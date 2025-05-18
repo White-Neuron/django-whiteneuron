@@ -1,0 +1,10 @@
+npm i tailwindcss @tailwindcss/cli
+npm i -D daisyui@latest
+
+# styles.css
+@import 'tailwindcss';
+@plugin "daisyui" {
+  prefix: "ui-";
+}
+
+npx @tailwindcss/cli -i styles.css -o whiteneuron/static/base/css/styles.css --minify
