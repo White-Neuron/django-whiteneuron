@@ -9,8 +9,8 @@
         {% endif %}
     </a>
 
-    <nav class="absolute bg-white border flex flex-col leading-none overflow-hidden py-1 -right-2 rounded shadow-lg top-7 w-52 z-50 dark:bg-gray-800 dark:border-gray-700" x-cloak x-show="openUserLinks" @click.outside="openUserLinks = false">
-        <div class="border-b border-gray-100 flex flex-row flex-shrink-0 items-start justify-start mb-1 pb-1 dark:border-gray-700">
+    <nav class="absolute bg-white border flex flex-col leading-none overflow-hidden py-1 -right-2 rounded shadow-lg top-7 w-52 z-50 dark:bg-gray-800 dark:border-gray-900" x-cloak x-show="openUserLinks" @click.outside="openUserLinks = false">
+        <div class="border-b border-gray-100 flex flex-row flex-shrink-0 items-start justify-start mb-1 pb-1 dark:border-gray-900">
             <span class="block mx-1 px-3 py-2 truncate">
                 {% firstof user.get_short_name user.get_username %}
             </span>
@@ -35,7 +35,7 @@
             </a>
         {% endif %}
 
-        <div class="border-t mt-1 pt-1 dark:border-gray-700">
+        <div class="border-t mt-1 pt-1 dark:border-gray-900">
             <form id="logout-form" method="post" action="{% url 'admin:logout' %}" class="mx-1">
                 {% csrf_token %}
 
