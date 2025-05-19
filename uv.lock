@@ -372,14 +372,14 @@ wheels = [
 
 [[package]]
 name = "django-unfold"
-version = "0.57.0"
+version = "0.56.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a8/4c/72ca9abd41166b80428da5cff0d7ccbdc620c8f1373816e51ab9e60ab6f1/django_unfold-0.57.0.tar.gz", hash = "sha256:eb5fa8db77e84d1f2490e2d015c7d90699407c36183fe3ce451b54dc522770ed", size = 1058554 }
+sdist = { url = "https://files.pythonhosted.org/packages/f5/c7/83d5c3b5c1ad08264b1e4ddb310d76fb73e7574215d59fee2ab3d40dc9ed/django_unfold-0.56.0.tar.gz", hash = "sha256:66d48ddc1f0aa3c56731dfb12d4e7d3fd395384a815a5e293012cfedb144da61", size = 1057772 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/eb/81/b9ee39c0adf5164dc78262736f1d21e94db2713cdfbb508a694b4a0ebb01/django_unfold-0.57.0-py3-none-any.whl", hash = "sha256:a51b12c9d6ec6b46b459f5e4c74c3dc31211485c4914e2b49a251ba57531f22c", size = 1160406 },
+    { url = "https://files.pythonhosted.org/packages/06/70/e3f25446145e50721476e32688893843f4ae658774c2a124cb093518833f/django_unfold-0.56.0-py3-none-any.whl", hash = "sha256:89db68109b00b3b759e61f8d98dee737e8e1e859afdc16680745117e012e7212", size = 1158210 },
 ]
 
 [[package]]
@@ -405,7 +405,7 @@ dependencies = [
     { name = "pillow" },
     { name = "python-dotenv" },
     { name = "redis" },
-    { name = "sentry-sdk", extra = ["django"] },
+    { name = "sentry-sdk" },
 ]
 
 [package.optional-dependencies]
@@ -427,7 +427,7 @@ requires-dist = [
     { name = "django-modeltranslation", specifier = ">=0.19.11" },
     { name = "django-ninja", specifier = ">=1.3.0" },
     { name = "django-simple-history", specifier = ">=3.7.0" },
-    { name = "django-unfold", specifier = ">=0.57" },
+    { name = "django-unfold", specifier = "==0.56" },
     { name = "flake8", marker = "extra == 'dev'" },
     { name = "gunicorn", specifier = ">=23.0.0" },
     { name = "hiredis", specifier = ">=3.1.0" },
@@ -440,7 +440,7 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'dev'" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
     { name = "redis", specifier = ">=5.2.1" },
-    { name = "sentry-sdk", extras = ["django"], specifier = ">=2.19.2" },
+    { name = "sentry-sdk", specifier = "==2.28.0" },
 ]
 
 [[package]]
@@ -1260,11 +1260,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/5e/bb/6a41b2e0e9121bed4d2ec68d50568ab95c49f4744156a9bbb789c866c66d/sentry_sdk-2.28.0.tar.gz", hash = "sha256:14d2b73bc93afaf2a9412490329099e6217761cbab13b6ee8bc0e82927e1504e", size = 325052 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/9b/4e/b1575833094c088dfdef63fbca794518860fcbc8002aadf51ebe8b6a387f/sentry_sdk-2.28.0-py2.py3-none-any.whl", hash = "sha256:51496e6cb3cb625b99c8e08907c67a9112360259b0ef08470e532c3ab184a232", size = 341693 },
-]
-
-[package.optional-dependencies]
-django = [
-    { name = "django" },
 ]
 
 [[package]]

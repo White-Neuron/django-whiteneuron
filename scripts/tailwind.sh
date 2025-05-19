@@ -1,1 +1,1 @@
-npx @tailwindcss/cli -i styles.css -o whiteneuron/static/base/css/styles.css --minify
+npx tailwindcss -i styles.css -o whiteneuron/static/base/css/styles.css --minify
