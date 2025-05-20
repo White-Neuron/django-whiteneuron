@@ -89,7 +89,6 @@ if BROWSER_RELOAD:
     INSTALLED_APPS.append("django_browser_reload")
 
 INSTALLED_APPS += [
-    "colorfield",
 
     "django.contrib.admin",
     "django.contrib.auth",
