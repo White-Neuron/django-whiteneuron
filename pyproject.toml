@@ -30,6 +30,7 @@ dependencies = [
     "redis>=5.2.1",
     "sentry-sdk==2.28.0",
     "django-browser-reload>=1.18.0",
+    "whitenoise>=6.9.0",
 ]
 requires-python = ">=3.10"
 
