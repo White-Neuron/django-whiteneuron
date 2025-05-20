@@ -265,6 +265,19 @@ wheels = [
 ]
 
 [[package]]
+name = "django-browser-reload"
+version = "1.18.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "asgiref" },
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/3b/41/84eaa4f2b7f764e56e01c4ee49aa12bdea30ae50fd0d3ef7c2690b0c4ec2/django_browser_reload-1.18.0.tar.gz", hash = "sha256:c5f0b134723cbf2a0dc9ae1ee1d38e42db28fe23c74cdee613ba3ef286d04735", size = 14319 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e4/9d/1322dc4bce4982d1eadd3a62802c996ae0303aad13d9ad88c1d35025f73d/django_browser_reload-1.18.0-py3-none-any.whl", hash = "sha256:ed4cc2fb83c3bf6c30b54107a1a6736c0b896e62e4eba666d81005b9f2ecf6f8", size = 12230 },
+]
+
+[[package]]
 name = "django-celery-beat"
 version = "2.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -279,6 +292,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/03/8f/8a18f234173001bd7a7d63826d2d7f456b38031c892514d27c0f7aea10be/django_celery_beat-2.7.0.tar.gz", hash = "sha256:8482034925e09b698c05ad61c36ed2a8dbc436724a3fe119215193a4ca6dc967", size = 163472 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/29/f8/f5a25472222b19258c3a53ce71c4efd171a12ab3c988bb3026dec0522a64/django_celery_beat-2.7.0-py3-none-any.whl", hash = "sha256:851c680d8fbf608ca5fecd5836622beea89fa017bc2b3f94a5b8c648c32d84b1", size = 94097 },
+]
+
+[[package]]
+name = "django-debug-toolbar"
+version = "5.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+    { name = "sqlparse" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/2a/9f/97ba2648f66fa208fc7f19d6895586d08bc5f0ab930a1f41032e60f31a41/django_debug_toolbar-5.2.0.tar.gz", hash = "sha256:9e7f0145e1a1b7d78fcc3b53798686170a5b472d9cf085d88121ff823e900821", size = 297901 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fa/c2/ed3cb815002664349e9e50799b8c00ef15941f4cad797247cadbdeebab02/django_debug_toolbar-5.2.0-py3-none-any.whl", hash = "sha256:15627f4c2836a9099d795e271e38e8cf5204ccd79d5dbcd748f8a6c284dcd195", size = 262834 },
 ]
 
 [[package]]
@@ -384,11 +410,13 @@ wheels = [
 
 [[package]]
 name = "django-whiteneuron"
-version = "0.1.38"
+version = "0.1.39"
 source = { editable = "." }
 dependencies = [
     { name = "django" },
+    { name = "django-browser-reload" },
     { name = "django-celery-beat" },
+    { name = "django-debug-toolbar" },
     { name = "django-guardian" },
     { name = "django-imagekit" },
     { name = "django-import-export" },
@@ -420,13 +448,15 @@ dev = [
 requires-dist = [
     { name = "black", marker = "extra == 'dev'" },
     { name = "django", specifier = ">=5.1.6" },
+    { name = "django-browser-reload", specifier = ">=1.18.0" },
     { name = "django-celery-beat", specifier = ">=2.7.0" },
+    { name = "django-debug-toolbar", specifier = ">=5.0.1" },
     { name = "django-guardian", specifier = ">=2.4.0" },
     { name = "django-imagekit", specifier = ">=5.0.0" },
     { name = "django-import-export", specifier = ">=4.3.3" },
     { name = "django-modeltranslation", specifier = ">=0.19.11" },
     { name = "django-ninja", specifier = ">=1.3.0" },
-    { name = "django-simple-history", specifier = ">=3.7.0" },
+    { name = "django-simple-history", specifier = ">=3.8.0" },
     { name = "django-unfold", specifier = "==0.55.2" },
     { name = "flake8", marker = "extra == 'dev'" },
     { name = "gunicorn", specifier = ">=23.0.0" },
