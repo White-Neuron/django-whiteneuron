@@ -230,21 +230,30 @@ class BaseModel(SoftDeleteModel):
 
     def save(self, request= None, *args, **kwargs):
         if request:
-            if not self.pk:
-                self.created_by = request.user
-            # Nếu có thay đổi thì cập nhật thời gian
-            else:  #self.pk:
-                fl= False
-                old= self.__class__.objects_all.filter(id=self.pk).first()
-                for field in self._meta.fields:
-                    if field.name in ['created_at', 'created_by', 'updated_at', 'updated_by']:
-                        continue
-                    if hasattr(old, field.name) and getattr(old, field.name) != getattr(self, field.name):
-                        fl= True
-                        break
-                if fl:
-                    self.updated_at = timezone.now()
-                    self.updated_by = request.user
+            user= request.user
+        else:
+            user= None
+        if not self.pk:
+            if user:
+                self.created_by = user
+                self.updated_by = user
+            self.created_at = timezone.now()
+            self.updated_at = timezone.now()
+        # Nếu có thay đổi thì cập nhật thời gian
+        else:  #self.pk:
+            fl= False
+            old= self.__class__.objects_all.filter(id=self.pk).first()
+            for field in self._meta.fields:
+                print(f'Checking field {field.name}')
+                if field.name in ['created_at', 'created_by', 'updated_at', 'updated_by']:
+                    continue
+                if hasattr(old, field.name) and getattr(old, field.name) != getattr(self, field.name):
+                    fl= True
+                    break
+            if fl:
+                self.updated_at = timezone.now()
+                if user:
+                    self.updated_by = user
         super(BaseModel, self).save(*args, **kwargs)
 
 ############################################
