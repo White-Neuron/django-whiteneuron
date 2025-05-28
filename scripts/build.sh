@@ -1,5 +1,11 @@
 echo "Building Tailwind CSS..."
 bash scripts/tailwind.sh
+
+echo "Make migrations..."
+cd whiteneuron
+python manage.py makemigrations
+cd ..
+
 echo "Building package..."
 uv build
 read -p "Do you want to push to Github? (y/n) " REPLY
