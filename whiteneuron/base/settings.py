@@ -12,7 +12,7 @@ import sentry_sdk
 
 DATA_UPLOAD_MAX_NUMBER_FILES = environ.get("DATA_UPLOAD_MAX_NUMBER_FILES", 1000)
 
-PROJECT_NAME = environ.get("PROJECT_NAME", "WN")
+PROJECT_NAME = environ.get("PROJECT_NAME", "base")
 NAME= environ.get("NAME", "White Neuron")
 URL= environ.get("URL", f"https://{PROJECT_NAME.lower()}whiteneuron.com")
 
