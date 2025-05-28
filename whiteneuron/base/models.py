@@ -244,7 +244,7 @@ class BaseModel(SoftDeleteModel):
             fl= False
             old= self.__class__.objects_all.filter(id=self.pk).first()
             for field in self._meta.fields:
-                print(f'Checking field {field.name}')
+                # print(f'Checking field {field.name}')
                 if field.name in ['created_at', 'created_by', 'updated_at', 'updated_by']:
                     continue
                 if hasattr(old, field.name) and getattr(old, field.name) != getattr(self, field.name):
