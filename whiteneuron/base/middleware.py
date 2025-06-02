@@ -53,6 +53,7 @@ class UserActivityMiddleware:
         ('/base/useractivity/', 'contains'),
         ('/__debug__/', 'contains'),
         ('/jsi18n/', 'contains'),
+        ('/.well-known/', 'contains'),
     ]
 
     def __init__(self, get_response):
