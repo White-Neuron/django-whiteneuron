@@ -32,6 +32,7 @@ dependencies = [
     "django-browser-reload>=1.18.0",
     "whitenoise>=6.9.0",
     "django-crispy-forms>=2.4",
+    "django-colorfield>=0.14.0",
 ]
 requires-python = ">=3.10"
 

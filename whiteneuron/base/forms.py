@@ -8,4 +8,5 @@ class LoginForm(AuthenticationForm):
 
     def __init__(self, request=None, *args, **kwargs):
         super().__init__(request, *args, **kwargs)
+        self.fields["password"].widget.attrs["class"]+= ""
 

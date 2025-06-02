@@ -371,11 +371,18 @@ class ModelAdmin(UnfoldAdmin):
 
 
     # GRID VIEW
+    using_grid_view = True
     grid_view = False
     grid_exclude_fields_list_display = []
 
     def changelist_view(self, request, extra_context = None):
-        grid_view= int(request.POST.get('grid_view', self.grid_view))
+        extra_context = extra_context or {}
+        extra_context['using_grid_view'] = self.using_grid_view
+        if not self.using_grid_view:
+            grid_view= False
+        else:
+            grid_view= int(request.POST.get('grid_view', self.grid_view))
+            
         if grid_view:
             extra_context = extra_context or {}
             extra_context['grid_view'] = grid_view

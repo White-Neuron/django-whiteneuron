@@ -295,6 +295,18 @@ wheels = [
 ]
 
 [[package]]
+name = "django-colorfield"
+version = "0.14.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pillow" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/49/4a/dcc1c9a071cf7e32391139843d4eb127a91bf9cbfe19596f924d51cb1680/django_colorfield-0.14.0.tar.gz", hash = "sha256:478dbd3975a88f2ea2a9afc325faaca05c54ebf04ec985ce130f6dea39dfb899", size = 36971 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e0/63/1226d92ec38286a7c1d41959fb2fb5ba4dd68e4a179d3554c478e8ee6c92/django_colorfield-0.14.0-py3-none-any.whl", hash = "sha256:f169c4e7ad8f336e51d4ea81f866346e7d4f336f3766e54e144cd16ea7d84a0e", size = 34827 },
+]
+
+[[package]]
 name = "django-crispy-forms"
 version = "2.4"
 source = { registry = "https://pypi.org/simple" }
@@ -422,12 +434,13 @@ wheels = [
 
 [[package]]
 name = "django-whiteneuron"
-version = "0.1.42"
+version = "0.1.43"
 source = { editable = "." }
 dependencies = [
     { name = "django" },
     { name = "django-browser-reload" },
     { name = "django-celery-beat" },
+    { name = "django-colorfield" },
     { name = "django-crispy-forms" },
     { name = "django-debug-toolbar" },
     { name = "django-guardian" },
@@ -464,6 +477,7 @@ requires-dist = [
     { name = "django", specifier = ">=5.1.6" },
     { name = "django-browser-reload", specifier = ">=1.18.0" },
     { name = "django-celery-beat", specifier = ">=2.7.0" },
+    { name = "django-colorfield", specifier = ">=0.14.0" },
     { name = "django-crispy-forms", specifier = ">=2.4" },
     { name = "django-debug-toolbar", specifier = ">=5.0.1" },
     { name = "django-guardian", specifier = ">=2.4.0" },
