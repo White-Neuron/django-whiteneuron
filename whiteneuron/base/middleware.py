@@ -47,13 +47,12 @@ from .models import UserActivity
 class UserActivityMiddleware:
 
     exclude_paths = [
-        ('/media/', 'startwith'),
-        ('/static/', 'startwith'),
-        ('/admin/jsi18n/', 'startwith'),
-        ('/__reload__/', 'startwith'),
-        ('/admin/base/useractivity/', 'startwith'),
-        # ('/admin/', 'exact'),
-        ('/__debug__/', 'startwith'),
+        ('/media/', 'contains'),
+        ('/static/', 'contains'),
+        ('/__reload__/', 'contains'),
+        ('/base/useractivity/', 'contains'),
+        ('/__debug__/', 'contains'),
+        ('/jsi18n/', 'contains'),
     ]
 
     def __init__(self, get_response):
@@ -68,6 +67,8 @@ class UserActivityMiddleware:
     def do_not_track(self, request):
         for path, condition in self.exclude_paths:
             if condition == 'startwith' and request.path.startswith(path):
+                return True
+            if condition == 'contains' and path in request.path:
                 return True
             if condition == 'exact' and request.path == path:
                 return True
