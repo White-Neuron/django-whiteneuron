@@ -379,6 +379,7 @@ UNFOLD = {
     ],
     "SCRIPTS": [
         lambda request: static("base/js/loading.js"),
+        lambda request: static("base/js/whiteneuron.js"),
     ],
     "COLORS": {
         "font": {
