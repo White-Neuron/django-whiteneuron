@@ -181,6 +181,8 @@ class UserActivity(models.Model):
 ############################################
 # Base Model
 ############################################
+from .thread_local import thread_local
+from whiteneuron.notification.models import Notification
 class SoftDeleteModel(models.Model):
     is_deleted = models.BooleanField(default=False, verbose_name= _('Deleted'))
     deleted_at = models.DateTimeField(null=True, blank=True, verbose_name= _('Deleted at'))
@@ -196,6 +198,7 @@ class SoftDeleteModel(models.Model):
     def hard_delete(self, using=None, keep_parents=False):
         super(SoftDeleteModel, self).delete(using=using, keep_parents=keep_parents)
 
+
     def restore(self, request=None):
         self.is_deleted = False
         self.deleted_at = None
@@ -205,6 +208,7 @@ class BaseManager(models.Manager):
     def get_queryset(self):
         return super(BaseManager, self).get_queryset().filter(is_hidden=False, is_deleted=False)
 
+from django.urls import reverse
 class BaseModel(SoftDeleteModel):
     id= models.AutoField(primary_key=True)
 
@@ -224,37 +228,104 @@ class BaseModel(SoftDeleteModel):
 
     def path(self):
         return f'/admin/{self._meta.app_label}/{self._meta.model_name}/{self.id}/'
+        # return reverse('admin:%s_%s_change' % (self._meta.app_label, self._meta.model_name), args=[self.id])
 
     def delete(self, request=None, *args, **kwargs):
         super(BaseModel, self).delete(*args, **kwargs)
 
-    def save(self, request= None, *args, **kwargs):
+    def save(self, *args, **kwargs):
+        request = getattr(thread_local, 'request', None)
         if request:
+            # save created_by and updated_by when create or update
+            title= ''
+            content_html= ''
+            action= ''
             user= request.user
-        else:
-            user= None
-        if not self.pk:
-            if user:
+            if not self.pk:  # Nếu là tạo mới
                 self.created_by = user
                 self.updated_by = user
-            self.created_at = timezone.now()
-            self.updated_at = timezone.now()
-        # Nếu có thay đổi thì cập nhật thời gian
-        else:  #self.pk:
-            fl= False
-            old= self.__class__.objects_all.filter(id=self.pk).first()
-            for field in self._meta.fields:
-                # print(f'Checking field {field.name}')
-                if field.name in ['created_at', 'created_by', 'updated_at', 'updated_by']:
-                    continue
-                if hasattr(old, field.name) and getattr(old, field.name) != getattr(self, field.name):
-                    fl= True
-                    break
-            if fl:
+                self.created_at = timezone.now()
                 self.updated_at = timezone.now()
-                if user:
+                action= 'create'
+                title= f"{_('New')} {self._meta.verbose_name} \"{self}\" {_('has been created by user')} \"{self.created_by}\""
+                
+            else:  # Nếu là cập nhật
+                fields_changed= []
+                if hasattr(self.__class__, 'objects_all'):
+                    old= self.__class__.objects_all.get(pk= self.pk)
+                else:
+                    old= self.__class__.objects.get(pk= self.pk)
+                for attr in self.__dict__:
+                    if attr in ['_state', 'created_at', 'created_by', 'updated_at', 'updated_by']:
+                        continue
+                    # kiểm tra attr có phải là field không
+                    if not hasattr(self.__class__, attr):
+                        continue
+                    try:
+                        if getattr(self, attr) != getattr(old, attr):
+                            fields_changed.append((attr, getattr(old, attr), getattr(self, attr)))
+                    except Exception as e:
+                        print(e)
+                        pass
+                if fields_changed:
+                    self.updated_at = timezone.now()
                     self.updated_by = user
-        super(BaseModel, self).save(*args, **kwargs)
+                    action= 'update'
+                    title= f"{_('Update')} {self._meta.verbose_name} \"{self}\" {_('has been updated by user')} \"{self.updated_by}\""
+                    content_html= f"{self._meta.verbose_name} \"{self}\" has been updated by user \"{self.updated_by}\" with the following changes: <ul>"
+                    for field in fields_changed:
+                        content_html+= f"<li>{field[0].verbose_name if hasattr(field[0], 'verbose_name') else field[0]}: {field[1]} -> {field[2]}</li>"
+                    content_html+= "</ul>"
+            
+            super(BaseModel, self).save(*args, **kwargs)  # Lưu đối tượng trước khi gửi thông báo
+            # Gửi thông báo đến người dùng
+            if title:
+                if action == 'create':
+                    content_html= f"""
+<p>{_('New')} {self._meta.verbose_name} <strong>{self}</strong> {_('has been created by user')} <strong>{self.created_by}</strong></p>
+<p>{_('You can view it at')} <a href="{self.path()}">{_('this link')}</a>.</p>
+"""
+                obj_link= self.path() if hasattr(self, 'path') else None
+                for user in User.objects.filter(is_superuser= True):
+                    obj= Notification.objects.create(user= user, title= title,
+                                                     flag= 'info',
+                                                     action= action,
+                                                     obj_link= obj_link,
+                                                     content= content_html)
+                    obj.alert(request)
+        
+        else:
+            super(BaseModel, self).save(*args, **kwargs)  # Nếu không có request thì không gửi thông báo
+
+
+
+
+        # if request:
+        #     user= request.user
+        # else:
+        #     user= None
+        # if not self.pk:
+        #     if user:
+        #         self.created_by = user
+        #         self.updated_by = user
+        #     self.created_at = timezone.now()
+        #     self.updated_at = timezone.now()
+        # # Nếu có thay đổi thì cập nhật thời gian
+        # else:  #self.pk:
+        #     fl= False
+        #     old= self.__class__.objects_all.filter(id=self.pk).first()
+        #     for field in self._meta.fields:
+        #         # print(f'Checking field {field.name}')
+        #         if field.name in ['created_at', 'created_by', 'updated_at', 'updated_by']:
+        #             continue
+        #         if hasattr(old, field.name) and getattr(old, field.name) != getattr(self, field.name):
+        #             fl= True
+        #             break
+        #     if fl:
+        #         self.updated_at = timezone.now()
+        #         if user:
+        #             self.updated_by = user
+        # super(BaseModel, self).save(*args, **kwargs)
 
 
 ############################################

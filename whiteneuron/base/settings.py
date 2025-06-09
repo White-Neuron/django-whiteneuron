@@ -146,6 +146,7 @@ MIDDLEWARE = [
     # My middleware
     "whiteneuron.base.middleware.ReadonlyExceptionHandlerMiddleware",
     "whiteneuron.base.middleware.UserActivityMiddleware",
+    'whiteneuron.base.middleware.ThreadLocalMiddleware',
 ]
 
 if BROWSER_RELOAD:

@@ -141,59 +141,59 @@ class ModelAdmin(UnfoldAdmin):
     
     def save_model(self, request, obj, form, change):
         # save created_by and updated_by when create or update
-        title= ''
-        content_html= ''
-        action= ''
-        user= request.user
-        obj_link= f"/admin/{obj._meta.app_label}/{obj._meta.model_name}/{obj.id}/change/"
-        if not change: # check if the object is being created
-            obj.updated_by= user
-            obj.created_by= user
-            action= 'create'
-            title= f"New {obj._meta.verbose_name} \"{obj}\" has been created by user \"{obj.created_by}\""
-            content_html= f"New {obj._meta.verbose_name} <a href='{obj_link}'>{obj}</a> has been created by user \"{obj.created_by}\""
+        # title= ''
+        # content_html= ''
+        # action= ''
+        # user= request.user
+        # obj_link= f"/admin/{obj._meta.app_label}/{obj._meta.model_name}/{obj.id}/change/"
+        # if not change: # check if the object is being created
+        #     obj.updated_by= user
+        #     obj.created_by= user
+        #     action= 'create'
+        #     title= f"New {obj._meta.verbose_name} \"{obj}\" has been created by user \"{obj.created_by}\""
+        #     content_html= f"New {obj._meta.verbose_name} <a href='{obj_link}'>{obj}</a> has been created by user \"{obj.created_by}\""
 
-        # check if the object is being updated with a new version
-        else:
-            fields_changed= []
-            isUpdate= False
-            if hasattr(obj.__class__, 'objects_all'):
-                old= obj.__class__.objects_all.get(pk= obj.pk)
-            else:
-                old= obj.__class__.objects.get(pk= obj.pk)
+        # # check if the object is being updated with a new version
+        # else:
+        #     fields_changed= []
+        #     isUpdate= False
+        #     if hasattr(obj.__class__, 'objects_all'):
+        #         old= obj.__class__.objects_all.get(pk= obj.pk)
+        #     else:
+        #         old= obj.__class__.objects.get(pk= obj.pk)
 
-            for attr in obj.__dict__:
-                if attr in ['_state', 'created_at', 'created_by', 'updated_at', 'updated_by']:
-                    continue
-                # kiểm tra attr có phải là field không
-                if not hasattr(obj.__class__, attr):
-                    continue
-                # print(attr)
-                try:
-                    if getattr(obj, attr) != getattr(old, attr):
-                        isUpdate= True
-                        fields_changed.append((attr, getattr(old, attr), getattr(obj, attr)))
-                except Exception as e:
-                    print(e)
-                    pass
-            if isUpdate:
-                obj.updated_by= user
-                action= 'update'
-                title= f"{obj._meta.verbose_name} \"{obj}\" has been updated by user \"{obj.updated_by}\""
-                content_html= f"{obj._meta.verbose_name} \"{obj}\" has been updated by user \"{obj.updated_by}\" with the following changes: <ul>"
-                for field in fields_changed:
-                    content_html+= f"<li>{field[0].verbose_name if hasattr(field[0], 'verbose_name') else field[0]}: {field[1]} -> {field[2]}</li>"
-                content_html+= "</ul>"
+        #     for attr in obj.__dict__:
+        #         if attr in ['_state', 'created_at', 'created_by', 'updated_at', 'updated_by']:
+        #             continue
+        #         # kiểm tra attr có phải là field không
+        #         if not hasattr(obj.__class__, attr):
+        #             continue
+        #         # print(attr)
+        #         try:
+        #             if getattr(obj, attr) != getattr(old, attr):
+        #                 isUpdate= True
+        #                 fields_changed.append((attr, getattr(old, attr), getattr(obj, attr)))
+        #         except Exception as e:
+        #             print(e)
+        #             pass
+        #     if isUpdate:
+        #         obj.updated_by= user
+        #         action= 'update'
+        #         title= f"{obj._meta.verbose_name} \"{obj}\" has been updated by user \"{obj.updated_by}\""
+        #         content_html= f"{obj._meta.verbose_name} \"{obj}\" has been updated by user \"{obj.updated_by}\" with the following changes: <ul>"
+        #         for field in fields_changed:
+        #             content_html+= f"<li>{field[0].verbose_name if hasattr(field[0], 'verbose_name') else field[0]}: {field[1]} -> {field[2]}</li>"
+        #         content_html+= "</ul>"
         super().save_model(request, obj, form, change)
         # send notification to superuser when create or update successfully
-        if title:
-            for user in User.objects.filter(is_superuser= True):
-                obj= Notification.objects.create(user= user, title= title,
-                                            flag= 'info',
-                                            action= action,
-                                            obj_link= obj_link,
-                                            content= content_html)
-                obj.alert(request) # send alert to user
+        # if title:
+        #     for user in User.objects.filter(is_superuser= True):
+        #         obj= Notification.objects.create(user= user, title= title,
+        #                                     flag= 'info',
+        #                                     action= action,
+        #                                     obj_link= obj_link,
+        #                                     content= content_html)
+        #         obj.alert(request) # send alert to user
 
 
 
