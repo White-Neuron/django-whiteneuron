@@ -256,48 +256,6 @@ class BaseModel(SoftDeleteModel):
                     self.updated_by = user
         super(BaseModel, self).save(*args, **kwargs)
 
-############################################
-# Notification
-############################################
-
-class Notification(models.Model):
-    user= models.ForeignKey(User, on_delete=models.CASCADE)
-    title = models.CharField(max_length=255)
-    obj_link= models.CharField(max_length=255, null=True, blank=True) # link to object
-    content = models.TextField()
-    is_read = models.BooleanField(default=False, verbose_name=_("Read"))
-    flag = models.CharField(max_length=25, choices=[("info", "info"), 
-                                                    ("success", "success"), 
-                                                    ("warning", "warning"), 
-                                                    ("danger", "danger")])
-    action = models.CharField(max_length=25, null=True, blank=True, choices=[("update", "update"),
-                                                                             ("create", "create"),
-                                                                             ('restore', 'restore'),
-                                                                             ("delete", "delete")])
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = "notifications"
-        verbose_name = _("notification")
-        verbose_name_plural = _("notifications")
-
-    def __str__(self):
-        return f"[{self.flag}] {self.title}"
-    
-    def mark_as_read(self):
-        self.is_read = True
-        self.save()
-
-    def mark_as_unread(self):
-        self.is_read = False
-        self.save()
-
-    def mark_as_read_all(self):
-        self.objects.update(is_read=True)
-
-    def mark_as_unread_all(self):
-        self.objects.update(is_read=False)
-
 
 ############################################
 # Image Model

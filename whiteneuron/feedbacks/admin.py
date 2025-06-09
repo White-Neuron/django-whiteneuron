@@ -7,7 +7,7 @@ from .models import FeedbackData
 
 from django.urls import reverse
 
-from whiteneuron.base.models import Notification
+from whiteneuron.notification.models import Notification
 
 @admin.register(FeedbackData, site=base_admin_site)
 class FeedbackDataAdmin(ModelAdmin):

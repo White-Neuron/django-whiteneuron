@@ -1,5 +1,5 @@
 from django.utils import timezone
-from .models import User, UserActivity, Notification
+from .models import User, UserActivity
 from django.contrib.auth.models import Group
 
 # count time run function

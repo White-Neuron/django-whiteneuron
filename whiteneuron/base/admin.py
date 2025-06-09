@@ -56,7 +56,7 @@ from unfold.widgets import (
     UnfoldAdminTextInputWidget,
 )
 
-from .models import User, Tag, UserActivity, Notification, UserProfile
+from .models import User, Tag, UserActivity, UserProfile
 from .sites import base_admin_site
 from django.utils.safestring import mark_safe
 
@@ -364,109 +364,6 @@ class UserProfileAdmin(ModelAdmin):
         extra_context['show_save_and_continue']= False
         return super().changeform_view(request, object_id=str(request.user.pk), extra_context=extra_context, form_url='')
 
-@admin.register(Notification, site=base_admin_site)
-class NotificationAdmin(ModelAdmin):
-    list_display = [
-        # "user",
-        "title",
-        "display_action",
-        "display_flag",
-        "is_read",
-        "created_at",
-    ]
-    autocomplete_fields = [ "user" ]
-    search_fields = [
-        "user__username",
-        "title",
-        "content",
-    ]
-    list_filter = [
-        "is_read",
-        "created_at",
-    ]
-    date_hierarchy = "created_at"
-
-    fieldsets = (
-        (
-            _("Notification information"),
-            {
-                "fields": (
-                    "user",
-                    "action",
-                    "flag", 
-                    "title",
-                    "display_content",
-                    "is_read", 
-                    "created_at",
-                ),
-            },
-        ),
-    )
-
-    actions_submit_line = ["view_obj_link"]
-
-    @action(description=_("View"), permissions= ["view_obj_link"])
-    def view_obj_link(self, request, obj):
-        return redirect(obj.obj_link)
-    
-    def has_view_obj_link_permission(self, request, obj=None):
-        if obj is not None:
-            obj= get_object_or_404(Notification, pk=obj)
-            if obj.obj_link:
-                return True
-        return False
-    
-    def has_add_permission(self, request):
-        # if request.user.is_superuser:
-        #     return True
-        return False
-    
-    def has_change_permission(self, request, obj=None):
-        # if request.user.is_superuser:
-        #     return True
-        return False
-    
-    def has_delete_permission(self, request, obj=None):
-        # if request.user.is_superuser:
-        #     return True
-        return False
-    
-    # Chỉ hiện thông báo của user đang đăng nhập
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        # if request.user.is_superuser:
-        #     return qs
-        return qs.filter(user=request.user)
-    
-    # Cập nhật đã đọc khi xem chi tiết
-    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
-        try:
-            obj = get_object_or_404(Notification, pk=object_id)
-            if not obj.is_read and obj.user == request.user:
-                obj.is_read = True
-                obj.save()
-        except:
-            pass
-        return super().changeform_view(request, object_id=object_id, form_url=form_url, extra_context=extra_context)
-    
-    def get_list_filter(self, request: HttpRequest) -> Sequence[str]:
-        list_filter = super().get_list_filter(request)
-        if request.user.is_superuser:
-            return list(list_filter) + ['user']
-        return list_filter
-    
-    @display(description=_("Content"), header=True)
-    def display_content(self, instance: Notification):
-        return mark_safe(instance.content)
-
-    @display(description=_("Action"), label=True)
-    def display_action(self, instance: Notification):
-        return instance.action
-    
-    @display(description=_("Flag"), label=True)
-    def display_flag(self, instance: Notification):
-        return instance.flag
-    
 from .models import Image
 @admin.register(Image, site=base_admin_site)
 class ImageAdmin(ModelAdmin):

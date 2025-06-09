@@ -14,7 +14,8 @@ from unfold.widgets import UnfoldAdminSplitDateTimeWidget
 from django.db import models
 
 from .utils import timeit
-from .models import User, Notification
+from .models import User
+from whiteneuron.notification.models import Notification
 from .filters import FieldSelectionFilter
 
 from django.urls import path
@@ -187,11 +188,12 @@ class ModelAdmin(UnfoldAdmin):
         # send notification to superuser when create or update successfully
         if title:
             for user in User.objects.filter(is_superuser= True):
-                Notification.objects.create(user= user, title= title,
+                obj= Notification.objects.create(user= user, title= title,
                                             flag= 'info',
                                             action= action,
                                             obj_link= obj_link,
                                             content= content_html)
+                obj.alert(request) # send alert to user
 
 
 

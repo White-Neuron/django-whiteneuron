@@ -33,6 +33,10 @@ dependencies = [
     "whitenoise>=6.9.0",
     "django-crispy-forms>=2.4",
     "django-colorfield>=0.14.0",
+    "channels>=4.2.2",
+    "channels-redis>=4.2.1",
+    "uvicorn>=0.34.3",
+    "daphne>=4.2.0",
 ]
 requires-python = ">=3.10"
 

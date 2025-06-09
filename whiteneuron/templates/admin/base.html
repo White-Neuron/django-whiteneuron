@@ -1,23 +1,15 @@
 {% extends "admin/base.html" %}
-{% load i18n admin_urls static admin_list %}
-{% csrf_token %}
-{% load static%}
+{% load i18n static unfold %}
 
-{% block stylesheet %}
-    {{ block.super }}
-    <link rel="stylesheet" href='{% static "base/css/styles.css" %}'>
-{% endblock %}
 
 {% block base %}
     <!-- Overlay loading -->
-    <link rel="stylesheet" href='{% static "base/css/loading.css" %}'>
     <div id="loading-overlay" display="flex">
         <img src="{% static 'base/images/loading.gif' %}" alt="Loading...">
     </div>
+
+    <!-- toast -->
+    <div class="ui-toast ui-toast-top ui-toast-end z-50 mt-16" id="toast-container">
+    </div>
     {{ block.super }}
 {% endblock %}
-
-{% block extrabody %}
-    <script src="{% static 'base/js/loading.js' %}"></script>
-    {{ block.super }}
-{% endblock extrabody %}

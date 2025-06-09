@@ -50,6 +50,18 @@ WSGI_APPLICATION = f"{PROJECT_NAME}.wsgi.application"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 ######################################################################
+# Channels
+######################################################################
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
+
+######################################################################
 # Domains
 ######################################################################
 ALLOWED_HOSTS = environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
@@ -73,6 +85,7 @@ INSTALLED_APPS = [
     "whiteneuron.file_management", # File management app
     "whiteneuron.contrib", # Contrib app
     "whiteneuron.dashboard",
+    "whiteneuron.notification",  # Notification app
 
     "modeltranslation",
     "unfold",
@@ -84,6 +97,7 @@ INSTALLED_APPS = [
     "unfold.contrib.simple_history",  # optional, if django-simple-history package is used
 
     "crispy_forms", # Crispy forms
+    "channels", # Channels for WebSocket support
 ]
 if BROWSER_RELOAD:
     INSTALLED_APPS.append("django_browser_reload")
@@ -430,8 +444,8 @@ UNFOLD = {
                     {
                         "title": _("Notifications"),
                         "icon": "notifications",
-                        "link": reverse_lazy("admin:base_notification_changelist"),
-                        "badge": "whiteneuron.base.utils.notification_badge_callback",
+                        "link": reverse_lazy("admin:notification_notification_changelist"),
+                        "badge": "whiteneuron.notification.utils.notification_badge_callback",
                     },
                     {
                         "title": _("Feedbacks"),
@@ -504,6 +518,12 @@ UNFOLD = {
                         "link": reverse_lazy("admin:base_mail_changelist"),
                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
                     },
+                    {
+                        "title": _("Notifications config"),
+                        "icon": "notifications",
+                        "link": reverse_lazy("admin:notification_notificationconfig_changelist"),
+                        "permission": "whiteneuron.base.utils.permission_superuser_callback",
+                    }
                 ],
             },
             {
