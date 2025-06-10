@@ -139,7 +139,7 @@ class ModelAdmin(UnfoldAdmin):
                                         action= 'delete',
                                         content= content_html)
     
-    def save_model(self, request, obj, form, change):
+    # def save_model(self, request, obj, form, change):
         # save created_by and updated_by when create or update
         # title= ''
         # content_html= ''
@@ -184,7 +184,7 @@ class ModelAdmin(UnfoldAdmin):
         #         for field in fields_changed:
         #             content_html+= f"<li>{field[0].verbose_name if hasattr(field[0], 'verbose_name') else field[0]}: {field[1]} -> {field[2]}</li>"
         #         content_html+= "</ul>"
-        super().save_model(request, obj, form, change)
+        # super().save_model(request, obj, form, change)
         # send notification to superuser when create or update successfully
         # if title:
         #     for user in User.objects.filter(is_superuser= True):
