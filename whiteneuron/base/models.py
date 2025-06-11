@@ -227,8 +227,11 @@ class BaseModel(SoftDeleteModel):
         abstract=True
 
     def path(self):
-        return f'/admin/{self._meta.app_label}/{self._meta.model_name}/{self.id}/'
-        # return reverse('admin:%s_%s_change' % (self._meta.app_label, self._meta.model_name), args=[self.id])
+        # return f'/admin/{self._meta.app_label}/{self._meta.model_name}/{self.id}/'
+        try:
+            return reverse('admin:%s_%s_change' % (self._meta.app_label, self._meta.model_name), args=[self.id])
+        except:
+            return ''
 
     def delete(self, request=None, *args, **kwargs):
         super(BaseModel, self).delete(*args, **kwargs)
@@ -271,8 +274,8 @@ class BaseModel(SoftDeleteModel):
                     self.updated_at = timezone.now()
                     self.updated_by = user
                     action= 'update'
-                    title= f"{_('Update')} {self._meta.verbose_name} \"{self}\" {_('has been updated by user')} \"{self.updated_by}\""
-                    content_html= f"{self._meta.verbose_name} \"{self}\" has been updated by user \"{self.updated_by}\" with the following changes: <ul>"
+                    title= f"{_('Update')} {self._meta.verbose_name} <strong>{self}</strong>({self.id}) {_('has been updated by user')} \"{self.updated_by}\""
+                    content_html= f"{self._meta.verbose_name} <strong>{self}</strong>({self.id}) has been updated by user \"{self.updated_by}\" with the following changes: <ul>"
                     for field in fields_changed:
                         content_html+= f"<li>{field[0].verbose_name if hasattr(field[0], 'verbose_name') else field[0]}: {field[1]} -> {field[2]}</li>"
                     content_html+= "</ul>"
@@ -282,9 +285,11 @@ class BaseModel(SoftDeleteModel):
             if title:
                 if action == 'create':
                     content_html= f"""
-<p>{_('New')} {self._meta.verbose_name} <strong>{self}</strong> {_('has been created by user')} <strong>{self.created_by}</strong></p>
-<p>{_('You can view it at')} <a href="{self.path()}">{_('this link')}</a>.</p>
+<p>{_('New')} {self._meta.verbose_name} <strong>{self}({self.id})</strong> {_('has been created by user')} <strong>{self.created_by}</strong></p>
 """
+                    if self.path():
+                        content_html+= f"""<p>{_('You can view it at')} <a href="{self.path()}">{_('this link')}</a>.</p>"""
+
                 obj_link= self.path() if hasattr(self, 'path') else None
                 for user in User.objects.filter(is_superuser= True):
                     obj= Notification.objects.create(user= user, title= title,
