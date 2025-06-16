@@ -369,7 +369,7 @@ class ModelAdmin(UnfoldAdmin):
                 if inline_form.has_changed():
                     child_object = inline_form.instance
                     # Thực hiện hành động tùy chỉnh, chẳng hạn như gọi hàm save
-                    child_object.save(request)
+                    child_object.save()
 
 
     # GRID VIEW
