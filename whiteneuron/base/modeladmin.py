@@ -416,4 +416,4 @@ class ModelAdmin(UnfoldAdmin):
     def grid_item_header(self, obj):
         # TODO: implement this method to return the header of the grid item
         return mark_safe(f'<div class="grid-item-header">{obj}</div>')
-    grid_item_header.short_description = 'Hearder'
+    grid_item_header.short_description = 'Header'

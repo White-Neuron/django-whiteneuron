@@ -151,7 +151,7 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
 </div>
 """
         return mark_safe(string)
-    grid_item_header.short_description = "Hearder"
+    grid_item_header.short_description = "Header"
 
     form = UserChangeForm
     add_form = UserCreationForm
