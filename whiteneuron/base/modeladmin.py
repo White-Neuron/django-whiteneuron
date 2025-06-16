@@ -63,6 +63,8 @@ class ModelAdmin(UnfoldAdmin):
     enable_field_selection_filter = True
     list_filter_submit = True
 
+    has_display_links = True
+
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
         self.search_help_text= f'Search by {", ".join([get_verbose_name_field(model, f) for f in self.search_fields])}'
@@ -232,6 +234,8 @@ class ModelAdmin(UnfoldAdmin):
         return readonly_fields
     
     def get_list_display_links(self, request, list_display):
+        if not self.has_display_links:
+            return None
         fields= super().get_list_display_links(request, list_display)
         if self.action_buttons_top:
             try:
