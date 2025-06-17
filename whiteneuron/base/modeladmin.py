@@ -65,6 +65,8 @@ class ModelAdmin(UnfoldAdmin):
 
     has_display_links = True
 
+    default_toggle_sidebar= None
+
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
         self.search_help_text= f'Search by {", ".join([get_verbose_name_field(model, f) for f in self.search_fields])}'
@@ -409,8 +411,15 @@ class ModelAdmin(UnfoldAdmin):
             extra_context = {}
         extra_context['page_sizes'] = [5, 10, 20, 50, 100, 200]
         
+        if self.default_toggle_sidebar is not None:
+            request.session["toggle_sidebar"] = self.default_toggle_sidebar
         res = super().changelist_view(request, extra_context)
         return res
+    
+    def changeform_view(self, request, object_id = None, form_url = "", extra_context = None):
+        if self.default_toggle_sidebar is not None:
+            request.session["toggle_sidebar"] = self.default_toggle_sidebar
+        return super().changeform_view(request, object_id, form_url, extra_context)
     
     # GridItemHeader
     def grid_item_header(self, obj):
