@@ -65,7 +65,7 @@ class ModelAdmin(UnfoldAdmin):
 
     has_display_links = True
 
-    default_toggle_sidebar= None
+    default_toggle_sidebar= True
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
