@@ -610,19 +610,19 @@ wheels = [
 
 [[package]]
 name = "django-unfold"
-version = "0.55.2"
+version = "0.55.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b6/db/5fb2898822564537d6a3edadd4063908458264ef8c60784a878ff6ec0e30/django_unfold-0.55.2.tar.gz", hash = "sha256:1bc54541265517766007a7c9b741c9823a569f6ea37a360904adc1625690ee51", size = 1058017 }
+sdist = { url = "https://files.pythonhosted.org/packages/03/1c/0b4893858d63233b5f90046230fecfdfbcf0b71b9064f7c5fd8f4e0d61e3/django_unfold-0.55.3.tar.gz", hash = "sha256:a84c6c9b3da968cb7868300fb229907c845aabfa68fa46cfd50f11e636bd6f1f", size = 1058024 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/56/95/308cb16e7b954184b4807dd140bccf51538039d05831ea8d81913f823b85/django_unfold-0.55.2-py3-none-any.whl", hash = "sha256:55887e71e31b2eb493992def21ee17f9eadae5ceadf1661807a1317b003e7976", size = 1157543 },
+    { url = "https://files.pythonhosted.org/packages/de/3b/7a6a0070a73a6bda962a94f90a478899850b16773770cf862d5406a87df9/django_unfold-0.55.3-py3-none-any.whl", hash = "sha256:511db366c2e4a139aab01e741e899edcb192512ef7c8bb290c7ce71f6900c0c8", size = 1157544 },
 ]
 
 [[package]]
 name = "django-whiteneuron"
-version = "0.1.46"
+version = "0.1.52"
 source = { editable = "." }
 dependencies = [
     { name = "channels" },
@@ -681,7 +681,7 @@ requires-dist = [
     { name = "django-modeltranslation", specifier = ">=0.19.11" },
     { name = "django-ninja", specifier = ">=1.3.0" },
     { name = "django-simple-history", specifier = ">=3.8.0" },
-    { name = "django-unfold", specifier = "==0.55.2" },
+    { name = "django-unfold", specifier = "==0.55.3" },
     { name = "flake8", marker = "extra == 'dev'" },
     { name = "gunicorn", specifier = ">=23.0.0" },
     { name = "hiredis", specifier = ">=3.1.0" },
