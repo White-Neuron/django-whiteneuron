@@ -62,6 +62,7 @@ class ModelAdmin(UnfoldAdmin):
 
     enable_field_selection_filter = True
     list_filter_submit = True
+    list_filter_sheet = True
 
     has_display_links = True
 
@@ -382,6 +383,7 @@ class ModelAdmin(UnfoldAdmin):
     using_grid_view = True
     grid_view = False
     grid_exclude_fields_list_display = []
+    page_sizes = [5, 10, 20, 50, 100, 200]
 
     def changelist_view(self, request, extra_context = None):
         extra_context = extra_context or {}
@@ -390,7 +392,8 @@ class ModelAdmin(UnfoldAdmin):
             grid_view= False
         else:
             grid_view= int(request.POST.get('grid_view', self.grid_view))
-            
+        
+        self.grid_view = grid_view
         if grid_view:
             extra_context = extra_context or {}
             extra_context['grid_view'] = grid_view
@@ -409,8 +412,8 @@ class ModelAdmin(UnfoldAdmin):
         # Truyền danh sách số lượng hiển thị vào context
         if extra_context is None:
             extra_context = {}
-        extra_context['page_sizes'] = [5, 10, 20, 50, 100, 200]
-        
+        extra_context['page_sizes'] = self.page_sizes
+
         if self.default_toggle_sidebar is not None:
             request.session["toggle_sidebar"] = self.default_toggle_sidebar
         res = super().changelist_view(request, extra_context)
