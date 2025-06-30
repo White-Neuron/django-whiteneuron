@@ -389,8 +389,8 @@ class ModelAdmin(UnfoldAdmin):
 
 
     # GRID VIEW
-    using_grid_view = True
-    grid_view = False
+    using_grid_view = True # True if you want to use grid view, False if you want to use list view
+    grid_view = False # Default grid view is False, set to True to use grid view
     grid_exclude_fields_list_display = []
     page_sizes = [5, 10, 20, 50, 100, 200]
 
@@ -407,6 +407,7 @@ class ModelAdmin(UnfoldAdmin):
             extra_context = extra_context or {}
             extra_context['grid_view'] = grid_view
             self.list_display_links= list(self.list_display_links) + ['grid_item_header']
+            self.list_display= self.get_list_display(request)
 
         # Xác định số lượng hiển thị từ request
         per_page = self.list_per_page
