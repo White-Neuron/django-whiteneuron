@@ -1,13 +1,13 @@
 github: [tanhtm] # GitHub Sponsors username của bạn (nếu có)
-patreon: "" # Thay bằng username Patreon của bạn nếu đã tạo
-open_collective: "" # Thay bằng tên dự án trên Open Collective
-ko_fi: "" # Thay bằng username trên Ko-fi
-tidelift: "" # Nếu bạn đã liên kết Tidelift cho package này
+patreon:  # Thay bằng username Patreon của bạn nếu đã tạo
+open_collective: # Thay bằng tên dự án trên Open Collective
+ko_fi:  # Thay bằng username trên Ko-fi
+tidelift:  # Nếu bạn đã liên kết Tidelift cho package này
 community_bridge: # Chưa có, có thể để trống
-liberapay: "" # Username trên Liberapay
-issuehunt: "" # Username trên IssueHunt
+liberapay:  # Username trên Liberapay
+issuehunt: # Username trên IssueHunt
 lfx_crowdfunding: # Nếu dự án có trên LFX Crowdfunding
-polar: "" # Username trên Polar
-buy_me_a_coffee: "" # Username Buy Me a Coffee
-thanks_dev: "" # Username trên thanks.dev
+polar: # Username trên Polar
+buy_me_a_coffee: # Username Buy Me a Coffee
+thanks_dev: # Username trên thanks.dev
 custom: ['https://whiteneuron.com']
