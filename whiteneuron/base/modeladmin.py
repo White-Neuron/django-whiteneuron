@@ -297,7 +297,7 @@ class ModelAdmin(UnfoldAdmin):
 
         grid_view= int(request.POST.get('grid_view', self.grid_view))
         if grid_view:
-            list_display =['grid_item_header'] + list(list_display)
+            list_display = list(set(['grid_item_header'] + list(list_display)))
             if self.grid_exclude_fields_list_display:
                 for field in self.grid_exclude_fields_list_display:
                     try:
@@ -406,7 +406,7 @@ class ModelAdmin(UnfoldAdmin):
         if grid_view:
             extra_context = extra_context or {}
             extra_context['grid_view'] = grid_view
-            self.list_display_links= list(self.list_display_links) + ['grid_item_header']
+            self.list_display_links= list(set(list(self.list_display_links) + ['grid_item_header']))
             self.list_display= self.get_list_display(request)
 
         # Xác định số lượng hiển thị từ request
