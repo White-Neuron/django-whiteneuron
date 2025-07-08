@@ -392,6 +392,7 @@ class ModelAdmin(UnfoldAdmin):
     using_grid_view = True # True if you want to use grid view, False if you want to use list view
     grid_view = False # Default grid view is False, set to True to use grid view
     grid_exclude_fields_list_display = []
+    grid_cols= 4
     page_sizes = [5, 10, 20, 50, 100, 200]
 
     def changelist_view(self, request, extra_context = None):
@@ -423,6 +424,7 @@ class ModelAdmin(UnfoldAdmin):
         if extra_context is None:
             extra_context = {}
         extra_context['page_sizes'] = self.page_sizes
+        extra_context['grid_cols'] = self.grid_cols
 
         if self.default_toggle_sidebar is not None:
             request.session["toggle_sidebar"] = self.default_toggle_sidebar
