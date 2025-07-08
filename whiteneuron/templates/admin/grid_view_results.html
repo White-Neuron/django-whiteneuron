@@ -13,7 +13,6 @@
 
 {% if results %}
     {# Sử dụng CSS Grid: 1 cột trên mobile, 2-3 cột trên màn hình lớn hơn #}
-    {{cl.model_admin.grid_cols}}
     <div class="grid_view">
         {% if cl.model_admin.grid_cols %}
         <div id="result_list" class="grid grid-cols-{{cl.model_admin.grid_cols}} gap-2 md:gap-4">
