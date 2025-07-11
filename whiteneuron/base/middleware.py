@@ -27,18 +27,36 @@ class ReadonlyExceptionHandlerMiddleware:
             return redirect(reverse_lazy("admin:login"))
         
 
+import ipaddress
 def get_client_ip(request):
+    def is_public_ipv4(ip):
+        try:
+            ip_obj = ipaddress.ip_address(ip)
+            return (
+                isinstance(ip_obj, ipaddress.IPv4Address)
+                and not ip_obj.is_private
+                and not ip_obj.is_loopback
+                and not ip_obj.is_reserved
+                and not ip_obj.is_multicast
+                and not ip_obj.is_link_local
+            )
+        except ValueError:
+            return False
+
     ip = request.headers.get('X-Client-Ip')
     if ip is None:
         ip = request.headers.get('X-Forwarded-For')
         if ip:
-            # Extract the first IP address if there's a comma-separated list
-            ip = ip.split(',')[0].strip()
+            # Có thể có danh sách IP cách nhau bởi dấu phẩy
+            ip_list = [x.strip() for x in ip.split(',')]
+            ip = next((x for x in ip_list if is_public_ipv4(x)), None)
     if ip is None:
-        try:
-            ip = request.META.get('REMOTE_ADDR')
-        except:
-            ip = 'Not available!'
+        remote_addr = request.META.get('REMOTE_ADDR')
+        if is_public_ipv4(remote_addr):
+            ip = remote_addr
+
+    if not ip:
+        ip = 'Public IPv4 not found'
     user_agent = request.headers.get('User-Agent')
     return ip, user_agent
 
