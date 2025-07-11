@@ -34,11 +34,6 @@ def get_client_ip(request):
             ip_obj = ipaddress.ip_address(ip)
             return (
                 isinstance(ip_obj, ipaddress.IPv4Address)
-                and not ip_obj.is_private
-                and not ip_obj.is_loopback
-                and not ip_obj.is_reserved
-                and not ip_obj.is_multicast
-                and not ip_obj.is_link_local
             )
         except ValueError:
             return False
