@@ -54,11 +54,13 @@ class NotificationConfig(models.Model):
 
 
 from .views import notify_admin
+import json
 class Notification(models.Model):
     user= models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     obj_link= models.CharField(max_length=255, null=True, blank=True) # link to object
     content = models.TextField()
+    changed_data= models.JSONField(null=True, blank=True, verbose_name=_("Changed Data"))
     is_read = models.BooleanField(default=False, verbose_name=_("Read"))
     flag = models.CharField(max_length=25, choices=[("info", "info"), 
                                                     ("success", "success"), 
@@ -93,10 +95,13 @@ class Notification(models.Model):
     def mark_as_unread_all(self):
         self.objects.update(is_read=False)
 
+    # def get_changed_data(self):
+        
+
     def alert(self, request):
         """
         Returns a dictionary suitable for use in a JavaScript alert.
         """
         message = f"{self.title}"
         type= self.flag
-        return notify_admin(message, type=type, obj_link=self.obj_link, action=self.action)
+        return notify_admin(message, type=type, obj_link=self.obj_link, action=self.action, changed_data=json.loads(self.changed_data) if self.changed_data else {})

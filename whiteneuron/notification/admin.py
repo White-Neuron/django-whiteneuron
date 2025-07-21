@@ -71,6 +71,7 @@ class NotificationAdmin(ModelAdmin):
                     "flag", 
                     "title",
                     "display_content",
+                    'changed_data',
                     "is_read", 
                     "created_at",
                 ),
