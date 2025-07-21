@@ -35,8 +35,10 @@
                         {% with header=result_headers|get_item:forloop.counter %}
                         
                         {# Header của item #}
-                        {% if header.text and header.text != "Header" %}
-                            {% if header.text == "Deleted" %}
+                        {% trans "Header" as header_text %}
+                        {% if header.text and header.text != header_text %}
+                            {% trans "Deleted" as deleted_text %}
+                            {% if header.text == deleted_text %}
                                 {% if "True" in item %}
                                     <span class="absolute bg-red-500 dark:bg-red-600 font-semibold px-2 py-1 rounded text-white text-xs top-2 right-2">
                                         Deleted
