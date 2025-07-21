@@ -75,6 +75,9 @@ include = ["whiteneuron*"]
     "static/**/*",
     "static/**/**/*",
     "static/**/**/**/*",
+    'locale/**/*',
+    'locale/**/**/*',
+    'locale/**/**/**/*',
 ]
 
 
