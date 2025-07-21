@@ -99,4 +99,4 @@ class Notification(models.Model):
         """
         message = f"{self.title}"
         type= self.flag
-        return notify_admin(message, type=type)
+        return notify_admin(message, type=type, obj_link=self.obj_link)
