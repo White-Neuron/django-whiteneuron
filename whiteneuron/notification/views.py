@@ -17,7 +17,7 @@ def notify_admin(message, type="info", obj_link=None, action=None, changed_data=
                 "type": type,
                 'obj_link': obj_link,
                 'action': action,
-                'changed_data': changed_data if changed_data else {},
+                'changed_data': changed_data if changed_data else "",
             }
         }
     )

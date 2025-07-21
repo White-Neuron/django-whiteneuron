@@ -244,7 +244,7 @@ class BaseModel(SoftDeleteModel):
             content_html= ''
             action= ''
             user= request.user
-            changed_data= {}
+            changed_data= []
             if not self.pk:  # Nếu là tạo mới
                 self.created_by = user
                 self.updated_by = user
@@ -278,11 +278,11 @@ class BaseModel(SoftDeleteModel):
                     title= f"{_('Update')} {self._meta.verbose_name} <strong>{self}</strong>({self.id}) {_('has been updated by user')} \"{self.updated_by}\""
                     content_html= f"{self._meta.verbose_name} <strong>{self}</strong>({self.id}) has been updated by user \"{self.updated_by}\" with the following changes: <ul>"
                     for field in fields_changed:
-                        changed_data[field[0]]= {
+                        changed_data.append({
                             'verbose_name': field[0].verbose_name if hasattr(field[0], 'verbose_name') else field[0],
                             'old_value': field[1],
                             'new_value': field[2]
-                        }
+                        })
                         content_html+= f"<li>{field[0].verbose_name if hasattr(field[0], 'verbose_name') else field[0]}: {field[1]} -> {field[2]}</li>"
                     content_html+= "</ul>"
             

@@ -104,4 +104,4 @@ class Notification(models.Model):
         """
         message = f"{self.title}"
         type= self.flag
-        return notify_admin(message, type=type, obj_link=self.obj_link, action=self.action, changed_data=self.changed_data)
+        return notify_admin(message, type=type, obj_link=self.obj_link, action=self.action, changed_data=json.dumps(self.changed_data) if self.changed_data else "")
