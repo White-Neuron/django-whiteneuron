@@ -285,6 +285,10 @@ LANGUAGES = [
 MODELTRANSLATION_DEFAULT_LANGUAGE = 'vi'
 MODELTRANSLATION_LANGUAGES = ('vi', 'en')
 
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
+
 # https://docs.djangoproject.com/en/5.1/ref/settings/#date-input-formats
 DATE_INPUT_FORMATS = [
     "%d.%m.%Y",  # Custom input

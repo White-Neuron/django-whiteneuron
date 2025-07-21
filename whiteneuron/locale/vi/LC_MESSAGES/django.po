@@ -1,0 +1,670 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-07-21 14:49+0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+#: base/admin.py:177 base/admin.py:185 base/admin.py:344
+msgid "Personal info"
+msgstr "Thông tin cá nhân"
+
+#: base/admin.py:192
+msgid "Permissions"
+msgstr "Quyền hạn"
+
+#: base/admin.py:205
+msgid "Important dates"
+msgstr "Ngày quan trọng"
+
+#: base/admin.py:226 feedbacks/models.py:15
+msgid "User"
+msgstr "Người dùng"
+
+#: base/admin.py:230
+msgid "Avatar"
+msgstr "Ảnh đại diện"
+
+#: base/admin.py:234
+msgid "Staff"
+msgstr "Nhân viên"
+
+#: base/admin.py:238
+msgid "Superuser"
+msgstr "Quản trị viên"
+
+#: base/admin.py:242
+msgid "Created"
+msgstr "Đã tạo"
+
+#: base/admin.py:255
+msgid ""
+"Failed to send email notification! Please change the password so that the "
+"user can log in."
+msgstr ""
+"Không thể gửi thông báo qua email! Vui lòng thay đổi mật khẩu để người dùng có thể đăng nhập."
+
+#: base/admin.py:258
+msgid "Email notification has been sent, please check your inbox!"
+msgstr "Thông báo qua email đã được gửi, vui lòng kiểm tra hộp thư đến của bạn!"
+
+#: base/admin.py:305
+msgid "Client information"
+msgstr "Thông tin khách hàng"
+
+#: base/admin.py:314
+msgid "Request information"
+msgstr "Thông tin yêu cầu"
+
+#: base/admin.py:375
+msgid "Image info"
+msgstr "Thông tin hình ảnh"
+
+#: base/admin.py:402
+msgid "Mail info"
+msgstr "Thông tin thư"
+
+#: base/admin.py:418 base/models.py:573 notification/admin.py:133
+msgid "Content"
+msgstr "Nội dung"
+
+#: base/filters.py:4
+msgid "field(s) to display"
+msgstr "Trường hiển thị"
+
+#: base/filters.py:7
+msgid "Default fields"
+msgstr "Trường mặc định"
+
+#: base/middleware.py:24
+msgid "Database is operating in readonly mode. Not possible to save any data."
+msgstr "Cơ sở dữ liệu đang hoạt động ở chế độ chỉ đọc. Không thể lưu bất kỳ dữ liệu nào."
+
+#: base/models.py:67
+msgid "title"
+msgstr "Tiêu đề"
+
+#: base/models.py:68
+msgid "slug"
+msgstr "Đường dẫn"
+
+#: base/models.py:70
+msgid "content type"
+msgstr "Kiểu nội dung"
+
+#: base/models.py:72
+msgid "object id"
+msgstr "ID đối tượng"
+
+#: base/models.py:80
+msgid "tag"
+msgstr "Thẻ"
+
+#: base/models.py:81
+msgid "tags"
+msgstr "Thẻ"
+
+#: base/models.py:89
+msgid "avatar"
+msgstr "ảnh đại diện"
+
+#: base/models.py:90
+msgid "biography"
+msgstr "tiểu sử"
+
+#: base/models.py:92
+msgid "created at"
+msgstr "tạo lúc"
+
+#: base/models.py:93
+msgid "updated at"
+msgstr "cập nhật lúc"
+
+#: base/models.py:97
+msgid "user"
+msgstr "người dùng"
+
+#: base/models.py:98
+msgid "users"
+msgstr "người dùng"
+
+#: base/models.py:152
+msgid "user profile"
+msgstr "hồ sơ người dùng"
+
+#: base/models.py:153
+msgid "user profiles"
+msgstr "hồ sơ người dùng"
+
+#: base/models.py:160
+msgid "IP address"
+msgstr "Địa chỉ IP"
+
+#: base/models.py:161
+msgid "User agent"
+msgstr "Trình duyệt người dùng"
+
+#: base/models.py:162
+msgid "Path"
+msgstr "Đường dẫn"
+
+#: base/models.py:163 file_management/models.py:15 file_management/models.py:40
+msgid "Method"
+msgstr "Phương thức"
+
+#: base/models.py:164
+msgid "Data"
+msgstr "Dữ liệu"
+
+#: base/models.py:165
+msgid "Status code"
+msgstr "Mã trạng thái"
+
+#: base/models.py:166
+msgid "Timestamp"
+msgstr "Thời gian"
+
+#: base/models.py:167
+msgid "Timelapse"
+msgstr "Khoảng thời gian"
+
+#: base/models.py:171
+msgid "user activity"
+msgstr "hoạt động người dùng"
+
+#: base/models.py:172
+msgid "user activities"
+msgstr "hoạt động người dùng"
+
+#: base/models.py:187
+msgid "Deleted"
+msgstr "Đã xóa"
+
+#: base/models.py:188
+msgid "Deleted at"
+msgstr "Đã xóa lúc"
+
+#: base/models.py:215
+msgid "Date created"
+msgstr "Ngày tạo"
+
+#: base/models.py:216
+msgid "Created by"
+msgstr "Tạo bởi"
+
+#: base/models.py:218
+msgid "Date updated"
+msgstr "Ngày cập nhật"
+
+#: base/models.py:219
+msgid "Updated by"
+msgstr "Cập nhật bởi"
+
+#: base/models.py:221
+msgid "Hidden"
+msgstr "Ẩn"
+
+#: base/models.py:408
+msgid "Image"
+msgstr "Hình ảnh"
+
+#: base/models.py:409 base/models.py:485
+msgid "Thumbnail"
+msgstr "Hình thu nhỏ"
+
+#: base/models.py:411 base/models.py:497
+msgid "Preview"
+msgstr "Xem trước"
+
+#: base/models.py:413 file_management/models.py:8
+msgid "Description"
+msgstr "Mô tả"
+
+#: base/models.py:417
+msgid "System image"
+msgstr "Hình ảnh hệ thống"
+
+#: base/models.py:418
+msgid "System images"
+msgstr "Hình ảnh hệ thống"
+
+#: base/models.py:482 base/models.py:491
+msgid "Image not found"
+msgstr "Hình ảnh không tìm thấy"
+
+#: base/models.py:493
+msgid "View original image size"
+msgstr "Xem kích thước hình ảnh gốc"
+
+#: base/models.py:572
+msgid "Subject"
+msgstr "Chủ đề"
+
+#: base/models.py:574
+msgid "Receiver"
+msgstr "Người nhận"
+
+#: base/models.py:575 file_management/models.py:9 file_management/models.py:20
+msgid "Pending"
+msgstr "Đang chờ"
+
+#: base/models.py:576
+msgid "Sent"
+msgstr "Gửi"
+
+#: base/models.py:577
+msgid "Failed"
+msgstr "Thất bại"
+
+#: base/models.py:578 file_management/models.py:12 file_management/models.py:29
+msgid "Status"
+msgstr "Trạng thái"
+
+#: base/models.py:579 feedbacks/models.py:42
+msgid "Note"
+msgstr "Ghi chú"
+
+#: base/models.py:583
+msgid "Email notification"
+msgstr "Thông báo qua email"
+
+#: base/models.py:584
+msgid "Email notifications"
+msgstr "Thông báo qua email"
+
+#: base/settings.py:281
+msgid "English"
+msgstr "Tiếng Anh"
+
+#: base/settings.py:282
+msgid "Vietnamese"
+msgstr "Tiếng Việt"
+
+#: base/settings.py:354
+msgid "Admin panel"
+msgstr "Trang quản trị"
+
+#: base/settings.py:358
+msgid "White Neuron Co. Ltd."
+msgstr "Công ty TNHH White Neuron"
+
+#: base/settings.py:363
+msgid "Email: anhnt@whiteneuron.com"
+msgstr ""
+
+#: base/settings.py:438
+msgid "Navigation"
+msgstr "Điều hướng"
+
+#: base/settings.py:441 dashboard/views.py:169 templates/admin/index.html:8
+msgid "Dashboard"
+msgstr "Bảng điều khiển"
+
+#: base/settings.py:446
+msgid "Notifications"
+msgstr "Thông báo"
+
+#: base/settings.py:452 feedbacks/models.py:50
+msgid "Feedbacks"
+msgstr "Phản hồi"
+
+#: base/settings.py:460
+msgid "File Management"
+msgstr "Quản lý tệp"
+
+#: base/settings.py:464 file_management/models.py:58
+msgid "Excel Files"
+msgstr "Tệp Excel"
+
+#: base/settings.py:471 file_management/models.py:65
+msgid "PDF Files"
+msgstr "Tệp PDF"
+
+#: base/settings.py:480
+msgid "Users & Groups"
+msgstr "Người dùng & Nhóm"
+
+#: base/settings.py:484
+msgid "Users"
+msgstr "Người dùng"
+
+#: base/settings.py:491
+msgid "User activity"
+msgstr "Hoạt động người dùng"
+
+#: base/settings.py:498
+msgid "Groups"
+msgstr "Nhóm"
+
+#: base/settings.py:507
+msgid "System"
+msgstr "Hệ thống"
+
+#: base/settings.py:511
+msgid "Images"
+msgstr "Hình ảnh"
+
+#: base/settings.py:517
+msgid "Emails"
+msgstr "Email"
+
+#: base/settings.py:523
+msgid "Notifications config"
+msgstr "Cấu hình thông báo"
+
+#: base/settings.py:531
+msgid "Celery Tasks"
+msgstr "Nhiệm vụ Celery"
+
+#: base/settings.py:535
+msgid "Clocked"
+msgstr "Khóa"
+
+#: base/settings.py:543
+msgid "Crontabs"
+msgstr "Crontabs"
+
+#: base/settings.py:551
+msgid "Intervals"
+msgstr "Khoảng thời gian"
+
+#: base/settings.py:559
+msgid "Periodic tasks"
+msgstr "Nhiệm vụ định kỳ"
+
+#: base/settings.py:567
+msgid "Solar events"
+msgstr "Sự kiện Solar"
+
+#: contrib/wn_import_export/admin.py:32
+msgid "Export selected records"
+msgstr "Xuất các bản ghi đã chọn"
+
+#: contrib/wn_modeltranslation/admin.py:44
+msgid "Translate to Vietnamese"
+msgstr "Dịch sang tiếng Việt"
+
+#: contrib/wn_modeltranslation/utils.py:34
+msgid "You must be a superuser to use this action"
+msgstr "Bạn phải là quản trị viên để sử dụng hành động này"
+
+#: contrib/wn_modeltranslation/utils.py:69
+#, python-format
+msgid "Translate failed: %s"
+msgstr "Dịch không thành công: %s"
+
+#: contrib/wn_modeltranslation/utils.py:70
+msgid "Translate successfully"
+msgstr "Dịch thành công"
+
+#: dashboard/views.py:170
+msgid "Analytics"
+msgstr "Phân tích"
+
+#: dashboard/views.py:171
+msgid "Settings"
+msgstr "Cài đặt"
+
+#: dashboard/views.py:175
+msgid "Today"
+msgstr "Hôm nay"
+
+#: dashboard/views.py:180
+msgid "7 days"
+msgstr "7 ngày"
+
+#: dashboard/views.py:185
+msgid "Week"
+msgstr "Tuần"
+
+#: dashboard/views.py:190
+msgid "Month"
+msgstr "Tháng"
+
+#: dashboard/views.py:195
+msgid "Year"
+msgstr "Năm"
+
+#: dashboard/views.py:271
+msgid "Last week revenue"
+msgstr "Giá trị doanh thu tuần trước"
+
+#: dashboard/views.py:286
+msgid "Last week expenses"
+msgstr "Giá trị chi phí tuần trước"
+
+#: feedbacks/admin.py:53
+msgid "Mark selected feedbacks as resolved"
+msgstr "Đánh dấu các phản hồi đã chọn là đã giải quyết"
+
+#: feedbacks/admin.py:58
+#, python-format
+msgid "%d feedback(s) marked as resolved."
+msgstr "%d phản hồi đã được đánh dấu là đã giải quyết."
+
+#: feedbacks/admin.py:86
+msgid "Only superuser can mark feedback as resolved"
+msgstr "Chỉ quản trị viên mới có thể đánh dấu phản hồi là đã giải quyết"
+
+#: feedbacks/admin.py:100
+msgid "Feedback resolved"
+msgstr "Phản hồi đã được giải quyết"
+
+#: feedbacks/admin.py:112
+msgid "Feedback marked as resolved"
+msgstr "Phản hồi đã được đánh dấu là đã giải quyết"
+
+#: feedbacks/models.py:21
+msgid "Content Type"
+msgstr "Loại nội dung"
+
+#: feedbacks/models.py:25
+msgid "Object ID"
+msgstr "ID đối tượng"
+
+#: feedbacks/models.py:31
+msgid "Message"
+msgstr "Tin nhắn"
+
+#: feedbacks/models.py:32
+msgid "The message of the feedback"
+msgstr "Tin nhắn của phản hồi"
+
+#: feedbacks/models.py:37
+msgid "Is Resolved"
+msgstr "Đã giải quyết"
+
+#: feedbacks/models.py:38
+msgid "Whether the feedback is resolved"
+msgstr "Liệu phản hồi đã được giải quyết hay chưa"
+
+#: feedbacks/models.py:43
+msgid "Admin note for the feedback"
+msgstr "Ghi chú của quản trị viên cho phản hồi"
+
+#: feedbacks/models.py:49
+msgid "Feedback"
+msgstr "Phản hồi"
+
+#: file_management/admin.py:15
+msgid "General Information"
+msgstr "Thông tin chung"
+
+#: file_management/admin.py:21
+msgid "Meta"
+msgstr "Meta"
+
+#: file_management/models.py:10 file_management/models.py:23
+msgid "Done"
+msgstr "Hoàn thành"
+
+#: file_management/models.py:11 file_management/models.py:26
+msgid "Error"
+msgstr "Lỗi"
+
+#: file_management/models.py:13 file_management/models.py:34
+msgid "Upload"
+msgstr "Tải lên"
+
+#: file_management/models.py:14 file_management/models.py:37
+msgid "Auto"
+msgstr "Tự động"
+
+#: file_management/models.py:57
+msgid "Excel File"
+msgstr "Tệp Excel"
+
+#: file_management/models.py:64
+msgid "PDF File"
+msgstr "Tệp PDF"
+
+#: notification/admin.py:31
+msgid "Notification Recipients"
+msgstr "Người nhận thông báo"
+
+#: notification/admin.py:65
+msgid "Notification information"
+msgstr "Thông tin thông báo"
+
+#: notification/admin.py:83
+msgid "View"
+msgstr "Xem"
+
+#: notification/admin.py:137
+msgid "Action"
+msgstr "Hành động"
+
+#: notification/admin.py:141
+msgid "Flag"
+msgstr "Cờ"
+
+#: notification/models.py:13
+msgid "The model this configuration applies to."
+msgstr "Mô hình mà cấu hình này áp dụng."
+
+#: notification/models.py:17
+msgid ""
+"The type of event this configuration applies to (e.g., 'create', 'update', "
+"'delete')."
+msgstr "Loại sự kiện mà cấu hình này áp dụng (ví dụ: 'tạo', 'cập nhật', 'xóa')."
+
+#: notification/models.py:28
+msgid "Whether to send notifications to the admin."
+msgstr "Liệu có gửi thông báo đến quản trị viên hay không."
+
+#: notification/models.py:33
+msgid "Whether to send notifications to the user."
+msgstr "Liệu có gửi thông báo đến người dùng hay không."
+
+#: notification/models.py:38
+msgid "Whether to send notifications to group users."
+msgstr "Liệu có gửi thông báo đến nhóm người dùng hay không."
+
+#: notification/models.py:45
+msgid "Groups of users to send notifications to."
+msgstr "Nhóm người dùng để gửi thông báo đến."
+
+#: notification/models.py:52
+msgid "Specific users to send notifications to."
+msgstr "Người dùng cụ thể để gửi thông báo đến."
+
+#: notification/models.py:62
+msgid "Read"
+msgstr "Đã đọc"
+
+#: notification/models.py:76
+msgid "notification"
+msgstr "thông báo"
+
+#: notification/models.py:77
+msgid "notifications"
+msgstr "thông báo"
+
+#: templates/admin/grid_view_results.html:79
+#, python-format
+msgid "Add %(name)s"
+msgstr "Thêm %(name)s"
+
+#: templates/admin/grid_view_results.html:87
+msgid "No results found"
+msgstr "Không tìm thấy kết quả"
+
+#: templates/admin/grid_view_results.html:91
+msgid ""
+"This page yielded into no results. Create a new item or reset your filters."
+msgstr "Trang này không có kết quả nào. Tạo một mục mới hoặc đặt lại bộ lọc của bạn."
+
+#: templates/admin/grid_view_results.html:104
+msgid "Reset filters"
+msgstr "Đặt lại bộ lọc"
+
+#: templates/admin/index.html:8 templates/admin/login.html:32
+msgid "Django site admin"
+msgstr "Quản trị trang Django"
+
+#: templates/admin/index.html:49
+msgid "Website performance in last 28 days"
+msgstr "Hiệu suất trang web trong 28 ngày qua"
+
+#: templates/admin/login.html:31
+msgid "Welcome back to"
+msgstr "Chào mừng trở lại với"
+
+#: templates/admin/login.html:44
+#, python-format
+msgid ""
+"You are authenticated as %(username)s, but are not authorized to access this "
+"page. Would you like to login to a different account?"
+msgstr "Bạn đã xác thực với tư cách %(username)s, nhưng không được phép truy cập trang này. Bạn có muốn đăng nhập vào tài khoản khác không?"
+
+#: templates/admin/login.html:67
+msgid "Log in"
+msgstr "Đăng nhập"
+
+#: templates/admin/login.html:76
+msgid "Forgotten your password or username?"
+msgstr "Quên mật khẩu hoặc tên người dùng?"
+
+#: templates/admin/login.html:90
+msgid "Return to site"
+msgstr "Trở lại trang"
+
+#: templates/admin/login_after.html:7
+msgid "Log in as guest"
+msgstr "Đăng nhập với tư cách khách"
+
+#: templates/admin/search_form.html:9
+msgid "Type to search"
+msgstr "Gõ để tìm kiếm"
+
+#: templates/admin/search_form.html:45
+msgid "Items per page"
+msgstr "Số mục trên mỗi trang"
+
+#: templates/unfold/helpers/account_links.html:22
+msgid "User profile"
+msgstr "Hồ sơ người dùng"
+
+#: templates/unfold/helpers/account_links.html:28
+msgid "View site"
+msgstr "Xem trang"
+
+#: templates/unfold/helpers/account_links.html:34
+msgid "Change password"
+msgstr "Đổi mật khẩu"
+
+#: templates/unfold/helpers/account_links.html:43
+msgid "Log out"
+msgstr "Đăng xuất"
