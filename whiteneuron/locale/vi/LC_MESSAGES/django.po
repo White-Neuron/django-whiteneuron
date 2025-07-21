@@ -558,7 +558,8 @@ msgstr "Mô hình mà cấu hình này áp dụng."
 msgid ""
 "The type of event this configuration applies to (e.g., 'create', 'update', "
 "'delete')."
-msgstr "Loại sự kiện mà cấu hình này áp dụng (ví dụ: 'tạo', 'cập nhật', 'xóa')."
+msgstr ""
+"Loại sự kiện mà cấu hình này áp dụng (ví dụ: 'tạo', 'cập nhật', 'xóa')."
 
 #: notification/models.py:28
 msgid "Whether to send notifications to the admin."
@@ -604,7 +605,8 @@ msgstr "Không tìm thấy kết quả"
 #: templates/admin/grid_view_results.html:91
 msgid ""
 "This page yielded into no results. Create a new item or reset your filters."
-msgstr "Trang này không có kết quả nào. Tạo một mục mới hoặc đặt lại bộ lọc của bạn."
+msgstr ""
+"Trang này không có kết quả nào. Tạo một mục mới hoặc đặt lại bộ lọc của bạn."
 
 #: templates/admin/grid_view_results.html:104
 msgid "Reset filters"
@@ -627,7 +629,8 @@ msgstr "Chào mừng trở lại với"
 msgid ""
 "You are authenticated as %(username)s, but are not authorized to access this "
 "page. Would you like to login to a different account?"
-msgstr "Bạn đã xác thực với tư cách %(username)s, nhưng không được phép truy cập trang này. Bạn có muốn đăng nhập vào tài khoản khác không?"
+msgstr ""
+"Bạn đã xác thực với tư cách %(username)s, nhưng không được phép truy cập trang này. Bạn có muốn đăng nhập vào tài khoản khác không?"
 
 #: templates/admin/login.html:67
 msgid "Log in"
