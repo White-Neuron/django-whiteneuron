@@ -60,7 +60,7 @@ class Notification(models.Model):
     title = models.CharField(max_length=255)
     obj_link= models.CharField(max_length=255, null=True, blank=True) # link to object
     content = models.TextField()
-    changed_data= models.JSONField(null=True, blank=True, verbose_name=_("Changed Data"))
+    changed_data= models.TextField(null=True, blank=True, verbose_name=_("Changed Data"))
     is_read = models.BooleanField(default=False, verbose_name=_("Read"))
     flag = models.CharField(max_length=25, choices=[("info", "info"), 
                                                     ("success", "success"), 
@@ -104,4 +104,4 @@ class Notification(models.Model):
         """
         message = f"{self.title}"
         type= self.flag
-        return notify_admin(message, type=type, obj_link=self.obj_link, action=self.action, changed_data=json.dumps(self.changed_data) if self.changed_data else "")
+        return notify_admin(message, type=type, obj_link=self.obj_link, action=self.action, changed_data=self.changed_data if self.changed_data else "")

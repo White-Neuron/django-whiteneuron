@@ -302,7 +302,7 @@ class BaseModel(SoftDeleteModel):
                                                      flag= 'info',
                                                      action= action,
                                                      obj_link= obj_link,
-                                                     changed_data= changed_data,
+                                                     changed_data= str(changed_data),
                                                      content= content_html)
                     obj.alert(request)
         
