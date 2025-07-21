@@ -279,6 +279,7 @@ class BaseModel(SoftDeleteModel):
                     content_html= f"{self._meta.verbose_name} <strong>{self}</strong>({self.id}) has been updated by user \"{self.updated_by}\" with the following changes: <ul>"
                     for field in fields_changed:
                         changed_data.append({
+                            'field_name': field[0],
                             'old_value': field[1],
                             'new_value': field[2]
                         })
