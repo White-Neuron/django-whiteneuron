@@ -23,7 +23,7 @@ msgstr "Thông tin cá nhân"
 
 #: base/admin.py:192
 msgid "Permissions"
-msgstr "Quyền hạn"
+msgstr "Quyền"
 
 #: base/admin.py:205
 msgid "Important dates"
