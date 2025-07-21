@@ -66,6 +66,7 @@ class NotificationAdmin(ModelAdmin):
             {
                 "fields": (
                     "user",
+                    'obj_link',
                     "action",
                     "flag", 
                     "title",
