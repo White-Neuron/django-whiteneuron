@@ -75,6 +75,21 @@ CSRF_TRUSTED_ORIGINS = environ.get(
     "CSRF_TRUSTED_ORIGINS", "http://localhost:8000"
 ).split(",")
 
+
+######################################################################
+# HTTPS/SSL Settings for Production
+######################################################################
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    USE_TLS = True
+
 ######################################################################
 # Apps
 ######################################################################
