@@ -2,13 +2,6 @@ module.exports = {
   content: ["./**/*.{html,py,js}"],
   media: false,
   darkMode: "class",
-  plugins: [
-    require('daisyui'),
-  ],
-  daisyui: {
-      themes: ['light', 'dark'],
-      prefix: 'ui-',
-  },
   theme: {
     extend: {
       colors: {

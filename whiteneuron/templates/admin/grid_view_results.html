@@ -27,7 +27,7 @@
                     </div>
                 {% endif %}
                 {# Flag hiển thị ở góc nếu record đã bị xóa #}
-                    <div class="border rounded shadow-sm p-4 bg-white dark:bg-base-900 relative">
+                    <div class="border rounded-sm shadow-xs p-4 bg-white dark:bg-base-900 relative">
                     {# Lặp qua các cell của kết quả, bỏ qua phần tử đầu tiên (thường là checkbox cột) #}
 
                     {% for item in result|slice:"1:" %}
@@ -40,7 +40,7 @@
                             {% trans "Deleted" as deleted_text %}
                             {% if header.text == deleted_text %}
                                 {% if "True" in item %}
-                                    <span class="absolute bg-red-500 dark:bg-red-600 font-semibold px-2 py-1 rounded text-white text-xs top-2 right-2">
+                                    <span class="absolute bg-red-500 dark:bg-red-600 font-semibold px-2 py-1 rounded-sm text-white text-xs top-2 right-2">
                                         Deleted
                                     </span>
                                 {% endif %}
@@ -80,9 +80,9 @@
     {% url cl.opts|admin_urlname:"add" as add_url %}
     {% blocktranslate with name=cl.opts.verbose_name asvar title %}Add {{ name }}{% endblocktranslate %}
 
-    <div class="border border-base-200 flex flex-col items-center px-8 py-24 rounded shadow-sm dark:border-base-800">
+    <div class="border border-base-200 flex flex-col items-center px-8 py-24 rounded-sm shadow-xs dark:border-base-800">
         <div class="bg-base-100 flex h-24 items-center justify-center mb-8 rounded-full w-24 dark:bg-base-800">
-            <span class="material-symbols-outlined text-base-500 !text-5xl dark:text-base-400">inbox</span>
+            <span class="material-symbols-outlined text-base-500 text-5xl! dark:text-base-400">inbox</span>
         </div>
 
         <h2 class="font-semibold mb-1 text-xl text-font-important-light dark:text-font-important-dark">
@@ -96,13 +96,13 @@
         {% if has_add_permission or cl.has_filters %}
             <div class="flex flex-col gap-4 justify-center w-full lg:flex-row">
                 {% if has_add_permission %}
-                    <a href="{% add_preserved_filters add_url is_popup to_field %}" class="bg-primary-600 flex flex-row font-medium gap-2 items-center h-9.5 justify-center px-3 py-2 rounded text-white w-full lg:w-auto">
+                    <a href="{% add_preserved_filters add_url is_popup to_field %}" class="bg-primary-600 flex flex-row font-medium gap-2 items-center h-9.5 justify-center px-3 py-2 rounded-sm text-white w-full lg:w-auto">
                         <span class="material-symbols-outlined text-white">add</span> {{ title }}
                     </a>
                 {% endif %}
 
                 {% if cl.has_filters %}
-                    <a href="{{ cl.clear_all_filters_qs }}" class="border border-base-200 flex flex-row font-medium gap-2 group/button h-9.5 items-center justify-center px-3 py-2 rounded transition-all w-full hover:text-primary-600 lg:w-auto dark:border-base-700 dark:hover:bg-base-900 dark:hover:text-primary-500">
+                    <a href="{{ cl.clear_all_filters_qs }}" class="border border-base-200 flex flex-row font-medium gap-2 group/button h-9.5 items-center justify-center px-3 py-2 rounded-sm transition-all w-full hover:text-primary-600 lg:w-auto dark:border-base-700 dark:hover:bg-base-900 dark:hover:text-primary-500">
                         <span class="material-symbols-outlined group-hover/button:text-primary-600 dark:group-hover/button:text-base-500 text-base-400 dark:text-base-500">filter_list_off</span> {% trans "Reset filters" %}
                     </a>
                 {% endif %}
