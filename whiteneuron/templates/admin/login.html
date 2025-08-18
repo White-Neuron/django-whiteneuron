@@ -1,15 +1,5 @@
-{% extends 'unfold/layouts/unauthenticated.html' %}
-
+{% extends 'admin/login.html' %}
 {% load i18n static unfold %}
-
-{% block extrastyle %}
-    {{ block.super }}
-    {{ form.media }}
-{% endblock %}
-
-{% block title %}
-    {{ title }} | {{ site_title }}
-{% endblock %}
 
 {% block content %}
     {% include "unfold/helpers/unauthenticated_title.html" with title=site_title|default:_('Django site admin') subtitle=_('Welcome back to') %}
@@ -40,6 +30,7 @@
 
         {% include "unfold/helpers/field.html" with field=form.username %}
 
+        {# whiteneuron custom #}
         {% include "unfold/helpers/field_password.html" with field=form.password %}
 
         <div class="flex flex-col gap-3 mt-6">
@@ -58,5 +49,8 @@
         </div>
     </form>
 
-    {% block login_after %}{% endblock %}
+    {% block login_after %}
+        {# whiteneuron custom #}
+        {% include "admin/login_after.html" %}
+    {% endblock %}
 {% endblock %}

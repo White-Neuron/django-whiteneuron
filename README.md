@@ -7,9 +7,20 @@
 ## 📥 **Cài đặt**  
 
 ### **1️⃣ Cài đặt package**  
-Sử dụng pip để cài đặt `django-whiteneuron`:  
+
+#### **Sử dụng uv (Khuyến nghị):**  
+```bash
+uv add django-whiteneuron
+```
+
+#### **Sử dụng pip:**  
 ```bash
 pip install django-whiteneuron
+```
+
+#### **Cài đặt từ GitHub (phiên bản mới nhất):**  
+```bash
+uv add git+https://github.com/tanhtm/django-whiteneuron.git@v0.2.0
 ```
 
 ---

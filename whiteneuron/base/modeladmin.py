@@ -258,6 +258,9 @@ class ModelAdmin(UnfoldAdmin):
                 fields = [list_display[0]]
             else:
                 fields = [list_display[1]]
+        grid_view= int(request.POST.get('grid_view', self.grid_view))
+        if grid_view:
+            fields = ['grid_item_header']
         return fields
     
     def get_list_display(self, request: HttpRequest) -> Sequence[str]:
@@ -407,8 +410,8 @@ class ModelAdmin(UnfoldAdmin):
         if grid_view:
             extra_context = extra_context or {}
             extra_context['grid_view'] = grid_view
-            self.list_display_links= list(set(list(self.list_display_links) + ['grid_item_header']))
-            self.list_display= self.get_list_display(request)
+            # list_display_links= list(set(list(self.list_display_links) + ['grid_item_header']))
+            # list_display= self.get_list_display(request)
 
         # Xác định số lượng hiển thị từ request
         per_page = self.list_per_page
