@@ -8,14 +8,58 @@ cd ..
 
 echo "Building package..."
 uv build
-read -p "Do you want to push to Github? (y/n) " REPLY
+
+read -p "Do you want to create a release? (y/n) " REPLY
 echo
 DATE=$(date)
+
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-  read -p "Enter commit message: " MESSAGE
-  echo "Pushing to Github with message: $MESSAGE"
+  # Get current version from pyproject.toml
+  CURRENT_VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+  echo "Current version: $CURRENT_VERSION"
+  
+  read -p "Enter new version (or press Enter to keep $CURRENT_VERSION): " NEW_VERSION
+  if [[ -z "$NEW_VERSION" ]]; then
+    NEW_VERSION=$CURRENT_VERSION
+  fi
+  
+  # Update version in pyproject.toml if changed
+  if [[ "$NEW_VERSION" != "$CURRENT_VERSION" ]]; then
+    sed -i '' "s/version = \"$CURRENT_VERSION\"/version = \"$NEW_VERSION\"/" pyproject.toml
+    echo "Updated version to: $NEW_VERSION"
+    
+    # Rebuild with new version
+    echo "Rebuilding package with new version..."
+    uv build
+  fi
+  
+  read -p "Enter release message: " MESSAGE
+  
+  echo "Creating release v$NEW_VERSION with message: $MESSAGE"
+  
+  # Commit changes
   git add .
-  git commit -m "Build $DATE: $MESSAGE"
-  git push
+  git commit -m "Release v$NEW_VERSION: $MESSAGE"
+  
+  # Create and push tag
+  git tag -a "v$NEW_VERSION" -m "Release v$NEW_VERSION: $MESSAGE"
+  
+  # Push to GitHub
+  git push origin $(git branch --show-current)
+  git push origin "v$NEW_VERSION"
+  
+  echo "✅ Release v$NEW_VERSION created successfully!"
+  echo "🔗 Check your release at: https://github.com/tanhtm/django-whiteneuron/releases"
+  
+  # Ask if user wants to publish to PyPI
+  read -p "Do you want to publish to PyPI? (y/n) " PYPI_REPLY
+  if [[ $PYPI_REPLY =~ ^[Yy]$ ]]; then
+    echo "Publishing to PyPI..."
+    uv publish
+    echo "✅ Published to PyPI!"
+  fi
+else
+  echo "Build completed without release."
 fi
+
 echo "Done!"
