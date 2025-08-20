@@ -238,77 +238,75 @@ class BaseModel(SoftDeleteModel):
 
     def save(self, *args, **kwargs):
         request = getattr(thread_local, 'request', None)
-        if request:
-            # save created_by and updated_by when create or update
-            title= ''
-            content_html= ''
-            action= ''
+        # save created_by and updated_by when create or update
+        title= ''
+        content_html= ''
+        action= ''
+        if request is None:
+            user= User.objects.filter(is_superuser=True).first()
+        else:
             user= request.user
-            changed_data= []
-            if not self.pk:  # Nếu là tạo mới
-                self.created_by = user
-                self.updated_by = user
-                self.created_at = timezone.now()
-                self.updated_at = timezone.now()
-                action= 'create'
-                title= f"{_('New')} {self._meta.verbose_name} \"{self}\" {_('has been created by user')} \"{self.created_by}\""
-                
-            else:  # Nếu là cập nhật
-                fields_changed= []
-                if hasattr(self.__class__, 'objects_all'):
-                    old= self.__class__.objects_all.get(pk= self.pk)
-                else:
-                    old= self.__class__.objects.get(pk= self.pk)
-                for attr in self.__dict__:
-                    if attr in ['_state', 'created_at', 'created_by', 'updated_at', 'updated_by']:
-                        continue
-                    # kiểm tra attr có phải là field không
-                    if not hasattr(self.__class__, attr):
-                        continue
-                    try:
-                        if getattr(self, attr) != getattr(old, attr):
-                            fields_changed.append((attr, getattr(old, attr), getattr(self, attr)))
-                    except Exception as e:
-                        print(e)
-                        pass
-                if fields_changed:
-                    self.updated_at = timezone.now()
-                    self.updated_by = user
-                    action= 'update'
-                    title= f"{_('Update')} {self._meta.verbose_name} <strong>{self}</strong>({self.id}) {_('has been updated by user')} \"{self.updated_by}\""
-                    content_html= f"{self._meta.verbose_name} <strong>{self}</strong>({self.id}) has been updated by user \"{self.updated_by}\" with the following changes: <ul>"
-                    for field in fields_changed:
-                        changed_data.append({
-                            'field_name': field[0],
-                            'old_value': field[1],
-                            'new_value': field[2]
-                        })
-                        content_html+= f"<li>{field[0].verbose_name if hasattr(field[0], 'verbose_name') else field[0]}: {field[1]} -> {field[2]}</li>"
-                    content_html+= "</ul>"
+        changed_data= []
+        if not self.pk:  # Nếu là tạo mới
+            self.created_by = user
+            self.updated_by = user
+            self.created_at = timezone.now()
+            self.updated_at = timezone.now()
+            action= 'create'
+            title= f"{_('New')} {self._meta.verbose_name} \"{self}\" {_('has been created by user')} \"{self.created_by}\""
             
-            super(BaseModel, self).save(*args, **kwargs)  # Lưu đối tượng trước khi gửi thông báo
-            # Gửi thông báo đến người dùng
-            if title:
-                if action == 'create':
-                    content_html= f"""
+        else:  # Nếu là cập nhật
+            fields_changed= []
+            if hasattr(self.__class__, 'objects_all'):
+                old= self.__class__.objects_all.get(pk= self.pk)
+            else:
+                old= self.__class__.objects.get(pk= self.pk)
+            for attr in self.__dict__:
+                if attr in ['_state', 'created_at', 'created_by', 'updated_at', 'updated_by']:
+                    continue
+                # kiểm tra attr có phải là field không
+                if not hasattr(self.__class__, attr):
+                    continue
+                try:
+                    if getattr(self, attr) != getattr(old, attr):
+                        fields_changed.append((attr, getattr(old, attr), getattr(self, attr)))
+                except Exception as e:
+                    print(e)
+                    pass
+            if fields_changed:
+                self.updated_at = timezone.now()
+                self.updated_by = user
+                action= 'update'
+                title= f"{_('Update')} {self._meta.verbose_name} <strong>{self}</strong>({self.id}) {_('has been updated by user')} \"{self.updated_by}\""
+                content_html= f"{self._meta.verbose_name} <strong>{self}</strong>({self.id}) has been updated by user \"{self.updated_by}\" with the following changes: <ul>"
+                for field in fields_changed:
+                    changed_data.append({
+                        'field_name': field[0],
+                        'old_value': field[1],
+                        'new_value': field[2]
+                    })
+                    content_html+= f"<li>{field[0].verbose_name if hasattr(field[0], 'verbose_name') else field[0]}: {field[1]} -> {field[2]}</li>"
+                content_html+= "</ul>"
+        
+        super(BaseModel, self).save(*args, **kwargs)  # Lưu đối tượng trước khi gửi thông báo
+        # Gửi thông báo đến người dùng
+        if title:
+            if action == 'create':
+                content_html= f"""
 <p>{_('New')} {self._meta.verbose_name} <strong>{self}({self.id})</strong> {_('has been created by user')} <strong>{self.created_by}</strong></p>
 """
-                    if self.path():
-                        content_html+= f"""<p>{_('You can view it at')} <a href="{self.path()}">{_('this link')}</a>.</p>"""
+                if self.path():
+                    content_html+= f"""<p>{_('You can view it at')} <a href="{self.path()}">{_('this link')}</a>.</p>"""
 
-                obj_link= self.path() if hasattr(self, 'path') else None
-                for user in User.objects.filter(is_superuser= True):
-                    obj= Notification.objects.create(user= user, title= title,
-                                                     flag= 'info',
-                                                     action= action,
-                                                     obj_link= obj_link,
-                                                     changed_data= str(changed_data),
-                                                     content= content_html)
-                    obj.alert(request)
-        
-        else:
-            super(BaseModel, self).save(*args, **kwargs)  # Nếu không có request thì không gửi thông báo
-
+            obj_link= self.path() if hasattr(self, 'path') else None
+            for user in User.objects.filter(is_superuser= True):
+                obj= Notification.objects.create(user= user, title= title,
+                                                    flag= 'info',
+                                                    action= action,
+                                                    obj_link= obj_link,
+                                                    changed_data= str(changed_data),
+                                                    content= content_html)
+                obj.alert()
 
 ############################################
 # Image Model
