@@ -363,6 +363,22 @@ class UserProfileAdmin(ModelAdmin):
         extra_context['show_save_and_add_another']= False
         extra_context['show_save_and_continue']= False
         return super().changeform_view(request, object_id=str(request.user.pk), extra_context=extra_context, form_url='')
+    
+    def get_fieldsets(self, request: HttpRequest, obj: None) -> list[tuple[str, dict]]:
+        fieldsets = super().get_fieldsets(request, obj)
+        if obj == request.user and request.user.is_superuser:
+            # Thêm ,
+            # (_('Configuration'), {
+            #     'fields': ('show_softdelete',)
+            # })
+            fieldsets = list(fieldsets)  # Convert to list to modify
+            print(fieldsets)
+            fieldsets.insert(1, (_('Configuration'),
+                {
+                    'fields': ('show_softdelete',)
+                }
+            ))
+        return fieldsets
 
 from .models import Image
 @admin.register(Image, site=base_admin_site)

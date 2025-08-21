@@ -129,7 +129,7 @@ class ModelAdmin(UnfoldAdmin):
     restore.short_description = 'Restore selected records'
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
-        if request.user.is_superuser:
+        if request.user.is_superuser and request.user.show_softdelete:
             if hasattr(self.model, 'objects_all'):
                 return self.model.objects_all.all()
         return self.model.objects.all()
@@ -281,7 +281,7 @@ class ModelAdmin(UnfoldAdmin):
         # check nếu model có trường sau thì mới thêm vào list_display
         # fields_extra = ['updated_at', 'updated_by']
         fields_extra = []
-        if request.user.is_superuser: #is_hidden
+        if request.user.is_superuser and request.user.show_softdelete:
             fields_extra += ['is_deleted']
         for field in fields_extra:
             if field in [f.name for f in self.model._meta.fields]:

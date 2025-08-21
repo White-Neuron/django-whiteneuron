@@ -92,6 +92,9 @@ class User(AbstractUser):
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
     updated_at = models.DateTimeField(_("updated at"), auto_now=True)
 
+    # config by user
+    show_softdelete = models.BooleanField(_("show soft delete"), default=False, help_text=_("Show soft deleted items in the list view"))
+
     class Meta:
         db_table = "users"
         verbose_name = _("user")
