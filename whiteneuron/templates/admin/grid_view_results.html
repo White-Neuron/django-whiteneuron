@@ -46,7 +46,7 @@
                                 {% endif %}
                             {% else %}
                                 {# Nếu header có text, hiển thị header và giá trị #}
-                                <div class="mb-1 p-2 bg-white dark:bg-base-900 border border-gray-200 dark:border-base-700 rounded-lg shadow-md hover:shadow-xl transform hover:-translate-y-1 transition duration-300">
+                                <div class="p-2 bg-white dark:bg-base-900 border border-gray-200 dark:border-base-700 rounded-lg shadow-md hover:shadow-xl transform hover:-translate-y-1 transition duration-300">
                                     <div class="mb-1">
                                         <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                                             {{ header.text|capfirst }}
@@ -68,7 +68,7 @@
                     {% endfor %}
                     
                     {# Hiển thị các hành động (Edit, Delete,...) cho dòng #}
-                    <div class="mt-2">
+                    <div class="">
                         {% include 'unfold/helpers/actions_row.html' with actions=actions_row instance_pk=result.instance_pk %}
                     </div>
                 </div>
