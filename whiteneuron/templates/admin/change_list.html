@@ -51,16 +51,18 @@
         {% endif %}
 
         {# Dropdown chọn số lượng hiển thị #}
-        <form method="post" action="" class="">
-            {% csrf_token %}
-            <select name="per_page" id="per_page" class="h-9 ui-select ui-select-sm ui-select-info border border-base-200 dark:border-base-700 w-full max-w-xs dark:bg-base-900 dark:border-base-700
-            " onchange="this.form.submit()">
-                <option disabled >{{ _('Items per page') }}</option>
-                {% for size in page_sizes %}
-                    <option value="{{ size }}" {% if cl.list_per_page == size %}selected{% endif %}>{{ size }}</option>
-                {% endfor %}
-            </select>
-        </form>        
+        {% if page_sizes|length > 1 %}
+            <form method="post" action="" class="">
+                {% csrf_token %}
+                <select name="per_page" id="per_page" class="h-9 ui-select ui-select-sm ui-select-info border border-base-200 dark:border-base-700 w-full max-w-xs dark:bg-base-900 dark:border-base-700
+                " onchange="this.form.submit()">
+                    <option disabled >{{ _('Items per page') }}</option>
+                    {% for size in page_sizes %}
+                        <option value="{{ size }}" {% if cl.list_per_page == size %}selected{% endif %}>{{ size }}</option>
+                    {% endfor %}
+                </select>
+            </form> 
+        {% endif %}       
 
         {% if cl.has_filters %}
             <a class="h-9 rounded shadow-sm {% if cl.has_active_filters %}bg-primary-600 border-primary-600 text-white{% else %}bg-white border-base-200 hover:text-primary-600 dark:bg-base-900 dark:border-base-700 dark:hover:text-primary-500{% endif %} border cursor-pointer flex font-medium gap-2 group items-center px-3 py-2 rounded-default shadow-xs text-sm lg:ml-auto md:mt-0 {% if not cl.model_admin.list_filter_sheet %}2xl:hidden{% endif %}" x-on:click="filterOpen = true" x-on:keydown.escape.window="filterOpen = false">
