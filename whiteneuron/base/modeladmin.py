@@ -397,6 +397,7 @@ class ModelAdmin(UnfoldAdmin):
     grid_exclude_fields_list_display = []
     grid_cols= 4
     page_sizes = [5, 10, 20, 50, 100, 200]
+    using_page_size = True # True if you want to use page size, False if you want to use default list_per_page
 
     def changelist_view(self, request, extra_context = None):
         extra_context = extra_context or {}
@@ -418,7 +419,7 @@ class ModelAdmin(UnfoldAdmin):
         if 'per_page' in request.POST:
             try:
                 per_page = int(request.POST.get('per_page'))
-                if per_page in [5, 10, 20, 50, 100, 200]:
+                if per_page in self.page_sizes:
                     self.list_per_page = per_page
             except ValueError:
                 pass  # Giữ nguyên giá trị mặc định nếu không hợp lệ
@@ -426,6 +427,7 @@ class ModelAdmin(UnfoldAdmin):
         # Truyền danh sách số lượng hiển thị vào context
         if extra_context is None:
             extra_context = {}
+        extra_context['using_page_size'] = self.using_page_size
         extra_context['page_sizes'] = self.page_sizes
         extra_context['grid_cols'] = self.grid_cols
 
