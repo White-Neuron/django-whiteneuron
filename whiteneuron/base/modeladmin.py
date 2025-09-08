@@ -79,7 +79,8 @@ class ModelAdmin(UnfoldAdmin):
     # Soft delete
     def get_actions(self, request: HttpRequest) -> OrderedDict[Any, Any]:
         actions = super().get_actions(request)
-        actions['delete_selected'] = (self.soft_delete, 'delete_selected', self.soft_delete.short_description)
+        if 'delete_selected' in actions:
+            actions['delete_selected'] = (self.soft_delete, 'delete_selected', self.soft_delete.short_description)
         if request.user.is_superuser:
             # hard delete and restore
             actions['hard_delete'] = (self.hard_delete, 'hard_delete', self.hard_delete.short_description)
