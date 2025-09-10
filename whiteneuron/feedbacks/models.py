@@ -21,8 +21,17 @@ class FeedbackData(BaseModel):
         verbose_name=_("Content Type")
     )
 
-    object_id = models.PositiveIntegerField(
+    object_id = models.CharField(
+        max_length=255,
         verbose_name=_("Object ID")
+    )
+
+    field= models.CharField(
+        max_length=255,
+        verbose_name=_("Field"),
+        help_text=_("The specific field of the object the feedback is about"),
+        blank=True,
+        null=True
     )
 
     content_object = GenericForeignKey('content_type', 'object_id')

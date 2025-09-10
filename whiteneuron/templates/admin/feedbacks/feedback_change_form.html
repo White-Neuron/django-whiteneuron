@@ -11,25 +11,28 @@
             document.getElementById('make-resolved-link').addEventListener('click', function() {
                 // có cho phép nhập note khi mark as resolved (không bắt buộc)
                 const note = prompt('Please enter a note (optional) to mark this feedback as resolved:');
-                if (note) {
-                    fetch('?resolved=1&note=' + note)
-                        .then(response => {
-                            if (response.ok) {
-                                alert('Feedback marked as resolved successfully');
-                            } else {
-                                alert('Failed to mark feedback as resolved');
-                            }
-                        });
-                } else {
-                    fetch('?resolved=1')
-                        .then(response => {
-                            if (response.ok) {
-                                alert('Feedback marked as resolved successfully');
-                            } else {
-                                alert('Failed to mark feedback as resolved');
-                            }
-                        });
+    
+                // Kiểm tra nếu người dùng ấn Cancel (note === null)
+                if (note === null) {
+                    return; // Không làm gì cả nếu Cancel
                 }
+                
+                // Nếu có note hoặc note rỗng (OK được ấn)
+                const url = note ? `?resolved=1&note=${encodeURIComponent(note)}` : '?resolved=1';
+                
+                fetch(url)
+                    .then(response => {
+                        if (response.ok) {
+                            alert('Feedback marked as resolved successfully');
+                            location.reload(); // Reload trang để cập nhật trạng thái
+                        } else {
+                            alert('Failed to mark feedback as resolved');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to mark feedback as resolved');
+                    });
             });
         </script>
     {% endif %}
