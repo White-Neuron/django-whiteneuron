@@ -41,7 +41,8 @@ from unfold.contrib.filters.admin import (
     SingleNumericFilter,
     TextFilter,
 )
-from unfold.contrib.forms.widgets import WysiwygWidget
+from unfold.contrib.forms.widgets import WysiwygWidget as UnfoldWysiwygWidget
+from whiteneuron.base.widgets import WysiwygWidget
 from unfold.contrib.import_export.forms import ExportForm, ImportForm
 from unfold.contrib.inlines.admin import NonrelatedStackedInline
 from unfold.decorators import action, display

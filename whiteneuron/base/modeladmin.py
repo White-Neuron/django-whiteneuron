@@ -9,7 +9,8 @@ from typing import Any, Sequence
 
 from django.urls import reverse_lazy
 
-from unfold.contrib.forms.widgets import WysiwygWidget
+from unfold.contrib.forms.widgets import WysiwygWidget as UnfoldWysiwygWidget
+from whiteneuron.base.widgets import WysiwygWidget
 from unfold.widgets import UnfoldAdminSplitDateTimeWidget
 from django.db import models
 
