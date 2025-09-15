@@ -17,6 +17,7 @@ class WysiwygWidget(UnfoldWysiwygWidget):
             )
         }
         js = (
+            "base/forms/js/format.html.js",
             "unfold/forms/js/trix/trix.js",
             "base/forms/js/trix.config.js",
         )

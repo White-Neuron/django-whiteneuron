@@ -105,24 +105,24 @@ document.addEventListener("DOMContentLoaded", function() {
                 return formatHtml(content);
             }
             
-            function formatHtml(html) {
-                if (!html) return '';
+            // function formatHtml(html) {
+            //     if (!html) return '';
                 
-                // Add line breaks and indentation for better readability
-                let formatted = html
-                    // Add line breaks before opening tags
-                    .replace(/(<(?:div|p|h[1-6]|blockquote|ul|ol|li|figure)(?:\s[^>]*)??>)/gi, '\n$1')
-                    // Add line breaks after closing tags
-                    .replace(/(<\/(?:div|p|h[1-6]|blockquote|ul|ol|li|figure)>)/gi, '$1\n')
-                    // Add line breaks around self-closing tags
-                    .replace(/(<(?:br|img|hr)(?:\s[^>]*)?\/?>)/gi, '\n$1\n')
-                    // Clean up multiple line breaks
-                    .replace(/\n\s*\n/g, '\n')
-                    // Trim leading/trailing whitespace
-                    .trim();
+            //     // Add line breaks and indentation for better readability
+            //     let formatted = html
+            //         // Add line breaks before opening tags
+            //         .replace(/(<(?:div|p|h[1-6]|blockquote|ul|ol|li|figure)(?:\s[^>]*)??>)/gi, '\n$1')
+            //         // Add line breaks after closing tags
+            //         .replace(/(<\/(?:div|p|h[1-6]|blockquote|ul|ol|li|figure)>)/gi, '$1\n')
+            //         // Add line breaks around self-closing tags
+            //         .replace(/(<(?:br|img|hr)(?:\s[^>]*)?\/?>)/gi, '\n$1\n')
+            //         // Clean up multiple line breaks
+            //         .replace(/\n\s*\n/g, '\n')
+            //         // Trim leading/trailing whitespace
+            //         .trim();
                 
-                return formatted;
-            }
+            //     return formatted;
+            // }
             
             function switchToHtmlMode() {
                 const htmlContent = getHtmlFromTrix();
