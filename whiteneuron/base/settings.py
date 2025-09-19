@@ -94,6 +94,8 @@ if not DEBUG:
 # Apps
 ######################################################################
 INSTALLED_APPS = [
+    'django_ckeditor_5',
+
     "whiteneuron",
     "whiteneuron.base", # Base app
     "whiteneuron.feedbacks", # Feedbacks app
@@ -619,3 +621,96 @@ CELERY_TASK_SERIALIZER = 'json'
 ######################################################################
 CRISPY_TEMPLATE_PACK = "unfold_crispy"
 CRISPY_ALLOWED_TEMPLATE_PACKS = ["unfold_crispy"]
+
+
+######################################################################
+# CKEditor5
+######################################################################
+customColorPalette = [
+        {
+            'color': 'hsl(4, 90%, 58%)',
+            'label': 'Red'
+        },
+        {
+            'color': 'hsl(340, 82%, 52%)',
+            'label': 'Pink'
+        },
+        {
+            'color': 'hsl(291, 64%, 42%)',
+            'label': 'Purple'
+        },
+        {
+            'color': 'hsl(262, 52%, 47%)',
+            'label': 'Deep Purple'
+        },
+        {
+            'color': 'hsl(231, 48%, 48%)',
+            'label': 'Indigo'
+        },
+        {
+            'color': 'hsl(207, 90%, 54%)',
+            'label': 'Blue'
+        },
+    ]
+# CKEDITOR_5_FILE_STORAGE= 'django.core.files.storage.FileSystemStorage'
+CKEDITOR_5_FILE_STORAGE = 'whiteneuron.base.ckeditor.CustomStorage'
+CKEDITOR_5_CUSTOM_CSS = 'base/css/ckeditor5.css'
+CKEDITOR_5_FILE_UPLOAD_PERMISSION = 'staff'
+CKEDITOR_5_CONFIGS = {
+    'default': {
+        'language': 'en',
+        'toolbar': {
+            'items': [
+                'heading', '|',
+                'bold', 'italic', 'underline', 'strikethrough', '|',
+                'fontColor', 'fontBackgroundColor', 'highlight', '|',
+                'alignment', '|',
+                'link', 'imageUpload', 'insertTable', 'mediaEmbed', '|',
+                'bulletedList', 'numberedList', 'todoList', 'outdent', 'indent', '|',
+                'blockQuote', 'codeBlock', '|',
+                'subscript', 'superscript', 'removeFormat', '|',
+                'sourceEditing'
+            ],
+            'shouldNotGroupWhenFull': True,
+        },
+        'heading': {
+            'options': [
+                {'model': 'paragraph', 'title': 'Paragraph', 'class': 'ck-heading_paragraph'},
+                {'model': 'heading1', 'view': 'h1', 'title': 'Heading 1', 'class': 'ck-heading_heading1'},
+                {'model': 'heading2', 'view': 'h2', 'title': 'Heading 2', 'class': 'ck-heading_heading2'},
+                {'model': 'heading3', 'view': 'h3', 'title': 'Heading 3', 'class': 'ck-heading_heading3'},
+                {'model': 'heading4', 'view': 'h4', 'title': 'Heading 4', 'class': 'ck-heading_heading4'},
+            ]
+        },
+        'image': {
+            'toolbar': [
+                'imageTextAlternative', '|',
+                'imageStyle:inline', 'imageStyle:block', 'imageStyle:side', '|',
+                'toggleImageCaption', 'linkImage'
+            ],
+            'styles': ['full', 'side', 'alignLeft', 'alignRight', 'alignCenter']
+        },
+        'table': {
+            'contentToolbar': [
+                'tableColumn', 'tableRow', 'mergeTableCells',
+                'tableProperties', 'tableCellProperties'
+            ],
+            'tableProperties': {'borderColors': customColorPalette, 'backgroundColors': customColorPalette},
+            'tableCellProperties': {'borderColors': customColorPalette, 'backgroundColors': customColorPalette}
+        },
+        'list': {
+            'properties': {
+                'styles': True,
+                'startIndex': True,
+                'reversed': True,
+            }
+        },
+        'language': {
+            'textPartLanguage': [
+                {'title': 'English', 'languageCode': 'en'},
+                {'title': 'Vietnamese', 'languageCode': 'vi'},
+            ]
+        },
+        'placeholder': 'Start typing your content here...'
+    },
+}

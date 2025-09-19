@@ -483,6 +483,19 @@ wheels = [
 ]
 
 [[package]]
+name = "django-ckeditor-5"
+version = "0.2.18"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+    { name = "pillow" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/17/c0/2ddd9b6b5b62f37f24e470684b5cc5494de2504ce00d6e803f3005fdebbc/django_ckeditor_5-0.2.18.tar.gz", hash = "sha256:08270b1dd8d1b5c27c5a2023ec8f920e2ec0c7d2afa0113af765f0de53947d35", size = 2630309 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/46/e1/c4a02822e86e733cbb5f4c8c2d881bd16cd0a251780e34aff16d2ea82008/django_ckeditor_5-0.2.18-py3-none-any.whl", hash = "sha256:155d14bed6688791026486c191dd82dbc2937d6a588079989d5bd89708de8463", size = 2726759 },
+]
+
+[[package]]
 name = "django-colorfield"
 version = "0.14.0"
 source = { registry = "https://pypi.org/simple" }
@@ -622,7 +635,7 @@ wheels = [
 
 [[package]]
 name = "django-whiteneuron"
-version = "0.1.71"
+version = "0.1.74"
 source = { editable = "." }
 dependencies = [
     { name = "channels" },
@@ -631,6 +644,7 @@ dependencies = [
     { name = "django" },
     { name = "django-browser-reload" },
     { name = "django-celery-beat" },
+    { name = "django-ckeditor-5" },
     { name = "django-colorfield" },
     { name = "django-crispy-forms" },
     { name = "django-debug-toolbar" },
@@ -672,6 +686,7 @@ requires-dist = [
     { name = "django", specifier = ">=5.1.6" },
     { name = "django-browser-reload", specifier = ">=1.18.0" },
     { name = "django-celery-beat", specifier = ">=2.7.0" },
+    { name = "django-ckeditor-5", specifier = ">=0.2.18" },
     { name = "django-colorfield", specifier = ">=0.14.0" },
     { name = "django-crispy-forms", specifier = ">=2.4" },
     { name = "django-debug-toolbar", specifier = ">=5.0.1" },

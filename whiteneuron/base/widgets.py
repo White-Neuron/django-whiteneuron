@@ -1,6 +1,8 @@
 from typing import Any, Optional
 from unfold.contrib.forms.widgets import WysiwygWidget as UnfoldWysiwygWidget
 
+from django_ckeditor_5.widgets import CKEditor5Widget
+
 
 class WysiwygWidget(UnfoldWysiwygWidget):
     """

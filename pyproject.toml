@@ -1,6 +1,6 @@
 [project]
 name = "django-whiteneuron"
-version = "0.1.74"
+version = "0.1.75"
 description = "django-whiteneuron là một gói mở rộng giúp nâng cấp giao diện và chức năng Django Admin, mang đến trải nghiệm quản trị hiện đại, trực quan và tối ưu hiệu suất. 🚀"
 authors = [
     {name = "White Neuron", email = "anhnt@whiteneuron.com"}
@@ -37,6 +37,7 @@ dependencies = [
     "channels-redis>=4.2.1",
     "uvicorn>=0.34.3",
     "daphne>=4.2.0",
+    "django-ckeditor-5>=0.2.18",
 ]
 requires-python = ">=3.10"
 

@@ -10,7 +10,7 @@ from typing import Any, Sequence
 from django.urls import reverse_lazy
 
 from unfold.contrib.forms.widgets import WysiwygWidget as UnfoldWysiwygWidget
-from whiteneuron.base.widgets import WysiwygWidget
+from whiteneuron.base.widgets import WysiwygWidget, CKEditor5Widget
 from unfold.widgets import UnfoldAdminSplitDateTimeWidget
 from django.db import models
 
@@ -62,6 +62,8 @@ class ModelAdmin(UnfoldAdmin):
         },
     }
 
+    text_field_widget= 'wysiwyg' # options: 'wysiwyg', 'ckeditor', ''
+
     enable_field_selection_filter = True
     list_filter_submit = True
     list_filter_sheet = True
@@ -73,6 +75,11 @@ class ModelAdmin(UnfoldAdmin):
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
         self.search_help_text= f'Search by {", ".join([get_verbose_name_field(model, f) for f in self.search_fields])}'
+        if self.text_field_widget == 'ckeditor':
+            self.formfield_overrides[models.TextField]["widget"]= CKEditor5Widget(
+                    attrs={"class": "django_ckeditor_5"})
+        elif self.text_field_widget == '':
+            self.formfield_overrides[models.TextField] = {}
 
     def has_module_permission(self, request: HttpRequest) -> bool:
         return super().has_module_permission(request)
