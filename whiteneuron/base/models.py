@@ -94,6 +94,7 @@ class User(AbstractUser):
 
     # config by user
     show_softdelete = models.BooleanField(_("show soft delete"), default=False, help_text=_("Show soft deleted items in the list view"))
+    is_bot= models.BooleanField(_("is bot"), default=False, help_text=_("Designate whether the user is a bot account"))
 
     class Meta:
         db_table = "users"
@@ -101,15 +102,25 @@ class User(AbstractUser):
         verbose_name_plural = _("users")
 
     def __str__(self):
-        return self.username
+        s= self.username
+        if self.is_bot:
+            s+= ' (bot)'
+        return s
 
     @property
     def full_name(self):
+        s= ''
         if self.first_name and self.last_name:
-            return f"{self.last_name}, {self.first_name}"
-        return None
+            s= f"{self.last_name}, {self.first_name}"
+        if s:
+            if self.is_bot:
+                s+= ' (bot)'
+        else:
+            return s
     
     def display_avatar(self):
+        if self.is_bot:
+            return mark_safe(f'<span class="material-symbols-outlined" style="font-size: 32px;">smart_toy</span>')
         if self.avatar:
             # print(instance.avatar.url)
             return mark_safe(f'<img src="{self.avatar.url}" style="width: 32px; height: 32px; border-radius: 50%;">')

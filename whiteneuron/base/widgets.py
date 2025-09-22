@@ -1,28 +1,29 @@
 from typing import Any, Optional
-from unfold.contrib.forms.widgets import WysiwygWidget as UnfoldWysiwygWidget
+# from unfold.contrib.forms.widgets import WysiwygWidget as UnfoldWysiwygWidget
+from unfold.contrib.forms.widgets import WysiwygWidget
 
 from django_ckeditor_5.widgets import CKEditor5Widget
 
 
-class WysiwygWidget(UnfoldWysiwygWidget):
-    """
-    Custom WYSIWYG widget that extends Unfold's WysiwygWidget 
-    with HTML Editor functionality.
-    """
-    template_name = "base/forms/wysiwyg.html"
+# class WysiwygWidget(UnfoldWysiwygWidget):
+#     """
+#     Custom WYSIWYG widget that extends Unfold's WysiwygWidget 
+#     with HTML Editor functionality.
+#     """
+#     template_name = "base/forms/wysiwyg.html"
 
-    class Media:
-        css = {
-            "all": (
-                "unfold/forms/css/trix/trix.css",
-                "base/forms/css/html-editor.css",
-            )
-        }
-        js = (
-            "base/forms/js/format.html.js",
-            "unfold/forms/js/trix/trix.js",
-            "base/forms/js/trix.config.js",
-        )
+#     class Media:
+#         css = {
+#             "all": (
+#                 "unfold/forms/css/trix/trix.css",
+#                 "base/forms/css/html-editor.css",
+#             )
+#         }
+#         js = (
+#             "base/forms/js/format.html.js",
+#             "unfold/forms/js/trix/trix.js",
+#             "base/forms/js/trix.config.js",
+#         )
 
-    def __init__(self, attrs: Optional[dict[str, Any]] = None) -> None:
-        super().__init__(attrs)
+#     def __init__(self, attrs: Optional[dict[str, Any]] = None) -> None:
+#         super().__init__(attrs)

@@ -131,7 +131,9 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
                                        'display_staff', 'display_superuser', 'display_header']
 
     def grid_item_header(self, obj):
-        if not obj.avatar:
+        if obj.is_bot:
+            s= '<span class="material-symbols-outlined" style="font-size: 192px;">smart_toy</span>'
+        elif not obj.avatar:
             s= '<span class="material-symbols-outlined" style="font-size: 192px;">person</span>'
         else:
             s= f'<img src="{obj.avatar.url}" height="192" class="rounded-lg"/>'
@@ -147,6 +149,7 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
         {'<span class="ui-badge ui-badge-success">Active</span>' if obj.is_active else '<span class="ui-badge ui-badge-danger">Inactive</span>'}
         {'<span class="ui-badge ui-badge-success">Staff</span>' if obj.is_staff else ''}
         {'<span class="ui-badge ui-badge-warning">Superuser</span>' if obj.is_superuser else ''}
+        {'<span class="ui-badge ui-badge-info">Bot</span>' if obj.is_bot else ''}
         </div>
     </div>
 </div>
@@ -169,15 +172,34 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
     ]
 
     add_fieldsets = (
-        (None, {"fields": (
-            "username",  # "username" is not in the original User model
-            "email",
+        (
+            None, 
+            {"fields": (
+                "username",  # "username" is not in the original User model
+                "email",
             # "password1",
             # "password2",
             )}),
-        (_("Personal info"),
-         {"fields": (("first_name", "last_name"), "avatar", "biography"),
-                     }),
+        (
+            _("Personal info"),
+            {
+                "fields": (("first_name", "last_name"), "avatar", "biography"), 
+                "classes": ["tab"],}
+        ),
+        (
+            _("Permissions"),
+            {
+                "fields": (
+                    "is_bot",
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                    "groups",
+                    "user_permissions",
+                ),
+                "classes": ["tab"],
+            },
+        ),
     )
 
     fieldsets = (
@@ -193,6 +215,7 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
             _("Permissions"),
             {
                 "fields": (
+                    "is_bot",
                     "is_active",
                     "is_staff",
                     "is_superuser",
