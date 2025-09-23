@@ -598,6 +598,13 @@ UNFOLD = {
     },
 }
 
+SHOW_CELERY_TASKS = environ.get("SHOW_CELERY_TASKS", "True") == "True"
+SHOW_FILE_MANAGEMENT = environ.get("SHOW_FILE_MANAGEMENT", "True") == "True"
+if not SHOW_FILE_MANAGEMENT:
+    UNFOLD["SIDEBAR"]["navigation"] = [item for item in UNFOLD["SIDEBAR"]["navigation"] if item["title"] != _("File Management")]
+if not SHOW_CELERY_TASKS:
+    UNFOLD["SIDEBAR"]["navigation"] = [item for item in UNFOLD["SIDEBAR"]["navigation"] if item["title"] != _("Celery Tasks")]
+
 ######################################################################
 # Sentry
 ######################################################################
