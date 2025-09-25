@@ -27,16 +27,17 @@
                     </div>
                 {% endif %}
                 {# Flag hiển thị ở góc nếu record đã bị xóa #}
-                    <div class="grid-object-container border rounded shadow-sm p-1 bg-white dark:bg-base-900 relative">
+                <div class="grid-object-container border rounded shadow-sm p-1 bg-white dark:bg-base-900 relative">
                     {# Lặp qua các cell của kết quả, bỏ qua phần tử đầu tiên (thường là checkbox cột) #}
-
-                    {% for item in result|slice:"1:" %}
-                        {# Dùng forloop.counter (bắt đầu từ 1) để lấy header tương ứng từ result_headers #}
-                        {% with header=result_headers|get_item:forloop.counter %}
+                    {% for item in result %}
+                        {# Dùng forloop.counter0 (bắt đầu từ 0) để lấy header tương ứng từ result_headers #}
+                        {% with header=result_headers|get_item:forloop.counter0 %}
                         
                         {# Header của item #}
                         {% trans "Header" as header_text %}
-                        {% if header.text and header.text != header_text %}
+                        {% if header.class_attrib and 'action-checkbox' in header.class_attrib %}
+                            {# skip #}
+                        {% elif header.text and header.text != header_text %}
                             {% trans "Deleted" as deleted_text %}
                             {% if header.text == deleted_text %}
                                 {% if "True" in item %}
@@ -60,9 +61,9 @@
                                 </div>
                             {% endif %}
                         {% else %}
-                        <span class="text-sm font-semibold text-gray-800 dark:text-gray-100">
-                            {{ item }}
-                        </span>
+                            <span class="text-sm font-semibold text-gray-800 dark:text-gray-100">
+                                {{ item }}
+                            </span>
                         {% endif %}
                         {% endwith %}
                     {% endfor %}

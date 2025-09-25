@@ -43,6 +43,11 @@ ROOT_URLCONF = f"{PROJECT_NAME}.urls"
 BROWSER_RELOAD = environ.get("BROWSER_RELOAD", "False") == "True"
 
 USE_CACHE = environ.get("USE_CACHE", "False") == "True"
+CACHENAME = environ.get("CACHENAME", "default")
+CACHE_REDIS_LOCATION=environ.get("CACHE_REDIS_LOCATION", "redis://localhost:6379")
+if CACHENAME not in ["default", "redis"]:
+    print("CACHENAME must be 'default' or 'redis'")
+    sys.exit(1)
 # USE_CACHE = False
 
 WSGI_APPLICATION = f"{PROJECT_NAME}.wsgi.application"
@@ -54,12 +59,23 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 ######################################################################
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
-        },
-    },
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
 }
+if USE_CACHE:
+    if CACHENAME == "redis":
+        host= CACHE_REDIS_LOCATION.split("://")[-1].split(":")[0]
+        port= int(CACHE_REDIS_LOCATION.split(":")[-1].split("/")[0])
+        CHANNEL_LAYERS = {
+            "default": {
+                "BACKEND": "channels_redis.core.RedisChannelLayer",
+                "CONFIG": {
+                    "hosts": [(host, port)],
+                },
+            },
+        }
+
+
 
 ######################################################################
 # Domains
@@ -170,7 +186,6 @@ if BROWSER_RELOAD:
     MIDDLEWARE.append("django_browser_reload.middleware.BrowserReloadMiddleware")
 
 if USE_CACHE:
-    CACHENAME = environ.get("CACHENAME", "default")
     if CACHENAME == "default":
         CACHES= {'default': {
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
