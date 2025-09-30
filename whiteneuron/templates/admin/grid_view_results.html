@@ -34,10 +34,9 @@
                         {% with header=result_headers|get_item:forloop.counter0 %}
                         
                         {# Header của item #}
-                        {% trans "Header" as header_text %}
                         {% if header.class_attrib and 'action-checkbox' in header.class_attrib %}
                             {# skip #}
-                        {% elif header.text and header.text != header_text %}
+                        {% elif header.text and header.text != 'Header' %}
                             {% trans "Deleted" as deleted_text %}
                             {% if header.text == deleted_text %}
                                 {% if "True" in item %}

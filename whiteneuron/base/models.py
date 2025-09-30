@@ -260,6 +260,8 @@ class BaseModel(SoftDeleteModel):
             user= User.objects.filter(is_superuser=True).first()
         else:
             user= request.user
+            if user.is_anonymous:
+                user= User.objects.filter(is_superuser=True).first()
         changed_data= []
         if not self.pk:  # Nếu là tạo mới
             self.created_by = user
