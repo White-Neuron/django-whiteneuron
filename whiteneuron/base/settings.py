@@ -81,14 +81,13 @@ if USE_CACHE:
 # Domains
 ######################################################################
 ALLOWED_HOSTS = environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
-ALLOWED_HOSTS.append("192.168.88.115")
-ALLOWED_HOSTS.append("192.168.50.164")
-ALLOWED_HOSTS.append("192.168.50.2")
-ALLOWED_HOSTS.append("172.20.10.2")
-ALLOWED_HOSTS.append("172.20.0.1")
 
 CSRF_TRUSTED_ORIGINS = environ.get(
     "CSRF_TRUSTED_ORIGINS", "http://localhost:8000"
+).split(",")
+
+CORS_ALLOWED_ORIGINS = environ.get(
+    "CORS_ALLOWED_ORIGINS", "http://localhost:4200"
 ).split(",")
 
 
@@ -111,6 +110,7 @@ if not DEBUG:
 ######################################################################
 INSTALLED_APPS = [
     'django_ckeditor_5',
+    'corsheaders',
 
     "whiteneuron",
     "whiteneuron.base", # Base app
@@ -164,6 +164,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
