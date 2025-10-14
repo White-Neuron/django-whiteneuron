@@ -253,6 +253,9 @@ class BaseModel(SoftDeleteModel):
     def save(self, *args, **kwargs):
         request = getattr(thread_local, 'request', None)
         # save created_by and updated_by when create or update
+        # Lấy tham số notification từ kwargs, mặc định là True
+        # Trong các trường hợp không muốn gửi thông báo, có thể gọi save với notification= False: ví dụ obj.save(notification= False)
+        notification= kwargs.pop('notification', True)
         title= ''
         content_html= ''
         action= ''
@@ -306,7 +309,7 @@ class BaseModel(SoftDeleteModel):
         
         super(BaseModel, self).save(*args, **kwargs)  # Lưu đối tượng trước khi gửi thông báo
         # Gửi thông báo đến người dùng
-        if title:
+        if title and notification:
             if action == 'create':
                 content_html= f"""
 <p>{_('New')} {self._meta.verbose_name} <strong>{self}({self.id})</strong> {_('has been created by user')} <strong>{self.created_by}</strong></p>
