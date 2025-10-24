@@ -1,11 +1,46 @@
-@import 'tailwindcss';
-@config './tailwind.config.js';
+@import "tailwindcss";
 
+@plugin "./node_modules/daisyui";
+
+@theme {
+  --color-primary-50: rgb(var(--color-sky-100) / <alpha-value>);
+  --color-primary-100: rgb(var(--color-sky-100) / <alpha-value>);
+  --color-primary-200: rgb(var(--color-sky-200) / <alpha-value>);
+  --color-primary-300: rgb(var(--color-sky-300) / <alpha-value>);
+  --color-primary-400: rgb(var(--color-sky-400) / <alpha-value>);
+  --color-primary-500: rgb(var(--color-sky-500) / <alpha-value>);
+  --color-primary-600: rgb(var(--color-sky-600) / <alpha-value>);
+  --color-primary-700: rgb(var(--color-sky-700) / <alpha-value>);
+  --color-primary-800: rgb(var(--color-sky-800) / <alpha-value>);
+  --color-primary-900: rgb(var(--color-sky-900) / <alpha-value>);
+
+  --font-sans: "Inter", sans-serif;
+  --font-size-xxs: 11px;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --min-width-sidebar: 18rem;
+  --spacing-68: 17rem;
+  --spacing-128: 32rem;
+  --transition-height: height;
+  --transition-width: width;
+  --width-sidebar: 18rem;
+}
+
+/* 4️⃣ Dark Mode & Hover Variants */
+@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant hover (&:hover);
+
+/* 5️⃣ Component Layer tuỳ biến thêm */
+@layer components {
+  body {
+    font-family: var(--font-sans);
+  }
+}
+
+/* 6️⃣ DaisyUI config block vẫn giữ được */
 @plugin "daisyui" {
   themes: light --default, dark --prefersdark;
   root: ":root";
-  include: ;
-  exclude: ;
   prefix: ui-;
   logs: true;
 }
