@@ -33,6 +33,8 @@ from unfold.contrib.filters.admin import (
     RangeDateFilter, RangeDateTimeFilter
 )
 
+from unfold.paginator import InfinitePaginator
+
 def get_verbose_name_field(model, field):
     try:
         return str(model._meta.get_field(field).verbose_name)
@@ -51,6 +53,8 @@ class ModelAdmin(UnfoldAdmin):
 
     warn_unsaved_form = True
     compressed_fields = True
+
+    use_infinite_paginator = True
 
     formfield_overrides = {
         models.TextField: {
@@ -72,6 +76,10 @@ class ModelAdmin(UnfoldAdmin):
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
         self.search_help_text= f'Search by {", ".join([get_verbose_name_field(model, f) for f in self.search_fields])}'
+        
+        if getattr(self, 'use_infinite_paginator', False):
+            self.paginator = InfinitePaginator
+            self.show_full_result_count = False
 
     def has_module_permission(self, request: HttpRequest) -> bool:
         return super().has_module_permission(request)
