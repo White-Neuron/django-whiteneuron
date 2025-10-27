@@ -463,6 +463,12 @@ UNFOLD = {
     "TABS": [
         # "apps.projects.tabs.tabs_callback"
     ],
+    # Command settings
+    "COMMAND": {
+        "search_models": True,  
+        "search_callback": "whiteneuron.base.utils.search_callback",
+        "show_history": True, 
+    },
     "SIDEBAR": {
         "show_search": True,
         "show_all_applications": False,
