@@ -1,5 +1,5 @@
 @import "tailwindcss";
-
+@source "./whiteneuron/templates/**/*.{html,py,js,jsx,ts,tsx}";
 @plugin "./node_modules/daisyui";
 
 @theme {
