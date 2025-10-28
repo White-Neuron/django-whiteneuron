@@ -7,42 +7,48 @@
 ## 📥 **Cài đặt**  
 
 ### **1️⃣ Cài đặt package**  
-Sử dụng pip để cài đặt `django-whiteneuron`:  
+
+#### **Sử dụng uv (Khuyến nghị):**  
+```bash
+uv add django-whiteneuron
+```
+
+#### **Sử dụng pip:**  
 ```bash
 pip install django-whiteneuron
+```
+
+#### **Cài đặt từ GitHub (phiên bản mới nhất):**  
+```bash
+uv add git+https://github.com/tanhtm/django-whiteneuron.git@v0.2.0
 ```
 
 ---
 
 ### **2️⃣ Cấu hình Frontend - TailwindCSS & DaisyUI**  
 
-**Lưu ý:** Package này **chỉ chạy với TailwindCSS phiên bản 3.4.17**.  
+**Lưu ý:** Package này **chạy với TailwindCSS phiên bản 4.x và daisyUI phiên bản 5.x**.  
 
-#### **Cài đặt TailwindCSS**  
+#### **Cài đặt TailwindCSS 4 và daisyUI 5**  
 ```bash
-npm install tailwindcss
-```
-
-#### **Tạo file cấu hình `tailwind.config.js`**  
-```bash
-npx tailwindcss init
-```
-
-#### **Thêm DaisyUI vào `package.json`**  
-Thêm dòng sau vào `package.json` trong phần `dependencies`:  
-```json
-"daisyui": "^4.12.10"
-```
-Sau đó chạy lệnh:  
-```bash
-npm install
+npm install -D @tailwindcss/cli@next daisyui@latest
 ```
 
 #### **Tạo file `styles.css` ở thư mục gốc của project**  
 ```css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@plugin "daisyui";
+```
+
+**Lưu ý quan trọng:**
+- **Tailwind CSS 4 không sử dụng file `tailwind.config.js`** nữa
+- Chỉ cần import `tailwindcss` và plugin `daisyui` trong CSS file
+- daisyUI 5 yêu cầu Tailwind CSS 4
+
+#### **Biên dịch CSS với TailwindCSS CLI**  
+Sử dụng lệnh sau để biên dịch CSS:
+```bash
+npx @tailwindcss/cli -i styles.css -o whiteneuron/static/base/css/styles.css --minify
 ```
 
 ---
@@ -237,3 +243,5 @@ Nếu bạn có câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ:
 ---
 
 🔥 **django-whiteneuron** – Giải pháp tối ưu giúp bạn **nâng cấp Django Admin Site** một cách chuyên nghiệp, mạnh mẽ và hiện đại! 🚀
+
+Nghị fork 0.64 test

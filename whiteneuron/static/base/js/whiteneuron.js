@@ -3,13 +3,14 @@
 // Set the data-theme attribute on the HTML tag based on the adminTheme setting. It will make daisyui work with Alpine.js
 document.addEventListener("DOMContentLoaded", function () {
     const htmlTag = document.documentElement;
-
-    const desiredBind = `(adminTheme === 'dark' || (adminTheme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) ? 'dark' : 'light'`;
-
-    if (!htmlTag.hasAttribute("x-bind:data-theme")) {
-        htmlTag.setAttribute("x-bind:data-theme", desiredBind);
-    }
+    // Tính toán trạng thái dark/light
+    const isDark = (adminTheme === 'dark' || (adminTheme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches));
+    
+    // Set cả class lẫn attribute
+    htmlTag.setAttribute("data-theme", isDark ? "dark" : "light");
+    htmlTag.classList.toggle("dark", isDark);
 });
+
 
 function toast_(message, type = "info", title = "Notification") {
     const toastContainer = document.getElementById("toast-container");

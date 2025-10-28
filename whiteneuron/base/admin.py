@@ -135,13 +135,47 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
             s= '<span class="material-symbols-outlined" style="font-size: 192px;">smart_toy</span>'
         elif not obj.avatar:
             s= '<span class="material-symbols-outlined" style="font-size: 192px;">person</span>'
+
         else:
-            s= f'<img src="{obj.avatar.url}" height="192" class="rounded-lg"/>'
-        string= f"""
-<div class="ui-card ui-card-side h-48">
-    <figure class="w-48 h-48 flex justify-center">
-        {s}
+            avatar_content = f'''
+            <div class="w-full h-full ui-mask ui-mask-squircle overflow-hidden bg-base-300/50 dark:bg-base-700/50 ring-1 ring-base-content/10 dark:ring-base-content/20">
+                <img src="{obj.avatar.url}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"/>
+            </div>
+            '''
+        
+        # Status badges với dark mode support
+        badges = []
+        if obj.is_active:
+            badges.append('<span class="ui-badge ui-badge-success ui-badge-xs gap-1"><span class="w-1.5 h-1.5 bg-success dark:bg-success-300 rounded-full animate-pulse"></span>Active</span>')
+        else:
+            badges.append('<span class="ui-badge ui-badge-error ui-badge-xs gap-1"><span class="w-1.5 h-1.5 bg-error dark:bg-error-300 rounded-full"></span>Inactive</span>')
+        
+        if obj.is_staff:
+            badges.append('<span class="ui-badge ui-badge-info ui-badge-xs">Staff</span>')
+        
+        if obj.is_superuser:
+            badges.append('<span class="ui-badge ui-badge-warning ui-badge-xs">Admin</span>')
+        
+        badges_html = ' '.join(badges)
+        
+        # Tên đầy đủ hoặc fallback
+        display_name = obj.get_full_name() or obj.username or 'Unknown User'
+        username_display = f'@{obj.username}' if obj.username else 'No username'
+        
+        # Compact vertical card layout với dark mode support
+        string = f"""
+<div class="ui-card bg-base-100 dark:bg-base-800 hover:bg-base-200/60 dark:hover:bg-base-700/60 shadow-lg hover:shadow-xl dark:shadow-base-content/10 transition-all duration-300 border border-base-300 dark:border-base-600 hover:border-primary/30 dark:hover:border-primary/50 group w-full max-w-xs">
+    <!-- Avatar Section -->
+    <figure class="p-4 flex items-center justify-center bg-gradient-to-br from-base-200/50 to-base-300/30 dark:from-base-700/50 dark:to-base-800/30 relative overflow-hidden">
+        <!-- Background pattern -->
+        <div class="absolute inset-0 bg-gradient-to-br from-transparent via-base-content/[0.02] dark:via-base-content/[0.05] to-transparent"></div>
+        <div class="w-20 h-20 relative group-hover:scale-110 transition-transform duration-300 z-10">
+            {avatar_content}
+        </div>
+        <!-- Glow effect -->
+        <div class="absolute inset-0 bg-gradient-to-br from-primary/5 dark:from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
     </figure>
+
     <div class="ui-card-body">
         <h5>{obj.username}</h5>
         <h4 class="ui-card-title">{obj.full_name}</h4>
@@ -150,7 +184,11 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
         {'<span class="ui-badge ui-badge-success">Staff</span>' if obj.is_staff else ''}
         {'<span class="ui-badge ui-badge-warning">Superuser</span>' if obj.is_superuser else ''}
         {'<span class="ui-badge ui-badge-info">Bot</span>' if obj.is_bot else ''}
+
         </div>
+        
+        <!-- Bottom border -->
+        <div class="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-base-content/10 dark:via-base-content/20 to-transparent"></div>
     </div>
 </div>
 """

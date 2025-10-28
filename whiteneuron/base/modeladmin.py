@@ -34,6 +34,8 @@ from unfold.contrib.filters.admin import (
     RangeDateFilter, RangeDateTimeFilter
 )
 
+from unfold.paginator import InfinitePaginator
+
 def get_verbose_name_field(model, field):
     try:
         return str(model._meta.get_field(field).verbose_name)
@@ -52,6 +54,8 @@ class ModelAdmin(UnfoldAdmin):
 
     warn_unsaved_form = True
     compressed_fields = True
+
+    use_infinite_paginator = True
 
     formfield_overrides = {
         models.TextField: {
@@ -75,6 +79,7 @@ class ModelAdmin(UnfoldAdmin):
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
         self.search_help_text= f'Search by {", ".join([get_verbose_name_field(model, f) for f in self.search_fields])}'
+
         if self.text_field_widget == 'ckeditor':
             self.formfield_overrides[models.TextField]["widget"]= CKEditor5Widget(
                     attrs={"class": "django_ckeditor_5"})
@@ -420,8 +425,10 @@ class ModelAdmin(UnfoldAdmin):
         if grid_view:
             extra_context = extra_context or {}
             extra_context['grid_view'] = grid_view
+
             # self.list_display_links= list(set(list(self.list_display_links) + ['grid_item_header']))
             # self.list_display= self.get_list_display(request)
+
 
         # Xác định số lượng hiển thị từ request
         per_page = self.list_per_page

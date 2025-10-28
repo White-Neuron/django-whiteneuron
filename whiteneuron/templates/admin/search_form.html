@@ -4,11 +4,11 @@
     <!-- CHỈ thêm class tailwind để trong đẹp hơn -->
     <div id="toolbar" class="flex items-center gap-2 w-full">
         <form id="changelist-search" method="get" role="search" class="flex items-center gap-2 w-full">
-            <div class="bg-white border border-base-200 flex rounded overflow-hidden shadow-sm h-9 w-full
-            focus-within:ring focus-within:ring-primary-300 focus-within:border-primary-600 dark:bg-base-900 dark:border-base-700 dark:focus-within:border-primary-600 dark:focus-within:ring-primary-700 dark:focus-within:ring-opacity-50">
-                <input class="font-medium grow min-w-0 h-9 px-3 text-font-default-light focus:outline-none dark:bg-base-900 dark:text-font-default-dark placeholder-shown:truncate placeholder-base-400" type="text" name="{{ search_var }}" value="{{ cl.query }}" id="searchbar" placeholder="{% if cl.search_help_text %}{{ cl.search_help_text }}{% else %}{% trans "Type to search" %}{% endif %}" />
+            <div class="bg-white border border-base-200 flex rounded overflow-hidden shadow-xs h-9 w-full
+            focus-within:ring-3 focus-within:ring-primary-300 focus-within:border-primary-600 dark:bg-base-900 dark:border-base-700 dark:focus-within:border-primary-600 dark:focus-within:ring-primary-700 dark:focus-within:ring-opacity-50">
+                <input class="font-medium grow min-w-0 h-9 px-3 text-font-default-light focus:outline-hidden dark:bg-base-900 dark:text-font-default-dark placeholder-shown:truncate placeholder-base-400" type="text" name="{{ search_var }}" value="{{ cl.query }}" id="searchbar" placeholder="{% if cl.search_help_text %}{{ cl.search_help_text }}{% else %}{% trans "Type to search" %}{% endif %}" />
 
-                <button type="submit" class="flex items-center px-2 focus:outline-none h-9" id="searchbar-submit">
+                <button type="submit" class="flex items-center px-2 focus:outline-hidden h-9" id="searchbar-submit">
                     <span class="material-symbols-outlined md-32 text-base-400 dark:text-base-500">search</span>
                 </button>
             </div>
@@ -27,12 +27,12 @@
                 <input type="hidden" name="grid_view" value="0">
                 <button type="submit" 
                 style="font-size: 1.2rem"
-                class="flex items-center justify-center h-9 w-9 material-symbols-outlined text-base-500 bg-white border border-base-200 dark:bg-base-900 dark:border-base-700 cursor-pointer flex font-medium group items-center rounded shadow-sm">table_view</button>
+                class="flex items-center justify-center h-9 w-9 material-symbols-outlined text-base-500 bg-white border border-base-200 dark:bg-base-900 dark:border-base-700 cursor-pointer flex font-medium group items-center rounded-sm shadow-xs">table_view</button>
             {% else %}
                 <input type="hidden" name="grid_view" value="1">
                 <button type="submit" 
                 style="font-size: 1.2rem"
-                class="flex items-center justify-center h-9 w-9 material-symbols-outlined text-base-500 bg-white border border-base-200 dark:bg-base-900 dark:border-base-700 cursor-pointer flex font-medium group items-center rounded shadow-sm">grid_view</button>
+                class="flex items-center justify-center h-9 w-9 material-symbols-outlined text-base-500 bg-white border border-base-200 dark:bg-base-900 dark:border-base-700 cursor-pointer flex font-medium group items-center rounded-sm shadow-xs">grid_view</button>
             {% endif %}
         </form>
         {% endif %}
@@ -51,7 +51,7 @@
         </form>  
         {% endif %}
         {% if cl.has_filters %}
-            <a class="h-9 rounded shadow-sm {% if cl.has_active_filters %}bg-primary-600 border-primary-600 text-white{% else %}bg-white border-base-200 hover:text-primary-600 dark:bg-base-900 dark:border-base-700 dark:hover:text-primary-500{% endif %} border cursor-pointer flex font-medium gap-2 group items-center px-3 py-2 rounded-default shadow-xs text-sm lg:ml-auto md:mt-0 {% if not cl.model_admin.list_filter_sheet %}2xl:hidden{% endif %}" x-on:click="filterOpen = true" x-on:keydown.escape.window="filterOpen = false">
+            <a class="h-9 rounded-sm shadow-xs {% if cl.has_active_filters %}bg-primary-600 border-primary-600 text-white{% else %}bg-white border-base-200 hover:text-primary-600 dark:bg-base-900 dark:border-base-700 dark:hover:text-primary-500{% endif %} border cursor-pointer flex font-medium gap-2 group items-center px-3 py-2 rounded-default shadow-2xs text-sm lg:ml-auto md:mt-0 {% if not cl.model_admin.list_filter_sheet %}2xl:hidden{% endif %}" x-on:click="filterOpen = true" x-on:keydown.escape.window="filterOpen = false">
                 <span class="material-symbols-outlined md-18 ml-auto" style="font-size: 1.2rem">filter_list</span>
             </a>
         {% endif %}

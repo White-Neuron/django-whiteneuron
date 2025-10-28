@@ -1,6 +1,6 @@
 [project]
 name = "django-whiteneuron"
-version = "0.1.83"
+version = "0.2.0"
 description = "django-whiteneuron là một gói mở rộng giúp nâng cấp giao diện và chức năng Django Admin, mang đến trải nghiệm quản trị hiện đại, trực quan và tối ưu hiệu suất. 🚀"
 authors = [
     {name = "White Neuron", email = "anhnt@whiteneuron.com"}
@@ -18,7 +18,7 @@ dependencies = [
     "django-modeltranslation>=0.19.11",
     "django-ninja>=1.3.0",
     "django-simple-history>=3.8.0",
-    "django-unfold==0.55.3",
+    "django-unfold==0.68.0",
     "gunicorn>=23.0.0",
     "hiredis>=3.1.0",
     "markdown>=3.7",
