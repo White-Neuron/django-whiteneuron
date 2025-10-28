@@ -1,0 +1,15 @@
+{% include "base/forms/helpers/toolbar.html" %}
+
+<input type="hidden" name="{{ widget.name }}" id="wysiwyg-{{ widget.name }}"{% if widget.value != None %} value="{{ widget.value }}"{% endif %} {% include "django/forms/widgets/attrs.html" %}>
+
+<div class="max-w-4xl relative wysiwyg-container">
+    <trix-editor input="wysiwyg-{{ widget.name }}" {% include "django/forms/widgets/attrs.html" %}></trix-editor>
+    
+    <!-- HTML Editor textarea (hidden by default) -->
+    <textarea 
+        class="html-editor-textarea hidden border border-base-200 border-t-0 group-[.errors]:border-red-600 max-w-none p-4 rounded-b rounded-t-none text-base-500 w-full focus:outline-none dark:border-base-700 dark:text-base-300 dark:group-[.errors]:border-red-500 dark:bg-base-900" 
+        id="html-textarea-{{ widget.name }}"
+        rows="20"
+        style="font-family: monospace; font-size: 14px; line-height: 1.4;"
+    ></textarea>
+</div>

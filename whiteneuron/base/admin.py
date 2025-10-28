@@ -41,7 +41,8 @@ from unfold.contrib.filters.admin import (
     SingleNumericFilter,
     TextFilter,
 )
-from unfold.contrib.forms.widgets import WysiwygWidget
+from unfold.contrib.forms.widgets import WysiwygWidget as UnfoldWysiwygWidget
+from whiteneuron.base.widgets import WysiwygWidget
 from unfold.contrib.import_export.forms import ExportForm, ImportForm
 from unfold.contrib.inlines.admin import NonrelatedStackedInline
 from unfold.decorators import action, display
@@ -130,13 +131,11 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
                                        'display_staff', 'display_superuser', 'display_header']
 
     def grid_item_header(self, obj):
-        # Avatar với gradient background hỗ trợ dark mode
-        if not obj.avatar:
-            avatar_content = '''
-            <div class="w-full h-full bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 dark:from-primary/20 dark:via-secondary/20 dark:to-accent/20 ui-mask ui-mask-squircle flex items-center justify-center">
-                <span class="material-symbols-outlined text-primary dark:text-primary/90" style="font-size: 48px;">person</span>
-            </div>
-            '''
+        if obj.is_bot:
+            s= '<span class="material-symbols-outlined" style="font-size: 192px;">smart_toy</span>'
+        elif not obj.avatar:
+            s= '<span class="material-symbols-outlined" style="font-size: 192px;">person</span>'
+
         else:
             avatar_content = f'''
             <div class="w-full h-full ui-mask ui-mask-squircle overflow-hidden bg-base-300/50 dark:bg-base-700/50 ring-1 ring-base-content/10 dark:ring-base-content/20">
@@ -176,21 +175,16 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
         <!-- Glow effect -->
         <div class="absolute inset-0 bg-gradient-to-br from-primary/5 dark:from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
     </figure>
-    
-    <!-- Content Section -->
-    <div class="ui-card-body p-4 text-center relative">
-        <!-- Header Info -->
-        <div class="mb-3 space-y-1">
-            <p class="text-xs text-base-content/50 dark:text-base-content/60 font-mono tracking-wide uppercase">{username_display}</p>
-            <h2 class="ui-card-title text-sm font-semibold text-base-content dark:text-base-content/90 group-hover:text-primary dark:group-hover:text-primary/90 transition-colors duration-200 justify-center leading-tight">
-                {display_name}
-            </h2>
-            {f'<p class="text-xs text-base-content/60 dark:text-base-content/70 truncate">{obj.email}</p>' if obj.email else ''}
-        </div>
-        
-        <!-- Status Badges -->
-        <div class="flex flex-wrap justify-center gap-1">
-            {badges_html}
+
+    <div class="ui-card-body">
+        <h5>{obj.username}</h5>
+        <h4 class="ui-card-title">{obj.full_name}</h4>
+        <div class="flex flex-row items-center gap-2">
+        {'<span class="ui-badge ui-badge-success">Active</span>' if obj.is_active else '<span class="ui-badge ui-badge-danger">Inactive</span>'}
+        {'<span class="ui-badge ui-badge-success">Staff</span>' if obj.is_staff else ''}
+        {'<span class="ui-badge ui-badge-warning">Superuser</span>' if obj.is_superuser else ''}
+        {'<span class="ui-badge ui-badge-info">Bot</span>' if obj.is_bot else ''}
+
         </div>
         
         <!-- Bottom border -->
@@ -216,15 +210,34 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
     ]
 
     add_fieldsets = (
-        (None, {"fields": (
-            "username",  # "username" is not in the original User model
-            "email",
+        (
+            None, 
+            {"fields": (
+                "username",  # "username" is not in the original User model
+                "email",
             # "password1",
             # "password2",
             )}),
-        (_("Personal info"),
-         {"fields": (("first_name", "last_name"), "avatar", "biography"),
-                     }),
+        (
+            _("Personal info"),
+            {
+                "fields": (("first_name", "last_name"), "avatar", "biography"), 
+                "classes": ["tab"],}
+        ),
+        (
+            _("Permissions"),
+            {
+                "fields": (
+                    "is_bot",
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                    "groups",
+                    "user_permissions",
+                ),
+                "classes": ["tab"],
+            },
+        ),
     )
 
     fieldsets = (
@@ -240,6 +253,7 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
             _("Permissions"),
             {
                 "fields": (
+                    "is_bot",
                     "is_active",
                     "is_staff",
                     "is_superuser",
@@ -411,6 +425,22 @@ class UserProfileAdmin(ModelAdmin):
         extra_context['show_save_and_add_another']= False
         extra_context['show_save_and_continue']= False
         return super().changeform_view(request, object_id=str(request.user.pk), extra_context=extra_context, form_url='')
+    
+    def get_fieldsets(self, request: HttpRequest, obj: None) -> list[tuple[str, dict]]:
+        fieldsets = super().get_fieldsets(request, obj)
+        if obj == request.user and request.user.is_superuser:
+            # Thêm ,
+            # (_('Configuration'), {
+            #     'fields': ('show_softdelete',)
+            # })
+            fieldsets = list(fieldsets)  # Convert to list to modify
+            print(fieldsets)
+            fieldsets.insert(1, (_('Configuration'),
+                {
+                    'fields': ('show_softdelete',)
+                }
+            ))
+        return fieldsets
 
 from .models import Image
 @admin.register(Image, site=base_admin_site)

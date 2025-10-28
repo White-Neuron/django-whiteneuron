@@ -2,6 +2,7 @@ echo "Building Tailwind CSS..."
 bash scripts/tailwind.sh
 
 echo "Make migrations..."
+source .venv/bin/activate
 cd whiteneuron
 python manage.py makemigrations
 cd ..

@@ -1,0 +1,89 @@
+/* HTML Editor Custom Styles */
+.wysiwyg-container {
+    position: relative;
+}
+
+.html-editor-textarea {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    resize: vertical;
+    tab-size: 2;
+    -moz-tab-size: 2;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.html-editor-textarea:focus {
+    border-color: rgb(59 130 246) !important;
+    box-shadow: 0 0 0 1px rgb(59 130 246) !important;
+}
+
+/* Dark mode support for HTML editor */
+.dark .html-editor-textarea {
+    background-color: rgb(17 24 39) !important;
+    color: rgb(209 213 219) !important;
+    border-color: rgb(55 65 81) !important;
+}
+
+.dark .html-editor-textarea:focus {
+    border-color: rgb(59 130 246) !important;
+    box-shadow: 0 0 0 1px rgb(59 130 246) !important;
+}
+
+/* Toggle button active state */
+#html-editor-toggle.text-primary-600,
+[id^="html-editor-toggle-"].text-primary-600 {
+    background-color: rgb(59 130 246 / 0.1) !important;
+}
+
+/* Smooth transition for editor switching */
+.wysiwyg-container trix-editor,
+.wysiwyg-container .html-editor-textarea {
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* Ensure consistent styling with Trix editor */
+.html-editor-textarea {
+    min-height: 200px;
+}
+
+/* Syntax highlighting for HTML in textarea (optional enhancement) */
+.html-editor-textarea {
+    color: #333;
+}
+
+.dark .html-editor-textarea {
+    color: #e5e7eb;
+}
+
+/* Scrollbar styling for better UX */
+.html-editor-textarea::-webkit-scrollbar {
+    width: 8px;
+}
+
+.html-editor-textarea::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.html-editor-textarea::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.html-editor-textarea::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+.dark .html-editor-textarea::-webkit-scrollbar-track {
+    background: #374151;
+}
+
+.dark .html-editor-textarea::-webkit-scrollbar-thumb {
+    background: #6b7280;
+}
+
+.dark .html-editor-textarea::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}

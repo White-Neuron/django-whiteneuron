@@ -43,6 +43,11 @@ ROOT_URLCONF = f"{PROJECT_NAME}.urls"
 BROWSER_RELOAD = environ.get("BROWSER_RELOAD", "False") == "True"
 
 USE_CACHE = environ.get("USE_CACHE", "False") == "True"
+CACHENAME = environ.get("CACHENAME", "default")
+CACHE_REDIS_LOCATION=environ.get("CACHE_REDIS_LOCATION", "redis://localhost:6379")
+if CACHENAME not in ["default", "redis"]:
+    print("CACHENAME must be 'default' or 'redis'")
+    sys.exit(1)
 # USE_CACHE = False
 
 WSGI_APPLICATION = f"{PROJECT_NAME}.wsgi.application"
@@ -54,25 +59,35 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 ######################################################################
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
-        },
-    },
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
 }
+if USE_CACHE:
+    if CACHENAME == "redis":
+        host= CACHE_REDIS_LOCATION.split("://")[-1].split(":")[0]
+        port= int(CACHE_REDIS_LOCATION.split(":")[-1].split("/")[0])
+        CHANNEL_LAYERS = {
+            "default": {
+                "BACKEND": "channels_redis.core.RedisChannelLayer",
+                "CONFIG": {
+                    "hosts": [(host, port)],
+                },
+            },
+        }
+
+
 
 ######################################################################
 # Domains
 ######################################################################
 ALLOWED_HOSTS = environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
-ALLOWED_HOSTS.append("192.168.88.115")
-ALLOWED_HOSTS.append("192.168.50.164")
-ALLOWED_HOSTS.append("192.168.50.2")
-ALLOWED_HOSTS.append("172.20.10.2")
-ALLOWED_HOSTS.append("172.20.0.1")
 
 CSRF_TRUSTED_ORIGINS = environ.get(
     "CSRF_TRUSTED_ORIGINS", "http://localhost:8000"
+).split(",")
+
+CORS_ALLOWED_ORIGINS = environ.get(
+    "CORS_ALLOWED_ORIGINS", "http://localhost:4200"
 ).split(",")
 
 
@@ -94,6 +109,9 @@ if not DEBUG:
 # Apps
 ######################################################################
 INSTALLED_APPS = [
+    'django_ckeditor_5',
+    'corsheaders',
+
     "whiteneuron",
     "whiteneuron.base", # Base app
     "whiteneuron.feedbacks", # Feedbacks app
@@ -146,6 +164,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -168,7 +187,6 @@ if BROWSER_RELOAD:
     MIDDLEWARE.append("django_browser_reload.middleware.BrowserReloadMiddleware")
 
 if USE_CACHE:
-    CACHENAME = environ.get("CACHENAME", "default")
     if CACHENAME == "default":
         CACHES= {'default': {
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
@@ -616,6 +634,16 @@ UNFOLD = {
     },
 }
 
+SHOW_CELERY_TASKS = environ.get("SHOW_CELERY_TASKS", "True") == "True"
+SHOW_FILE_MANAGEMENT = environ.get("SHOW_FILE_MANAGEMENT", "True") == "True"
+SHOW_FEEDBACKS = environ.get("SHOW_FEEDBACKS", "True") == "True"
+if not SHOW_FILE_MANAGEMENT:
+    UNFOLD["SIDEBAR"]["navigation"]= UNFOLD["SIDEBAR"]["navigation"][:1] + UNFOLD["SIDEBAR"]["navigation"][2:]
+if not SHOW_CELERY_TASKS:
+    UNFOLD["SIDEBAR"]["navigation"]= UNFOLD["SIDEBAR"]["navigation"][:-1]
+if not SHOW_FEEDBACKS:
+    UNFOLD["SIDEBAR"]["navigation"][0]["items"]= UNFOLD["SIDEBAR"]["navigation"][0]["items"][:-1]
+
 ######################################################################
 # Sentry
 ######################################################################
@@ -639,3 +667,96 @@ CELERY_TASK_SERIALIZER = 'json'
 ######################################################################
 CRISPY_TEMPLATE_PACK = "unfold_crispy"
 CRISPY_ALLOWED_TEMPLATE_PACKS = ["unfold_crispy"]
+
+
+######################################################################
+# CKEditor5
+######################################################################
+customColorPalette = [
+        {
+            'color': 'hsl(4, 90%, 58%)',
+            'label': 'Red'
+        },
+        {
+            'color': 'hsl(340, 82%, 52%)',
+            'label': 'Pink'
+        },
+        {
+            'color': 'hsl(291, 64%, 42%)',
+            'label': 'Purple'
+        },
+        {
+            'color': 'hsl(262, 52%, 47%)',
+            'label': 'Deep Purple'
+        },
+        {
+            'color': 'hsl(231, 48%, 48%)',
+            'label': 'Indigo'
+        },
+        {
+            'color': 'hsl(207, 90%, 54%)',
+            'label': 'Blue'
+        },
+    ]
+# CKEDITOR_5_FILE_STORAGE= 'django.core.files.storage.FileSystemStorage'
+CKEDITOR_5_FILE_STORAGE = 'whiteneuron.base.ckeditor.CustomStorage'
+CKEDITOR_5_CUSTOM_CSS = 'base/css/ckeditor5.css'
+CKEDITOR_5_FILE_UPLOAD_PERMISSION = 'staff'
+CKEDITOR_5_CONFIGS = {
+    'default': {
+        'language': 'en',
+        'toolbar': {
+            'items': [
+                'heading', '|',
+                'bold', 'italic', 'underline', 'strikethrough', '|',
+                'fontColor', 'fontBackgroundColor', 'highlight', '|',
+                'alignment', '|',
+                'link', 'imageUpload', 'insertTable', 'mediaEmbed', '|',
+                'bulletedList', 'numberedList', 'todoList', 'outdent', 'indent', '|',
+                'blockQuote', 'codeBlock', '|',
+                'subscript', 'superscript', 'removeFormat', '|',
+                'sourceEditing'
+            ],
+            'shouldNotGroupWhenFull': True,
+        },
+        'heading': {
+            'options': [
+                {'model': 'paragraph', 'title': 'Paragraph', 'class': 'ck-heading_paragraph'},
+                {'model': 'heading1', 'view': 'h1', 'title': 'Heading 1', 'class': 'ck-heading_heading1'},
+                {'model': 'heading2', 'view': 'h2', 'title': 'Heading 2', 'class': 'ck-heading_heading2'},
+                {'model': 'heading3', 'view': 'h3', 'title': 'Heading 3', 'class': 'ck-heading_heading3'},
+                {'model': 'heading4', 'view': 'h4', 'title': 'Heading 4', 'class': 'ck-heading_heading4'},
+            ]
+        },
+        'image': {
+            'toolbar': [
+                'imageTextAlternative', '|',
+                'imageStyle:inline', 'imageStyle:block', 'imageStyle:side', '|',
+                'toggleImageCaption', 'linkImage'
+            ],
+            'styles': ['full', 'side', 'alignLeft', 'alignRight', 'alignCenter']
+        },
+        'table': {
+            'contentToolbar': [
+                'tableColumn', 'tableRow', 'mergeTableCells',
+                'tableProperties', 'tableCellProperties'
+            ],
+            'tableProperties': {'borderColors': customColorPalette, 'backgroundColors': customColorPalette},
+            'tableCellProperties': {'borderColors': customColorPalette, 'backgroundColors': customColorPalette}
+        },
+        'list': {
+            'properties': {
+                'styles': True,
+                'startIndex': True,
+                'reversed': True,
+            }
+        },
+        'language': {
+            'textPartLanguage': [
+                {'title': 'English', 'languageCode': 'en'},
+                {'title': 'Vietnamese', 'languageCode': 'vi'},
+            ]
+        },
+        'placeholder': 'Start typing your content here...'
+    },
+}

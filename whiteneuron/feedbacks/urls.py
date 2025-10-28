@@ -22,6 +22,7 @@ def receive_feedback(request):
 
         data = json.loads(body_unicode)
         object_id = data.get("object_id")
+        field = data.get("field")
         feedback_message = data.get("feedback_message")
         model_name = data.get("model_name")
         app_label = data.get("app_label")
@@ -47,10 +48,11 @@ def receive_feedback(request):
             user=User.objects.get(id=user_id),
             content_type=content_type,
             object_id=object_id,
+            field=field,
             message=feedback_message,
         )
 
-        feedback.save(request=request)  # Lưu feedback có request để lưu thông tin người thực hiện
+        feedback.save()  # Lưu feedback có request để lưu thông tin người thực hiện
 
         logger.info(f"Feedback saved: {feedback}")
         return JsonResponse({"success": True, "message": "Feedback saved successfully"})

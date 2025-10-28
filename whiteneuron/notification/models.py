@@ -98,7 +98,7 @@ class Notification(models.Model):
     # def get_changed_data(self):
         
 
-    def alert(self, request):
+    def alert(self):
         """
         Returns a dictionary suitable for use in a JavaScript alert.
         """

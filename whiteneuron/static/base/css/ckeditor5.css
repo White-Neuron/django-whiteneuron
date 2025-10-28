@@ -1,0 +1,550 @@
+/* CKEditor5 Custom Styles for Unfold Theme with Tailwind CSS 3 & DaisyUI 4 */
+
+/* Container styling to match Unfold form fields */
+.ck-editor-container {
+  @apply relative w-full;
+}
+
+/* Main editor wrapper */
+.ck.ck-editor {
+  @apply relative w-full bg-white dark:bg-base-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm;
+  @apply focus-within:border-primary-600 focus-within:ring focus-within:ring-primary-500/40 dark:focus-within:border-primary-600 dark:focus-within:ring-primary-500/30;
+  @apply transition-all duration-300 ease-in-out;
+}
+
+/* Toolbar styling */
+.ck.ck-toolbar {
+  @apply bg-base-100 dark:bg-base-900 border-b border-gray-200 dark:border-gray-700;
+  @apply px-2 py-1.5 rounded-t-lg;
+}
+
+/* Toolbar items container */
+.ck.ck-toolbar__items {
+  @apply flex flex-wrap items-center gap-1;
+}
+
+/* Toolbar separators */
+.ck.ck-toolbar__separator {
+  @apply w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1;
+}
+
+/* Buttons styling refined */
+.ck.ck-button {
+  @apply inline-flex items-center justify-center h-8 min-h-8 px-2.5 py-1.5;
+  @apply text-[13px] font-medium text-gray-700 dark:text-gray-300 tracking-tight;
+  @apply bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700/70;
+  @apply border border-transparent rounded-md;
+  @apply transition-colors duration-150 ease-in-out;
+  @apply cursor-pointer select-none;
+  @apply focus:outline-none focus:ring-2 focus:ring-primary-500/40 dark:focus:ring-primary-500/30;
+}
+
+.ck.ck-button:hover {
+  @apply bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100;
+}
+
+.ck.ck-button.ck-on {
+  @apply bg-primary-100 dark:bg-primary-700/70 text-primary-700 dark:text-white;
+  @apply border-primary-300 dark:border-primary-600;
+}
+
+.ck.ck-button.ck-disabled,
+.ck.ck-button:disabled {
+  @apply opacity-50 cursor-not-allowed pointer-events-none;
+}
+
+/* Button icons */
+.ck.ck-button .ck-icon {
+  @apply w-4 h-4 opacity-90 text-gray-600 dark:text-gray-300;
+}
+
+.ck.ck-button:hover .ck-icon,
+.ck.ck-button.ck-on .ck-icon {
+  @apply opacity-100 text-primary-600 dark:text-white;
+}
+
+/* Dropdown buttons */
+.ck.ck-dropdown__button {
+  @apply inline-flex items-center gap-2;
+}
+
+.ck.ck-dropdown__button .ck-dropdown__arrow {
+  @apply w-3 h-3 opacity-60;
+}
+
+/* Split buttons styling */
+.ck.ck-splitbutton .ck-splitbutton__action {
+  @apply rounded-l-md border-r border-gray-300 dark:border-gray-600;
+}
+
+.ck.ck-splitbutton .ck-splitbutton__arrow {
+  @apply rounded-r-md px-2;
+}
+
+/* Dropdown panels */
+.ck.ck-dropdown__panel {
+  @apply bg-white dark:bg-base-800 border border-gray-200 dark:border-gray-700;
+  @apply rounded-lg shadow-lg mt-1 p-1 min-w-48;
+}
+
+/* High contrast nested dropdown variants (language, heading, font size) */
+.ck.ck-code-block-dropdown .ck-dropdown__panel,
+.ck.ck-font-size-dropdown .ck-dropdown__panel,
+.ck.ck-heading-dropdown .ck-dropdown__panel {
+  @apply bg-white dark:bg-base-900 border border-gray-200 dark:border-gray-700 shadow-xl;
+}
+
+/* Improve list item readability inside panels */
+.ck.ck-dropdown__panel .ck.ck-list .ck-list__item { @apply rounded-md; }
+.ck.ck-dropdown__panel .ck.ck-list .ck-list__item + .ck-list__item { @apply mt-0.5; }
+.ck.ck-dropdown__panel .ck.ck-list .ck-list__item .ck-button { @apply w-full text-left px-3 py-2 text-[13px] font-medium; }
+.ck.ck-dropdown__panel .ck.ck-list .ck-list__item .ck-button:hover { @apply bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white; }
+.ck.ck-dropdown__panel .ck.ck-list .ck-list__item .ck-button.ck-on { @apply bg-primary-100 dark:bg-primary-700 text-primary-700 dark:text-white; }
+
+/* Visible check holder */
+.ck.ck-dropdown__panel .ck-list-item-button__check-holder { @apply w-4 h-4 mr-2 flex items-center justify-center text-[11px] rounded-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-base-800; }
+
+/* Ensure visibility when panel is shown */
+.ck.ck-dropdown__panel.ck-dropdown__panel-visible { @apply bg-white dark:bg-base-900; }
+
+/* Scrollbars inside dropdown lists */
+.ck.ck-dropdown__panel .ck.ck-list::-webkit-scrollbar { @apply w-2; }
+.ck.ck-dropdown__panel .ck.ck-list::-webkit-scrollbar-thumb { @apply bg-gray-300 dark:bg-gray-600 rounded; }
+
+/* Zebra table rows inside content */
+.ck.ck-content table tbody tr:nth-child(odd) { @apply bg-gray-50 dark:bg-base-800; }
+.ck.ck-content table tbody tr:nth-child(even) { @apply bg-white dark:bg-base-900; }
+.ck.ck-content table th, .ck.ck-content table td { @apply border border-gray-200 dark:border-gray-700; }
+
+/* Text selection highlight */
+.ck.ck-content ::selection { background: theme('colors.primary.500'); color: white; }
+.ck.ck-content ::-moz-selection { background: theme('colors.primary.500'); color: white; }
+
+/* Main editing area */
+.ck.ck-content {
+  @apply min-h-48 max-h-[32rem] p-5 bg-white dark:bg-base-800;
+  @apply text-gray-900 dark:text-gray-100 text-[15px] leading-relaxed;
+  @apply rounded-b-lg border-none outline-none;
+  @apply overflow-y-auto;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.ck.ck-content:focus {
+  @apply outline-none ring-0;
+}
+
+/* Content styling within editor */
+.ck.ck-content h1,
+.ck.ck-content h2,
+.ck.ck-content h3,
+.ck.ck-content h4,
+.ck.ck-content h5,
+.ck.ck-content h6 {
+  @apply font-semibold text-gray-900 dark:text-gray-100 mb-3 mt-4;
+}
+
+.ck.ck-content h1 { @apply text-2xl; }
+.ck.ck-content h2 { @apply text-xl; }
+.ck.ck-content h3 { @apply text-lg; }
+.ck.ck-content h4 { @apply text-base font-bold; }
+.ck.ck-content h5 { @apply text-sm font-bold; }
+.ck.ck-content h6 { @apply text-xs font-bold uppercase tracking-wide; }
+
+.ck.ck-content p {
+  @apply mb-4 text-gray-700 dark:text-gray-300;
+}
+
+.ck.ck-content blockquote {
+  /* Refined blockquote styling */
+  @apply relative pl-5 py-3 my-5 rounded-md overflow-hidden italic;
+  @apply bg-gray-50 dark:bg-base-900 text-gray-700 dark:text-gray-300;
+  @apply border-l-4 border-primary-500;
+}
+
+.ck.ck-content blockquote:before {
+  content: "";
+  @apply absolute left-0 top-0 h-full w-1 bg-primary-500;
+}
+
+.ck.ck-content ul,
+.ck.ck-content ol {
+  @apply ml-6 mb-4;
+}
+
+.ck.ck-content ul {
+  @apply list-disc;
+}
+
+.ck.ck-content ol {
+  @apply list-decimal;
+}
+
+.ck.ck-content li {
+  @apply mb-1 text-gray-700 dark:text-gray-300;
+}
+
+.ck.ck-content a {
+  @apply text-primary-600 dark:text-primary-500 hover:text-primary-700 dark:hover:text-primary-400;
+  @apply underline transition-colors duration-200;
+}
+
+.ck.ck-content code {
+  @apply bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200;
+  @apply px-2 py-1 rounded font-mono text-sm;
+}
+
+.ck.ck-content pre {
+  @apply bg-gray-900/90 dark:bg-gray-900 text-gray-100 dark:text-gray-100;
+  @apply border border-gray-800 dark:border-gray-700;
+  @apply p-4 rounded-md overflow-x-auto my-5 font-mono text-[13px] leading-snug;
+}
+
+/* Table styling */
+.ck.ck-content table {
+  @apply w-full border-collapse my-4;
+}
+
+.ck.ck-content table td,
+.ck.ck-content table th {
+  @apply border border-gray-300 dark:border-gray-600 px-3 py-2;
+}
+
+.ck.ck-content table th {
+  @apply bg-gray-100 dark:bg-gray-700 font-semibold text-gray-900 dark:text-gray-100;
+}
+
+.ck.ck-content table td {
+  @apply bg-white dark:bg-base-800 text-gray-700 dark:text-gray-300;
+}
+
+/* Image widget styling */
+.ck.ck-content figure.image {
+  @apply my-4 mx-auto max-w-full;
+}
+
+.ck.ck-content figure.image img {
+  @apply max-w-full h-auto rounded-lg shadow-md;
+}
+
+/* Widget styling */
+.ck.ck-widget {
+  @apply relative;
+}
+
+.ck.ck-widget.ck-widget_selected {
+  @apply ring-2 ring-primary-400 ring-opacity-50 rounded;
+}
+
+.ck.ck-widget__type-around__button {
+  @apply bg-primary-600 hover:bg-primary-700 text-white;
+  @apply w-6 h-6 rounded-full flex items-center justify-center;
+  @apply transition-colors duration-200;
+}
+
+/* Resizer styling */
+.ck.ck-widget__resizer {
+  @apply border border-primary-400 bg-primary-50 dark:bg-primary-900 bg-opacity-20;
+}
+
+.ck.ck-widget__resizer__handle {
+  @apply bg-primary-600 w-3 h-3 border border-primary-700 rounded;
+}
+
+/* Placeholder styling */
+.ck.ck-content .ck-placeholder:before {
+  @apply text-gray-400 dark:text-gray-500 italic;
+}
+
+/* Balloon panels */
+.ck.ck-balloon-panel {
+  @apply bg-white dark:bg-base-800 border border-gray-200 dark:border-gray-700;
+  @apply rounded-lg shadow-lg p-2;
+}
+
+/* Link balloon styling */
+.ck.ck-link-form,
+.ck.ck-link-actions {
+  @apply flex items-center gap-2 p-2;
+}
+
+.ck.ck-link-form .ck-input {
+  @apply flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600;
+  @apply bg-white dark:bg-base-800 text-gray-900 dark:text-gray-100;
+  @apply rounded-md text-sm focus:ring-2 focus:ring-primary-300 focus:border-primary-600;
+}
+
+/* Color picker styling */
+.ck.ck-color-selector {
+  @apply grid grid-cols-6 gap-1 p-2;
+}
+
+.ck.ck-color-selector .ck-color-selector__option {
+  @apply w-7 h-7 rounded-md border border-gray-300 dark:border-gray-600 shadow-sm;
+  @apply hover:scale-110 transition-transform duration-150;
+}
+.ck.ck-color-selector .ck-color-selector__option.ck-on {
+  @apply ring-2 ring-primary-500 ring-offset-1 ring-offset-white dark:ring-offset-base-800 border-primary-500;
+}
+
+/* Font size dropdown */
+.ck.ck-font-size-dropdown .ck-dropdown__panel {
+  @apply max-h-48 overflow-y-auto;
+}
+
+.ck.ck-list .ck-list__item {
+  @apply px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700;
+  @apply text-gray-700 dark:text-gray-300 cursor-pointer;
+  @apply transition-colors duration-200;
+}
+
+.ck.ck-list .ck-list__item.ck-on {
+  @apply bg-primary-100 dark:bg-primary-700 text-primary-700 dark:text-white font-medium rounded;
+}
+
+/* Code block dropdown */
+.ck.ck-code-block-dropdown .ck-dropdown__panel {
+  @apply min-w-56;
+}
+
+/* Media embed styling */
+.ck.ck-content .ck-media__wrapper {
+  @apply my-4 rounded-lg overflow-hidden shadow-md;
+}
+
+.ck.ck-content .ck-media__placeholder {
+  @apply bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400;
+  @apply p-8 text-center rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600;
+}
+
+/* Todo list styling */
+.ck.ck-content .todo-list {
+  @apply list-none ml-0;
+}
+
+.ck.ck-content .todo-list li {
+  @apply flex items-start gap-3 mb-2;
+}
+
+.ck.ck-content .todo-list li .todo-list__label {
+  @apply flex items-center gap-2;
+}
+
+.ck.ck-content .todo-list li .todo-list__label input {
+  @apply w-4 h-4 text-primary-600 border border-gray-300 dark:border-gray-600 rounded;
+  @apply focus:ring-2 focus:ring-primary-300;
+}
+
+/* Highlight styling */
+.ck.ck-content mark {
+  @apply bg-yellow-200 dark:bg-yellow-600 text-gray-900 dark:text-gray-100;
+  @apply px-1 rounded;
+}
+
+/* Source editing mode */
+.ck.ck-source-editing-area {
+  @apply w-full min-h-48 p-4 bg-gray-50 dark:bg-gray-900;
+  @apply text-gray-900 dark:text-gray-100 font-mono text-sm;
+  @apply border border-gray-300 dark:border-gray-600 rounded-lg;
+  @apply focus:ring-2 focus:ring-primary-300 focus:border-primary-600;
+  @apply resize-y;
+}
+
+/* Word count styling */
+.word-count {
+  @apply mt-2 text-right;
+}
+
+.ck.ck-word-count {
+  @apply text-xs text-gray-500 dark:text-gray-400 flex gap-4 justify-end;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .ck.ck-toolbar__items {
+    @apply gap-0.5;
+  }
+  
+  .ck.ck-button {
+    @apply h-7 min-h-7 px-2 text-xs;
+  }
+  
+  .ck.ck-content {
+    @apply min-h-32 p-3 text-sm;
+  }
+  
+  .ck.ck-dropdown__panel {
+    @apply min-w-full;
+  }
+}
+
+/* Animation improvements */
+@media (prefers-reduced-motion: no-preference) {
+  .ck.ck-button {
+    @apply transition-all duration-200 ease-in-out;
+  }
+  
+  .ck.ck-dropdown__panel {
+    @apply transition-opacity duration-200 ease-in-out;
+  }
+  
+  .ck.ck-widget {
+    @apply transition-all duration-200 ease-in-out;
+  }
+}
+
+/* Dark mode specific adjustments */
+@media (prefers-color-scheme: dark) {
+  .ck.ck-editor {
+    @apply border-gray-600;
+  }
+  
+  .ck.ck-content {
+    @apply scrollbar-thin scrollbar-track-gray-800 scrollbar-thumb-gray-600;
+  }
+}
+
+/* Focus states for accessibility */
+.ck.ck-button:focus-visible {
+  @apply ring-2 ring-primary-400 ring-offset-1 ring-offset-white dark:ring-offset-base-800;
+}
+
+.ck.ck-content:focus {
+  @apply ring-0 outline-none;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .ck.ck-button {
+    @apply border border-gray-400 dark:border-gray-500;
+  }
+  
+  .ck.ck-content {
+    @apply border border-gray-400 dark:border-gray-500;
+  }
+}
+
+/* Override default CKEditor colors for better integration */
+:root {
+  --ck-color-base-background: theme('colors.white');
+  --ck-color-base-foreground: theme('colors.gray.100');
+  --ck-color-focus-border: theme('colors.primary.600');
+  --ck-color-text: theme('colors.gray.900');
+  --ck-color-shadow-drop: rgba(0, 0, 0, 0.15);
+  --ck-color-shadow-inner: rgba(0, 0, 0, 0.1);
+  --ck-color-button-default-background: transparent;
+  --ck-color-button-default-hover-background: theme('colors.gray.100');
+  --ck-color-button-on-background: theme('colors.primary.100');
+  --ck-color-button-on-hover-background: theme('colors.primary.200');
+  --ck-color-dropdown-panel-background: theme('colors.white');
+  --ck-color-dropdown-panel-border: theme('colors.gray.200');
+  --ck-color-dialog-background: theme('colors.white');
+  --ck-color-dialog-form-header-border: theme('colors.gray.200');
+  --ck-color-input-background: theme('colors.white');
+  --ck-color-input-border: theme('colors.gray.300');
+  --ck-color-input-error-border: theme('colors.red.500');
+  --ck-color-list-background: theme('colors.white');
+  --ck-color-list-button-hover-background: theme('colors.gray.100');
+  --ck-color-list-button-on-background: theme('colors.primary.100');
+  --ck-color-panel-background: theme('colors.white');
+  --ck-color-panel-border: theme('colors.gray.200');
+  --ck-color-toolbar-background: theme('colors.gray.50');
+  --ck-color-toolbar-border: theme('colors.gray.200');
+  --ck-color-tooltip-background: theme('colors.gray.800');
+  --ck-color-tooltip-text: theme('colors.white');
+  --ck-color-engine-placeholder-text: theme('colors.gray.400');
+  --ck-color-upload-bar-background: theme('colors.primary.600');
+  --ck-color-link-default: theme('colors.primary.600');
+  --ck-color-link-selected-background: theme('colors.primary.100');
+}
+
+[data-theme="dark"] {
+  --ck-color-base-background: theme('colors.base.800');
+  --ck-color-base-foreground: theme('colors.base.700');
+  --ck-color-focus-border: theme('colors.primary.600');
+  --ck-color-text: theme('colors.gray.100');
+  --ck-color-shadow-drop: rgba(0, 0, 0, 0.3);
+  --ck-color-shadow-inner: rgba(0, 0, 0, 0.2);
+  --ck-color-button-default-background: transparent;
+  --ck-color-button-default-hover-background: theme('colors.gray.700');
+  --ck-color-button-on-background: theme('colors.primary.600');
+  --ck-color-button-on-hover-background: theme('colors.primary.700');
+  --ck-color-dropdown-panel-background: theme('colors.base.800');
+  --ck-color-dropdown-panel-border: theme('colors.gray.600');
+  --ck-color-dialog-background: theme('colors.base.800');
+  --ck-color-dialog-form-header-border: theme('colors.gray.600');
+  --ck-color-input-background: theme('colors.base.800');
+  --ck-color-input-border: theme('colors.gray.600');
+  --ck-color-input-error-border: theme('colors.red.500');
+  --ck-color-list-background: theme('colors.base.800');
+  --ck-color-list-button-hover-background: theme('colors.gray.700');
+  --ck-color-list-button-on-background: theme('colors.primary.600');
+  --ck-color-panel-background: theme('colors.base.800');
+  --ck-color-panel-border: theme('colors.gray.600');
+  --ck-color-toolbar-background: theme('colors.base.900');
+  --ck-color-toolbar-border: theme('colors.gray.700');
+  --ck-color-tooltip-background: theme('colors.gray.700');
+  --ck-color-tooltip-text: theme('colors.white');
+  --ck-color-engine-placeholder-text: theme('colors.gray.500');
+  --ck-color-upload-bar-background: theme('colors.primary.600');
+  --ck-color-link-default: theme('colors.primary.500');
+  --ck-color-link-selected-background: theme('colors.primary.800');
+}
+
+/* Animation keyframes */
+@keyframes ck-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Apply fade-in animation to dropdowns */
+.ck.ck-dropdown__panel {
+  animation: ck-fade-in 0.2s ease-out;
+}
+
+/* Custom scrollbar for content area */
+.ck.ck-content::-webkit-scrollbar {
+  @apply w-2;
+}
+
+.ck.ck-content::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-800 rounded;
+}
+
+.ck.ck-content::-webkit-scrollbar-thumb {
+  @apply bg-gray-400 dark:bg-gray-600 rounded hover:bg-gray-500 dark:hover:bg-gray-500;
+}
+
+/* Ensure proper spacing for nested editor containers */
+.ck-editor-container .ck-editor-container {
+  @apply mt-0;
+}
+
+/* Integration with Django form styling */
+.form-row .ck-editor-container,
+.field-box .ck-editor-container {
+  @apply w-full;
+}
+
+/* Error state styling */
+.errors .ck.ck-editor {
+  @apply border-red-600 dark:border-red-500;
+}
+
+.errors .ck.ck-editor:focus-within {
+  @apply ring-red-200 dark:ring-red-600/40 border-red-600 dark:border-red-500;
+}
+
+/* Success state styling */
+.success .ck.ck-editor {
+  @apply border-green-600 dark:border-green-500;
+}
+
+.success .ck.ck-editor:focus-within {
+  @apply ring-green-200 dark:ring-green-600/40 border-green-600 dark:border-green-500;
+}

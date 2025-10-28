@@ -9,7 +9,8 @@ from typing import Any, Sequence
 
 from django.urls import reverse_lazy
 
-from unfold.contrib.forms.widgets import WysiwygWidget
+from unfold.contrib.forms.widgets import WysiwygWidget as UnfoldWysiwygWidget
+from whiteneuron.base.widgets import WysiwygWidget, CKEditor5Widget
 from unfold.widgets import UnfoldAdminSplitDateTimeWidget
 from django.db import models
 
@@ -65,6 +66,8 @@ class ModelAdmin(UnfoldAdmin):
         },
     }
 
+    text_field_widget= 'wysiwyg' # options: 'wysiwyg', 'ckeditor', ''
+
     enable_field_selection_filter = True
     list_filter_submit = True
     list_filter_sheet = True
@@ -76,10 +79,12 @@ class ModelAdmin(UnfoldAdmin):
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
         self.search_help_text= f'Search by {", ".join([get_verbose_name_field(model, f) for f in self.search_fields])}'
-        
-        if getattr(self, 'use_infinite_paginator', False):
-            self.paginator = InfinitePaginator
-            self.show_full_result_count = False
+
+        if self.text_field_widget == 'ckeditor':
+            self.formfield_overrides[models.TextField]["widget"]= CKEditor5Widget(
+                    attrs={"class": "django_ckeditor_5"})
+        elif self.text_field_widget == '':
+            self.formfield_overrides[models.TextField] = {}
 
     def has_module_permission(self, request: HttpRequest) -> bool:
         return super().has_module_permission(request)
@@ -87,7 +92,8 @@ class ModelAdmin(UnfoldAdmin):
     # Soft delete
     def get_actions(self, request: HttpRequest) -> OrderedDict[Any, Any]:
         actions = super().get_actions(request)
-        actions['delete_selected'] = (self.soft_delete, 'delete_selected', self.soft_delete.short_description)
+        if 'delete_selected' in actions:
+            actions['delete_selected'] = (self.soft_delete, 'delete_selected', self.soft_delete.short_description)
         if request.user.is_superuser:
             # hard delete and restore
             actions['hard_delete'] = (self.hard_delete, 'hard_delete', self.hard_delete.short_description)
@@ -137,7 +143,7 @@ class ModelAdmin(UnfoldAdmin):
     restore.short_description = 'Restore selected records'
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
-        if request.user.is_superuser:
+        if request.user.is_superuser and request.user.show_softdelete:
             if hasattr(self.model, 'objects_all'):
                 return self.model.objects_all.all()
         return self.model.objects.all()
@@ -289,7 +295,7 @@ class ModelAdmin(UnfoldAdmin):
         # check nếu model có trường sau thì mới thêm vào list_display
         # fields_extra = ['updated_at', 'updated_by']
         fields_extra = []
-        if request.user.is_superuser: #is_hidden
+        if request.user.is_superuser and request.user.show_softdelete:
             fields_extra += ['is_deleted']
         for field in fields_extra:
             if field in [f.name for f in self.model._meta.fields]:
@@ -405,6 +411,7 @@ class ModelAdmin(UnfoldAdmin):
     grid_exclude_fields_list_display = []
     grid_cols= 4
     page_sizes = [5, 10, 20, 50, 100, 200]
+    using_page_size = True # True if you want to use page size, False if you want to use default list_per_page
 
     def changelist_view(self, request, extra_context = None):
         extra_context = extra_context or {}
@@ -418,15 +425,17 @@ class ModelAdmin(UnfoldAdmin):
         if grid_view:
             extra_context = extra_context or {}
             extra_context['grid_view'] = grid_view
-            # list_display_links= list(set(list(self.list_display_links) + ['grid_item_header']))
-            # list_display= self.get_list_display(request)
+
+            # self.list_display_links= list(set(list(self.list_display_links) + ['grid_item_header']))
+            # self.list_display= self.get_list_display(request)
+
 
         # Xác định số lượng hiển thị từ request
         per_page = self.list_per_page
         if 'per_page' in request.POST:
             try:
                 per_page = int(request.POST.get('per_page'))
-                if per_page in [5, 10, 20, 50, 100, 200]:
+                if per_page in self.page_sizes:
                     self.list_per_page = per_page
             except ValueError:
                 pass  # Giữ nguyên giá trị mặc định nếu không hợp lệ
@@ -434,6 +443,7 @@ class ModelAdmin(UnfoldAdmin):
         # Truyền danh sách số lượng hiển thị vào context
         if extra_context is None:
             extra_context = {}
+        extra_context['using_page_size'] = self.using_page_size
         extra_context['page_sizes'] = self.page_sizes
         extra_context['grid_cols'] = self.grid_cols
 

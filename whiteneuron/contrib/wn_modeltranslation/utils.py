@@ -9,7 +9,10 @@ load_dotenv()
 
 
 OPEN_AI_API_KEY = os.getenv("OPENAI_API_KEY")
-client = openai.Client(api_key=OPEN_AI_API_KEY)
+if OPEN_AI_API_KEY:
+    client = openai.Client(api_key=OPEN_AI_API_KEY)
+else:
+    client = None
 
 
 def gpt_translate_vi(request, obj):
@@ -34,6 +37,14 @@ def gpt_translate_vi(request, obj):
         return {"success": False, "message": _("You must be a superuser to use this action"), "object_id": obj.id, "result": {}}
 
     def translate(obj):
+        if not client:
+            print("OpenAI API key not found")
+            return {
+                "success": False,
+                "message": _("OpenAI API key not found"),
+                "object_id": obj.id,
+                "result": {},
+            }
         prompt = ""
         obj_data = obj.__dict__
         fields= []

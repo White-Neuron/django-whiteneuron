@@ -15,9 +15,9 @@
     {# Sử dụng CSS Grid: 1 cột trên mobile, 2-3 cột trên màn hình lớn hơn #}
     <div class="grid_view">
         {% if cl.model_admin.grid_cols %}
-        <div id="result_list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-{{cl.model_admin.grid_cols}} xl:grid-cols-5 2xl:grid-cols-6 gap-2 md:gap-4">
+        <div id="result_list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-{{cl.model_admin.grid_cols}} xl:grid-cols-5 2xl:grid-cols-6 gap-1 md:gap-2">
         {% else %}
-        <div id="result_list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 md:gap-4">
+        <div id="result_list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-1 md:gap-2">
         {% endif %} 
             {% for result in results %}
                 {# Nếu có lỗi cho object cụ thể, hiển thị thông báo lỗi chiếm toàn bộ hàng #}
@@ -27,16 +27,18 @@
                     </div>
                 {% endif %}
                 {# Flag hiển thị ở góc nếu record đã bị xóa #}
-                    <div class="border rounded-sm shadow-xs p-4 bg-white dark:bg-base-900 relative">
-                    {# Lặp qua các cell của kết quả, bỏ qua phần tử đầu tiên (thường là checkbox cột) #}
 
-                    {% for item in result|slice:"1:" %}
-                        {# Dùng forloop.counter (bắt đầu từ 1) để lấy header tương ứng từ result_headers #}
-                        {% with header=result_headers|get_item:forloop.counter %}
+                <div class="grid-object-container border rounded shadow-sm p-1 bg-white dark:bg-base-900 relative">
+
+                    {# Lặp qua các cell của kết quả, bỏ qua phần tử đầu tiên (thường là checkbox cột) #}
+                    {% for item in result %}
+                        {# Dùng forloop.counter0 (bắt đầu từ 0) để lấy header tương ứng từ result_headers #}
+                        {% with header=result_headers|get_item:forloop.counter0 %}
                         
                         {# Header của item #}
-                        {% trans "Header" as header_text %}
-                        {% if header.text and header.text != header_text %}
+                        {% if header.class_attrib and 'action-checkbox' in header.class_attrib %}
+                            {# skip #}
+                        {% elif header.text and header.text != 'Header' %}
                             {% trans "Deleted" as deleted_text %}
                             {% if header.text == deleted_text %}
                                 {% if "True" in item %}
@@ -46,7 +48,7 @@
                                 {% endif %}
                             {% else %}
                                 {# Nếu header có text, hiển thị header và giá trị #}
-                                <div class="mb-1 p-2 bg-white dark:bg-base-900 border border-gray-200 dark:border-base-700 rounded-lg shadow-md hover:shadow-xl transform hover:-translate-y-1 transition duration-300">
+                                <div class="p-2 bg-white dark:bg-base-900 border border-gray-200 dark:border-base-700 rounded-lg shadow-md hover:shadow-xl transform hover:-translate-y-1 transition duration-300">
                                     <div class="mb-1">
                                         <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                                             {{ header.text|capfirst }}
@@ -68,7 +70,7 @@
                     {% endfor %}
                     
                     {# Hiển thị các hành động (Edit, Delete,...) cho dòng #}
-                    <div class="mt-2">
+                    <div class="">
                         {% include 'unfold/helpers/actions_row.html' with actions=actions_row instance_pk=result.instance_pk %}
                     </div>
                 </div>

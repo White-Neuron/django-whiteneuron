@@ -27,7 +27,7 @@ class FeedbackDataAdmin(ModelAdmin):
 
     fieldsets = (
         ('Feedback Data', {
-            'fields': ('user', ('content_type', 'object_id'), 'get_related_object_link', 'message')
+            'fields': ('user', ('content_type', 'object_id'), ('get_related_object_link', 'field'), 'message')
         }),
         ('Status', {
             'fields': ('is_resolved', 'note')
@@ -92,7 +92,7 @@ class FeedbackDataAdmin(ModelAdmin):
             obj = self.get_object(request, object_id)
             obj.is_resolved = True
             obj.note = note
-            obj.save(request=request)
+            obj.save()
 
             # Thông báo đến user gửi feedback rằng feedback đã được xử lý
             noti= Notification(
