@@ -6,8 +6,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const desiredBind = `(adminTheme === 'dark' || (adminTheme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) ? 'dark' : 'light'`;
 
-    if (!htmlTag.hasAttribute("x-bind:data-theme")) {
-        htmlTag.setAttribute("x-bind:data-theme", desiredBind);
+    if (!htmlTag.hasAttribute("x-bind:class")) {
+        htmlTag.setAttribute("x-bind:class", desiredBind);
     }
 });
 
