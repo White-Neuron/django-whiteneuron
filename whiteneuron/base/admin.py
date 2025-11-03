@@ -480,6 +480,9 @@ def init_app_db():
             for item in items:
                 app_name= item.get('title', None)
                 link= item.get('link', None)
+                if '/base/app/' in str(link):
+                    # bỏ qua link quản trị app
+                    continue
                 icon= item.get('icon', None)
                 permission= item.get('permission', None)
                 if app_name and link:
@@ -494,7 +497,7 @@ def init_app_db():
         pass
     # Cập nhật hoặc tạo mới các app từ sidebar_apps
     for app in sidebar_apps:
-        obj= App.objects.filter(name= app['name']).first()
+        obj= App.objects.filter(url= app['url']).first()
         if obj is None:
             obj= App()
         obj.name= app['name']
@@ -508,7 +511,7 @@ def init_app_db():
     # set active= False cho các app không có trong sidebar_apps
     existing_apps= App.objects.all()
     for obj in existing_apps:
-        if not any(app['name'] == obj.name for app in sidebar_apps):
+        if not any(app['url'] == obj.url for app in sidebar_apps):
             obj.is_active= False
             obj.save(notification= False)
     
@@ -521,7 +524,7 @@ from whiteneuron.dashboard.views import dashboard_callback
 @admin.register(App, site=base_admin_site)
 class AppAdmin(ModelAdmin):
 
-    # list_before_template= 'admin/header.html'
+    list_before_template= 'admin/header.html'
 
     list_display = ['icon_display', 'name', 'is_active', 'category', 'permission']
     search_fields = ['name']
@@ -532,6 +535,8 @@ class AppAdmin(ModelAdmin):
             'fields': ('name', 'is_active', 'icon', 'url')
         }),
     )
+
+    list_filter_submit= False
 
     default_toggle_sidebar= False
 
@@ -560,12 +565,12 @@ class AppAdmin(ModelAdmin):
     def grid_item_header(self, obj):
         s= ''
         if not obj.icon:
-            s= '<span class="material-symbols-outlined" style="font-size: 162px;">apps</span>'
+            s= '<span class="material-symbols-outlined" style="font-size: 132px;">apps</span>'
         else:
             if obj.icon.startswith('http://') or obj.icon.startswith('https://'):
-                s= f'<img src="{obj.icon}" height="162" class="rounded-lg"/>'
+                s= f'<img src="{obj.icon}" height="132" class="rounded-lg"/>'
             else:
-                s= f'<span class="material-symbols-outlined" style="font-size: 162px;">{obj.icon}</span>'
+                s= f'<span class="material-symbols-outlined" style="font-size: 132px;">{obj.icon}</span>'
         string= f"""
 <div class="ui-card ui-card-side">
     <div class="flex justify-center">
@@ -577,7 +582,7 @@ class AppAdmin(ModelAdmin):
         {'<span class="ui-badge ui-badge-success">Active</span>' if obj.is_active else '<span class="ui-badge ui-badge-danger">Inactive</span>'}
         </div>
         <div class="flex flex-row items-center gap-2">
-        {'<span class="ui-badge ui-badge-info ui-badge-outline h-full px-5">' + obj.category + '</span>' if obj.category else ''}
+        {'<span class="ui-badge ui-badge-info ui-badge-outline h-full px-3">' + obj.category + '</span>' if obj.category else ''}
         </div>
     </div>
 </div>
@@ -615,5 +620,9 @@ class AppAdmin(ModelAdmin):
     def changelist_view(self, request, extra_context=None):
         if extra_context is None:
             extra_context= {}
-        # extra_context.update(dashboard_callback(request, extra_context))
+        extra_context.update(dashboard_callback(request, extra_context))
+        extra_context['title']= _('Dashboard')
         return super().changelist_view(request, extra_context)
+    
+    def get_list_filter(self, request):
+        return ['category']

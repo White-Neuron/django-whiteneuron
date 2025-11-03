@@ -10,4 +10,4 @@ from unfold.views import UnfoldModelAdminViewMixin
 
 
 class HomeView(RedirectView):
-    pattern_name = "admin:index"
+    pattern_name = "admin:base_app_changelist"
