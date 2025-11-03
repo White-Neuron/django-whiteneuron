@@ -568,7 +568,7 @@ UNFOLD = {
                     },
                     {
                         "title": _("Notifications config"),
-                        "icon": "notifications",
+                        "icon": "notification_important",
                         "link": reverse_lazy("admin:notification_notificationconfig_changelist"),
                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
                     }
