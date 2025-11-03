@@ -10,7 +10,7 @@
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 /* DaisyUI v5 — CHỈ 1 plugin block */
 @plugin "daisyui" {
-  themes: light --default, dark --prefersdark, cyberpunk;
+  themes: light --default, dark --prefersdark;
   prefix: ui-;
   logs: true;
 }
