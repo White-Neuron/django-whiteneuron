@@ -1,5 +1,5 @@
 from django.utils import timezone
-from .models import User, UserActivity
+from .models import User, UserActivity, App
 from django.contrib.auth.models import Group
 
 # count time run function
@@ -35,6 +35,9 @@ def user_badge_callback(request):
 def group_badge_callback(request):
     return ""
 
+def app_badge_callback(request):
+    return base_badge_callback(request, App)
+
 def permission_callback(request):
     return False
 
@@ -48,6 +51,9 @@ def permission_admin_callback(request):
 
 def permission_non_guest_callback(request):
     return not request.user.groups.filter(name='Khách thăm').exists()
+
+def prmission_viewer_callback(request):
+    return True
 
 
 TEMPLATE="""

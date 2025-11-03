@@ -272,9 +272,8 @@ class BaseModel(SoftDeleteModel):
             self.created_at = timezone.now()
             self.updated_at = timezone.now()
             action= 'create'
-            title= f"{_('New')} {self._meta.verbose_name} \"{self}\" {_('has been created by user')} \"{self.created_by}\""
-            
-        else:  # Nếu là cập nhật
+            if notification: title= f"{_('New')} {self._meta.verbose_name} \"{self}\" {_('has been created by user')} \"{self.created_by}\"" 
+        elif notification:  # Nếu là cập nhật và có yêu cầu gửi thông báo
             fields_changed= []
             if hasattr(self.__class__, 'objects_all'):
                 old= self.__class__.objects_all.get(pk= self.pk)
@@ -622,3 +621,173 @@ class Mail(BaseModel):
 
     def is_sent(self):
         return self.status == 'sent'
+    
+
+# Apps
+
+# Init data cho bảng App with Model Manager and Settings
+# UNFOLD = {
+#.    ..........
+#     "SIDEBAR": {
+#         "show_search": True,
+#         "show_all_applications": False,
+#         "navigation": [
+#             {
+#                 "title": _("Navigation"),
+#                 "items": [
+#                     {
+#                         "title": _("Dashboard"),
+#                         "icon": "dashboard",
+#                         "link": reverse_lazy("admin:index"),
+#                     },
+#                     {
+#                         "title": _("Notifications"),
+#                         "icon": "notifications",
+#                         "link": reverse_lazy("admin:notification_notification_changelist"),
+#                         "badge": "whiteneuron.notification.utils.notification_badge_callback",
+#                     },
+#                     {
+#                         "title": _("Feedbacks"),
+#                         "icon": "feedback",
+#                         "link": reverse_lazy("admin:feedbacks_feedbackdata_changelist"),
+#                         "badge": "whiteneuron.feedbacks.utils.feedback_data_badge_callback",
+#                     },
+#                 ],
+#             },
+#             {
+#                 "title": _("File Management"),
+#                 "collapsible": True,
+#                 "items": [
+#                     {
+#                         "title": _("Excel Files"),
+#                         "icon": "table",
+#                         "link": reverse_lazy("admin:file_management_excelfile_changelist"),
+#                         "badge": "whiteneuron.file_management.utils.excelfile_badge_callback",
+#                         "permission": "whiteneuron.base.utils.permission_non_guest_callback",
+#                     },
+#                     {
+#                         "title": _("PDF Files"),
+#                         "icon": "picture_as_pdf",
+#                         "link": reverse_lazy("admin:file_management_pdffile_changelist"),
+#                         "badge": "whiteneuron.file_management.utils.pdffile_badge_callback",
+#                         "permission": "whiteneuron.base.utils.permission_non_guest_callback",
+#                     },
+#                 ],
+#             },
+#             {
+#                 "title": _("Users & Groups"),
+#                 "collapsible": True,
+#                 "items": [
+#                     {
+#                         "title": _("Users"),
+#                         "icon": "person",
+#                         "link": reverse_lazy("admin:base_user_changelist"),
+#                         "badge": "whiteneuron.base.utils.user_badge_callback",
+#                         "permission": "whiteneuron.base.utils.permission_admin_callback",
+#                     },
+#                     {
+#                         "title": _("User activity"),
+#                         "icon": "history",
+#                         "link": reverse_lazy("admin:base_useractivity_changelist"),
+#                         "badge": "whiteneuron.base.utils.useractivity_badge_callback",
+#                         "permission": "whiteneuron.base.utils.permission_admin_callback",
+#                     },
+#                     {
+#                         "title": _("Groups"),
+#                         "icon": "group",
+#                         "link": reverse_lazy("admin:auth_group_changelist"),
+#                         "badge": "whiteneuron.base.utils.group_badge_callback",
+#                         "permission": "whiteneuron.base.utils.permission_admin_callback",
+#                     },
+#                 ],
+#             },
+#             {
+#                 "title": _("System"),
+#                 "collapsible": True,
+#                 "items": [
+#                     {
+#                         "title": _("Images"),
+#                         "icon": "image",
+#                         "link": reverse_lazy("admin:base_image_changelist"),
+#                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
+#                     },
+#                     {
+#                         "title": _("Emails"),
+#                         "icon": "email",
+#                         "link": reverse_lazy("admin:base_mail_changelist"),
+#                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
+#                     },
+#                     {
+#                         "title": _("Notifications config"),
+#                         "icon": "notifications",
+#                         "link": reverse_lazy("admin:notification_notificationconfig_changelist"),
+#                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
+#                     }
+#                 ],
+#             },
+#             {
+#                 "title": _("Celery Tasks"),
+#                 "collapsible": True,
+#                 "items": [
+#                     {
+#                         "title": _("Clocked"),
+#                         "icon": "hourglass_bottom",
+#                         "link": reverse_lazy(
+#                             "admin:django_celery_beat_clockedschedule_changelist"
+#                         ),
+#                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
+#                     },
+#                     {
+#                         "title": _("Crontabs"),
+#                         "icon": "update",
+#                         "link": reverse_lazy(
+#                             "admin:django_celery_beat_crontabschedule_changelist"
+#                         ),
+#                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
+#                     },
+#                     {
+#                         "title": _("Intervals"),
+#                         "icon": "arrow_range",
+#                         "link": reverse_lazy(
+#                             "admin:django_celery_beat_intervalschedule_changelist"
+#                         ),
+#                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
+#                     },
+#                     {
+#                         "title": _("Periodic tasks"),
+#                         "icon": "task",
+#                         "link": reverse_lazy(
+#                             "admin:django_celery_beat_periodictask_changelist"
+#                         ),
+#                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
+#                     },
+#                     {
+#                         "title": _("Solar events"),
+#                         "icon": "event",
+#                         "link": reverse_lazy(
+#                             "admin:django_celery_beat_solarschedule_changelist"
+#                         ),
+#                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
+#                     },
+#                 ],
+#             },
+#         ],
+#     },
+# }
+
+class App(BaseModel):
+    name = models.CharField(max_length=255, verbose_name= _('App name'))
+    is_active = models.BooleanField(default=True, verbose_name= _('Active'))
+    icon= models.CharField(max_length=255, blank=True, null=True, verbose_name= _('Icon'), help_text= _('Icon name (Material Symbols Outlined) or URL'))
+    url = models.URLField(blank=True, null=True, verbose_name= _('URL'))
+    category = models.CharField(max_length=255, blank=True, null=True, verbose_name= _('Category'))
+    permission= models.CharField(max_length=255, blank=True, null=True, verbose_name= _('Permission'), help_text= _('Permission required to access this app'))
+    class Meta:
+        verbose_name = _('App')
+        verbose_name_plural = _('Apps')
+        ordering = ['id']
+
+    def __str__(self):
+        if self.name:
+            return self.name
+        return f'App {self.id}'
