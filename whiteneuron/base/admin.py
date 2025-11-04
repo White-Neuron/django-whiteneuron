@@ -57,9 +57,11 @@ from unfold.widgets import (
     UnfoldAdminTextInputWidget,
 )
 
-from .models import User, Tag, UserActivity, UserProfile
+from .models import User, Tag, UserActivity, UserProfile, App
 from .sites import base_admin_site
 from django.utils.safestring import mark_safe
+
+from django.templatetags.static import static
 
 from .modeladmin import ModelAdmin
 
@@ -496,3 +498,173 @@ class MailAdmin(ModelAdmin):
     preview_email.short_description = _('Content')
 
 
+from django.conf import settings
+from django.core.cache import cache
+
+def init_app_db():
+    # Kiểm tra xem hàm đã được chạy chưa
+    cache_key = 'init_app_db_executed'
+    if cache.get(cache_key):
+        return  # Đã chạy rồi, bỏ qua
+    
+    print("Initializing App database from UNFOLD SIDEBAR...")
+    
+    # Get apps from SIDEBAR in UNFOLD settings
+    sidebar_apps= []
+    try:
+        sidebar= settings.UNFOLD.get('SIDEBAR', {})
+        navigation= sidebar.get('navigation', [])
+        for section in navigation:
+            category= section.get('title', None)
+            items= section.get('items', [])
+            for item in items:
+                app_name= item.get('title', None)
+                link= item.get('link', None)
+                if '/base/app/' in str(link):
+                    # bỏ qua link quản trị app
+                    continue
+                icon= item.get('icon', None)
+                permission= item.get('permission', None)
+                thumbnail_url= item.get('thumbnail', None)
+                if app_name and link:
+                    sidebar_apps.append({
+                        'name': app_name,
+                        'url': link,
+                        'icon': icon,
+                        'category': category,
+                        'permission': permission,
+                        'thumbnail_url': thumbnail_url,
+                    })
+    except:
+        pass
+    # Cập nhật hoặc tạo mới các app từ sidebar_apps
+    for app in sidebar_apps:
+        obj= App.objects.filter(url= app['url']).first()
+        if obj is None:
+            obj= App()
+        obj.name= app['name']
+        obj.url= app['url']
+        obj.icon= app['icon']
+        obj.category= app['category']
+        obj.permission= app['permission']
+        obj.thumbnail_url= app['thumbnail_url']
+        obj.is_active= True
+        obj.save(notification= False)
+
+    # set active= False cho các app không có trong sidebar_apps
+    existing_apps= App.objects.all()
+    for obj in existing_apps:
+        if not any(app['url'] == obj.url for app in sidebar_apps):
+            obj.is_active= False
+            obj.save(notification= False)
+    
+    # Đánh dấu đã chạy xong (cache vĩnh viễn hoặc thời gian rất dài)
+    cache.set(cache_key, True, timeout=None)
+
+# App Model Admin
+from django.utils.module_loading import import_string
+from whiteneuron.dashboard.views import dashboard_callback
+@admin.register(App, site=base_admin_site)
+class AppAdmin(ModelAdmin):
+
+    list_before_template= 'admin/header.html'
+
+    list_display = ['icon_display', 'name', 'is_active', 'category', 'permission']
+    search_fields = ['name']
+    list_filter = ['is_active', 'category']
+    readonly_fields = ['icon_display']
+    fieldsets = (
+        (_('App info'), {
+            'fields': ('name', 'is_active', 'icon', 'url')
+        }),
+    )
+
+    list_filter_submit= False
+
+    default_toggle_sidebar= False
+
+    def icon_display(self, instance: App):
+        if instance.icon:
+            if instance.icon.startswith('http://') or instance.icon.startswith('https://'):
+                return format_html(f'<img src="{instance.icon}" height="48"/>')
+            else:
+                return format_html(f'<span class="material-symbols-outlined" style="font-size: 48px;">{instance.icon}</span>')
+        return None
+    icon_display.short_description = _('Icon')
+
+    def has_add_permission(self, request):
+        return False
+    
+    def has_change_permission(self, request, obj = ...):
+        return False   
+    
+    def has_delete_permission(self, request, obj = ...):
+        return False
+
+    grid_view= True
+    grid_exclude_fields_list_display= ['icon_display', 'is_active', 'name', 'category', 'permission']
+    action_buttons= False
+
+    def grid_item_header(self, obj):
+        s= ''
+        if obj.thumbnail_url:
+            s= f'<img src="{static(obj.thumbnail_url)}" height="132" class="rounded-lg"/>'
+        elif not obj.icon:
+            s= '<span class="material-symbols-outlined" style="font-size: 132px;">apps</span>'
+        else:
+            s= f'<span class="material-symbols-outlined" style="font-size: 132px;">{obj.icon}</span>'
+        string= f"""
+<div class="ui-card ui-card-side">
+    <div class="flex justify-center items-center w-36 h-36">
+        {s}
+    </div>
+    <div class="ui-card-body">
+        <h5>{obj.name}</h5>
+        <div class="flex flex-row items-center gap-2">
+        {'<span class="ui-badge ui-badge-success">Active</span>' if obj.is_active else '<span class="ui-badge ui-badge-danger">Inactive</span>'}
+        </div>
+        <div class="flex flex-row items-center gap-2">
+        {'<span class="ui-badge ui-badge-info ui-badge-outline h-full px-3">' + obj.category + '</span>' if obj.category else ''}
+        </div>
+    </div>
+</div>
+"""
+        return mark_safe(string)
+    grid_item_header.short_description = "Header"
+
+    def has_permission(self, request, obj= None):
+        if request.user.is_superuser:
+            return True
+        permission= obj.permission if obj else None # string like: 'whiteneuron.base.utils.permission_admin_callback'
+        if permission:
+            perm_func= import_string(permission)
+            if perm_func:
+                return perm_func(request)
+        return True
+
+    def get_queryset(self, request):
+        init_app_db()
+        return super(AppAdmin, self).get_queryset(request).filter(is_active= True)
+    
+    def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
+        ## Điều hướng tới url của app
+        app= get_object_or_404(App, pk= object_id)
+        if not app.is_active:
+            messages.error(request, _("This app is not active."))
+            return redirect(reverse_lazy('admin:base_app_changelist'))
+        if not self.has_permission(request, app):
+            messages.error(request, _("You do not have permission to access this app."))
+            return redirect(reverse_lazy('admin:base_app_changelist'))
+        if app.url:
+            return redirect(app.url)
+        return super().changeform_view(request, object_id, form_url, extra_context)
+
+    def changelist_view(self, request, extra_context=None):
+        if extra_context is None:
+            extra_context= {}
+        extra_context.update(dashboard_callback(request, extra_context))
+        extra_context['title']= _('Dashboard')
+        return super().changelist_view(request, extra_context)
+    
+    def get_list_filter(self, request):
+        return ['category']

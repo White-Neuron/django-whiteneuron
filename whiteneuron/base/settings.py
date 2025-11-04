@@ -494,22 +494,32 @@ UNFOLD = {
             {
                 "title": _("Navigation"),
                 "items": [
+                    # {
+                    #     "title": _("Dashboard"),
+                    #     "icon": "dashboard",
+                    #     "link": reverse_lazy("admin:index"),
+                    #     "permission": "whiteneuron.base.utils.prmission_viewer_callback",
+                    # },
                     {
                         "title": _("Dashboard"),
                         "icon": "dashboard",
-                        "link": reverse_lazy("admin:index"),
+                        "link": reverse_lazy("admin:base_app_changelist"),
+                        "badge": "whiteneuron.base.utils.app_badge_callback",
+                        "permission": "whiteneuron.base.utils.prmission_viewer_callback",
                     },
                     {
                         "title": _("Notifications"),
                         "icon": "notifications",
                         "link": reverse_lazy("admin:notification_notification_changelist"),
                         "badge": "whiteneuron.notification.utils.notification_badge_callback",
+                        "permission": "whiteneuron.base.utils.permission_non_guest_callback",
                     },
                     {
                         "title": _("Feedbacks"),
                         "icon": "feedback",
                         "link": reverse_lazy("admin:feedbacks_feedbackdata_changelist"),
                         "badge": "whiteneuron.feedbacks.utils.feedback_data_badge_callback",
+                        "permission": "whiteneuron.base.utils.permission_non_guest_callback",
                     },
                 ],
             },
@@ -578,7 +588,7 @@ UNFOLD = {
                     },
                     {
                         "title": _("Notifications config"),
-                        "icon": "notifications",
+                        "icon": "notification_important",
                         "link": reverse_lazy("admin:notification_notificationconfig_changelist"),
                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
                     }

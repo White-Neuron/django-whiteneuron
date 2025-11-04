@@ -30,7 +30,8 @@ window.applyGlobalTheme = function(theme) {
     
     // Tìm tất cả các component "đảo" (dialogs, tables, v.v.) và áp theme
     const elementsToTheme = document.querySelectorAll(
-        'dialog, .ui-modal, .ui-toast, .ui-table, [class^="ui-"]'
+        // Bắt mọi phần tử có token class bắt đầu bằng "ui-" (kể cả không đứng đầu)
+        'dialog, .ui-modal, .ui-modal-box, .ui .ui-toast, .ui-table, [class^="ui-"], [class*=" ui-"]'
     );
     
     elementsToTheme.forEach((el) => {

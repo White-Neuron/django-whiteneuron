@@ -110,12 +110,12 @@ def dashboard_callback(request, context):
     # total_activities_icd10 = user_activities.filter(path__startswith="/admin/icd10").count()
     # total_activities_last_week_icd10 = user_activities_last_week.filter(path__startswith="/admin/icd10").count()
 
-    total_activities_icd10 = user_activities.filter(path__startswith="/admin/icd10").count()
-    total_activities_last_icd10 = user_activities_last.filter(path__startswith="/admin/icd10").count()
+    # total_activities_icd10 = user_activities.filter(path__startswith="/admin/icd10").count()
+    # total_activities_last_icd10 = user_activities_last.filter(path__startswith="/admin/icd10").count()
 
-    # top user TODO: top user
-    top_user = user_activities.values("user").annotate(count=Count("id")).order_by("-count")[:5]
-    top_user_last = user_activities_last.values("user").annotate(count=Count("id")).order_by("-count")[:5]
+    # # top user TODO: top user
+    # top_user = user_activities.values("user").annotate(count=Count("id")).order_by("-count")[:5]
+    # top_user_last = user_activities_last.values("user").annotate(count=Count("id")).order_by("-count")[:5]
 
     # chart data 28 days for activities success, error
     user_activities_28_days = UserActivity.objects.filter(timestamp__gte=timezone.now()-datetime.timedelta(days=28))
@@ -157,11 +157,11 @@ def dashboard_callback(request, context):
         }
 
 
-    positive = [[1, random.randrange(8, 28)] for i in range(1, 28)]
-    negative = [[-1, -random.randrange(8, 28)] for i in range(1, 28)]
-    average = [r[1] - random.randint(3, 5) for r in positive]
-    performance_positive = [[1, random.randrange(8, 28)] for i in range(1, 28)]
-    performance_negative = [[-1, -random.randrange(8, 28)] for i in range(1, 28)]
+    # positive = [[1, random.randrange(8, 28)] for i in range(1, 28)]
+    # negative = [[-1, -random.randrange(8, 28)] for i in range(1, 28)]
+    # average = [r[1] - random.randint(3, 5) for r in positive]
+    # performance_positive = [[1, random.randrange(8, 28)] for i in range(1, 28)]
+    # performance_negative = [[-1, -random.randrange(8, 28)] for i in range(1, 28)]
 
     context.update(
         {
@@ -215,39 +215,39 @@ def dashboard_callback(request, context):
                 #     ),
                 # },
             ],
-            "progress": [
-                {
-                    "title": "Social marketing e-book",
-                    "description": " $1,234.56",
-                    "value": random.randint(10, 90),
-                },
-                {
-                    "title": "Freelancing tasks",
-                    "description": " $1,234.56",
-                    "value": random.randint(10, 90),
-                },
-                {
-                    "title": "Development coaching",
-                    "description": " $1,234.56",
-                    "value": random.randint(10, 90),
-                },
-                {
-                    "title": "Product consulting",
-                    "description": " $1,234.56",
-                    "value": random.randint(10, 90),
-                },
-                {
-                    "title": "Other income",
-                    "description": " $1,234.56",
-                    "value": random.randint(10, 90),
-                },
-            ],
+            # "progress": [
+            #     {
+            #         "title": "Social marketing e-book",
+            #         "description": " $1,234.56",
+            #         "value": random.randint(10, 90),
+            #     },
+            #     {
+            #         "title": "Freelancing tasks",
+            #         "description": " $1,234.56",
+            #         "value": random.randint(10, 90),
+            #     },
+            #     {
+            #         "title": "Development coaching",
+            #         "description": " $1,234.56",
+            #         "value": random.randint(10, 90),
+            #     },
+            #     {
+            #         "title": "Product consulting",
+            #         "description": " $1,234.56",
+            #         "value": random.randint(10, 90),
+            #     },
+            #     {
+            #         "title": "Other income",
+            #         "description": " $1,234.56",
+            #         "value": random.randint(10, 90),
+            #     },
+            # ],
             "chart": json.dumps(
                 {
                     "labels": _28_days,
                     "datasets": [
                         {
-                            "label": "Example 1",
+                            "label": "Average",
                             "type": "line",
                             "data": user_activities_28_days['average'],
                             "backgroundColor": "#f0abfc",
@@ -266,38 +266,38 @@ def dashboard_callback(request, context):
                     ],
                 }
             ),
-            "performance": [
-                {
-                    "title": _("Last week revenue"),
-                    "metric": "$1,234.56",
-                    "footer": mark_safe(
-                        '<strong class="text-green-600 font-medium">+3.14%</strong>&nbsp;progress from last week'
-                    ),
-                    "chart": json.dumps(
-                        {
-                            "labels": [WEEKDAYS[day % 7] for day in range(1, 28)],
-                            "datasets": [
-                                {"data": performance_positive, "borderColor": "#9333ea"}
-                            ],
-                        }
-                    ),
-                },
-                {
-                    "title": _("Last week expenses"),
-                    "metric": "$1,234.56",
-                    "footer": mark_safe(
-                        '<strong class="text-green-600 font-medium">+3.14%</strong>&nbsp;progress from last week'
-                    ),
-                    "chart": json.dumps(
-                        {
-                            "labels": [WEEKDAYS[day % 7] for day in range(1, 28)],
-                            "datasets": [
-                                {"data": performance_negative, "borderColor": "#f43f5e"}
-                            ],
-                        }
-                    ),
-                },
-            ],
+            # "performance": [
+            #     {
+            #         "title": _("Last week revenue"),
+            #         "metric": "$1,234.56",
+            #         "footer": mark_safe(
+            #             '<strong class="text-green-600 font-medium">+3.14%</strong>&nbsp;progress from last week'
+            #         ),
+            #         "chart": json.dumps(
+            #             {
+            #                 "labels": [WEEKDAYS[day % 7] for day in range(1, 28)],
+            #                 "datasets": [
+            #                     {"data": performance_positive, "borderColor": "#9333ea"}
+            #                 ],
+            #             }
+            #         ),
+            #     },
+            #     {
+            #         "title": _("Last week expenses"),
+            #         "metric": "$1,234.56",
+            #         "footer": mark_safe(
+            #             '<strong class="text-green-600 font-medium">+3.14%</strong>&nbsp;progress from last week'
+            #         ),
+            #         "chart": json.dumps(
+            #             {
+            #                 "labels": [WEEKDAYS[day % 7] for day in range(1, 28)],
+            #                 "datasets": [
+            #                     {"data": performance_negative, "borderColor": "#f43f5e"}
+            #                 ],
+            #             }
+            #         ),
+            #     },
+            # ],
         },
     )
 

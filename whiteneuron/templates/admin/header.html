@@ -1,0 +1,32 @@
+{% load i18n unfold %}
+
+{% block extrahead %}
+{% if plausible_domain %}
+        <script defer data-domain="{{ plausible_domain }}" src="https://plausible.io/js/script.js"></script>
+    {% endif %}    
+{% endblock %}
+
+{% block content %}
+    {% include "unfold/helpers/messages.html" %}
+    {% component "unfold/components/container.html" %}
+        {% component "unfold/components/flex.html" with class="gap-4 mb-4 flex-col lg:flex-row" %}
+            {% component "unfold/components/flex.html" with class="gap-4 flex-col lg:flex-row" %}
+                {% for stats in kpi %}
+                    {% trans stats.label as label %}
+                    {% component "unfold/components/card.html" with class="lg:w-1/3" label=label footer=stats.footer %}
+                        {% component "unfold/components/text.html" %}
+                            {{ stats.title }}
+                        {% endcomponent %}   
+                        {% component "unfold/components/title.html" %}
+                            {{ stats.metric }}
+                        {% endcomponent %}                                  
+                    {% endcomponent %}
+                {% endfor %}
+            {% endcomponent %}
+            {% trans "Website performance in last 28 days" as title_ %}
+            {% component "unfold/components/card.html" with class="" title=title_ %}
+                {% component "unfold/components/chart/bar.html" with data=chart height=126 %}{% endcomponent %}
+            {% endcomponent %}
+        {% endcomponent %}
+    {% endcomponent %}
+{% endblock %}
