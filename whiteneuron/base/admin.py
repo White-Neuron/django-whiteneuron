@@ -61,6 +61,8 @@ from .models import User, Tag, UserActivity, UserProfile, App
 from .sites import base_admin_site
 from django.utils.safestring import mark_safe
 
+from django.templatetags.static import static
+
 from .modeladmin import ModelAdmin
 
 admin.site.unregister(PeriodicTask)
@@ -485,6 +487,7 @@ def init_app_db():
                     continue
                 icon= item.get('icon', None)
                 permission= item.get('permission', None)
+                thumbnail_url= item.get('thumbnail', None)
                 if app_name and link:
                     sidebar_apps.append({
                         'name': app_name,
@@ -492,6 +495,7 @@ def init_app_db():
                         'icon': icon,
                         'category': category,
                         'permission': permission,
+                        'thumbnail_url': thumbnail_url,
                     })
     except:
         pass
@@ -505,6 +509,7 @@ def init_app_db():
         obj.icon= app['icon']
         obj.category= app['category']
         obj.permission= app['permission']
+        obj.thumbnail_url= app['thumbnail_url']
         obj.is_active= True
         obj.save(notification= False)
 
@@ -564,16 +569,15 @@ class AppAdmin(ModelAdmin):
 
     def grid_item_header(self, obj):
         s= ''
-        if not obj.icon:
+        if obj.thumbnail_url:
+            s= f'<img src="{static(obj.thumbnail_url)}" height="132" class="rounded-lg"/>'
+        elif not obj.icon:
             s= '<span class="material-symbols-outlined" style="font-size: 132px;">apps</span>'
         else:
-            if obj.icon.startswith('http://') or obj.icon.startswith('https://'):
-                s= f'<img src="{obj.icon}" height="132" class="rounded-lg"/>'
-            else:
-                s= f'<span class="material-symbols-outlined" style="font-size: 132px;">{obj.icon}</span>'
+            s= f'<span class="material-symbols-outlined" style="font-size: 132px;">{obj.icon}</span>'
         string= f"""
 <div class="ui-card ui-card-side">
-    <div class="flex justify-center">
+    <div class="flex justify-center items-center w-36 h-36">
         {s}
     </div>
     <div class="ui-card-body">

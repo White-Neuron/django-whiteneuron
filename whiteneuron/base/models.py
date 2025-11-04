@@ -782,6 +782,8 @@ class App(BaseModel):
     url = models.URLField(blank=True, null=True, verbose_name= _('URL'))
     category = models.CharField(max_length=255, blank=True, null=True, verbose_name= _('Category'))
     permission= models.CharField(max_length=255, blank=True, null=True, verbose_name= _('Permission'), help_text= _('Permission required to access this app'))
+    thumbnail_url= models.URLField(blank=True, null=True, verbose_name= _('Thumbnail URL'))
+
     class Meta:
         verbose_name = _('App')
         verbose_name_plural = _('Apps')
