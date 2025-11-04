@@ -134,10 +134,9 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
 
     def grid_item_header(self, obj):
         if obj.is_bot:
-            s= '<span class="material-symbols-outlined" style="font-size: 192px;">smart_toy</span>'
+            avatar_content = '<span class="material-symbols-outlined" style="font-size: 192px;">smart_toy</span>'
         elif not obj.avatar:
-            s= '<span class="material-symbols-outlined" style="font-size: 192px;">person</span>'
-
+            avatar_content = '<span class="material-symbols-outlined" style="font-size: 192px;">person</span>'
         else:
             avatar_content = f'''
             <div class="w-full h-full ui-mask ui-mask-squircle overflow-hidden bg-base-300/50 dark:bg-base-700/50 ring-1 ring-base-content/10 dark:ring-base-content/20">
