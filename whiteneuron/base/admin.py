@@ -623,7 +623,7 @@ class AppAdmin(ModelAdmin):
         {'<span class="ui-badge ui-badge-success">Active</span>' if obj.is_active else '<span class="ui-badge ui-badge-danger">Inactive</span>'}
         </div>
         <div class="flex flex-row items-center gap-2">
-        {'<span class="ui-badge ui-badge-info ui-badge-outline h-full px-3">' + obj.category + '</span>' if obj.category else ''}
+        {'<span class="ui-badge ui-badge-info ui-badge-outline h-full">' + obj.category + '</span>' if obj.category else ''}
         </div>
     </div>
 </div>
