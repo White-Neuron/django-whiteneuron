@@ -15,6 +15,7 @@ function toast_(message, type = "info", title = "Notification") {
     const toastContainer = document.getElementById("toast-container");
     if (toastContainer) {
         const toastItem = document.createElement("div");
+        toastItem.setAttribute("role", "alert");
         toastItem.className = `ui-alert ui-alert-${type}`;
         toastItem.innerHTML = `
             <span>${title}</span>
