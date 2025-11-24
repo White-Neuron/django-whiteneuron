@@ -607,23 +607,21 @@ class AppAdmin(ModelAdmin):
     def grid_item_header(self, obj):
         s= ''
         if obj.thumbnail_url:
-            s= f'<img src="{static(obj.thumbnail_url)}" height="132" class="rounded-lg"/>'
+            s= f'<img src="{static(obj.thumbnail_url)}" class="h-24 w-24 object-contain rounded-lg"/>'
         elif not obj.icon:
-            s= '<span class="material-symbols-outlined" style="font-size: 132px;">apps</span>'
+            s= '<span class="material-symbols-outlined" style="font-size: 6rem;">apps</span>'
         else:
-            s= f'<span class="material-symbols-outlined" style="font-size: 132px;">{obj.icon}</span>'
+            s= f'<span class="material-symbols-outlined" style="font-size: 6rem;">{obj.icon}</span>'
         string= f"""
-<div class="ui-card ui-card-side">
-    <div class="flex justify-center items-center w-36 h-36">
+<div class="ui-card h-full bg-base-100 shadow-sm hover:shadow-md transition-all border border-base-200">
+    <div class="flex justify-center items-center p-6">
         {s}
     </div>
-    <div class="ui-card-body">
-        <h5>{obj.name}</h5>
-        <div class="flex flex-row items-center gap-2">
-        {'<span class="ui-badge ui-badge-success">Active</span>' if obj.is_active else '<span class="ui-badge ui-badge-danger">Inactive</span>'}
-        </div>
-        <div class="flex flex-row items-center gap-2">
-        {'<span class="ui-badge ui-badge-info ui-badge-outline h-full">' + obj.category + '</span>' if obj.category else ''}
+    <div class="ui-card-body p-4 pt-0 text-center items-center">
+        <h5 class="font-bold text-lg mb-1">{obj.name}</h5>
+        <div class="flex flex-wrap justify-center gap-2">
+            {'<span class="ui-badge ui-badge-success ui-badge-sm">Active</span>' if obj.is_active else '<span class="ui-badge ui-badge-error ui-badge-sm">Inactive</span>'}
+            {'<span class="ui-badge ui-badge-info ui-badge-outline ui-badge-sm">' + obj.category + '</span>' if obj.category else ''}
         </div>
     </div>
 </div>
