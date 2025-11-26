@@ -613,13 +613,13 @@ class AppAdmin(ModelAdmin):
         else:
             s= f'<span class="material-symbols-outlined" style="font-size: 6rem;">{obj.icon}</span>'
         string= f"""
-<div class="ui-card h-full bg-base-100 shadow-sm hover:shadow-md transition-all border border-base-200">
-    <div class="flex justify-center items-center p-6">
+<div class="ui-card h-full flex flex-col bg-base-100 dark:bg-base-800 shadow-sm hover:shadow-md transition-all border border-base-200 dark:border-base-600">
+    <div class="flex justify-center items-center p-6 min-h-[140px]">
         {s}
     </div>
-    <div class="ui-card-body p-4 pt-0 text-center items-center">
-        <h5 class="font-bold text-lg mb-1">{obj.name}</h5>
-        <div class="flex flex-wrap justify-center gap-2">
+    <div class="ui-card-body flex flex-col flex-1 p-4 pt-0 text-center items-center">
+        <h5 class="font-bold text-lg mb-2">{obj.name}</h5>
+        <div class="mt-auto flex flex-wrap justify-center gap-2">
             {'<span class="ui-badge ui-badge-success ui-badge-sm">Active</span>' if obj.is_active else '<span class="ui-badge ui-badge-error ui-badge-sm">Inactive</span>'}
             {'<span class="ui-badge ui-badge-info ui-badge-outline ui-badge-sm">' + obj.category + '</span>' if obj.category else ''}
         </div>
