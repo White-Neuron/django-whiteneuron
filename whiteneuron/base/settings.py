@@ -150,6 +150,7 @@ INSTALLED_APPS += [
     "guardian",
     "simple_history",
     "django_celery_beat",
+    "djangoql",
 
     # Apps from the project
 ]
