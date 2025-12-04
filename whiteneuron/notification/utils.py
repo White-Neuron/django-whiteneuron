@@ -7,5 +7,5 @@ def notification_badge_callback(request):
         is_read=False,
         created_at__gte= timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)).count()
     if c==0:
-        return ''
-    return f"+{c}"
+        return 0
+    return c
