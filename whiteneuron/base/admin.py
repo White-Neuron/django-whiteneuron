@@ -134,12 +134,12 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
 
     def grid_item_header(self, obj):
         if obj.is_bot:
-            avatar_content = '<span class="material-symbols-outlined" style="font-size: 192px;">smart_toy</span>'
+            avatar_content = '<span class="material-symbols-outlined" style="font-size: 80px; line-height: 1;">smart_toy</span>'
         elif not obj.avatar:
-            avatar_content = '<span class="material-symbols-outlined" style="font-size: 192px;">person</span>'
+            avatar_content = '<span class="material-symbols-outlined" style="font-size: 80px; line-height: 1;">person</span>'
         else:
             avatar_content = f'''
-            <div class="w-full h-full ui-mask ui-mask-squircle overflow-hidden bg-base-300/50 dark:bg-base-700/50 ring-1 ring-base-content/10 dark:ring-base-content/20">
+            <div class="w-full h-full rounded-2xl overflow-hidden bg-base-300/50 dark:bg-base-700/50 ring-1 ring-base-content/10 dark:ring-base-content/20">
                 <img src="{obj.avatar.url}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"/>
             </div>
             '''
@@ -165,31 +165,29 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
         
         # Compact vertical card layout với dark mode support
         string = f"""
-<div class="ui-card bg-base-100 dark:bg-base-800 hover:bg-base-200/60 dark:hover:bg-base-700/60 shadow-lg hover:shadow-xl dark:shadow-base-content/10 transition-all duration-300 border border-base-300 dark:border-base-600 hover:border-primary/30 dark:hover:border-primary/50 group w-full max-w-xs">
+<div class="ui-card bg-base-100 dark:bg-base-800 hover:bg-base-200/60 dark:hover:bg-base-700/60 shadow-lg hover:shadow-xl dark:shadow-base-content/10 transition-all duration-300 border border-base-300 dark:border-base-600 hover:border-primary/30 dark:hover:border-primary/50 group w-full">
     <!-- Avatar Section -->
-    <figure class="p-4 flex items-center justify-center bg-gradient-to-br from-base-200/50 to-base-300/30 dark:from-base-700/50 dark:to-base-800/30 relative overflow-hidden">
+    <figure class="p-3 flex items-center justify-center bg-gradient-to-br from-base-200/50 to-base-300/30 dark:from-base-700/50 dark:to-base-800/30 relative overflow-hidden">
         <!-- Background pattern -->
         <div class="absolute inset-0 bg-gradient-to-br from-transparent via-base-content/[0.02] dark:via-base-content/[0.05] to-transparent"></div>
-        <div class="w-20 h-20 relative group-hover:scale-110 transition-transform duration-300 z-10">
+        <div class="w-20 h-20 relative group-hover:scale-110 transition-transform duration-300 z-10 flex items-center justify-center">
             {avatar_content}
         </div>
         <!-- Glow effect -->
         <div class="absolute inset-0 bg-gradient-to-br from-primary/5 dark:from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
     </figure>
 
-    <div class="ui-card-body">
+    <div class="ui-card-body py-3 px-4 pb-6 text-center">
         <h5>{obj.username}</h5>
-        <h4 class="ui-card-title">{obj.full_name}</h4>
-        <div class="flex flex-row items-center gap-2">
+        <h4 class="ui-card-title justify-center">{obj.full_name}</h4>
+        <div class="flex flex-wrap items-center justify-center gap-2 mt-3">
         {'<span class="ui-badge ui-badge-success">Active</span>' if obj.is_active else '<span class="ui-badge ui-badge-danger">Inactive</span>'}
         {'<span class="ui-badge ui-badge-success">Staff</span>' if obj.is_staff else ''}
         {'<span class="ui-badge ui-badge-warning">Superuser</span>' if obj.is_superuser else ''}
         {'<span class="ui-badge ui-badge-info">Bot</span>' if obj.is_bot else ''}
 
         </div>
-        
-        <!-- Bottom border -->
-        <div class="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-base-content/10 dark:via-base-content/20 to-transparent"></div>
+
     </div>
 </div>
 """

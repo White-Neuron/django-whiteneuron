@@ -11,6 +11,36 @@
         }
     </style>
     <link rel="stylesheet" href='{% static "base/css/btn-styles.css" %}'>
+    {% if sidebar_model_key %}
+<script>
+    (function () {
+        const globalKey = "sidebarDesktopOpen";
+        const modelKey = "sidebarDesktopOpen_{{ sidebar_model_key }}";
+        // default theo ModelAdmin: True => '1', False => '0'
+        const defaultVal = '{{ sidebar_default|yesno:"1,0"|default:"1" }}';
+
+        // 1) MỖI LẦN load trang: luôn dùng default của model
+        let perModel = defaultVal;
+        localStorage.setItem(modelKey, perModel);
+        // ép luôn globalKey cho Unfold dùng
+        localStorage.setItem(globalKey, perModel);
+
+        // 2) Bọc localStorage.setItem để khi Unfold set globalKey, ta copy sang modelKey
+        const _setItem = localStorage.setItem.bind(localStorage);
+        localStorage.setItem = function (key, value) {
+            _setItem(key, value);
+            if (key === globalKey) {
+                _setItem(modelKey, value);
+            }
+        };
+
+        console.log("Sidebar override for {{ sidebar_model_key }} ->", perModel,
+                    "global:", localStorage.getItem(globalKey));
+    })();
+</script>
+{% endif %}
+
+
 {% endblock %}
 
 {% block result_list %}

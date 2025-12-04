@@ -415,6 +415,10 @@ class ModelAdmin(UnfoldAdmin):
 
     def changelist_view(self, request, extra_context = None):
         extra_context = extra_context or {}
+        extra_context["sidebar_default"] = self.default_toggle_sidebar
+        extra_context["sidebar_model_key"] = (
+            f"{self.model._meta.app_label}_{self.model._meta.model_name}"
+        )
         extra_context['using_grid_view'] = self.using_grid_view
         if not self.using_grid_view:
             grid_view= False
@@ -453,6 +457,11 @@ class ModelAdmin(UnfoldAdmin):
         return res
     
     def changeform_view(self, request, object_id = None, form_url = "", extra_context = None):
+        extra_context = extra_context or {}
+        extra_context["sidebar_default"] = self.default_toggle_sidebar
+        extra_context["sidebar_model_key"] = (
+            f"{self.model._meta.app_label}_{self.model._meta.model_name}"
+        )
         if self.default_toggle_sidebar is not None:
             request.session["toggle_sidebar"] = self.default_toggle_sidebar
         return super().changeform_view(request, object_id, form_url, extra_context)
