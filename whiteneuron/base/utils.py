@@ -18,28 +18,31 @@ from django.core.exceptions import FieldDoesNotExist
 def base_badge_callback(request, model):
     today = timezone.localtime().replace(hour=0, minute=0, second=0, microsecond=0)
 
-    try:
-        model._meta.get_field("is_deleted")
-        model._meta.get_field("deleted_at")
-        has_soft_delete = True
-    except FieldDoesNotExist:
-        has_soft_delete = False
+    # try:
+    #     model._meta.get_field("is_deleted")
+    #     model._meta.get_field("deleted_at")
+    #     has_soft_delete = True
+    # except FieldDoesNotExist:
+    #     has_soft_delete = False
 
-    if has_soft_delete:
-        number_update = model.objects.filter(
-            is_deleted=False,
-            updated_at__gte=today,
-        ).count()
+    # if has_soft_delete:
+    #     number_update = model.objects.filter(
+    #         is_deleted=False,
+    #         updated_at__gte=today,
+    #     ).count()
         
-        number_delete= getattr(model, 'objects_all', model.objects).filter(is_deleted=True,deleted_at__gte= timezone.localtime().replace(hour=0, minute=0, second=0, microsecond=0)).count()
-        print("model:",model.__name__,"number_delete:",number_delete)
+    #     number_delete= getattr(model, 'objects_all', model.objects).filter(is_deleted=True,deleted_at__gte= timezone.localtime().replace(hour=0, minute=0, second=0, microsecond=0)).count()
+    #     print("model:",model.__name__,"number_delete:",number_delete)
 
-        c = number_update - number_delete
-    else:
-        c = model.objects.filter(
-            updated_at__gte=today,
-        ).count()
+    #     c = number_update - number_delete
+    # else:
+    #     c = model.objects.filter(
+    #         updated_at__gte=today,
+    #     ).count()
 
+    c = getattr(model, 'objects_all', model.objects).filter(
+      updated_at__gte=today,
+    ).count()
     return c
 
 
@@ -50,7 +53,7 @@ def useractivity_badge_callback(request):
     c= UserActivity.objects.filter(timestamp__gte= timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)).count()
     if c==0:
         return ''
-    return f"+{c}"
+    return f"{c}"
 
 def user_badge_callback(request):
     return base_badge_callback(request, User)

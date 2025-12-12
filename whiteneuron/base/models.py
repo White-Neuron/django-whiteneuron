@@ -273,7 +273,7 @@ class BaseModel(SoftDeleteModel):
             self.updated_at = timezone.now()
             action= 'create'
             if notification: title= f"{_('New')} {self._meta.verbose_name} \"{self}\" {_('has been created by user')} \"{self.created_by}\"" 
-        elif notification:  # Nếu là cập nhật và có yêu cầu gửi thông báo
+        else:  # Nếu là cập nhật và có yêu cầu gửi thông báo
             fields_changed= []
             if hasattr(self.__class__, 'objects_all'):
                 old= self.__class__.objects_all.get(pk= self.pk)
@@ -294,17 +294,18 @@ class BaseModel(SoftDeleteModel):
             if fields_changed:
                 self.updated_at = timezone.now()
                 self.updated_by = user
-                action= 'update'
-                title= f"{_('Update')} {self._meta.verbose_name} <strong>{self}</strong>({self.id}) {_('has been updated by user')} \"{self.updated_by}\""
-                content_html= f"{self._meta.verbose_name} <strong>{self}</strong>({self.id}) has been updated by user \"{self.updated_by}\" with the following changes: <ul>"
-                for field in fields_changed:
-                    changed_data.append({
-                        'field_name': field[0],
-                        'old_value': field[1],
-                        'new_value': field[2]
-                    })
-                    content_html+= f"<li>{field[0].verbose_name if hasattr(field[0], 'verbose_name') else field[0]}: {field[1]} -> {field[2]}</li>"
-                content_html+= "</ul>"
+                if notification:
+                    action= 'update'
+                    title= f"{_('Update')} {self._meta.verbose_name} <strong>{self}</strong>({self.id}) {_('has been updated by user')} \"{self.updated_by}\""
+                    content_html= f"{self._meta.verbose_name} <strong>{self}</strong>({self.id}) has been updated by user \"{self.updated_by}\" with the following changes: <ul>"
+                    for field in fields_changed:
+                        changed_data.append({
+                            'field_name': field[0],
+                            'old_value': field[1],
+                            'new_value': field[2]
+                        })
+                        content_html+= f"<li>{field[0].verbose_name if hasattr(field[0], 'verbose_name') else field[0]}: {field[1]} -> {field[2]}</li>"
+                    content_html+= "</ul>"
         
         super(BaseModel, self).save(*args, **kwargs)  # Lưu đối tượng trước khi gửi thông báo
         # Gửi thông báo đến người dùng
