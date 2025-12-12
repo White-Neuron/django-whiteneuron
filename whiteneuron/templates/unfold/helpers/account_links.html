@@ -1,53 +1,125 @@
 {% load i18n %}
 
-<div class="relative" x-data="{ openUserLinks: false }">
-    <a class="block cursor-pointer h-[18px] hover:text-base-700 dark:hover:text-base-200" @click="openUserLinks = !openUserLinks">
-        {% if user.avatar %}
-            <img src="{{ user.avatar.url }}" alt="{% firstof user.get_short_name user.get_username %}" class="h-8 rounded-full w-8">
-        {% else %}
-            <span class="material-symbols-outlined">person</span>
-        {% endif %}
-    </a>
-
-    <nav class="absolute bg-white border border-base-200 flex flex-col leading-none py-1 -right-2 rounded-default shadow-lg top-7 w-52 z-50 dark:bg-base-800 dark:border-base-700" x-cloak x-show="openUserLinks" x-transition x-on:click.outside="openUserLinks = false">
-        <div class="border-b border-base-200 flex flex-row shrink-0 items-start justify-start mb-1 pb-1 dark:border-base-700">
-            <span class="block mx-1 px-3 py-2 truncate">
-                {% firstof user.get_short_name user.get_username %}
-            </span>
-        </div>
-        {% if user.username != "guest" %}
-        <a href="{% url 'admin:base_userprofile_changelist' %}" target="_blank" class="mx-1 px-3 py-2 rounded-sm hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-gray-200">
-            {% translate 'User profile' %}
-        </a>
-        {% endif %}
-        {% if site_url %}
-            <a href="{{ site_url }}" target="_blank" class="mx-1 px-3 py-2 rounded-default hover:bg-base-100 hover:text-base-700 dark:hover:bg-base-700 dark:hover:text-base-200">
-                {% translate 'View site' %}
-            </a>
-        {% endif %}
-
-        {% if account_links %}
-            {% for link in account_links %}
-                <a href="{{ link.link }}" class="mx-1 px-3 py-2 rounded-default hover:bg-base-100 hover:text-base-700 dark:hover:bg-base-700 dark:hover:text-base-200">
-                    {{ link.title }}
-                </a>
-            {% endfor %}
-        {% else %}
-            {% if user.has_usable_password %}
-                <a href="{% url 'admin:password_change' %}" class="mx-1 px-3 py-2 rounded-default hover:bg-base-100 hover:text-base-700 dark:hover:bg-base-700 dark:hover:text-base-200">
-                    {% translate 'Change password' %}
-                </a>
+<div x-data="{ openUserLinks: false }">
+    <div class="flex items-center justify-center">
+        <a class="flex items-center justify-center cursor-pointer h-8 w-8 hover:text-base-700 dark:hover:text-base-200" @click="openUserLinks = true">
+            {% if user.avatar %}
+                <img src="{{ user.avatar.url }}" alt="{% firstof user.get_short_name user.get_username %}" class="h-8 rounded-full w-8">
+            {% else %}
+                <span class="material-symbols-outlined">person</span>
             {% endif %}
-        {% endif %}
+        </a>
+    </div>
 
-        <div class="border-t border-base-200 mt-1 pt-1 dark:border-base-700">
-            <form id="logout-form" method="post" action="{% url 'admin:logout' %}" class="mx-1">
-                {% csrf_token %}
-
-                <button type="submit" class="bg-none block cursor-pointer px-3 py-2 text-left text-red-500 rounded-default w-full hover:bg-red-100 dark:hover:bg-red-500/20 dark:hover:text-red-500">
-                    {% translate 'Log out' %}
+    <!-- Dialog Overlay -->
+    <div 
+        x-show="openUserLinks"
+        x-cloak
+        x-transition:enter="ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+        @click.self="openUserLinks = false"
+        @keydown.escape.window="openUserLinks = false"
+    >
+        <!-- Dialog Content -->
+        <div 
+            x-show="openUserLinks"
+            x-transition:enter="ease-out duration-300"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="ease-in duration-200"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            class="bg-white dark:bg-base-800 rounded-lg shadow-xl w-full max-w-sm border border-base-200 dark:border-base-700"
+        >
+            <!-- Header -->
+            <div class="border-b border-base-200 dark:border-base-700 px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="{% firstof user.get_short_name user.get_username %}" class="h-10 rounded-full w-10">
+                    {% else %}
+                        <span class="material-symbols-outlined text-4xl">person</span>
+                    {% endif %}
+                    <span class="font-medium text-base-900 dark:text-base-100">
+                        {% firstof user.get_short_name user.get_username %}
+                    </span>
+                </div>
+                <button 
+                    @click="openUserLinks = false"
+                    class="text-base-500 hover:text-base-700 dark:text-base-400 dark:hover:text-base-200"
+                >
+                    <span class="material-symbols-outlined">close</span>
                 </button>
-            </form>
+            </div>
+
+            <!-- Menu Items -->
+            <nav class="flex flex-col py-2">
+                {% if user.username != "guest" %}
+                <a 
+                    href="{% url 'admin:base_userprofile_changelist' %}" 
+                    target="_blank" 
+                    class="mx-2 px-3 py-2 rounded-default hover:bg-base-100 hover:text-base-700 dark:hover:bg-base-700 dark:hover:text-base-200 flex items-center gap-2"
+                    @click="openUserLinks = false"
+                >
+                    <span class="material-symbols-outlined text-lg">person</span>
+                    {% translate 'User profile' %}
+                </a>
+                {% endif %}
+                
+                {% if site_url %}
+                <a 
+                    href="{{ site_url }}" 
+                    target="_blank" 
+                    class="mx-2 px-3 py-2 rounded-default hover:bg-base-100 hover:text-base-700 dark:hover:bg-base-700 dark:hover:text-base-200 flex items-center gap-2"
+                    @click="openUserLinks = false"
+                >
+                    <span class="material-symbols-outlined text-lg">open_in_new</span>
+                    {% translate 'View site' %}
+                </a>
+                {% endif %}
+
+                {% if account_links %}
+                    {% for link in account_links %}
+                        <a 
+                            href="{{ link.link }}" 
+                            class="mx-2 px-3 py-2 rounded-default hover:bg-base-100 hover:text-base-700 dark:hover:bg-base-700 dark:hover:text-base-200 flex items-center gap-2"
+                            @click="openUserLinks = false"
+                        >
+                            <span class="material-symbols-outlined text-lg">link</span>
+                            {{ link.title }}
+                        </a>
+                    {% endfor %}
+                {% else %}
+                    {% if user.has_usable_password %}
+                        <a 
+                            href="{% url 'admin:password_change' %}" 
+                            class="mx-2 px-3 py-2 rounded-default hover:bg-base-100 hover:text-base-700 dark:hover:bg-base-700 dark:hover:text-base-200 flex items-center gap-2"
+                            @click="openUserLinks = false"
+                        >
+                            <span class="material-symbols-outlined text-lg">lock</span>
+                            {% translate 'Change password' %}
+                        </a>
+                    {% endif %}
+                {% endif %}
+
+                <!-- Logout -->
+                <div class="border-t border-base-200 dark:border-base-700 mt-2 pt-2">
+                    <form id="logout-form" method="post" action="{% url 'admin:logout' %}" class="mx-2">
+                        {% csrf_token %}
+                        <button 
+                            type="submit" 
+                            class="bg-none block cursor-pointer px-3 py-2 text-left text-red-500 rounded-default w-full hover:bg-red-100 dark:hover:bg-red-500/20 dark:hover:text-red-500 flex items-center gap-2"
+                        >
+                            <span class="material-symbols-outlined text-lg">logout</span>
+                            {% translate 'Log out' %}
+                        </button>
+                    </form>
+                </div>
+            </nav>
         </div>
-    </nav>
+    </div>
 </div>
