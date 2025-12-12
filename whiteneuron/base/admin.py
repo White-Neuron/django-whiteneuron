@@ -501,10 +501,10 @@ from django.core.cache import cache
 def init_app_db():
     # Kiểm tra xem hàm đã được chạy chưa
     cache_key = 'init_app_db_executed'
-    if cache.get(cache_key):
-        return  # Đã chạy rồi, bỏ qua
-    
-    print("Initializing App database from UNFOLD SIDEBAR...")
+    cached_value = cache.get(cache_key)
+    # Đã chạy rồi, bỏ qua
+    if cached_value is not None:
+        return
     
     # Get apps from SIDEBAR in UNFOLD settings
     sidebar_apps= []
