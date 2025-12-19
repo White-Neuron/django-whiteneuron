@@ -128,6 +128,8 @@ class UserActivityMiddleware:
 
 
 from .thread_local import thread_local
+from django.contrib.auth import login
+from .models import User
 
 class ThreadLocalMiddleware:
     def __init__(self, get_response):
@@ -155,13 +157,15 @@ class AutoGuestLoginMiddleware:
             and request.method == 'GET'
         ):
             try:
-                from .models import User
                 # Kiểm tra xem guest user có tồn tại không
                 guest_user = User.objects.filter(username='guest').first()
                 if guest_user:
                     # Tự động đăng nhập guest user
-                    from django.contrib.auth import login
                     login(request, guest_user, backend='django.contrib.auth.backends.ModelBackend')
+                    # Nếu có tham số next thì redirect luôn tới đó
+                    next_url = request.GET.get('next')
+                    if next_url:
+                        return redirect(next_url)
                 else:
                     pass
             except Exception as e:
