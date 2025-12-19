@@ -150,6 +150,10 @@ class AutoGuestLoginMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        # Nếu user đã chọn không auto login guest nữa (được set qua cookie) thì bỏ qua
+        if request.COOKIES.get("skip_auto_guest") == "1":
+            return self.get_response(request)
+
         # Chỉ xử lý khi user chưa đăng nhập và path có chứa "login"
         if (
             not request.user.is_authenticated
