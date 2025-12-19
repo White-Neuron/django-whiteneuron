@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
+import logging
 
 
 class ReadonlyExceptionHandlerMiddleware:
@@ -134,5 +135,37 @@ class ThreadLocalMiddleware:
 
     def __call__(self, request):
         thread_local.request = request
+        response = self.get_response(request)
+        return response
+
+
+class AutoGuestLoginMiddleware:
+    """
+    Middleware tự động đăng nhập guest user khi người dùng chưa đăng nhập 
+    và truy cập vào bất kỳ path nào có chứa "login".
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Chỉ xử lý khi user chưa đăng nhập và path có chứa "login"
+        if (
+            not request.user.is_authenticated
+            and 'login' in request.path.lower()
+            and request.method == 'GET'
+        ):
+            try:
+                from .models import User
+                # Kiểm tra xem guest user có tồn tại không
+                guest_user = User.objects.filter(username='guest').first()
+                if guest_user:
+                    # Tự động đăng nhập guest user
+                    from django.contrib.auth import login
+                    login(request, guest_user, backend='django.contrib.auth.backends.ModelBackend')
+                else:
+                    pass
+            except Exception as e:
+                pass
+
         response = self.get_response(request)
         return response

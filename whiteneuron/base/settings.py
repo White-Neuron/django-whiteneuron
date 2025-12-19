@@ -42,6 +42,8 @@ ROOT_URLCONF = f"{PROJECT_NAME}.urls"
 
 BROWSER_RELOAD = environ.get("BROWSER_RELOAD", "False") == "True"
 
+SKIP_GUEST_LOGIN = environ.get("SKIP_GUEST_LOGIN", "False") == "True"
+
 USE_CACHE = environ.get("USE_CACHE", "False") == "True"
 CACHENAME = environ.get("CACHENAME", "default")
 CACHE_REDIS_LOCATION=environ.get("CACHE_REDIS_LOCATION", "redis://localhost:6379")
@@ -183,6 +185,12 @@ MIDDLEWARE = [
     "whiteneuron.base.middleware.UserActivityMiddleware",
     'whiteneuron.base.middleware.ThreadLocalMiddleware',
 ]
+
+if SKIP_GUEST_LOGIN:
+    MIDDLEWARE.insert(
+        MIDDLEWARE.index("django.contrib.auth.middleware.AuthenticationMiddleware") + 1,
+        "whiteneuron.base.middleware.AutoGuestLoginMiddleware"
+    )
 
 if BROWSER_RELOAD:
     MIDDLEWARE.append("django_browser_reload.middleware.BrowserReloadMiddleware")
