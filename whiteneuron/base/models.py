@@ -111,12 +111,11 @@ class User(AbstractUser):
     def full_name(self):
         s= ''
         if self.first_name and self.last_name:
-            s= f"{self.last_name}, {self.first_name}"
+            s= f"{self.last_name} {self.first_name}"
         if s:
             if self.is_bot:
                 s+= ' (bot)'
-        else:
-            return s
+        return s
     
     def display_avatar(self):
         if self.is_bot:

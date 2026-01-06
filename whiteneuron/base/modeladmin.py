@@ -384,7 +384,7 @@ class ModelAdmin(UnfoldAdmin):
             button_delete = f'<a class="btn-delete btn-danger col-span-1" href="{path_delete}"> <img src="{svg_url_delete}" alt="Xóa" style="width: {width}px; height: {height}px;"></a>'
 
         return mark_safe(f'''
-                         <div id="action_buttoms" class="grid gap-1 grid-cols-{c}" style="width: {33*c}px;">{button_view} {button_edit} {button_delete} </div> 
+                         <div id="action_buttoms_{obj.id}" class="action_buttoms grid gap-1 grid-cols-{c}" style="width: {33*c}px;">{button_view} {button_edit} {button_delete} </div> 
                          ''')
 
     buttons.short_description = ''

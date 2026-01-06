@@ -28,7 +28,7 @@
                 {% endif %}
                 {# Flag hiển thị ở góc nếu record đã bị xóa #}
 
-                <div class="grid-object-container border rounded shadow-sm p-1 bg-white dark:bg-base-900 relative">
+                <div id = "grid-object_{{result.instance.pk}}" class="grid-object-container border rounded shadow-sm p-1 bg-white dark:bg-base-900 relative">
 
                     {# Lặp qua các cell của kết quả, bỏ qua phần tử đầu tiên (thường là checkbox cột) #}
                     {% for item in result %}
@@ -112,3 +112,31 @@
         {% endif %}
     </div>
 {% endif %}
+
+<script>
+
+    const actionsButtons = document.querySelectorAll('.action_buttoms');
+    actionsButtons.forEach(button => {
+        button.classList.add('hidden');
+    });
+
+    const gridObjects = document.querySelectorAll('.grid-object-container');
+    gridObjects.forEach(object => {
+        object.addEventListener('mouseover', () => {
+            console.log('hover');
+            const pk = object.id.split('_')[1];
+            console.log('pk',pk);
+            const actionsButton = document.querySelector(`#action_buttoms_${pk}`);
+            actionsButton.classList.remove('hidden');
+        });
+
+        object.addEventListener('mouseout', () => {
+            console.log('hover');
+            const pk = object.id.split('_')[1];
+            console.log("obj.id",object.id)
+            console.log('pk',pk);
+            const actionsButton = document.querySelector(`#action_buttoms_${pk}`);
+            actionsButton.classList.add('hidden');
+        });
+    }); 
+</script>

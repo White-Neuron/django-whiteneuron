@@ -160,8 +160,8 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
         badges_html = ' '.join(badges)
         
         # Tên đầy đủ hoặc fallback
-        display_name = obj.get_full_name() or obj.username or 'Unknown User'
-        username_display = f'@{obj.username}' if obj.username else 'No username'
+        display_name = obj.full_name or obj.username or 'Unknown User'
+        username_display = f'{obj.username}' if obj.username else 'No username'
         
         # Compact vertical card layout với dark mode support
         string = f"""
@@ -178,8 +178,8 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
     </figure>
 
     <div class="ui-card-body py-3 px-4 pb-6 text-center">
-        <h5>{obj.username}</h5>
-        <h4 class="ui-card-title justify-center">{obj.full_name}</h4>
+        <h5>{display_name}</h5>
+        <p class="ui-card-title justify-center text-xs">{username_display}</p>
         <div class="flex flex-wrap items-center justify-center gap-2 mt-3">
         {'<span class="ui-badge ui-badge-success">Active</span>' if obj.is_active else '<span class="ui-badge ui-badge-danger">Inactive</span>'}
         {'<span class="ui-badge ui-badge-success">Staff</span>' if obj.is_staff else ''}
