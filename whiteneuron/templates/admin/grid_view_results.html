@@ -123,20 +123,17 @@
     const gridObjects = document.querySelectorAll('.grid-object-container');
     gridObjects.forEach(object => {
         object.addEventListener('mouseover', () => {
-            console.log('hover');
             const pk = object.id.split('_')[1];
-            console.log('pk',pk);
             const actionsButton = document.querySelector(`#action_buttoms_${pk}`);
-            actionsButton.classList.remove('hidden');
+            if (actionsButton)
+                actionsButton.classList.remove('hidden');
         });
 
         object.addEventListener('mouseout', () => {
-            console.log('hover');
             const pk = object.id.split('_')[1];
-            console.log("obj.id",object.id)
-            console.log('pk',pk);
             const actionsButton = document.querySelector(`#action_buttoms_${pk}`);
-            actionsButton.classList.add('hidden');
+            if (actionsButton)
+                actionsButton.classList.add('hidden');
         });
     }); 
 </script>
