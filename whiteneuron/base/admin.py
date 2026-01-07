@@ -147,21 +147,29 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
         # Status badges với dark mode support
         badges = []
         if obj.is_active:
-            badges.append('<span class="ui-badge ui-badge-success ui-badge-xs gap-1"><span class="w-1.5 h-1.5 bg-success dark:bg-success-300 rounded-full animate-pulse"></span>Active</span>')
+            badges.append(f'<span class="ui-badge ui-badge-success ui-badge-xs gap-1"><span class="w-1.5 h-1.5 bg-success dark:bg-success-300 rounded-full animate-pulse"></span>{_("Active")}</span>')
         else:
-            badges.append('<span class="ui-badge ui-badge-error ui-badge-xs gap-1"><span class="w-1.5 h-1.5 bg-error dark:bg-error-300 rounded-full"></span>Inactive</span>')
+            badges.append(f'<span class="ui-badge ui-badge-error ui-badge-xs gap-1"><span class="w-1.5 h-1.5 bg-error dark:bg-error-300 rounded-full"></span>{_("Inactive")}</span>')
         
         if obj.is_staff:
-            badges.append('<span class="ui-badge ui-badge-info ui-badge-xs">Staff</span>')
+            badges.append(f'<span class="ui-badge ui-badge-info ui-badge-xs">{_("Staff")}</span>')
         
         if obj.is_superuser:
-            badges.append('<span class="ui-badge ui-badge-warning ui-badge-xs">Admin</span>')
+            badges.append(f'<span class="ui-badge ui-badge-warning ui-badge-xs">{_("Admin")}</span>')
         
         badges_html = ' '.join(badges)
         
         # Tên đầy đủ hoặc fallback
-        display_name = obj.full_name or obj.username or 'Unknown User'
-        username_display = f'{obj.username}' if obj.username else 'No username'
+        display_name = obj.full_name or obj.username or _('Unknown User')
+        username_display = f'{obj.username}' if obj.username else _('No username')
+
+        role= ""
+        if obj.is_superuser:
+            role= f'<span class="ui-badge ui-badge-xs ui-badge-warning">{_("Superuser")}</span>' 
+        elif obj.is_staff:
+            role= f'<span class="ui-badge ui-badge-xs ui-badge-info">{_("Staff")}</span>'
+        elif obj.is_bot:
+            role= f'<span class="ui-badge ui-badge-xs ui-badge-secondary">{_("Bot")}</span>'
         
         # Compact vertical card layout với dark mode support
         string = f"""
@@ -181,11 +189,8 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
         <h5>{display_name}</h5>
         <p class="ui-card-title justify-center text-xs">{username_display}</p>
         <div class="flex flex-wrap items-center justify-center gap-2 mt-3">
-        {'<span class="ui-badge ui-badge-success">Active</span>' if obj.is_active else '<span class="ui-badge ui-badge-danger">Inactive</span>'}
-        {'<span class="ui-badge ui-badge-success">Staff</span>' if obj.is_staff else ''}
-        {'<span class="ui-badge ui-badge-warning">Superuser</span>' if obj.is_superuser else ''}
-        {'<span class="ui-badge ui-badge-info">Bot</span>' if obj.is_bot else ''}
-
+        {f'<span class="ui-badge ui-badge-xs ui-badge-success">{_("Active")}</span>' if obj.is_active else f'<span class="ui-badge ui-badge-danger">{_("Inactive")}</span>'}
+        {role}
         </div>
 
     </div>
@@ -616,10 +621,10 @@ class AppAdmin(ModelAdmin):
         {s}
     </div>
     <div class="ui-card-body flex flex-col flex-1 p-4 pt-0 text-center items-center">
-        <h5 class="font-bold text-lg mb-2">{obj.name}</h5>
+        <h5 class="font-bold text-lg mb-2">{_(obj.name)}</h5>
         <div class="mt-auto flex flex-wrap justify-center gap-2">
-            {'<span class="ui-badge ui-badge-success ui-badge-sm">Active</span>' if obj.is_active else '<span class="ui-badge ui-badge-error ui-badge-sm">Inactive</span>'}
-            {'<span class="ui-badge ui-badge-info ui-badge-outline ui-badge-sm">' + obj.category + '</span>' if obj.category else ''}
+            {f'<span class="ui-badge ui-badge-success ui-badge-sm">{_("Active")}</span>' if obj.is_active else f'<span class="ui-badge ui-badge-error ui-badge-sm">{_("Inactive")}</span>'}
+            {'<span class="ui-badge ui-badge-info ui-badge-outline ui-badge-sm">' + _(obj.category) + '</span>' if obj.category else ''}
         </div>
     </div>
 </div>

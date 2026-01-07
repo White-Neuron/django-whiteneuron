@@ -1,5 +1,5 @@
 from django.contrib import admin, messages
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 from unfold.decorators import display
 
 from whiteneuron.base.admin import base_admin_site, ModelAdmin

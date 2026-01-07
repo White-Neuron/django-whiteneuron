@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext as _
 from django.contrib import messages
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
@@ -25,11 +25,11 @@ def dashboard_callback(request, context):
     time= request.GET.get("time", "week")
     
     MAPTIME = {
-        'today': 'today',
-        '7days': '7 days',
-        'week': 'week',
-        'month': 'month',
-        'year': 'year',
+        'today': _('today'),
+        '7days': _('7 days'),
+        'week': _('week'),
+        'month': _('month'),
+        'year': _('year'),
     }
 
     WEEKDAYS = [
@@ -69,7 +69,7 @@ def dashboard_callback(request, context):
         start_last= start.replace(year=start.year-1)
         end_last= end.replace(year=end.year-1)
     else:
-        ValueError("Invalid time")
+        ValueError(_("Invalid time"))
 
     
     
@@ -148,10 +148,10 @@ def dashboard_callback(request, context):
         is_increase = value > last_value
         diff = value - last_value
         diff_percent = diff / last_value * 100 if last_value else 0
-        footer = f'<strong class="text-{"green" if is_increase else "red"}-600 font-medium">{"+" if is_increase else "-"}{abs(diff)} ({diff_percent:.2f}%)</strong>&nbsp;progress from last {MAPTIME[time] if time != "today" else "day"}'
+        footer = f'<strong class="text-{"green" if is_increase else "red"}-600 font-medium">{"+" if is_increase else "-"}{abs(diff)} ({diff_percent:.2f}%)</strong>&nbsp;{_("progress from last")} - {MAPTIME[time] if time != "today" else "day"}'
         return {
             "label": label,
-            "title": f"{object_name} in this {MAPTIME[time]}",
+            "title": f"{_(object_name)} {_('in')} {_(MAPTIME[time])}",
             "metric": value,
             "footer": mark_safe(footer),
         }
@@ -198,14 +198,14 @@ def dashboard_callback(request, context):
                 },
             ],
             "kpi": [
-                render_kpi("Activity", "Activities", total_activities, total_activities_last, time),
-                render_kpi("Activity", "Success activities", total_activities_success, total_activities_last_success, time),
+                render_kpi(_("Activity"), _("Activities"), total_activities, total_activities_last, time),
+                render_kpi(_("Activity"), _("Success activities"), total_activities_success, total_activities_last_success, time),
                 # render_kpi("Activity", "ICD-10 activities", total_activities_icd10, total_activities_last_icd10, time),
                 # {
                 #     "title": "Product A Performance",
                 #     "metric": "$1,234.56",
                 #     "footer": mark_safe(
-                #         '<strong class="text-green-600 font-medium">+3.14%</strong>&nbsp;progress from last week'
+                #         '<strong class="text-green-600 font-medium">+3.14%</strong>&nbsp;{_("progress from last")} week'
                 #     ),
                 #     "chart": json.dumps(
                 #         {
@@ -247,19 +247,19 @@ def dashboard_callback(request, context):
                     "labels": _28_days,
                     "datasets": [
                         {
-                            "label": "Average",
+                            "label": _("Average"),
                             "type": "line",
                             "data": user_activities_28_days['average'],
                             "backgroundColor": "#f0abfc",
                             "borderColor": "#f0abfc",
                         },
                         {
-                            "label": "Success",
+                            "label": _("Success"),
                             "data": user_activities_28_days['success'],
                             "backgroundColor": "#9333ea",
                         },
                         {
-                            "label": "Error",
+                            "label": _("Error"),
                             "data": user_activities_28_days['error'],
                             "backgroundColor": "#f43f5e",
                         },
@@ -271,7 +271,7 @@ def dashboard_callback(request, context):
             #         "title": _("Last week revenue"),
             #         "metric": "$1,234.56",
             #         "footer": mark_safe(
-            #             '<strong class="text-green-600 font-medium">+3.14%</strong>&nbsp;progress from last week'
+            #             '<strong class="text-green-600 font-medium">+3.14%</strong>&nbsp;{_("progress from last")} week'
             #         ),
             #         "chart": json.dumps(
             #             {
@@ -286,7 +286,7 @@ def dashboard_callback(request, context):
             #         "title": _("Last week expenses"),
             #         "metric": "$1,234.56",
             #         "footer": mark_safe(
-            #             '<strong class="text-green-600 font-medium">+3.14%</strong>&nbsp;progress from last week'
+            #             '<strong class="text-green-600 font-medium">+3.14%</strong>&nbsp;{_("progress from last")} week'
             #         ),
             #         "chart": json.dumps(
             #             {
