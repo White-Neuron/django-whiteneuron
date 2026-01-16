@@ -59,7 +59,7 @@ def user_badge_callback(request):
     return base_badge_callback(request, User)
 
 def group_badge_callback(request):
-    return ""
+    return 0
 
 def app_badge_callback(request):
     return base_badge_callback(request, App)

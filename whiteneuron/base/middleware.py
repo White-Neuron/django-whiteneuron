@@ -3,7 +3,7 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 import logging
-
+import ipaddress
 
 class ReadonlyExceptionHandlerMiddleware:
     def __init__(self, get_response):
@@ -28,33 +28,32 @@ class ReadonlyExceptionHandlerMiddleware:
             return redirect(reverse_lazy("admin:login"))
         
 
-import ipaddress
+def is_global_ip(ip):
+    try:
+        obj = ipaddress.ip_address(ip)
+        return obj.is_global  
+    except ValueError:
+        return False
+
 def get_client_ip(request):
-    def is_public_ipv4(ip):
-        try:
-            ip_obj = ipaddress.ip_address(ip)
-            return (
-                isinstance(ip_obj, ipaddress.IPv4Address)
-            )
-        except ValueError:
-            return False
+    for h in ("CF-Connecting-IP", "True-Client-IP"):
+        ip = request.headers.get(h)
+        if ip and is_global_ip(ip):
+            return ip, request.headers.get("User-Agent")
 
-    ip = request.headers.get('X-Client-Ip')
-    if ip is None:
-        ip = request.headers.get('X-Forwarded-For')
+    xff = request.headers.get("X-Forwarded-For")
+    if xff:
+        ip_list = [x.strip() for x in xff.split(",")]
+        ip = next((x for x in ip_list if is_global_ip(x)), None)
         if ip:
-            # Có thể có danh sách IP cách nhau bởi dấu phẩy
-            ip_list = [x.strip() for x in ip.split(',')]
-            ip = next((x for x in ip_list if is_public_ipv4(x)), None)
-    if ip is None:
-        remote_addr = request.META.get('REMOTE_ADDR')
-        if is_public_ipv4(remote_addr):
-            ip = remote_addr
+            return ip, request.headers.get("User-Agent")
 
-    if not ip:
-        ip = 'Public IPv4 not found'
-    user_agent = request.headers.get('User-Agent')
-    return ip, user_agent
+    ra = request.META.get("REMOTE_ADDR")
+    if ra and is_global_ip(ra):
+        return ra, request.headers.get("User-Agent")
+
+    return None, request.headers.get("User-Agent")
+
 
 from django.utils import timezone
 from .models import UserActivity
