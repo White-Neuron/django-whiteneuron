@@ -28,17 +28,17 @@ class ReadonlyExceptionHandlerMiddleware:
             return redirect(reverse_lazy("admin:login"))
         
 
-def is_global_ip(ip):
-    try:
-        obj = ipaddress.ip_address(ip)
-        return obj.is_global  
-    except ValueError:
-        return False
+# def is_global_ip(ip):
+#     try:
+#         obj = ipaddress.ip_address(ip)
+#         return obj.is_global  
+#     except ValueError:
+#         return False
 
 def get_client_ip(request):
     for h in ("CF-Connecting-IP", "True-Client-IP"):
         ip = request.headers.get(h)
-        if ip and is_global_ip(ip):
+        if ip:
             return ip, request.headers.get("User-Agent")
 
     xff = request.headers.get("X-Forwarded-For")
@@ -49,7 +49,7 @@ def get_client_ip(request):
             return ip, request.headers.get("User-Agent")
 
     ra = request.META.get("REMOTE_ADDR")
-    if ra and is_global_ip(ra):
+    if ra:
         return ra, request.headers.get("User-Agent")
 
     return None, request.headers.get("User-Agent")
