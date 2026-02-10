@@ -83,6 +83,8 @@ if USE_CACHE:
 # Domains
 ######################################################################
 ALLOWED_HOSTS = environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+# allowhost thêm cái host.docker.internal
+ALLOWED_HOSTS.append("host.docker.internal")
 
 CSRF_TRUSTED_ORIGINS = environ.get(
     "CSRF_TRUSTED_ORIGINS", "http://localhost:8000"
@@ -155,6 +157,7 @@ INSTALLED_APPS += [
     "djangoql",
 
     # Apps from the project
+    "django_prometheus",
 ]
 
 if DEBUG:
@@ -164,6 +167,7 @@ if DEBUG:
 # Middleware
 ######################################################################
 MIDDLEWARE = [
+    "django_prometheus.middleware.PrometheusBeforeMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -184,6 +188,8 @@ MIDDLEWARE = [
     "whiteneuron.base.middleware.ReadonlyExceptionHandlerMiddleware",
     "whiteneuron.base.middleware.UserActivityMiddleware",
     'whiteneuron.base.middleware.ThreadLocalMiddleware',
+    
+    "django_prometheus.middleware.PrometheusAfterMiddleware",
 ]
 
 if SKIP_GUEST_LOGIN:
@@ -687,6 +693,13 @@ CELERY_TASK_SERIALIZER = 'json'
 CRISPY_TEMPLATE_PACK = "unfold_crispy"
 CRISPY_ALLOWED_TEMPLATE_PACKS = ["unfold_crispy"]
 
+######################################################################
+# Prometheus / Surveillance
+######################################################################
+# File path for Prometheus file-based service discovery
+PROM_TARGETS_FILE = environ.get("PROM_TARGETS_FILE", "D:/obs/targets.json")
+# App name for Prometheus labels
+PROM_APP_NAME = environ.get("APP_NAME", PROJECT_NAME)
 
 ######################################################################
 # CKEditor5
