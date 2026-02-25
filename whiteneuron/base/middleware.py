@@ -160,8 +160,8 @@ class AutoGuestLoginMiddleware:
             and request.method == 'GET'
         ):
             try:
-                # Kiểm tra xem guest user có tồn tại không
-                guest_user = User.objects.filter(username='guest').first()
+                # Kiểm tra xem guest user có tồn tại, đang active và có quyền staff không
+                guest_user = User.objects.filter(username='guest', is_active=True, is_staff=True).first()
                 if guest_user:
                     # Tự động đăng nhập guest user
                     login(request, guest_user, backend='django.contrib.auth.backends.ModelBackend')
