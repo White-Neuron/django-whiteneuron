@@ -225,10 +225,10 @@ from django.urls import reverse
 class BaseModel(SoftDeleteModel):
     id= models.AutoField(primary_key=True)
 
-    created_at = models.DateTimeField(default=timezone.now, editable=False, verbose_name= _('Date created'))
+    created_at = models.DateTimeField(default=timezone.now, editable=False, verbose_name= _('Date created'), db_index=True)
     created_by = models.ForeignKey(User, null=True, editable=False, verbose_name= _('Created by'),
                                    related_name='%(app_label)s_%(class)s_created', on_delete=models.CASCADE)
-    updated_at = models.DateTimeField(default=timezone.now, editable=False, verbose_name= _('Date updated'))
+    updated_at = models.DateTimeField(default=timezone.now, editable=False, verbose_name= _('Date updated'), db_index=True)
     updated_by = models.ForeignKey(User, null=True, editable=False, verbose_name= _('Updated by'),
                                    related_name='%(app_label)s_%(class)s_updated', on_delete=models.CASCADE)
     is_hidden = models.BooleanField(default=False, verbose_name= _('Hidden'))
