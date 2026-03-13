@@ -28,12 +28,12 @@ class ReadonlyExceptionHandlerMiddleware:
             return redirect(reverse_lazy("admin:login"))
         
 
-# def is_global_ip(ip):
-#     try:
-#         obj = ipaddress.ip_address(ip)
-#         return obj.is_global  
-#     except ValueError:
-#         return False
+def is_global_ip(ip):
+    try:
+        obj = ipaddress.ip_address(ip)
+        return obj.is_global  
+    except ValueError:
+        return False
 
 def get_client_ip(request):
     for h in ("CF-Connecting-IP", "True-Client-IP"):
