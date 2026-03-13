@@ -311,7 +311,7 @@ LOGIN_URL = "admin:login"
 LOGIN_REDIRECT_URL = reverse_lazy("admin:index")
 
 # Internationalization
-LANGUAGE_CODE = "vi"
+LANGUAGE_CODE = "en"
 
 TIME_ZONE = "UTC"
 
