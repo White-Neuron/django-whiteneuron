@@ -176,3 +176,25 @@ class AutoGuestLoginMiddleware:
 
         response = self.get_response(request)
         return response
+
+
+
+### Middleware để buộc sử dụng ngôn ngữ mặc định nếu người dùng chưa chọn ngôn ngữ nào cả (không có cookie và không có ngôn ngữ trong URL)
+from django.conf import settings
+from django.utils import translation
+from django.utils.deprecation import MiddlewareMixin
+from django.utils.translation import get_language_from_path
+
+
+class ForceDefaultLanguageMiddleware(MiddlewareMixin):
+    """Use LANGUAGE_CODE as default unless user explicitly chose a language."""
+
+    def process_request(self, request):
+        cookie_name = getattr(settings, "LANGUAGE_COOKIE_NAME", "django_language")
+        has_language_cookie = bool(request.COOKIES.get(cookie_name))
+        has_language_in_path = bool(get_language_from_path(request.path_info))
+
+        # Keep explicit language choices, but ignore browser Accept-Language by default.
+        if not has_language_cookie and not has_language_in_path:
+            translation.activate(settings.LANGUAGE_CODE)
+            request.LANGUAGE_CODE = translation.get_language()

@@ -311,7 +311,7 @@ LOGIN_URL = "admin:login"
 LOGIN_REDIRECT_URL = reverse_lazy("admin:index")
 
 # Internationalization
-LANGUAGE_CODE = "en"
+LANGUAGE_CODE = "vi"
 
 TIME_ZONE = "UTC"
 
@@ -320,9 +320,24 @@ USE_I18N = True
 USE_TZ = True
 
 LANGUAGES = [
-    ("en", _("English")),
     ("vi", _("Vietnamese")),
+    ("en", _("English")),
 ]
+
+# Persist user choice via cookie; if absent, default to LANGUAGE_CODE instead of browser header.
+LANGUAGE_COOKIE_NAME = 'django_language'
+IGNORE_ACCEPT_LANGUAGE_FOR_DEFAULT = environ.get(
+    'IGNORE_ACCEPT_LANGUAGE_FOR_DEFAULT', 'True'
+) == 'True'
+
+if IGNORE_ACCEPT_LANGUAGE_FOR_DEFAULT:
+    force_default_language_middleware = 'whiteneuron.base.middleware.ForceDefaultLanguageMiddleware'
+    if force_default_language_middleware not in MIDDLEWARE:
+        try:
+            locale_middleware_index = MIDDLEWARE.index('django.middleware.locale.LocaleMiddleware')
+            MIDDLEWARE.insert(locale_middleware_index + 1, force_default_language_middleware)
+        except ValueError:
+            MIDDLEWARE.append(force_default_language_middleware)
 
 MODELTRANSLATION_DEFAULT_LANGUAGE = 'vi'
 MODELTRANSLATION_LANGUAGES = ('vi', 'en')
