@@ -1,0 +1,14 @@
+{% load admin_list unfold %}
+{% load unfold_list i18n %}
+
+{% if cl %}
+    <div class="flex flex-row gap-4 px-4 lg:backdrop-blur-xs lg:bg-white/80 lg:flex lg:items-center lg:dark:bg-base-900/80 lg:left-0 lg:right-0 lg:bottom-0 lg:sticky relative z-40 lg:border-t lg:border-base-200 lg:relative lg:scrollable-top lg:dark:border-base-800 {% element_classes 'pagination' %}">
+        <a {% if cl.page_num != 1 %}href="{% infinite_paginator_url cl cl.page_num|add:-1 %}"{% endif %} class="ui-btn ui-btn-sm ui-btn-soft ui-btn-primary {% if cl.page_num == 1 %}ui-btn-disabled pointer-events-none opacity-60{% else %}hover:text-primary-600 dark:hover:text-primary-500{% endif %}">
+            {% trans "Previous" %}
+        </a>
+        {% pagination cl %}
+        <a {% if cl.result_list|length == cl.paginator.per_page %}href="{% infinite_paginator_url cl cl.page_num|add:1 %}"{% endif %} class="ui-btn ui-btn-sm ui-btn-soft ui-btn-primary {% if not cl.result_list|length or cl.result_list|length != cl.paginator.per_page %}ui-btn-disabled pointer-events-none opacity-60{% else %}hover:text-primary-600 dark:hover:text-primary-500{% endif %}">
+            {% trans "Next" %}
+        </a>
+    </div>
+{% endif %}

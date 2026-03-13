@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-07 14:30+0700\n"
+"POT-Creation-Date: 2026-03-13 10:56+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -129,7 +129,7 @@ msgstr "Ứng dụng này không hoạt động."
 msgid "You do not have permission to access this app."
 msgstr "Bạn không có quyền truy cập ứng dụng này."
 
-#: base/admin.py:666 base/settings.py:513 dashboard/apps.py:8
+#: base/admin.py:666 base/settings.py:528 dashboard/apps.py:8
 #: dashboard/views.py:169 templates/admin/index.html:8
 msgid "Dashboard"
 msgstr "Bảng điều khiển"
@@ -422,102 +422,102 @@ msgid "Apps"
 msgstr "Ứng dụng"
 
 #: base/settings.py:323
-msgid "English"
-msgstr "Tiếng Anh"
-
-#: base/settings.py:324
 msgid "Vietnamese"
 msgstr "Tiếng Việt"
 
-#: base/settings.py:400
+#: base/settings.py:324
+msgid "English"
+msgstr "Tiếng Anh"
+
+#: base/settings.py:415
 msgid "Admin panel"
 msgstr "Trang quản trị"
 
-#: base/settings.py:404
+#: base/settings.py:419
 msgid "White Neuron Co. Ltd."
 msgstr "Công ty TNHH White Neuron"
 
-#: base/settings.py:409
+#: base/settings.py:424
 msgid "Email: anhnt@whiteneuron.com"
 msgstr "Email: anhnt@whiteneuron.com"
 
-#: base/settings.py:504
+#: base/settings.py:519
 msgid "Navigation"
 msgstr "Điều hướng"
 
-#: base/settings.py:520
+#: base/settings.py:535
 msgid "Notifications"
 msgstr "Thông báo"
 
-#: base/settings.py:527 feedbacks/apps.py:8 feedbacks/models.py:59
+#: base/settings.py:542 feedbacks/apps.py:8 feedbacks/models.py:59
 msgid "Feedbacks"
 msgstr "Phản hồi"
 
-#: base/settings.py:536 file_management/apps.py:7
+#: base/settings.py:551 file_management/apps.py:7
 msgid "File Management"
 msgstr "Quản lý tệp"
 
-#: base/settings.py:540 file_management/models.py:58
+#: base/settings.py:555 file_management/models.py:58
 msgid "Excel Files"
 msgstr "Tệp Excel"
 
-#: base/settings.py:547 file_management/models.py:65
+#: base/settings.py:562 file_management/models.py:65
 msgid "PDF Files"
 msgstr "Tệp PDF"
 
-#: base/settings.py:556
+#: base/settings.py:571
 msgid "Users & Groups"
 msgstr "Người dùng & Nhóm"
 
-#: base/settings.py:560
+#: base/settings.py:575
 msgid "Users"
 msgstr "Người dùng"
 
-#: base/settings.py:567
+#: base/settings.py:582
 msgid "User activity"
 msgstr "Hoạt động người dùng"
 
-#: base/settings.py:574
+#: base/settings.py:589
 msgid "Groups"
 msgstr "Nhóm"
 
-#: base/settings.py:583
+#: base/settings.py:598
 msgid "System"
 msgstr "Hệ thống"
 
-#: base/settings.py:587
+#: base/settings.py:602
 msgid "Images"
 msgstr "Hình ảnh"
 
-#: base/settings.py:593
+#: base/settings.py:608
 msgid "Emails"
 msgstr "Email"
 
-#: base/settings.py:599
+#: base/settings.py:614
 msgid "Notifications config"
 msgstr "Cấu hình thông báo"
 
-#: base/settings.py:607
+#: base/settings.py:622
 msgid "Celery Tasks"
 msgstr "Nhiệm vụ Celery"
 
-#: base/settings.py:611
+#: base/settings.py:626
 msgid "Clocked"
 msgstr "Khóa"
 
-#: base/settings.py:619
+#: base/settings.py:634
 msgid "Crontabs"
 msgstr "Crontabs"
 
-#: base/settings.py:627
+#: base/settings.py:642
 msgid "Intervals"
 msgstr "Khoảng thời gian"
 
-#: base/settings.py:635
+#: base/settings.py:650
 msgid "Periodic tasks"
 msgstr "Nhiệm vụ định kỳ"
 
-#: base/settings.py:643
+#: base/settings.py:658
 msgid "Solar events"
 msgstr "Sự kiện Solar"
 
@@ -964,6 +964,14 @@ msgstr "Đổi mật khẩu"
 #: templates/unfold/helpers/account_links.html:119
 msgid "Log out"
 msgstr "Đăng xuất"
+
+#: templates/unfold/helpers/pagination.html:7
+msgid "Previous"
+msgstr "Trước"
+
+#: templates/unfold/helpers/pagination.html:11
+msgid "Next"
+msgstr "Tiếp theo"
 
 #~ msgid "Last week revenue"
 #~ msgstr "Giá trị doanh thu tuần trước"
