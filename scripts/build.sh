@@ -50,15 +50,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   git push origin "v$NEW_VERSION"
   
   echo "✅ Release v$NEW_VERSION created successfully!"
-  echo "🔗 Check your release at: https://github.com/tanhtm/django-whiteneuron/releases"
-  
-  # Ask if user wants to publish to PyPI
-  read -p "Do you want to publish to PyPI? (y/n) " PYPI_REPLY
-  if [[ $PYPI_REPLY =~ ^[Yy]$ ]]; then
-    echo "Publishing to PyPI..."
-    uv publish
-    echo "✅ Published to PyPI!"
-  fi
+  echo "🔗 Check your release at: https://github.com/White-Neuron/django-whiteneuron/releases"
 else
   echo "Build completed without release."
 fi

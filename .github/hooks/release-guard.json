@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "type": "command",
+        "command": "./scripts/hooks/guard_release_worktree.sh",
+        "timeout": 15
+      }
+    ]
+  }
+}
