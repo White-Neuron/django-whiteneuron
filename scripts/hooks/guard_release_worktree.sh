@@ -4,9 +4,9 @@ set -euo pipefail
 payload="$(cat)"
 
 # Extract useful fields from hook payload robustly, regardless of slight schema changes.
-readarray -t extracted < <(python3 - <<'PY' "$payload"
-import json, sys
-raw = sys.argv[1]
+extracted="$(PAYLOAD_JSON="$payload" python3 - <<'PY'
+import json, os
+raw = os.environ.get("PAYLOAD_JSON", "")
 try:
     data = json.loads(raw) if raw.strip() else {}
 except Exception:
@@ -32,14 +32,14 @@ walk(data, out)
 print("||".join(out["tool_names"]))
 print(" || ".join(out["commands"]))
 PY
-)
+ )"
 
-tool_names="${extracted[0]:-}"
-command_blob="${extracted[1]:-}"
+tool_names="$(printf '%s\n' "$extracted" | sed -n '1p')"
+command_blob="$(printf '%s\n' "$extracted" | sed -n '2p')"
 combined="${tool_names} ${command_blob}"
 
 # Only guard release-related operations.
-if ! printf '%s' "$combined" | grep -Eqi '(git[[:space:]]+tag|git[[:space:]]+push|gh[[:space:]]+release|release)'; then
+if ! printf '%s' "$combined" | grep -Eqi '(git[[:space:]]+tag|git[[:space:]]+push|gh[[:space:]]+release|\brelease\b)'; then
   echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","permissionDecisionReason":"Not a release operation."}}'
   exit 0
 fi
