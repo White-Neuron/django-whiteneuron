@@ -56,8 +56,8 @@ classifiers = [
 ]
 
 [project.urls]
-homepage = "https://github.com/tanhtm/django-whiteneuron"
-repository = "https://github.com/tanhtm/django-whiteneuron"
+homepage = "https://github.com/White-Neuron/django-whiteneuron"
+repository = "https://github.com/White-Neuron/django-whiteneuron"
 
 [tool.setuptools]
 [tool.setuptools.packages.find]
@@ -80,7 +80,6 @@ include = ["whiteneuron*"]
     'locale/**/**/*',
     'locale/**/**/**/*',
 ]
-
 
 [project.optional-dependencies]
 dev = ["pytest", "black", "flake8", "pre-commit"]

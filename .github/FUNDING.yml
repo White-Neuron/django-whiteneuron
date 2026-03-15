@@ -10,4 +10,4 @@ lfx_crowdfunding: # Nếu dự án có trên LFX Crowdfunding
 polar: # Username trên Polar
 buy_me_a_coffee: # Username Buy Me a Coffee
 thanks_dev: # Username trên thanks.dev
-custom: ['https://whiteneuron.com']
+custom: ['https://whiteneuron.ai']
