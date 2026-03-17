@@ -1,0 +1,18 @@
+name: ${PROJECT_NAME:-myproject}-deploy
+
+services:
+  web:
+    image: ${PROJECT_NAME:-myproject}-web:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    env_file:
+      - .env.docker
+    ports:
+      - "${PORT:-8000}:${PORT:-8000}"
+    volumes:
+      - ./media:/app/media
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

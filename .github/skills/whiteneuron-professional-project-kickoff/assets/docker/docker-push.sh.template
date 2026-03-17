@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+IMAGE=${1:-myproject-web:latest}
+docker push "$IMAGE"
