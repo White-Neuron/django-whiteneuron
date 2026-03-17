@@ -81,6 +81,9 @@ include = ["whiteneuron*"]
     'locale/**/**/**/*',
 ]
 
+[tool.uv.workspace]
+members = ["demo"]
+
 [project.optional-dependencies]
 dev = ["pytest", "black", "flake8", "pre-commit"]
 

@@ -1,19 +1,98 @@
-/* styles.css — Tailwind v4 config */
-@import "tailwindcss";
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme' layer(theme);
+@import 'tailwindcss/utilities' layer(utilities);
 
-/* DEFINE SOURCE FILES (mỗi dòng 1 @source + ;) */
-@source "./src/**/*.{html,py,js,jsx,ts,tsx}";
-@source "./src/apps/**/*.{html,py,js,jsx,ts,tsx}";
-@source "./src/templates/**/*.{html,py,js}";
-@source "./templates/**/*.{html,py,js}";
-@source "../**/templates/**/*.{html,py,js}";
-@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
-/* DaisyUI v5 — CHỈ 1 plugin block */
-@plugin "daisyui" {
-  themes: light --default, dark --prefersdark;
-  prefix: ui-;
-  logs: true;
+@custom-variant dark (&:is(.dark, .dark *, [data-theme=dark], [data-theme=dark] *));
+
+@theme {
+  --text-0: 0;
+  --text-0--line-height: 1;
+  --text-xxs: 11px;
+  --text-xxs--line-height: 14px;
+
+  --spacing-68: 17rem;
+  --spacing-128: 32rem;
+
+  /*
+    These color variables are from django-unfold css,
+    which tailwindcss cli won't detect and apply style such as dark mode.
+    Adding them here to make sure tailwindcss cli knows they exist.
+  */
+  --color-base-50: var(--color-base-50);
+  --color-base-400: var(--color-base-400);
+  --color-base-500: var(--color-base-500);
+  --color-base-600: var(--color-base-600);
+  --color-base-700: var(--color-base-700);
+  --color-base-800: var(--color-base-800);
+  --color-base-900: var(--color-base-900);
+  --color-base-950: var(--color-base-950);
 }
 
+@plugin "daisyui" {
+  theme: light dark;
+  prefix: "ui-";
+}
 
+@plugin "daisyui/theme" {
+  name: "light";
+  default: true;
 
+  --ui-color-base-100: oklch(100% 0 0);
+  --ui-color-base-200: oklch(98% 0 0);
+  --ui-color-base-300: oklch(95% 0 0);
+}
+
+@plugin "daisyui/theme" {
+  name: "dark";
+
+  --ui-color-base-100: oklch(25.33% .016 252.42);
+  --ui-color-base-200: oklch(23.26% .014 253.1);
+  --ui-color-base-300: oklch(21.15% .012 254.09);
+}
+
+/*
+  Django-unfold has the same css color variables name to daisyui,
+  but since the unfold vars are in <style> tags,
+  DaisyUI ones will be overridden.
+  To fix this, we put scoped color variables to all DaisyUI components,
+  which give higher priority than unfold ones.
+*/
+[class*="ui-"] {
+  --color-base-100: var(--ui-color-base-100) !important;
+  --color-base-200: var(--ui-color-base-200) !important;
+  --color-base-300: var(--ui-color-base-300) !important;
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+@utility min-w-sidebar {
+  @apply min-w-2xs;
+}
+
+@utility w-sidebar {
+  @apply w-2xs;
+}
+
+@utility transition-height {
+  @apply transition-[height];
+}
+
+@utility transition-width {
+  @apply transition-[width];
+}

@@ -7,7 +7,7 @@ resolution-markers = [
 
 [manifest]
 members = [
-    "demo-whiteneuron",
+    "demo-student-management",
     "django-whiteneuron",
 ]
 
@@ -491,9 +491,9 @@ wheels = [
 ]
 
 [[package]]
-name = "demo-whiteneuron"
+name = "demo-student-management"
 version = "0.1.0"
-source = { virtual = "demo" }
+source = { editable = "demo" }
 dependencies = [
     { name = "django" },
     { name = "django-whiteneuron" },
@@ -501,7 +501,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "django", specifier = ">=5.2.10" },
+    { name = "django", specifier = ">=5.1.6" },
     { name = "django-whiteneuron", editable = "." },
 ]
 

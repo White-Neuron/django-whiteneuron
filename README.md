@@ -117,7 +117,7 @@ Truy cập trang admin tại http://127.0.0.1:8000/admin/
 ## Liên hệ
 
 - Email: [anhnt@whiteneuron.com](mailto:anhnt@whiteneuron.com)
-- Website: [https://whiteneuron.com](https://whiteneuron.com)
+- Website: [https://whiteneuron.ai](https://whiteneuron.ai)
 - GitHub: [https://github.com/White-Neuron/django-whiteneuron](https://github.com/White-Neuron/django-whiteneuron)
 
 ## License
