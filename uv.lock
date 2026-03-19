@@ -5,12 +5,6 @@ resolution-markers = [
     "python_full_version < '3.12'",
 ]
 
-[manifest]
-members = [
-    "demo-student-management",
-    "django-whiteneuron",
-]
-
 [[package]]
 name = "amqp"
 version = "5.3.1"
@@ -491,21 +485,6 @@ wheels = [
 ]
 
 [[package]]
-name = "demo-student-management"
-version = "0.1.0"
-source = { editable = "demo" }
-dependencies = [
-    { name = "django" },
-    { name = "django-whiteneuron" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "django", specifier = ">=5.1.6" },
-    { name = "django-whiteneuron", editable = "." },
-]
-
-[[package]]
 name = "diff-match-patch"
 version = "20241021"
 source = { registry = "https://pypi.org/simple" }
@@ -743,19 +722,19 @@ wheels = [
 
 [[package]]
 name = "django-unfold"
-version = "0.84.0"
+version = "0.85.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ef/ad/1010c6667058f9da7cebf24e590418dfed3729695304cebae1925af90e61/django_unfold-0.84.0.tar.gz", hash = "sha256:061d8d11bfe02c48f11d29f9c550dd097ee7d6bc301d79a28e497d3c08e16955", size = 1114203 }
+sdist = { url = "https://files.pythonhosted.org/packages/bd/63/84c42ea29c04ef8c82387e352b19492e437e02a8abd9e18c1ed3818853a1/django_unfold-0.85.0.tar.gz", hash = "sha256:4c7f363a8f9bc93a12c75f15ce72c7fee410c794649df9de007e71df35e328bd", size = 1115707 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ff/9f/83f8cc1d744979760fb4e953aa56c0d421cd29b4aaefbce8b2d8dd5f1e35/django_unfold-0.84.0-py3-none-any.whl", hash = "sha256:3c9365c2003a33b18d69cde8554f802961bfc14a3e692f93371aacfe95a15753", size = 1230269 },
+    { url = "https://files.pythonhosted.org/packages/18/35/825b28c5e115641761050262de74bd8ad7018782d8add9d16fdcbec3de9b/django_unfold-0.85.0-py3-none-any.whl", hash = "sha256:05060a443b266b443bf3f30a08d59dd946e325fe6607355f09c603c598441f43", size = 1237700 },
 ]
 
 [[package]]
 name = "django-whiteneuron"
-version = "0.2.22"
+version = "0.2.25"
 source = { editable = "." }
 dependencies = [
     { name = "channels" },
@@ -819,7 +798,7 @@ requires-dist = [
     { name = "django-modeltranslation", specifier = ">=0.19.11" },
     { name = "django-ninja", specifier = ">=1.3.0" },
     { name = "django-simple-history", specifier = ">=3.8.0" },
-    { name = "django-unfold", specifier = ">=0.84.0" },
+    { name = "django-unfold", specifier = ">=0.85.0" },
     { name = "djangoql", specifier = ">=0.18.1" },
     { name = "flake8", marker = "extra == 'dev'" },
     { name = "gunicorn", specifier = ">=23.0.0" },
