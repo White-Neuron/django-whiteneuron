@@ -4,7 +4,7 @@ django-whiteneuron là package mở rộng Django Admin theo hướng hiện đ�
 
 ## Phiên bản hiện tại
 
-- 0.2.24
+- 0.2.26
 
 ## Tương thích
 
@@ -13,6 +13,17 @@ django-whiteneuron là package mở rộng Django Admin theo hướng hiện đ�
 - django-unfold >= 0.84.0
 - Tailwind CSS 4.x + daisyUI 5.x (khi dùng bộ style frontend đi kèm)
 
+## Changelog
+
+### v0.2.26 (2026-03-23)
+- **Fix**: Admin loading overlay no longer gets stuck during file downloads.
+- **Added**: Backend-frontend handshake via `DownloadResponseFlagMiddleware` for robust download handling.
+- **Improved**: Frontend loading logic with token-based polling and timeout guard (45s).
+- **Improved**: Clean cookie reset on page visibility transitions.
+
+### v0.2.25 và trước
+Xem chi tiết tại [releases](https://github.com/White-Neuron/django-whiteneuron/releases).
+
 ## Cài đặt (ưu tiên uv)
 
 Package chưa phát hành lên PyPI.
@@ -20,7 +31,7 @@ Package chưa phát hành lên PyPI.
 ### Cài từ GitHub theo tag
 
 ```bash
-uv add "git+https://github.com/White-Neuron/django-whiteneuron.git@v0.2.24"
+uv add "git+https://github.com/White-Neuron/django-whiteneuron.git@v0.2.26"
 ```
 
 ### Cài từ source local
