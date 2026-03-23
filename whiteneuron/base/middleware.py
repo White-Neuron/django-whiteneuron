@@ -4,6 +4,7 @@ from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 import logging
 import ipaddress
+import re
 
 class ReadonlyExceptionHandlerMiddleware:
     def __init__(self, get_response):
@@ -198,3 +199,32 @@ class ForceDefaultLanguageMiddleware(MiddlewareMixin):
         if not has_language_cookie and not has_language_in_path:
             translation.activate(settings.LANGUAGE_CODE)
             request.LANGUAGE_CODE = translation.get_language()
+
+
+class DownloadResponseFlagMiddleware:
+    """Flag attachment responses so frontend can stop loading for file downloads."""
+
+    REQUEST_TOKEN_COOKIE = "wn_loading_token"
+    RESPONSE_DONE_COOKIE = "wn_loading_done"
+    TOKEN_PATTERN = re.compile(r"^[a-z0-9]{8,64}$")
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+
+        request_token = request.COOKIES.get(self.REQUEST_TOKEN_COOKIE)
+        content_disposition = (response.get("Content-Disposition") or "").lower()
+        is_attachment = "attachment" in content_disposition
+
+        if request_token and is_attachment and self.TOKEN_PATTERN.match(request_token):
+            response.set_cookie(
+                self.RESPONSE_DONE_COOKIE,
+                request_token,
+                max_age=120,
+                path="/",
+                samesite="Lax",
+            )
+
+        return response

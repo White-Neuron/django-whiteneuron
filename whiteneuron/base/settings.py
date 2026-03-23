@@ -182,6 +182,7 @@ MIDDLEWARE = [
 
     # My middleware
     "whiteneuron.base.middleware.ReadonlyExceptionHandlerMiddleware",
+    "whiteneuron.base.middleware.DownloadResponseFlagMiddleware",
     "whiteneuron.base.middleware.UserActivityMiddleware",
     'whiteneuron.base.middleware.ThreadLocalMiddleware',
 ]
