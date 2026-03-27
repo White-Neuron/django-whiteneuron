@@ -318,7 +318,8 @@ class BaseModel(SoftDeleteModel):
 
             obj_link= self.path() if hasattr(self, 'path') else None
             for user in User.objects.filter(is_superuser= True):
-                obj= Notification.objects.create(user= user, title= title,
+                obj= Notification.objects.create(   user= user, title= title,
+                                                    action_by= self.updated_by if action == 'update' else self.created_by,
                                                     flag= 'info',
                                                     action= action,
                                                     obj_link= obj_link,

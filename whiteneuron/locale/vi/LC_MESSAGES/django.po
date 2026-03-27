@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-13 10:56+0700\n"
+"POT-Creation-Date: 2026-03-27 14:44+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: base/admin.py:150 base/admin.py:192 base/admin.py:626 base/models.py:780
+#: base/admin.py:150 base/admin.py:192 base/admin.py:626 base/models.py:781
 msgid "Active"
 msgstr "Hành động"
 
@@ -31,8 +31,6 @@ msgid "Staff"
 msgstr "Nhân viên"
 
 #: base/admin.py:158
-#, fuzzy
-#| msgid "Admin panel"
 msgid "Admin"
 msgstr "Trang quản trị"
 
@@ -109,7 +107,7 @@ msgstr "Thông tin hình ảnh"
 msgid "Mail info"
 msgstr "Thông tin thư"
 
-#: base/admin.py:500 base/models.py:566 notification/admin.py:134
+#: base/admin.py:500 base/models.py:567 notification/admin.py:138
 msgid "Content"
 msgstr "Nội dung"
 
@@ -117,7 +115,7 @@ msgstr "Nội dung"
 msgid "App info"
 msgstr "Thông tin ứng dụng"
 
-#: base/admin.py:595 base/models.py:781
+#: base/admin.py:595 base/models.py:782
 msgid "Icon"
 msgstr "Icon"
 
@@ -129,7 +127,7 @@ msgstr "Ứng dụng này không hoạt động."
 msgid "You do not have permission to access this app."
 msgstr "Bạn không có quyền truy cập ứng dụng này."
 
-#: base/admin.py:666 base/settings.py:528 dashboard/apps.py:8
+#: base/admin.py:666 base/settings.py:529 dashboard/apps.py:8
 #: dashboard/views.py:169 templates/admin/index.html:8
 msgid "Dashboard"
 msgstr "Bảng điều khiển"
@@ -146,7 +144,7 @@ msgstr "Trường hiển thị"
 msgid "Default fields"
 msgstr "Trường mặc định"
 
-#: base/middleware.py:25
+#: base/middleware.py:26
 msgid "Database is operating in readonly mode. Not possible to save any data."
 msgstr ""
 "Cơ sở dữ liệu đang hoạt động ở chế độ chỉ đọc. Không thể lưu bất kỳ dữ liệu "
@@ -316,208 +314,208 @@ msgstr "Bạn có thể xem tại"
 msgid "this link"
 msgstr "liên kết này"
 
-#: base/models.py:401
+#: base/models.py:402
 msgid "Image"
 msgstr "Hình ảnh"
 
-#: base/models.py:402 base/models.py:478
+#: base/models.py:403 base/models.py:479
 msgid "Thumbnail"
 msgstr "Hình thu nhỏ"
 
-#: base/models.py:404 base/models.py:490
+#: base/models.py:405 base/models.py:491
 msgid "Preview"
 msgstr "Xem trước"
 
-#: base/models.py:406 file_management/models.py:8
+#: base/models.py:407 file_management/models.py:8
 msgid "Description"
 msgstr "Mô tả"
 
-#: base/models.py:410
+#: base/models.py:411
 msgid "System image"
 msgstr "Hình ảnh hệ thống"
 
-#: base/models.py:411
+#: base/models.py:412
 msgid "System images"
 msgstr "Hình ảnh hệ thống"
 
-#: base/models.py:475 base/models.py:484
+#: base/models.py:476 base/models.py:485
 msgid "Image not found"
 msgstr "Hình ảnh không tìm thấy"
 
-#: base/models.py:486
+#: base/models.py:487
 msgid "View original image size"
 msgstr "Xem kích thước hình ảnh gốc"
 
-#: base/models.py:565
+#: base/models.py:566
 msgid "Subject"
 msgstr "Chủ đề"
 
-#: base/models.py:567
+#: base/models.py:568
 msgid "Receiver"
 msgstr "Người nhận"
 
-#: base/models.py:568 file_management/models.py:9 file_management/models.py:20
+#: base/models.py:569 file_management/models.py:9 file_management/models.py:20
 msgid "Pending"
 msgstr "Đang chờ"
 
-#: base/models.py:569
+#: base/models.py:570
 msgid "Sent"
 msgstr "Gửi"
 
-#: base/models.py:570
+#: base/models.py:571
 msgid "Failed"
 msgstr "Thất bại"
 
-#: base/models.py:571 file_management/models.py:12 file_management/models.py:29
+#: base/models.py:572 file_management/models.py:12 file_management/models.py:29
 #: synchronization/models.py:19
 msgid "Status"
 msgstr "Trạng thái"
 
-#: base/models.py:572 feedbacks/models.py:51
+#: base/models.py:573 feedbacks/models.py:51
 msgid "Note"
 msgstr "Ghi chú"
 
-#: base/models.py:576
+#: base/models.py:577
 msgid "Email notification"
 msgstr "Thông báo qua email"
 
-#: base/models.py:577
+#: base/models.py:578
 msgid "Email notifications"
 msgstr "Thông báo qua email"
 
-#: base/models.py:779
+#: base/models.py:780
 msgid "App name"
 msgstr "Tên ứng dụng"
 
-#: base/models.py:781
+#: base/models.py:782
 msgid "Icon name (Material Symbols Outlined) or URL"
 msgstr "Tên icon (Material Symbols Outlined) hoặc URL"
 
-#: base/models.py:782
+#: base/models.py:783
 msgid "URL"
 msgstr "URL"
 
-#: base/models.py:783
+#: base/models.py:784
 msgid "Category"
 msgstr "Danh mục"
 
-#: base/models.py:784
+#: base/models.py:785
 msgid "Permission"
 msgstr "Quyền"
 
-#: base/models.py:784
+#: base/models.py:785
 msgid "Permission required to access this app"
 msgstr "Quyền truy cập vào ứng dụng này"
 
-#: base/models.py:785
+#: base/models.py:786
 msgid "Thumbnail URL"
 msgstr "Hình thu nhỏ URL"
 
-#: base/models.py:788
+#: base/models.py:789
 msgid "App"
 msgstr "Ứng dụng"
 
-#: base/models.py:789
+#: base/models.py:790
 msgid "Apps"
 msgstr "Ứng dụng"
 
-#: base/settings.py:323
+#: base/settings.py:324
 msgid "Vietnamese"
 msgstr "Tiếng Việt"
 
-#: base/settings.py:324
+#: base/settings.py:325
 msgid "English"
 msgstr "Tiếng Anh"
 
-#: base/settings.py:415
+#: base/settings.py:416
 msgid "Admin panel"
 msgstr "Trang quản trị"
 
-#: base/settings.py:419
+#: base/settings.py:420
 msgid "White Neuron Co. Ltd."
 msgstr "Công ty TNHH White Neuron"
 
-#: base/settings.py:424
+#: base/settings.py:425
 msgid "Email: anhnt@whiteneuron.com"
 msgstr "Email: anhnt@whiteneuron.com"
 
-#: base/settings.py:519
+#: base/settings.py:520
 msgid "Navigation"
 msgstr "Điều hướng"
 
-#: base/settings.py:535
+#: base/settings.py:536
 msgid "Notifications"
 msgstr "Thông báo"
 
-#: base/settings.py:542 feedbacks/apps.py:8 feedbacks/models.py:59
+#: base/settings.py:543 feedbacks/apps.py:8 feedbacks/models.py:59
 msgid "Feedbacks"
 msgstr "Phản hồi"
 
-#: base/settings.py:551 file_management/apps.py:7
+#: base/settings.py:552 file_management/apps.py:7
 msgid "File Management"
 msgstr "Quản lý tệp"
 
-#: base/settings.py:555 file_management/models.py:58
+#: base/settings.py:556 file_management/models.py:58
 msgid "Excel Files"
 msgstr "Tệp Excel"
 
-#: base/settings.py:562 file_management/models.py:65
+#: base/settings.py:563 file_management/models.py:65
 msgid "PDF Files"
 msgstr "Tệp PDF"
 
-#: base/settings.py:571
+#: base/settings.py:572
 msgid "Users & Groups"
 msgstr "Người dùng & Nhóm"
 
-#: base/settings.py:575
+#: base/settings.py:576
 msgid "Users"
 msgstr "Người dùng"
 
-#: base/settings.py:582
+#: base/settings.py:583
 msgid "User activity"
 msgstr "Hoạt động người dùng"
 
-#: base/settings.py:589
+#: base/settings.py:590
 msgid "Groups"
 msgstr "Nhóm"
 
-#: base/settings.py:598
+#: base/settings.py:599
 msgid "System"
 msgstr "Hệ thống"
 
-#: base/settings.py:602
+#: base/settings.py:603
 msgid "Images"
 msgstr "Hình ảnh"
 
-#: base/settings.py:608
+#: base/settings.py:609
 msgid "Emails"
 msgstr "Email"
 
-#: base/settings.py:614
+#: base/settings.py:615
 msgid "Notifications config"
 msgstr "Cấu hình thông báo"
 
-#: base/settings.py:622
+#: base/settings.py:623
 msgid "Celery Tasks"
 msgstr "Nhiệm vụ Celery"
 
-#: base/settings.py:626
+#: base/settings.py:627
 msgid "Clocked"
 msgstr "Khóa"
 
-#: base/settings.py:634
+#: base/settings.py:635
 msgid "Crontabs"
 msgstr "Crontabs"
 
-#: base/settings.py:642
+#: base/settings.py:643
 msgid "Intervals"
 msgstr "Khoảng thời gian"
 
-#: base/settings.py:650
+#: base/settings.py:651
 msgid "Periodic tasks"
 msgstr "Nhiệm vụ định kỳ"
 
-#: base/settings.py:658
+#: base/settings.py:659
 msgid "Solar events"
 msgstr "Sự kiện Solar"
 
@@ -547,10 +545,8 @@ msgid "Translate successfully"
 msgstr "Dịch thành công"
 
 #: dashboard/views.py:28
-#, fuzzy
-#| msgid "Today"
 msgid "today"
-msgstr "Hôm nay"
+msgstr "hôm nay"
 
 #: dashboard/views.py:29 dashboard/views.py:180
 msgid "7 days"
@@ -561,8 +557,6 @@ msgid "week"
 msgstr "tuần"
 
 #: dashboard/views.py:31
-#, fuzzy
-#| msgid "Month"
 msgid "month"
 msgstr "tháng"
 
@@ -724,25 +718,23 @@ msgstr "Tệp PDF"
 msgid "Notification Recipients"
 msgstr "Người nhận thông báo"
 
-#: notification/admin.py:65
+#: notification/admin.py:68
 msgid "Notification information"
 msgstr "Thông tin thông báo"
 
-#: notification/admin.py:84
+#: notification/admin.py:88
 msgid "View"
 msgstr "Xem"
 
-#: notification/admin.py:138 synchronization/models.py:14
+#: notification/admin.py:142 synchronization/models.py:14
 msgid "Action"
 msgstr "Hành động"
 
-#: notification/admin.py:142
+#: notification/admin.py:146
 msgid "Flag"
 msgstr "Cờ"
 
 #: notification/apps.py:7
-#, fuzzy
-#| msgid "Notifications"
 msgid "Notification"
 msgstr "Thông báo"
 
@@ -777,6 +769,10 @@ msgstr "Nhóm người dùng để gửi thông báo đến."
 msgid "Specific users to send notifications to."
 msgstr "Người dùng cụ thể để gửi thông báo đến."
 
+#: notification/models.py:59
+msgid "User to Notify"
+msgstr "Thông báo cho người dùng"
+
 #: notification/models.py:63
 msgid "Changed Data"
 msgstr "Thay đổi dữ liệu"
@@ -785,11 +781,15 @@ msgstr "Thay đổi dữ liệu"
 msgid "Read"
 msgstr "Đã đọc"
 
-#: notification/models.py:78
+#: notification/models.py:76
+msgid "Action By"
+msgstr "Hành động bởi"
+
+#: notification/models.py:81
 msgid "notification"
 msgstr "thông báo"
 
-#: notification/models.py:79
+#: notification/models.py:82
 msgid "notifications"
 msgstr "thông báo"
 

@@ -56,7 +56,7 @@ class NotificationConfig(models.Model):
 from .views import notify_admin
 import json
 class Notification(models.Model):
-    user= models.ForeignKey(User, on_delete=models.CASCADE)
+    user= models.ForeignKey(User, on_delete=models.CASCADE, verbose_name=_("User to Notify"))
     title = models.CharField(max_length=255)
     obj_link= models.CharField(max_length=255, null=True, blank=True) # link to object
     content = models.TextField()
@@ -72,6 +72,9 @@ class Notification(models.Model):
                                                                              ('restore', 'restore'),
                                                                              ("delete", "delete")])
     created_at = models.DateTimeField(auto_now_add=True)
+    action_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, 
+                                  verbose_name=_("Action By"),
+                                  related_name='action_by_notifications') # user who performed the action that triggered the notification
 
     class Meta:
         db_table = "notifications"

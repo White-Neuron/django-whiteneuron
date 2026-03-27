@@ -1,4 +1,6 @@
 from django.contrib import admin
+import ast
+import json
 from typing import Sequence
 
 from whiteneuron.base.admin import base_admin_site
@@ -8,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from django.shortcuts import get_object_or_404, redirect
 from django.http import HttpRequest
 from django.utils.safestring import mark_safe
+from django.utils.html import format_html
 from unfold.decorators import action, display
 
 @admin.register(NotificationConfig, site=base_admin_site)
@@ -37,24 +40,26 @@ class NotificationConfigAdmin(ModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('model')
     
-
 @admin.register(Notification, site=base_admin_site)
 class NotificationAdmin(ModelAdmin):
     list_display = [
         # "user",
-        "title",
+        "display_title",
+        "action_by",
         "display_action",
         "display_flag",
         "is_read",
         "created_at",
     ]
-    autocomplete_fields = [ "user" ]
+    autocomplete_fields = [ "user", "action_by"]
     search_fields = [
         "user__username",
         "title",
         "content",
+        "action_by__username",
     ]
     list_filter = [
+        "action_by",
         "is_read",
         "created_at",
     ]
@@ -66,12 +71,13 @@ class NotificationAdmin(ModelAdmin):
             {
                 "fields": (
                     "user",
+                    "action_by",
                     'obj_link',
                     "action",
                     "flag", 
-                    "title",
+                    "display_title",
                     "display_content",
-                    'changed_data',
+                    "display_changed_data",
                     "is_read", 
                     "created_at",
                 ),
@@ -142,4 +148,52 @@ class NotificationAdmin(ModelAdmin):
     @display(description=_("Flag"), label=True)
     def display_flag(self, instance: Notification):
         return instance.flag
+    
+    def display_title(self, instance: Notification):
+        return mark_safe(f"{instance.title}")
+    display_title.short_description = _("Title")
+    
+    def display_changed_data(self, instance: Notification):
+        if instance.changed_data:
+            changed_data = None
+            try:
+                changed_data = json.loads(instance.changed_data)
+            except json.JSONDecodeError:
+                # Backward compatibility for old rows saved with str(list/dict)
+                try:
+                    changed_data = ast.literal_eval(instance.changed_data)
+                except (ValueError, SyntaxError):
+                    return instance.changed_data
+
+            if isinstance(changed_data, dict):
+                html = "<ul>"
+                for field, changes in changed_data.items():
+                    old_value = changes.get("old", "") if isinstance(changes, dict) else ""
+                    new_value = changes.get("new", "") if isinstance(changes, dict) else ""
+                    html += format_html(
+                        "<li><strong>{}:</strong> {} → {}</li>",
+                        field,
+                        old_value,
+                        new_value,
+                    )
+                html += "</ul>"
+                return mark_safe(html)
+
+            if isinstance(changed_data, list):
+                html = "<ul>"
+                for row in changed_data:
+                    if not isinstance(row, dict):
+                        continue
+                    html += format_html(
+                        "<li><strong>{}:</strong> {} → {}</li>",
+                        row.get("field_name", ""),
+                        row.get("old_value", ""),
+                        row.get("new_value", ""),
+                    )
+                html += "</ul>"
+                return mark_safe(html)
+
+            return str(changed_data)
+        return _("No changes")
+    display_changed_data.short_description = _("Changed Data")
     

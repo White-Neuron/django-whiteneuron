@@ -108,6 +108,7 @@ class ModelAdmin(UnfoldAdmin):
             # send notification to superuser when delete successfully
             for user in User.objects.filter(is_superuser= True):
                 Notification.objects.create(user= user, title= title,
+                                            action_by= request.user,
                                             flag= 'danger',
                                             action= 'delete',
                                             content= content_html)
@@ -124,6 +125,7 @@ class ModelAdmin(UnfoldAdmin):
             # send notification to superuser when delete successfully
             for user in User.objects.filter(is_superuser= True):
                 Notification.objects.create(user= user, title= title,
+                                            action_by= request.user,
                                             flag= 'danger',
                                             action= 'delete',
                                             content= content_html)
@@ -137,6 +139,7 @@ class ModelAdmin(UnfoldAdmin):
             # send notification to superuser when delete successfully
             for user in User.objects.filter(is_superuser= True):
                 Notification.objects.create(user= user, title= title,
+                                            action_by= request.user,
                                             flag= 'info',
                                             action= 'restore',
                                             content= content_html)
@@ -155,6 +158,7 @@ class ModelAdmin(UnfoldAdmin):
         # send notification to superuser when delete successfully
         for user in User.objects.filter(is_superuser= True):
             Notification.objects.create(user= user, title= title,
+                                        action_by= request.user,
                                         flag= 'danger',
                                         action= 'delete',
                                         content= content_html)
@@ -209,6 +213,7 @@ class ModelAdmin(UnfoldAdmin):
         # if title:
         #     for user in User.objects.filter(is_superuser= True):
         #         obj= Notification.objects.create(user= user, title= title,
+        #                                     action_by= obj.updated_by if action == 'update' else obj.created_by,
         #                                     flag= 'info',
         #                                     action= action,
         #                                     obj_link= obj_link,

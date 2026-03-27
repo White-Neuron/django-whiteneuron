@@ -622,8 +622,8 @@ class AppAdmin(ModelAdmin):
     </div>
     <div class="ui-card-body flex flex-col flex-1 p-4 pt-0 text-center items-center">
         <h5 class="font-bold text-lg mb-2">{_(obj.name)}</h5>
-        <div class="mt-auto flex flex-wrap justify-center gap-2">
-            {f'<span class="ui-badge ui-badge-success ui-badge-sm">{_("Active")}</span>' if obj.is_active else f'<span class="ui-badge ui-badge-error ui-badge-sm">{_("Inactive")}</span>'}
+        <div class="mt-auto flex flex-wrap justify-center items-center gap-2">
+            {f'<span class="material-symbols-outlined text-success" style="font-size:18px" title="{_("Active")}">check_circle</span>' if obj.is_active else f'<span class="material-symbols-outlined text-error" style="font-size:18px" title="{_("Inactive")}">cancel</span>'}
             {'<span class="ui-badge ui-badge-info ui-badge-outline ui-badge-sm">' + _(obj.category) + '</span>' if obj.category else ''}
         </div>
     </div>
