@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-27 14:44+0700\n"
+"POT-Creation-Date: 2026-03-28 10:42+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -107,7 +107,7 @@ msgstr "Thông tin hình ảnh"
 msgid "Mail info"
 msgstr "Thông tin thư"
 
-#: base/admin.py:500 base/models.py:567 notification/admin.py:138
+#: base/admin.py:500 base/models.py:567 notification/admin.py:140
 msgid "Content"
 msgstr "Nội dung"
 
@@ -467,7 +467,7 @@ msgstr "Tệp PDF"
 msgid "Users & Groups"
 msgstr "Người dùng & Nhóm"
 
-#: base/settings.py:576
+#: base/settings.py:576 notification/models.py:59
 msgid "Users"
 msgstr "Người dùng"
 
@@ -714,25 +714,37 @@ msgstr "Tệp Excel"
 msgid "PDF File"
 msgstr "Tệp PDF"
 
-#: notification/admin.py:31
+#: notification/admin.py:34
 msgid "Notification Recipients"
 msgstr "Người nhận thông báo"
 
-#: notification/admin.py:68
+#: notification/admin.py:70
 msgid "Notification information"
 msgstr "Thông tin thông báo"
 
-#: notification/admin.py:88
+#: notification/admin.py:90
 msgid "View"
 msgstr "Xem"
 
-#: notification/admin.py:142 synchronization/models.py:14
+#: notification/admin.py:144 synchronization/models.py:14
 msgid "Action"
 msgstr "Hành động"
 
-#: notification/admin.py:146
+#: notification/admin.py:148
 msgid "Flag"
 msgstr "Cờ"
+
+#: notification/admin.py:154
+msgid "Title"
+msgstr "Tiêu đề"
+
+#: notification/admin.py:197
+msgid "No changes"
+msgstr "Không có thay đổi nào"
+
+#: notification/admin.py:198 notification/models.py:71
+msgid "Changed Data"
+msgstr "Thay đổi dữ liệu"
 
 #: notification/apps.py:7
 msgid "Notification"
@@ -742,54 +754,90 @@ msgstr "Thông báo"
 msgid "The model this configuration applies to."
 msgstr "Mô hình mà cấu hình này áp dụng."
 
-#: notification/models.py:17
+#: notification/models.py:14
+msgid "Model"
+msgstr "Mô hình"
+
+#: notification/models.py:18
 msgid ""
 "The type of event this configuration applies to (e.g., 'create', 'update', "
 "'delete')."
 msgstr ""
 "Loại sự kiện mà cấu hình này áp dụng (ví dụ: 'tạo', 'cập nhật', 'xóa')."
 
-#: notification/models.py:28
+#: notification/models.py:25
+msgid "Event Type"
+msgstr "Loại sự kiện"
+
+#: notification/models.py:30
 msgid "Whether to send notifications to the admin."
 msgstr "Liệu có gửi thông báo đến quản trị viên hay không."
 
-#: notification/models.py:33
+#: notification/models.py:31
+msgid "Send to Admin"
+msgstr "Gửi đến quản trị viên"
+
+#: notification/models.py:36
 msgid "Whether to send notifications to the user."
 msgstr "Liệu có gửi thông báo đến người dùng hay không."
 
-#: notification/models.py:38
+#: notification/models.py:37
+msgid "Send to User"
+msgstr "Gửi đến người dùng"
+
+#: notification/models.py:42
 msgid "Whether to send notifications to group users."
 msgstr "Liệu có gửi thông báo đến nhóm người dùng hay không."
 
-#: notification/models.py:45
+#: notification/models.py:43
+msgid "Send to Group Users"
+msgstr "Gửi đến nhóm người dùng"
+
+#: notification/models.py:50
 msgid "Groups of users to send notifications to."
 msgstr "Nhóm người dùng để gửi thông báo đến."
 
-#: notification/models.py:52
+#: notification/models.py:51
+msgid "Group Users"
+msgstr "Nhóm người dùng"
+
+#: notification/models.py:58
 msgid "Specific users to send notifications to."
 msgstr "Người dùng cụ thể để gửi thông báo đến."
 
-#: notification/models.py:59
+#: notification/models.py:66
 msgid "User to Notify"
 msgstr "Thông báo cho người dùng"
 
-#: notification/models.py:63
-msgid "Changed Data"
-msgstr "Thay đổi dữ liệu"
+#: notification/models.py:68
+msgid "Object Link"
+msgstr "Đối tượng liên kết"
 
-#: notification/models.py:64
+#: notification/models.py:72
 msgid "Read"
 msgstr "Đã đọc"
 
-#: notification/models.py:76
+#: notification/models.py:77
+msgid "Notification Type"
+msgstr "Loại thông báo"
+
+#: notification/models.py:81
+msgid "Action Type"
+msgstr "Loại hành động"
+
+#: notification/models.py:82
+msgid "Created At"
+msgstr "Đã tạo lúc"
+
+#: notification/models.py:84
 msgid "Action By"
 msgstr "Hành động bởi"
 
-#: notification/models.py:81
+#: notification/models.py:89
 msgid "notification"
 msgstr "thông báo"
 
-#: notification/models.py:82
+#: notification/models.py:90
 msgid "notifications"
 msgstr "thông báo"
 

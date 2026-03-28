@@ -10,7 +10,8 @@ class NotificationConfig(models.Model):
         'contenttypes.ContentType',
         on_delete=models.CASCADE,
         related_name='notification_configs',
-        help_text=_("The model this configuration applies to.")
+        help_text=_("The model this configuration applies to."),
+        verbose_name=_("Model")
     )
     event_type = models.CharField(
         max_length=100,
@@ -20,36 +21,42 @@ class NotificationConfig(models.Model):
             ('create', 'Create'),
             ('update', 'Update'),
             ('delete', 'Delete'),
-        ]
+        ],
+        verbose_name=_("Event Type")
     )
     
     send_to_admin = models.BooleanField(
         default=True,
-        help_text=_("Whether to send notifications to the admin.")
+        help_text=_("Whether to send notifications to the admin."),
+        verbose_name=_("Send to Admin")
     )
     
     send_to_user = models.BooleanField(
         default=False,
-        help_text=_("Whether to send notifications to the user.")
+        help_text=_("Whether to send notifications to the user."),
+        verbose_name=_("Send to User")
     )
 
     send_to_group_user = models.BooleanField(
         default=False,
-        help_text=_("Whether to send notifications to group users.")
+        help_text=_("Whether to send notifications to group users."),
+        verbose_name=_("Send to Group Users")
     )
 
     group_users= models.ManyToManyField(
         Group,
         blank=True,
         related_name='notification_configs',
-        help_text=_("Groups of users to send notifications to.")
+        help_text=_("Groups of users to send notifications to."),
+        verbose_name=_("Group Users")
     )
 
     users= models.ManyToManyField(
         User,
         blank=True,
         related_name='notification_configs',    
-        help_text=_("Specific users to send notifications to.")
+        help_text=_("Specific users to send notifications to."),
+        verbose_name=_("Users")
     )
 
 
@@ -58,7 +65,8 @@ import json
 class Notification(models.Model):
     user= models.ForeignKey(User, on_delete=models.CASCADE, verbose_name=_("User to Notify"))
     title = models.CharField(max_length=255)
-    obj_link= models.CharField(max_length=255, null=True, blank=True) # link to object
+    obj_link= models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Object Link")
+                               ) # link to object
     content = models.TextField()
     changed_data= models.TextField(null=True, blank=True, verbose_name=_("Changed Data"))
     is_read = models.BooleanField(default=False, verbose_name=_("Read"))
@@ -66,12 +74,12 @@ class Notification(models.Model):
                                                     ("success", "success"), 
                                                     ("warning", "warning"), 
                                                     ("error", "error"),
-                                                    ("danger", "danger")])
+                                                    ("danger", "danger")], verbose_name=_("Notification Type"))
     action = models.CharField(max_length=25, null=True, blank=True, choices=[("update", "update"),
                                                                              ("create", "create"),
                                                                              ('restore', 'restore'),
-                                                                             ("delete", "delete")])
-    created_at = models.DateTimeField(auto_now_add=True)
+                                                                             ("delete", "delete")], verbose_name=_("Action Type"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
     action_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, 
                                   verbose_name=_("Action By"),
                                   related_name='action_by_notifications') # user who performed the action that triggered the notification

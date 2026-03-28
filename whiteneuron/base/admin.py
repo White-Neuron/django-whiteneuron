@@ -165,11 +165,11 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
 
         role= ""
         if obj.is_superuser:
-            role= f'<span class="ui-badge ui-badge-xs ui-badge-warning">{_("Superuser")}</span>' 
+            role= f'<span class="material-symbols-outlined text-warning" style="font-size:18px" title="{_("Superuser")}">admin_panel_settings</span>'
         elif obj.is_staff:
-            role= f'<span class="ui-badge ui-badge-xs ui-badge-info">{_("Staff")}</span>'
+            role= f'<span class="material-symbols-outlined text-info" style="font-size:18px" title="{_("Staff")}">badge</span>'
         elif obj.is_bot:
-            role= f'<span class="ui-badge ui-badge-xs ui-badge-secondary">{_("Bot")}</span>'
+            role= f'<span class="material-symbols-outlined text-secondary" style="font-size:18px" title="{_("Bot")}">smart_toy</span>'
         
         # Compact vertical card layout với dark mode support
         string = f"""
@@ -189,7 +189,7 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
         <h5>{display_name}</h5>
         <p class="ui-card-title justify-center text-xs">{username_display}</p>
         <div class="flex flex-wrap items-center justify-center gap-2 mt-3">
-        {f'<span class="ui-badge ui-badge-xs ui-badge-success">{_("Active")}</span>' if obj.is_active else f'<span class="ui-badge ui-badge-danger">{_("Inactive")}</span>'}
+        {f'<span class="material-symbols-outlined text-success" style="font-size:18px" title="{_("Active")}">check_circle</span>' if obj.is_active else f'<span class="material-symbols-outlined text-error" style="font-size:18px" title="{_("Inactive")}">cancel</span>'}
         {role}
         </div>
 
