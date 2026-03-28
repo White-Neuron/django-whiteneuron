@@ -177,7 +177,7 @@ node_modules/
 .vscode
 
 # Generated operational reports (local runtime artifacts)
-docs/reports/
+docs/reports/unfold-upgrades/
 
 # Local smoke-check helper (if created during manual validation)
 whiteneuron/base/test_urls.py
