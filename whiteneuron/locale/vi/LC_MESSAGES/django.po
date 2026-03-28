@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-28 10:42+0700\n"
+"POT-Creation-Date: 2026-03-28 11:35+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -107,7 +107,7 @@ msgstr "Thông tin hình ảnh"
 msgid "Mail info"
 msgstr "Thông tin thư"
 
-#: base/admin.py:500 base/models.py:567 notification/admin.py:140
+#: base/admin.py:500 base/models.py:567 notification/admin.py:146
 msgid "Content"
 msgstr "Nội dung"
 
@@ -723,26 +723,30 @@ msgid "Notification information"
 msgstr "Thông tin thông báo"
 
 #: notification/admin.py:90
-msgid "View"
-msgstr "Xem"
+msgid "View Linked Object"
+msgstr "Xem đối tượng được liên kết"
 
-#: notification/admin.py:144 synchronization/models.py:14
+#: notification/admin.py:97
+msgid "No object link available for this notification."
+msgstr "Không có liên kết đối tượng nào có sẵn cho thông báo này."
+
+#: notification/admin.py:150 synchronization/models.py:14
 msgid "Action"
 msgstr "Hành động"
 
-#: notification/admin.py:148
+#: notification/admin.py:154
 msgid "Flag"
 msgstr "Cờ"
 
-#: notification/admin.py:154
+#: notification/admin.py:160
 msgid "Title"
 msgstr "Tiêu đề"
 
-#: notification/admin.py:197
+#: notification/admin.py:203
 msgid "No changes"
 msgstr "Không có thay đổi nào"
 
-#: notification/admin.py:198 notification/models.py:71
+#: notification/admin.py:204 notification/models.py:71
 msgid "Changed Data"
 msgstr "Thay đổi dữ liệu"
 
@@ -1020,6 +1024,9 @@ msgstr "Trước"
 #: templates/unfold/helpers/pagination.html:11
 msgid "Next"
 msgstr "Tiếp theo"
+
+#~ msgid "View"
+#~ msgstr "Xem"
 
 #~ msgid "Last week revenue"
 #~ msgstr "Giá trị doanh thu tuần trước"

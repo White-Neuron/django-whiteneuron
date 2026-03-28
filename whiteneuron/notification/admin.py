@@ -85,15 +85,21 @@ class NotificationAdmin(ModelAdmin):
         ),
     )
 
-    actions_submit_line = ["view_obj_link"]
+    actions_detail = ["view_obj_link"]
 
-    @action(description=_("View"), permissions= ["view_obj_link"])
-    def view_obj_link(self, request, obj):
-        return redirect(obj.obj_link)
+    @action(description=_("View Linked Object"),
+            permissions= ["view_obj_link"],
+            url_path="view-obj-link")
+    def view_obj_link(self, request, object_id: int):
+        obj = get_object_or_404(Notification, pk=object_id)
+        if obj.obj_link:
+            return redirect(obj.obj_link)
+        self.message_user(request, _("No object link available for this notification."))
+        return redirect(request.META.get('HTTP_REFERER', 'admin:notification_notification_changeform', args=[object_id]))
     
-    def has_view_obj_link_permission(self, request, obj=None):
-        if obj is not None:
-            obj= get_object_or_404(Notification, pk=obj)
+    def has_view_obj_link_permission(self, request, object_id: int):
+        if object_id is not None:
+            obj= get_object_or_404(Notification, pk=object_id)
             if obj.obj_link:
                 return True
         return False
