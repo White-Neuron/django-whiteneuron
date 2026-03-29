@@ -644,7 +644,13 @@ class AppAdmin(ModelAdmin):
 
     def get_queryset(self, request):
         init_app_db()
-        return super(AppAdmin, self).get_queryset(request).filter(is_active= True)
+        queryset = super(AppAdmin, self).get_queryset(request).filter(is_active=True)
+
+        if request.user.is_superuser:
+            return queryset
+
+        allowed_ids = [obj.pk for obj in queryset if self.has_permission(request, obj)]
+        return queryset.filter(pk__in=allowed_ids)
     
     def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
         ## Điều hướng tới url của app
