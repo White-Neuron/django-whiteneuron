@@ -57,7 +57,7 @@ from unfold.widgets import (
     UnfoldAdminTextInputWidget,
 )
 
-from .models import User, Tag, UserActivity, UserProfile, App
+from .models import User, Tag, UserActivity, UserProfile, App, IPBlacklist
 from .sites import base_admin_site
 from django.utils.safestring import mark_safe
 
@@ -390,9 +390,84 @@ class UserActivityAdmin(ModelAdmin):
     )
     
     def has_add_permission(self, request):
-        return False 
+        return False
     def has_change_permission(self, request, obj=None):
         return False
+
+    @action(description=_("Block IP address"))
+    def block_ip(self, request, queryset):
+        blocked = []
+        skipped = []
+        for activity in queryset:
+            if not activity.ip_address:
+                continue
+            obj, created = IPBlacklist.objects.get_or_create(
+                ip_address=activity.ip_address,
+                defaults={
+                    'reason': f'Blocked from UserActivity by {request.user}',
+                    'created_by': request.user,
+                    'is_active': True,
+                },
+            )
+            if not created and not obj.is_active:
+                obj.is_active = True
+                obj.reason = f'Re-blocked from UserActivity by {request.user}'
+                obj.save()
+            blocked.append(activity.ip_address)
+        if blocked:
+            messages.success(request, _(f"Blocked {len(blocked)} IP(s): {', '.join(set(blocked))}"))
+        if skipped:
+            messages.warning(request, _(f"{len(skipped)} activity records had no IP address."))
+
+    actions = ['block_ip']
+
+
+@admin.register(IPBlacklist, site=base_admin_site)
+class IPBlacklistAdmin(ModelAdmin):
+    compressed_fields = True
+    list_display = ['ip_address', 'is_active_display', 'reason', 'blocked_until', 'created_at', 'created_by']
+    search_fields = ['ip_address', 'reason']
+    list_filter = ['is_active']
+    readonly_fields = ['created_at', 'created_by']
+    date_hierarchy = 'created_at'
+
+    fieldsets = (
+        (_('Target'), {
+            'fields': ('ip_address', 'reason'),
+        }),
+        (_('Block settings'), {
+            'fields': ('is_active', 'blocked_until'),
+        }),
+        (_('Meta'), {
+            'fields': ('created_at', 'created_by'),
+        }),
+    )
+
+    @display(label=True, boolean=True, description=_("Active"))
+    def is_active_display(self, obj):
+        return obj.is_active
+
+    def save_model(self, request, obj, form, change):
+        if not change:
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+
+    @action(description=_("Activate selected IPs"))
+    def activate(self, request, queryset):
+        for obj in queryset:
+            obj.is_active = True
+            obj.save()
+        messages.success(request, _("Selected IPs have been activated."))
+
+    @action(description=_("Deactivate selected IPs"))
+    def deactivate(self, request, queryset):
+        for obj in queryset:
+            obj.is_active = False
+            obj.save()
+        messages.success(request, _("Selected IPs have been deactivated."))
+
+    actions = ['activate', 'deactivate']
+
 
 @admin.register(Group, site=base_admin_site)
 class GroupAdmin(BaseGroupAdmin, ModelAdmin):

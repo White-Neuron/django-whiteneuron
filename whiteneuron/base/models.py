@@ -193,6 +193,77 @@ class UserActivity(models.Model):
 
 
 ############################################
+# IP Blacklist (dynamic, managed via admin + Redis)
+############################################
+class IPBlacklist(models.Model):
+    ip_address = models.GenericIPAddressField(
+        _("IP address"),
+        unique=True,
+        db_index=True,
+        help_text=_("Single IPv4 or IPv6 address. Use IP_BLACKLIST in .env for CIDR ranges."),
+    )
+    reason = models.CharField(_("reason"), max_length=500, blank=True)
+    is_active = models.BooleanField(_("active"), default=True)
+    blocked_until = models.DateTimeField(
+        _("blocked until"),
+        null=True,
+        blank=True,
+        help_text=_("Leave empty for permanent block. Temporary blocks expire automatically via Redis TTL."),
+    )
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    created_by = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="ip_blacklists",
+        verbose_name=_("created by"),
+    )
+
+    class Meta:
+        db_table = "ip_blacklists"
+        verbose_name = _("IP blacklist")
+        verbose_name_plural = _("IP blacklists")
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.ip_address
+
+    def _cache_key(self):
+        return f"blacklist:dynamic:{self.ip_address}"
+
+    def sync_cache(self):
+        from django.core.cache import cache
+        key = self._cache_key()
+        try:
+            if self.is_active:
+                if self.blocked_until:
+                    ttl = int((self.blocked_until - timezone.now()).total_seconds())
+                    if ttl > 0:
+                        cache.set(key, True, timeout=ttl)
+                    else:
+                        cache.delete(key)
+                else:
+                    cache.set(key, True, timeout=None)
+            else:
+                cache.delete(key)
+        except Exception:
+            pass
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.sync_cache()
+
+    def delete(self, *args, **kwargs):
+        from django.core.cache import cache
+        try:
+            cache.delete(self._cache_key())
+        except Exception:
+            pass
+        super().delete(*args, **kwargs)
+
+
+############################################
 # Base Model
 ############################################
 from .thread_local import thread_local

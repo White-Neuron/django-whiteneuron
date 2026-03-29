@@ -52,9 +52,18 @@ class RateLimitMiddleware:
             addr = ipaddress.ip_address(ip)
         except ValueError:
             return False
+        # Static blacklist from .env (loaded at startup, O(1) for IPs, supports CIDRs)
         if addr in self._blacklist_ips:
             return True
-        return any(addr in net for net in self._blacklist_nets)
+        if any(addr in net for net in self._blacklist_nets):
+            return True
+        # Dynamic blacklist from Redis (managed via Django admin, real-time)
+        try:
+            if cache.get(f'blacklist:dynamic:{addr}'):
+                return True
+        except Exception:
+            pass
+        return False
 
     def __call__(self, request):
         if not any(request.path.startswith(p) for p in self.EXEMPT_PATHS):

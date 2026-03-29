@@ -645,7 +645,13 @@ UNFOLD = {
                         "icon": "notification_important",
                         "link": reverse_lazy("admin:notification_notificationconfig_changelist"),
                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
-                    }
+                    },
+                    {
+                        "title": _("IP Blacklist"),
+                        "icon": "block",
+                        "link": reverse_lazy("admin:base_ipblacklist_changelist"),
+                        "permission": "whiteneuron.base.utils.permission_superuser_callback",
+                    },
                 ],
             },
             {
