@@ -49,11 +49,11 @@ CACHENAME = environ.get("CACHENAME", "default")
 CACHE_REDIS_LOCATION=environ.get("CACHE_REDIS_LOCATION", "redis://localhost:6379")
 
 # Rate limiting (RateLimitMiddleware)
-RATE_LIMIT_REQUESTS = int(environ.get("RATE_LIMIT_REQUESTS", 300))   # requests per window per IP
+RATE_LIMIT_REQUESTS = int(environ.get("RATE_LIMIT_REQUESTS", 60))    # requests per window per IP
 RATE_LIMIT_WINDOW = int(environ.get("RATE_LIMIT_WINDOW", 60))        # window in seconds
 
 # Rate limiting (UserActivityMiddleware — authenticated users)
-USER_RATE_LIMIT_REQUESTS = int(environ.get("USER_RATE_LIMIT_REQUESTS", 200))  # requests per window per user
+USER_RATE_LIMIT_REQUESTS = int(environ.get("USER_RATE_LIMIT_REQUESTS", 60))   # requests per window per user
 USER_RATE_LIMIT_WINDOW = int(environ.get("USER_RATE_LIMIT_WINDOW", 60))       # window in seconds
 
 # Chỉ bật khi deploy sau Cloudflare — tin tưởng CF-Connecting-IP / True-Client-IP header.

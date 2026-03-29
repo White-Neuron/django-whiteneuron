@@ -127,8 +127,9 @@ class User(AbstractUser):
     
     def display_header(self):
         # Hiển thị avatar bên cạnh username 
+        user_url= reverse('admin:base_user_change', args=[self.id])
         return mark_safe(f"""
-        <a href="/admin/base/user/{self.id}/change/">
+        <a href="{user_url}" style="text-decoration: none; color: inherit;">
             <div style="display: flex; align-items: center;">
                 <div style="border-radius: 50%; overflow: hidden;">
                          {self.display_avatar()}

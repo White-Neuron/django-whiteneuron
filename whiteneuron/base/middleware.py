@@ -48,8 +48,9 @@ class RateLimitMiddleware:
 
     def _is_rate_limited(self, ip: str) -> bool:
         # incr-first pattern: atomic trên Redis.
-        # Khi count == 1 nghĩa là key mới được tạo bởi Redis (không có TTL) → cần touch để set TTL.
+        # Khi count == 1: key mới tạo bởi Redis (không có TTL) → cần touch để set TTL.
         # Khi ValueError: LocMemCache không tự tạo key → dùng set với timeout.
+        # Khi Exception khác (VD: ConnectionError khi Redis không đủ reach): fail-open (không block).
         key = f'rl:global:{ip}'
         try:
             count = cache.incr(key)
@@ -58,6 +59,8 @@ class RateLimitMiddleware:
         except ValueError:
             cache.set(key, 1, timeout=self.window)
             count = 1
+        except Exception:
+            return False  # fail-open: không block khi cache lỗi
         return count > self.rate
 
 
@@ -154,8 +157,9 @@ class UserActivityMiddleware:
 
     def _is_user_rate_limited(self, user_id: int) -> bool:
         # incr-first pattern: atomic trên Redis.
-        # Khi count == 1 nghĩa là key mới được tạo bởi Redis (không có TTL) → cần touch để set TTL.
+        # Khi count == 1: key mới tạo bởi Redis (không có TTL) → cần touch để set TTL.
         # Khi ValueError: LocMemCache không tự tạo key → dùng set với timeout.
+        # Khi Exception khác (VD: ConnectionError khi Redis không reach được): fail-open.
         key = f'rl:user:{user_id}'
         try:
             count = cache.incr(key)
@@ -164,6 +168,8 @@ class UserActivityMiddleware:
         except ValueError:
             cache.set(key, 1, timeout=self.user_window)
             count = 1
+        except Exception:
+            return False  # fail-open: không block khi cache lỗi
         return count > self.user_rate
 
     def __call__(self, request):
