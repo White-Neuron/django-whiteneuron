@@ -56,6 +56,10 @@ RATE_LIMIT_WINDOW = int(environ.get("RATE_LIMIT_WINDOW", 60))        # window in
 USER_RATE_LIMIT_REQUESTS = int(environ.get("USER_RATE_LIMIT_REQUESTS", 200))  # requests per window per user
 USER_RATE_LIMIT_WINDOW = int(environ.get("USER_RATE_LIMIT_WINDOW", 60))       # window in seconds
 
+# Chỉ bật khi deploy sau Cloudflare — tin tưởng CF-Connecting-IP / True-Client-IP header.
+# Nếu không bật, các header này sẽ bị bỏ qua để tránh giả mạo IP.
+BEHIND_CLOUDFLARE = environ.get("BEHIND_CLOUDFLARE", "False") == "True"
+
 # Cảnh báo: rate limiting chỉ hiệu quả khi dùng Redis (shared cache giữa các worker).
 # Với LocMemCache (USE_CACHE=False hoặc CACHENAME=default), mỗi gunicorn worker có cache
 # riêng → giới hạn thực tế = RATE_LIMIT_REQUESTS × số worker.

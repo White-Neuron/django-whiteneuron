@@ -2,7 +2,6 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
-import logging
 import ipaddress
 import re
 from django.core.cache import cache
@@ -48,12 +47,15 @@ class RateLimitMiddleware:
         return self.get_response(request)
 
     def _is_rate_limited(self, ip: str) -> bool:
-        # Dùng incr-first pattern: atomic hơn get+set trên Redis/multi-worker
+        # incr-first pattern: atomic trên Redis.
+        # Khi count == 1 nghĩa là key mới được tạo bởi Redis (không có TTL) → cần touch để set TTL.
+        # Khi ValueError: LocMemCache không tự tạo key → dùng set với timeout.
         key = f'rl:global:{ip}'
         try:
             count = cache.incr(key)
+            if count == 1:
+                cache.touch(key, timeout=self.window)
         except ValueError:
-            # Key chưa tồn tại
             cache.set(key, 1, timeout=self.window)
             count = 1
         return count > self.rate
@@ -90,10 +92,14 @@ def is_global_ip(ip):
         return False
 
 def get_client_ip(request):
-    for h in ("CF-Connecting-IP", "True-Client-IP"):
-        ip = request.headers.get(h)
-        if ip:
-            return ip, request.headers.get("User-Agent")
+    from django.conf import settings
+    # CF-Connecting-IP / True-Client-IP chỉ tin tưởng khi deploy sau Cloudflare.
+    # Set BEHIND_CLOUDFLARE=True trong settings để bật.
+    if getattr(settings, 'BEHIND_CLOUDFLARE', False):
+        for h in ("CF-Connecting-IP", "True-Client-IP"):
+            ip = request.headers.get(h)
+            if ip:
+                return ip, request.headers.get("User-Agent")
 
     xff = request.headers.get("X-Forwarded-For")
     if xff:
@@ -147,10 +153,14 @@ class UserActivityMiddleware:
         return False
 
     def _is_user_rate_limited(self, user_id: int) -> bool:
-        # Dùng incr-first pattern: atomic hơn get+set trên Redis/multi-worker
+        # incr-first pattern: atomic trên Redis.
+        # Khi count == 1 nghĩa là key mới được tạo bởi Redis (không có TTL) → cần touch để set TTL.
+        # Khi ValueError: LocMemCache không tự tạo key → dùng set với timeout.
         key = f'rl:user:{user_id}'
         try:
             count = cache.incr(key)
+            if count == 1:
+                cache.touch(key, timeout=self.user_window)
         except ValueError:
             cache.set(key, 1, timeout=self.user_window)
             count = 1
@@ -160,8 +170,10 @@ class UserActivityMiddleware:
         # Ghi nhận thời điểm bắt đầu (fix: đặt ở đây thay vì process_request)
         request._request_time = timezone.now()
 
+        skip = self.do_not_track(request)
+
         # Per-user rate limit cho authenticated users
-        if not self.do_not_track(request) and request.user.is_authenticated:
+        if not skip and request.user.is_authenticated:
             if self._is_user_rate_limited(request.user.id):
                 if request.path.startswith('/api/') or request.headers.get('Accept') == 'application/json':
                     return JsonResponse(
@@ -175,7 +187,7 @@ class UserActivityMiddleware:
 
         response = self._get_response(request)
 
-        if self.do_not_track(request):
+        if skip:
             return response
 
         timelapse = timezone.now() - request._request_time
