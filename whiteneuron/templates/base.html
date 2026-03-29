@@ -1,0 +1,81 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="{% block lang %}en{% endblock %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>{% block title %}White Neuron{% endblock %}</title>
+    <meta name="description" content="{% block description %}{% endblock %}">
+    <meta name="robots" content="{% block robots %}noindex, nofollow{% endblock %}">
+    {% block meta %}{% endblock %}
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html {
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .error-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .main-title {
+            font-size: clamp(3.5rem, 10vw, 5rem);
+            font-weight: 800;
+            letter-spacing: 2px;
+        }
+
+        .subtitle1 {
+            font-size: clamp(1.1rem, 3vw, 1.5rem);
+            font-weight: 600;
+        }
+
+        .dashboard-btn {
+            cursor: pointer;
+        }
+
+        .dashboard-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+    {% block styles %}{% endblock %}
+    {% block extra_head %}{% endblock %}
+</head>
+<body{% block body_attrs %}{% endblock %}>
+    {% block body_start %}{% endblock %}
+
+    {% block header %}{% endblock %}
+
+    <main{% block main_attrs %}{% endblock %}>
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block footer %}{% endblock %}
+
+    {% block body_end %}{% endblock %}
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,76 @@
+{%extends 'base.html'%}
+{%block title%}404 - Page not found - White Neuron{%endblock%}
+{%block description%}404 - Page not found - White Neuron{%endblock%}
+{%block content%}
+<section class="error-section" id="error" style="position: relative; overflow: hidden;">
+    <div class="stars-bg" style="position:absolute; inset:0; background: radial-gradient(ellipse at top, rgba(120,119,198,0.15), transparent 60%), radial-gradient(ellipse at bottom, rgba(59,130,246,0.12), transparent 60%);"></div>
+    <div class="grid-lines" style="position:absolute; inset:0; background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 40px 40px; mask-image: radial-gradient(circle at center, black, transparent 75%);"></div>
+    <div class="container" style="position: relative; z-index: 1;">
+        <div style="text-align: center; padding: 80px 0;">
+            <div style="display: inline-flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                <svg width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: rgba(120,119,198,0.9); filter: drop-shadow(0 6px 18px rgba(120,119,198,0.35));">
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="M12 7v5"/>
+                    <circle cx="12" cy="16" r=".75"/>
+                </svg>
+            </div>
+
+            <h1 class="main-title" style="font-size: 5rem; line-height: 1; margin: 0; color: rgba(255,255,255,0.95); letter-spacing: 2px;">404</h1>
+            <h2 class="subtitle1" style="margin-top: 12px; color: rgba(255,255,255,0.85); font-size: 1.5rem;">Page not found</h2>
+            <p style="margin: 12px auto 30px; max-width: 680px; color: rgba(255,255,255,0.7); font-size: 1rem; line-height: 1.7;">
+                The link may have changed or the content has been moved. Please return to the home page
+                or contact us for support.
+            </p>
+
+            <div style="display: inline-flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: center;">
+                <a href="/" class="dashboard-btn" style="
+                    background: linear-gradient(135deg, rgba(120,119,198,0.35), rgba(59,130,246,0.35));
+                    border: 1px solid rgba(120,119,198,0.5);
+                    color: rgba(255,255,255,1);
+                    text-decoration: none;
+                    padding: 12px 22px;
+                    border-radius: 10px;
+                    font-size: 0.95rem;
+                    font-weight: 600;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    transition: transform .2s ease, box-shadow .2s ease;
+                ">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 12l9-9 9 9"/>
+                        <path d="M9 21V9h6v12"/>
+                    </svg>
+                   Back to home
+                </a>
+
+                <a href="/contact/" class="dashboard-btn" style="
+                    background: rgba(255,255,255,0.08);
+                    border: 1px solid rgba(255,255,255,0.18);
+                    color: rgba(255,255,255,0.95);
+                    text-decoration: none;
+                    padding: 12px 22px;
+                    border-radius: 10px;
+                    font-size: 0.95rem;
+                    font-weight: 600;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    transition: transform .2s ease, box-shadow .2s ease;
+                ">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                        <polyline points="22,6 12,13 2,6"/>
+                    </svg>
+                    Contact support
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Decorative plus signs -->
+    <div class="plus-symbol" style="position:absolute; top: 12%; left: 22%; color: rgba(255,255,255,0.15); font-size: 28px;">+</div>
+    <div class="plus-symbol" style="position:absolute; bottom: 18%; right: 18%; color: rgba(255,255,255,0.12); font-size: 24px;">+</div>
+    <div class="plus-symbol" style="position:absolute; top: 35%; right: 35%; color: rgba(255,255,255,0.1); font-size: 20px;">+</div>
+</section>
+{%endblock%}

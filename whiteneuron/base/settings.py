@@ -47,6 +47,23 @@ SKIP_GUEST_LOGIN = environ.get("SKIP_GUEST_LOGIN", "False") == "True"
 USE_CACHE = environ.get("USE_CACHE", "False") == "True"
 CACHENAME = environ.get("CACHENAME", "default")
 CACHE_REDIS_LOCATION=environ.get("CACHE_REDIS_LOCATION", "redis://localhost:6379")
+
+# Rate limiting (RateLimitMiddleware)
+RATE_LIMIT_REQUESTS = int(environ.get("RATE_LIMIT_REQUESTS", 300))   # requests per window per IP
+RATE_LIMIT_WINDOW = int(environ.get("RATE_LIMIT_WINDOW", 60))        # window in seconds
+
+# Rate limiting (UserActivityMiddleware — authenticated users)
+USER_RATE_LIMIT_REQUESTS = int(environ.get("USER_RATE_LIMIT_REQUESTS", 200))  # requests per window per user
+USER_RATE_LIMIT_WINDOW = int(environ.get("USER_RATE_LIMIT_WINDOW", 60))       # window in seconds
+
+# Cảnh báo: rate limiting chỉ hiệu quả khi dùng Redis (shared cache giữa các worker).
+# Với LocMemCache (USE_CACHE=False hoặc CACHENAME=default), mỗi gunicorn worker có cache
+# riêng → giới hạn thực tế = RATE_LIMIT_REQUESTS × số worker.
+if not DEBUG and (not USE_CACHE or CACHENAME != "redis"):
+    print(
+        "WARNING: Rate limiting is running on per-process cache. "
+        "Set USE_CACHE=True and CACHENAME=redis for accurate cross-worker rate limiting in production."
+    )
 if CACHENAME not in ["default", "redis"]:
     print("CACHENAME must be 'default' or 'redis'")
     sys.exit(1)
@@ -165,6 +182,10 @@ if DEBUG:
 ######################################################################
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    
+    # Rate limiting middleware should be placed as early as possible to minimize processing of abusive requests
+    "whiteneuron.base.middleware.RateLimitMiddleware",
+
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",

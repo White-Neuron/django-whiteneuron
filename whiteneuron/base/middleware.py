@@ -5,6 +5,59 @@ from django.utils.translation import gettext_lazy as _
 import logging
 import ipaddress
 import re
+from django.core.cache import cache
+from django.http import HttpResponse, JsonResponse
+from django.template.loader import render_to_string
+
+class RateLimitMiddleware:
+    """
+    Global rate limiting dựa trên IP.
+    Mặc định: 300 request/phút per IP.
+    Cấu hình qua settings:
+        RATE_LIMIT_REQUESTS  (int, default 300)
+        RATE_LIMIT_WINDOW    (int seconds, default 60)
+    """
+
+    EXEMPT_PATHS = (
+        '/static/',
+        '/media/',
+        '/__debug__/',
+        '/__reload__/',
+        '/.well-known/',
+    )
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+        from django.conf import settings
+        self.rate = getattr(settings, 'RATE_LIMIT_REQUESTS', 300)
+        self.window = getattr(settings, 'RATE_LIMIT_WINDOW', 60)
+
+    def __call__(self, request):
+        if not any(request.path.startswith(p) for p in self.EXEMPT_PATHS):
+            ip, _ = get_client_ip(request)
+            if ip and self._is_rate_limited(ip):
+                if request.path.startswith('/api/') or request.headers.get('Accept') == 'application/json':
+                    return JsonResponse(
+                        {'detail': 'Too many requests. Please slow down.'},
+                        status=429,
+                    )
+                html = render_to_string('429.html', {'retry_after': self.window}, request=request)
+                response = HttpResponse(html, status=429)
+                response['Retry-After'] = str(self.window)
+                return response
+        return self.get_response(request)
+
+    def _is_rate_limited(self, ip: str) -> bool:
+        # Dùng incr-first pattern: atomic hơn get+set trên Redis/multi-worker
+        key = f'rl:global:{ip}'
+        try:
+            count = cache.incr(key)
+        except ValueError:
+            # Key chưa tồn tại
+            cache.set(key, 1, timeout=self.window)
+            count = 1
+        return count > self.rate
+
 
 class ReadonlyExceptionHandlerMiddleware:
     def __init__(self, get_response):
@@ -59,6 +112,12 @@ def get_client_ip(request):
 from django.utils import timezone
 from .models import UserActivity
 class UserActivityMiddleware:
+    """
+    Ghi log hoạt động user và rate limit per-user cho authenticated requests.
+    Cấu hình qua settings:
+        USER_RATE_LIMIT_REQUESTS  (int, default 200) — số request per window per user
+        USER_RATE_LIMIT_WINDOW    (int seconds, default 60)
+    """
 
     exclude_paths = [
         ('/media/', 'contains'),
@@ -68,17 +127,15 @@ class UserActivityMiddleware:
         ('/__debug__/', 'contains'),
         ('/jsi18n/', 'contains'),
         ('/.well-known/', 'contains'),
+        ('/ws/', 'startwith'),  # WebSocket handshake — không log, không rate-limit per-user
     ]
 
     def __init__(self, get_response):
-        self.get_response = get_response
-    
-    def process_request(self, request):
-        request._request_time = timezone.now()
+        self._get_response = get_response
+        from django.conf import settings
+        self.user_rate = getattr(settings, 'USER_RATE_LIMIT_REQUESTS', 200)
+        self.user_window = getattr(settings, 'USER_RATE_LIMIT_WINDOW', 60)
 
-    def get_response(self, request):
-        return self.get_response(request)
-    
     def do_not_track(self, request):
         for path, condition in self.exclude_paths:
             if condition == 'startwith' and request.path.startswith(path):
@@ -89,28 +146,40 @@ class UserActivityMiddleware:
                 return True
         return False
 
+    def _is_user_rate_limited(self, user_id: int) -> bool:
+        # Dùng incr-first pattern: atomic hơn get+set trên Redis/multi-worker
+        key = f'rl:user:{user_id}'
+        try:
+            count = cache.incr(key)
+        except ValueError:
+            cache.set(key, 1, timeout=self.user_window)
+            count = 1
+        return count > self.user_rate
+
     def __call__(self, request):
-        """
-        user = models.ForeignKey(User, on_delete=models.CASCADE)
-        ip_address = models.GenericIPAddressField(_("IP address"))
-        user_agent = models.TextField(_("User agent"))
-        path = models.CharField(_("Path"), max_length=255)
-        method = models.CharField(_("Method"), max_length=10, choices=[("GET", "GET"), ("POST", "POST")])
-        data = models.JSONField(_("Data"), null=True, blank=True)
-        status_code = models.IntegerField(_("Status code"))
-        timestamp = models.DateTimeField(_("Timestamp"), auto_now_add=True)
-        timelapse = models.DurationField(_("Timelapse")) # Thời gian thực hiện hành động
-        """
+        # Ghi nhận thời điểm bắt đầu (fix: đặt ở đây thay vì process_request)
+        request._request_time = timezone.now()
 
-        response = self.get_response(request)
+        # Per-user rate limit cho authenticated users
+        if not self.do_not_track(request) and request.user.is_authenticated:
+            if self._is_user_rate_limited(request.user.id):
+                if request.path.startswith('/api/') or request.headers.get('Accept') == 'application/json':
+                    return JsonResponse(
+                        {'detail': 'Too many requests. Please slow down.'},
+                        status=429,
+                    )
+                html = render_to_string('429.html', {'retry_after': self.user_window}, request=request)
+                response = HttpResponse(html, status=429)
+                response['Retry-After'] = str(self.user_window)
+                return response
 
-        if hasattr(request, "_request_time"):
-            timelapse = timezone.now() - request._request_time
-        else:
-            timelapse = None
+        response = self._get_response(request)
+
         if self.do_not_track(request):
             return response
-        
+
+        timelapse = timezone.now() - request._request_time
+
         if request.user.is_authenticated:
             ip, user_agent = get_client_ip(request)
             UserActivity.objects.create(
@@ -119,12 +188,24 @@ class UserActivityMiddleware:
                 user_agent=user_agent,
                 path=request.path,
                 method=request.method,
-                data=request.POST.dict(),
+                data=self._sanitize_post(request.POST.dict()),
                 status_code=response.status_code,
                 timestamp=timezone.now(),
                 timelapse=timelapse,
             )
         return response
+
+    _SENSITIVE_FIELDS = frozenset({
+        'password', 'password1', 'password2', 'old_password', 'new_password',
+        'token', 'access_token', 'refresh_token', 'secret', 'api_key',
+        'credit_card', 'card_number', 'cvv', 'csrfmiddlewaretoken',
+    })
+
+    def _sanitize_post(self, data: dict) -> dict:
+        return {
+            k: '***' if k.lower() in self._SENSITIVE_FIELDS else v
+            for k, v in data.items()
+        }
 
 
 from .thread_local import thread_local
