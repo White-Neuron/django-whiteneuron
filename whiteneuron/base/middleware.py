@@ -30,10 +30,43 @@ class RateLimitMiddleware:
         from django.conf import settings
         self.rate = getattr(settings, 'RATE_LIMIT_REQUESTS', 300)
         self.window = getattr(settings, 'RATE_LIMIT_WINDOW', 60)
+        # IP Blacklist: parse từ settings (comma-separated IPs và/hoặc CIDR)
+        raw_blacklist = getattr(settings, 'IP_BLACKLIST', '')
+        self._blacklist_ips: set = set()
+        self._blacklist_nets: list = []
+        for entry in raw_blacklist.split(','):
+            entry = entry.strip()
+            if not entry:
+                continue
+            try:
+                net = ipaddress.ip_network(entry, strict=False)
+                if net.num_addresses == 1:
+                    self._blacklist_ips.add(net.network_address)
+                else:
+                    self._blacklist_nets.append(net)
+            except ValueError:
+                pass
+
+    def _is_blacklisted(self, ip: str) -> bool:
+        try:
+            addr = ipaddress.ip_address(ip)
+        except ValueError:
+            return False
+        if addr in self._blacklist_ips:
+            return True
+        return any(addr in net for net in self._blacklist_nets)
 
     def __call__(self, request):
         if not any(request.path.startswith(p) for p in self.EXEMPT_PATHS):
             ip, _ = get_client_ip(request)
+            if ip and self._is_blacklisted(ip):
+                if request.path.startswith('/api/') or request.headers.get('Accept') == 'application/json':
+                    return JsonResponse(
+                        {'detail': 'Your IP has been blocked.'},
+                        status=403,
+                    )
+                html = render_to_string('403.html', {}, request=request)
+                return HttpResponse(html, status=403)
             if ip and self._is_rate_limited(ip):
                 if request.path.startswith('/api/') or request.headers.get('Accept') == 'application/json':
                     return JsonResponse(

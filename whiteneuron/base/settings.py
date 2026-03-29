@@ -52,6 +52,10 @@ CACHE_REDIS_LOCATION=environ.get("CACHE_REDIS_LOCATION", "redis://localhost:6379
 RATE_LIMIT_REQUESTS = int(environ.get("RATE_LIMIT_REQUESTS", 60))    # requests per window per IP
 RATE_LIMIT_WINDOW = int(environ.get("RATE_LIMIT_WINDOW", 60))        # window in seconds
 
+# IP Blacklist: danh sách IP/CIDR ngăn chặn vĩnh viễn (comma-separated)
+# Ví dụ: IP_BLACKLIST=1.2.3.4,5.6.7.0/24,::1
+IP_BLACKLIST = environ.get("IP_BLACKLIST", "")
+
 # Rate limiting (UserActivityMiddleware — authenticated users)
 USER_RATE_LIMIT_REQUESTS = int(environ.get("USER_RATE_LIMIT_REQUESTS", 60))   # requests per window per user
 USER_RATE_LIMIT_WINDOW = int(environ.get("USER_RATE_LIMIT_WINDOW", 60))       # window in seconds
