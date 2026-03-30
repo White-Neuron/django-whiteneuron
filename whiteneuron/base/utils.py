@@ -221,7 +221,7 @@ Trân trọng,
               <tr>
                 <td style="vertical-align: top; line-height: 16px">
                   <a
-                    href="mailto:anhnt@whiteneurons.com"
+                    href="mailto:anhnt@whiteneuron.ai"
                     rel="nofollow noreferrer"
                     style="text-decoration: none"
                     target="_blank"
@@ -232,7 +232,7 @@ Trân trọng,
                         padding: 0px 20px 0px 0px;
                         color: rgb(0, 0, 0);
                       "
-                      >anhnt@whiteneurons.com</span
+                      >anhnt@whiteneuron.ai</span
                     ></a
                   >
                 </td>
@@ -240,7 +240,7 @@ Trân trọng,
               <tr>
                 <td style="vertical-align: top; line-height: 16px">
                   <a
-                    href="https://whiteneurons.com/"
+                    href="https://whiteneuron.ai/"
                     rel="nofollow noreferrer"
                     style="text-decoration: none"
                     target="_blank"
@@ -251,7 +251,7 @@ Trân trọng,
                         padding: 0px 20px 0px 0px;
                         color: rgb(0, 0, 0);
                       "
-                      >whiteneurons.com</span
+                      >whiteneuron.ai</span
                     ></a
                   >
                 </td>
@@ -270,8 +270,7 @@ Trân trọng,
                         padding: 0px 20px 0px 0px;
                         color: rgb(0, 0, 0);
                       "
-                      >333, 20 cluster, Kien Hung Ward, Ha Dong district, Ha Noi
-                      10000 Vietnam</span
+                      >333, 20 cluster, Kien Hung, Hanoi, Vietnam</span
                     ></a
                   >
                 </td>
@@ -342,12 +341,11 @@ Trân trọng,
 
 from django.conf import settings
 from .models import Mail
-def send_email_login(username, password, receiver):
+def send_email_login(username, password, receiver, is_reset=False):
     global TEMPLATE
-    SUBJECT=  "Thông tin đăng nhập hệ thống"
+    SUBJECT = "Đặt lại mật khẩu hệ thống" if is_reset else "Thông tin đăng nhập hệ thống"
     SYSTEM_NAME= settings.NAME
     URL= settings.URL
-    # TEMMPLATE= open('templates/admin/base/email_password.html').read()
     subject= SUBJECT
     template= TEMPLATE
     system_name= SYSTEM_NAME
