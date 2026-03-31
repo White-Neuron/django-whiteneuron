@@ -9,7 +9,7 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Current Version
 
-- 0.2.39
+- 0.2.40
 
 ## Compatibility
 
@@ -20,7 +20,18 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Changelog
 
-### v0.2.39 (2026-03-31) — latest
+### v0.2.40 (2026-03-31) — latest
+**Improve: App Dashboard — two-level category/app grid, UI polish, i18n fixes**
+- **Added**: Two-level App dashboard grid — category cards (level 1) expand to app cards (level 2) via Alpine.js client-side navigation, no page reload.
+- **Added**: `app_change_list.html` model-specific template — category mosaic (2×2 icon grid), app card grid, back button, smooth transitions.
+- **Improved**: Category mosaic — handles 1 app (single large icon), 2–3 apps (placeholder fill), 4 apps (full 2×2), 5+ apps (3 icons + "+N" counter on 4th cell).
+- **Improved**: App card icon — removed incorrect `static()` wrapper on `thumbnail_url` (already a full URL).
+- **Improved**: Search bar hidden on App dashboard (not usable in two-level layout).
+- **Fixed**: `changelist_view` queryset evaluated once via `list(qs)` to avoid double `get_queryset()` / double `init_app_db()` call.
+- **Fixed**: Translation `"Active"` → `"Hoạt động"` (was incorrectly `"Hành động"` = Action).
+- **Fixed**: Removed incorrect `{% trans %}` on DB values (`category`, `app.name`) — Django `{% trans %}` only resolves catalog entries, DB values are already stored in the target language.
+
+### v0.2.39 (2026-03-31)
 **Fix: `get_client_ip()` — validate IP headers, fix block-all bug with Cloudflare Tunnel**
 - **Fixed**: `CF-Connecting-IP` and `True-Client-IP` headers were not validated before use — raw strings could flow directly into Redis cache keys, causing incorrect rate limiting or unintended blocks.
 - **Fixed**: `REMOTE_ADDR` was also used without validation — now normalized through `_parse_ip()` before use.

@@ -692,6 +692,7 @@ from whiteneuron.dashboard.views import dashboard_callback
 class AppAdmin(ModelAdmin):
 
     list_before_template= 'admin/header.html'
+    change_list_template= 'admin/base/app_change_list.html'
 
     list_display = ['icon_display', 'name', 'is_active', 'category', 'permission']
     search_fields = ['name']
@@ -730,24 +731,28 @@ class AppAdmin(ModelAdmin):
     action_buttons= False
 
     def grid_item_header(self, obj):
-        s= ''
         if obj.thumbnail_url:
-            s= f'<img src="{static(obj.thumbnail_url)}" class="h-24 w-24 object-contain rounded-lg"/>'
-        elif not obj.icon:
-            s= '<span class="material-symbols-outlined" style="font-size: 6rem;">apps</span>'
+            icon_html = f'<img src="{static(obj.thumbnail_url)}" class="w-14 h-14 object-contain rounded-xl"/>'
+        elif obj.icon and (obj.icon.startswith('http://') or obj.icon.startswith('https://')):
+            icon_html = f'<img src="{obj.icon}" class="w-14 h-14 object-contain rounded-xl"/>'
+        elif obj.icon:
+            icon_html = f'<span class="material-symbols-outlined" style="font-size:3.5rem;line-height:1">{obj.icon}</span>'
         else:
-            s= f'<span class="material-symbols-outlined" style="font-size: 6rem;">{obj.icon}</span>'
-        string= f"""
-<div class="ui-card h-full flex flex-col bg-base-100 dark:bg-base-800 shadow-sm hover:shadow-md transition-all border border-base-200 dark:border-base-600">
-    <div class="flex justify-center items-center p-6 min-h-[140px]">
-        {s}
+            icon_html = '<span class="material-symbols-outlined text-base-content/30" style="font-size:3.5rem;line-height:1">apps</span>'
+
+        category_html = (
+            f'<span class="text-xs text-base-content/40 mt-1 truncate max-w-full">{_(obj.category)}</span>'
+            if obj.category else ''
+        )
+
+        string = f"""
+<div class="ui-card h-full flex flex-col items-center justify-center gap-3 p-5 bg-base-100 dark:bg-base-800 border border-base-200 dark:border-base-700 hover:border-primary/40 dark:hover:border-primary/50 hover:shadow-lg dark:hover:shadow-base-content/10 transition-all duration-200 cursor-pointer group rounded-2xl">
+    <div class="flex items-center justify-center w-16 h-16 rounded-2xl bg-base-200/60 dark:bg-base-700/40 group-hover:bg-primary/10 dark:group-hover:bg-primary/15 transition-colors duration-200 text-primary">
+        {icon_html}
     </div>
-    <div class="ui-card-body flex flex-col flex-1 p-4 pt-0 text-center items-center">
-        <h5 class="font-bold text-lg mb-2">{_(obj.name)}</h5>
-        <div class="mt-auto flex flex-wrap justify-center items-center gap-2">
-            {f'<span class="material-symbols-outlined text-success" style="font-size:18px" title="{_("Active")}">check_circle</span>' if obj.is_active else f'<span class="material-symbols-outlined text-error" style="font-size:18px" title="{_("Inactive")}">cancel</span>'}
-            {'<span class="ui-badge ui-badge-info ui-badge-outline ui-badge-sm">' + _(obj.category) + '</span>' if obj.category else ''}
-        </div>
+    <div class="flex flex-col items-center text-center gap-0.5 w-full">
+        <span class="font-semibold text-sm leading-snug line-clamp-2">{_(obj.name)}</span>
+        {category_html}
     </div>
 </div>
 """
@@ -792,7 +797,19 @@ class AppAdmin(ModelAdmin):
             extra_context= {}
         extra_context.update(dashboard_callback(request, extra_context))
         extra_context['title']= _('Dashboard')
+
+        # Group apps by category for two-level grid UI
+        qs = self.get_queryset(request)
+        app_by_category = {}
+        for app in qs:
+            cat = app.category or ''
+            app_by_category.setdefault(cat, []).append(app)
+        # Sort: named categories alphabetically, unnamed ("Other") last
+        extra_context['app_by_category'] = dict(
+            sorted(app_by_category.items(), key=lambda x: (x[0] == '', x[0].lower()))
+        )
+
         return super().changelist_view(request, extra_context)
-    
+
     def get_list_filter(self, request):
         return ['category']

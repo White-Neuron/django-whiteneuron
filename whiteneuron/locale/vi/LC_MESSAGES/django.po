@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-31 10:33+0700\n"
+"POT-Creation-Date: 2026-03-31 13:27+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,11 +19,11 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #: base/admin.py:150 base/admin.py:192 base/admin.py:446 base/admin.py:493
-#: base/admin.py:748 base/models.py:911
+#: base/models.py:911
 msgid "Active"
-msgstr "Hành động"
+msgstr "Hoạt động"
 
-#: base/admin.py:152 base/admin.py:192 base/admin.py:748
+#: base/admin.py:152 base/admin.py:192
 msgid "Inactive"
 msgstr "Không hoạt động"
 
@@ -164,23 +164,23 @@ msgstr "Thông tin thư"
 msgid "Content"
 msgstr "Nội dung"
 
-#: base/admin.py:701
+#: base/admin.py:702
 msgid "App info"
 msgstr "Thông tin ứng dụng"
 
-#: base/admin.py:717 base/models.py:912
+#: base/admin.py:718 base/models.py:912
 msgid "Icon"
 msgstr "Icon"
 
-#: base/admin.py:781
+#: base/admin.py:786
 msgid "This app is not active."
 msgstr "Ứng dụng này không hoạt động."
 
-#: base/admin.py:784
+#: base/admin.py:789
 msgid "You do not have permission to access this app."
 msgstr "Bạn không có quyền truy cập ứng dụng này."
 
-#: base/admin.py:794 base/settings.py:558 dashboard/apps.py:8
+#: base/admin.py:799 base/settings.py:562 dashboard/apps.py:8
 #: dashboard/views.py:169 templates/admin/index.html:8
 msgid "Dashboard"
 msgstr "Bảng điều khiển"
@@ -197,7 +197,7 @@ msgstr "Trường hiển thị"
 msgid "Default fields"
 msgstr "Trường mặc định"
 
-#: base/middleware.py:161
+#: base/middleware.py:170
 msgid "Database is operating in readonly mode. Not possible to save any data."
 msgstr ""
 "Cơ sở dữ liệu đang hoạt động ở chế độ chỉ đọc. Không thể lưu bất kỳ dữ liệu "
@@ -317,7 +317,8 @@ msgstr "hoạt động người dùng"
 
 #: base/models.py:203
 msgid "Single IPv4 or IPv6 address. Use IP_BLACKLIST in .env for CIDR ranges."
-msgstr "Địa chỉ IPv4 hoặc IPv6 đơn. Sử dụng IP_BLACKLIST trong .env cho các dải CIDR."
+msgstr ""
+"Địa chỉ IPv4 hoặc IPv6 đơn. Sử dụng IP_BLACKLIST trong .env cho các dải CIDR."
 
 #: base/models.py:205 base/models.py:283
 msgid "reason"
@@ -336,7 +337,8 @@ msgid ""
 "Leave empty for permanent block. Temporary blocks expire automatically via "
 "Redis TTL."
 msgstr ""
-"Để trống để khóa vĩnh viễn. Các khóa tạm thời sẽ tự động hết hạn thông qua Redis TTL."
+"Để trống để khóa vĩnh viễn. Các khóa tạm thời sẽ tự động hết hạn thông qua "
+"Redis TTL."
 
 #: base/models.py:220 base/models.py:292
 msgid "created by"
@@ -359,7 +361,8 @@ msgid ""
 "Substring or regex to match against the User-Agent header. E.g. 'GPTBot', "
 "'https://openai.com'."
 msgstr ""
-"Chuỗi con hoặc regex để khớp với header User-Agent. Ví dụ: 'GPTBot', 'https://openai.com'."
+"Chuỗi con hoặc regex để khớp với header User-Agent. Ví dụ: 'GPTBot', "
+"'https://openai.com'."
 
 #: base/models.py:279
 msgid "is regex"
@@ -370,7 +373,9 @@ msgid ""
 "If checked, pattern is treated as a Python regex (re.search, case-"
 "insensitive); otherwise simple case-insensitive substring match."
 msgstr ""
-"Nếu được chọn, mẫu được coi là một regex Python (re.search, không phân biệt chữ hoa chữ thường); nếu không, khớp chuỗi con không phân biệt chữ hoa chữ thường đơn giản."
+"Nếu được chọn, mẫu được coi là một regex Python (re.search, không phân biệt "
+"chữ hoa chữ thường); nếu không, khớp chuỗi con không phân biệt chữ hoa chữ "
+"thường đơn giản."
 
 #: base/models.py:297
 msgid "UA blacklist"
@@ -537,111 +542,111 @@ msgstr "Ứng dụng"
 msgid "Apps"
 msgstr "Ứng dụng"
 
-#: base/settings.py:353
+#: base/settings.py:357
 msgid "Vietnamese"
 msgstr "Tiếng Việt"
 
-#: base/settings.py:354
+#: base/settings.py:358
 msgid "English"
 msgstr "Tiếng Anh"
 
-#: base/settings.py:445
+#: base/settings.py:449
 msgid "Admin panel"
 msgstr "Trang quản trị"
 
-#: base/settings.py:449
+#: base/settings.py:453
 msgid "White Neuron Co. Ltd."
 msgstr "Công ty TNHH White Neuron"
 
-#: base/settings.py:454
+#: base/settings.py:458
 msgid "Email: anhnt@whiteneuron.com"
 msgstr "Email: anhnt@whiteneuron.com"
 
-#: base/settings.py:549
+#: base/settings.py:553
 msgid "Navigation"
 msgstr "Điều hướng"
 
-#: base/settings.py:565
+#: base/settings.py:569
 msgid "Notifications"
 msgstr "Thông báo"
 
-#: base/settings.py:572 feedbacks/apps.py:8 feedbacks/models.py:59
+#: base/settings.py:576 feedbacks/apps.py:8 feedbacks/models.py:59
 msgid "Feedbacks"
 msgstr "Phản hồi"
 
-#: base/settings.py:581 file_management/apps.py:7
+#: base/settings.py:585 file_management/apps.py:7
 msgid "File Management"
 msgstr "Quản lý tệp"
 
-#: base/settings.py:585 file_management/models.py:58
+#: base/settings.py:589 file_management/models.py:58
 msgid "Excel Files"
 msgstr "Tệp Excel"
 
-#: base/settings.py:592 file_management/models.py:65
+#: base/settings.py:596 file_management/models.py:65
 msgid "PDF Files"
 msgstr "Tệp PDF"
 
-#: base/settings.py:601
+#: base/settings.py:605
 msgid "Users & Groups"
 msgstr "Người dùng & Nhóm"
 
-#: base/settings.py:605 notification/models.py:59
+#: base/settings.py:609 notification/models.py:59
 msgid "Users"
 msgstr "Người dùng"
 
-#: base/settings.py:612
+#: base/settings.py:616
 msgid "User activity"
 msgstr "Hoạt động người dùng"
 
-#: base/settings.py:619
+#: base/settings.py:623
 msgid "Groups"
 msgstr "Nhóm"
 
-#: base/settings.py:628
+#: base/settings.py:632
 msgid "System"
 msgstr "Hệ thống"
 
-#: base/settings.py:632
+#: base/settings.py:636
 msgid "Images"
 msgstr "Hình ảnh"
 
-#: base/settings.py:638
+#: base/settings.py:642
 msgid "Emails"
 msgstr "Email"
 
-#: base/settings.py:644
+#: base/settings.py:648
 msgid "Notifications config"
 msgstr "Cấu hình thông báo"
 
-#: base/settings.py:650
+#: base/settings.py:654
 msgid "IP Blacklist"
 msgstr "Danh sách đen IP"
 
-#: base/settings.py:656
+#: base/settings.py:660
 msgid "UA Blacklist"
 msgstr "Danh sách đen UA"
 
-#: base/settings.py:664
+#: base/settings.py:668
 msgid "Celery Tasks"
 msgstr "Nhiệm vụ Celery"
 
-#: base/settings.py:668
+#: base/settings.py:672
 msgid "Clocked"
 msgstr "Khóa"
 
-#: base/settings.py:676
+#: base/settings.py:680
 msgid "Crontabs"
 msgstr "Crontabs"
 
-#: base/settings.py:684
+#: base/settings.py:688
 msgid "Intervals"
 msgstr "Khoảng thời gian"
 
-#: base/settings.py:692
+#: base/settings.py:696
 msgid "Periodic tasks"
 msgstr "Nhiệm vụ định kỳ"
 
-#: base/settings.py:700
+#: base/settings.py:704
 msgid "Solar events"
 msgstr "Sự kiện Solar"
 
@@ -994,6 +999,23 @@ msgstr "Log đồng bộ hóa"
 #: synchronization/models.py:28
 msgid "Synchronization Logs"
 msgstr "Log đồng bộ hóa"
+
+#: templates/admin/base/app_change_list.html:103
+#: templates/admin/base/app_change_list.html:130
+msgid "Other"
+msgstr "Khác"
+
+#: templates/admin/base/app_change_list.html:105
+msgid "apps"
+msgstr "ứng dụng"
+
+#: templates/admin/base/app_change_list.html:127
+msgid "Back"
+msgstr "Quay lại"
+
+#: templates/admin/base/app_change_list.html:168
+msgid "No apps available."
+msgstr "Không có ứng dụng nào có sẵn."
 
 #: templates/admin/grid_view_results.html:83
 #, python-format
