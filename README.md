@@ -1,106 +1,127 @@
 # django-whiteneuron
 
-django-whiteneuron là package mở rộng Django Admin theo hướng hiện đại, tập trung vào UI/UX quản trị, dashboard, feedback, file management và các tích hợp admin nâng cao.
+A modern Django Admin extension focused on UI/UX, dashboard, feedback, file management, and advanced admin integrations — built on top of [django-unfold](https://github.com/unfoldadmin/django-unfold).
 
-## Phiên bản hiện tại
+[![PyPI version](https://img.shields.io/pypi/v/django-whiteneuron)](https://pypi.org/project/django-whiteneuron/)
+[![Python](https://img.shields.io/pypi/pyversions/django-whiteneuron)](https://pypi.org/project/django-whiteneuron/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Downloads](https://img.shields.io/pypi/dm/django-whiteneuron)](https://pypi.org/project/django-whiteneuron/)
+
+## Current Version
 
 - 0.2.36
 
-## Tương thích
+## Compatibility
 
 - Python >= 3.11
 - Django >= 5.1.6
 - django-unfold >= 0.85.0
-- Tailwind CSS 4.x + daisyUI 5.x (khi dùng bộ style frontend đi kèm)
+- Tailwind CSS 4.x + daisyUI 5.x (for the bundled frontend styles)
 
 ## Changelog
 
 ### v0.2.36 (2026-03-30) — latest
-**Security: init_admin — xoá hardcode password, sinh mật khẩu ngẫu nhiên, gửi email tự động**
-- **Security**: Xoá password hardcode `'wnadmin2024&'` khỏi `init_admin.py` — thay bằng `secrets.choice()` (CSPRNG) sinh mật khẩu 20 ký tự (chữ hoa, thường, số, ký tự đặc biệt).
-- **Added**: Hỗ trợ `INIT_ADMIN_PASSWORD` env var — ưu tiên dùng password cố định từ `.env`, nếu không có thì sinh ngẫu nhiên.
-- **Added**: Hỗ trợ `INIT_ADMIN_EMAIL` env var — email nhận mật khẩu tạm thời, bắt buộc phải có (không còn hardcode).
-- **Added**: Tự động gửi email mật khẩu qua `send_email_login()` với template chuẩn (chữ ký công ty, link đăng nhập) khi password là random.
-- **Added**: Flag `--reset-password` cho lệnh `init_admin` — đặt lại mật khẩu admin đã tồn tại mà không ảnh hưởng luồng CI/CD bình thường.
-- **Fixed**: Double DB write khi tạo user mới — chỉ 1 lần `save()` duy nhất.
-- **Fixed**: Validate email trước khi ghi password vào DB — tránh password bị đổi nhưng email gửi thất bại.
-- **Improved**: `send_email_login()` thêm param `is_reset` — subject email thay đổi theo ngữ cảnh (tạo mới vs đặt lại).
-- **Removed**: File `templates/admin/base/email_password.html` không dùng.
+**Security: init_admin — remove hardcoded password, random generation, auto email delivery**
+- **Security**: Removed hardcoded password `'wnadmin2024&'` from `init_admin.py` — replaced with `secrets.choice()` (CSPRNG) generating a 20-character password (uppercase, lowercase, digits, special chars).
+- **Added**: `INIT_ADMIN_PASSWORD` env var support — uses fixed password from `.env` if set, otherwise generates randomly.
+- **Added**: `INIT_ADMIN_EMAIL` env var (required) — email recipient for the temporary password; no longer hardcoded.
+- **Added**: Automatically sends password via `send_email_login()` using the standard project email template (company signature, login link) when password is random.
+- **Added**: `--reset-password` flag for `init_admin` command — resets password for an existing admin without affecting normal CI/CD runs.
+- **Fixed**: Double DB write when creating a new user — now a single `save()` call.
+- **Fixed**: Email validation happens before writing password to DB — prevents password being changed without email delivery.
+- **Improved**: `send_email_login()` accepts `is_reset` param — email subject adapts to context (new account vs reset).
+- **Removed**: Unused `templates/admin/base/email_password.html`.
 
 ### v0.2.35 (2026-03-29)
 **Dynamic IP Blacklist: Redis + Model + Admin**
-- **Added**: `IPBlacklist` model (`base/ip_blacklists`) — quản lý IP bị chặn real-time qua Django Admin, hỗ trợ block vĩnh viễn và tạm thời (`blocked_until` với Redis TTL tự expire).
-- **Added**: `IPBlacklistAdmin` — giao diện quản lý IP blacklist với actions Activate/Deactivate, hiện thị trong sidebar System dưới icon `block`, superuser only.
-- **Added**: Action **"Block IP address"** trong `UserActivityAdmin` — chọn bản ghi activity → block IP ngay lập tức vào Redis, không cần restart Daphne.
-- **Improved**: `RateLimitMiddleware._is_blacklisted()` kiểm tra thêm `cache.get('blacklist:dynamic:<ip>')` sau static env blacklist — hybrid hai lớp tĩnh + động.
+- **Added**: `IPBlacklist` model (`base/ip_blacklists`) — manage blocked IPs in real-time via Django Admin, supports permanent and temporary blocks (`blocked_until` with Redis TTL auto-expiry).
+- **Added**: `IPBlacklistAdmin` — IP blacklist management UI with Activate/Deactivate actions, shown in System sidebar under `block` icon, superuser only.
+- **Added**: **"Block IP address"** action in `UserActivityAdmin` — select activity records → block IP immediately in Redis, no Daphne restart required.
+- **Improved**: `RateLimitMiddleware._is_blacklisted()` also checks `cache.get('blacklist:dynamic:<ip>')` after static env blacklist — hybrid two-layer static + dynamic blocking.
 - **Added**: Migration `base/0015_ipblacklist.py`.
 
 ### v0.2.34 (2026-03-29)
-**IP Blacklist: chặn IP/CIDR vĩnh viễn qua `.env`**
-- **Added**: `RateLimitMiddleware` bổ sung `_is_blacklisted()` — kiểm tra IP/CIDR blacklist trước rate limit, trả 403 ngay lập tức cho IP bị block.
-- **Added**: Parse `IP_BLACKLIST` từ settings (comma-separated IPs và/hoặc CIDR), hỗ trợ cả IPv4 và IPv6 — single IP dùng `set` lookup O(1), CIDR range dùng `ip_network` match.
-- **Added**: Setting `IP_BLACKLIST` trong `settings.py` và biến tương ứng trong `env.example`.
+**IP Blacklist: permanent IP/CIDR blocking via `.env`**
+- **Added**: `RateLimitMiddleware._is_blacklisted()` — checks IP/CIDR blacklist before rate limiting, returns 403 immediately for blocked IPs.
+- **Added**: Parse `IP_BLACKLIST` from settings (comma-separated IPs and/or CIDRs), supports IPv4 and IPv6 — single IPs use `set` lookup O(1), CIDR ranges use `ip_network` match.
+- **Added**: `IP_BLACKLIST` setting in `settings.py` and corresponding variable in `env.example`.
 
 ### v0.2.33 (2026-03-29)
-**Rate Limiting fix cho Docker + Daphne**
-- **Fixed**: `_is_rate_limited()` và `_is_user_rate_limited()` thêm `except Exception: return False` — bắt `ConnectionError` khi Redis không reachable trong Docker (trước đây unhandled exception làm request crash hoặc bypass rate limit).
-- **Fixed**: Default `RATE_LIMIT_REQUESTS` hạ từ 300 → 60 req/60 s, `USER_RATE_LIMIT_REQUESTS` từ 200 → 60 — phù hợp với admin panel.
-- **Fixed**: `User.display_header()` dùng `reverse('admin:base_user_change')` thay vì hardcode `/admin/base/user/` — tránh broken link khi đổi admin prefix.
-- **Fixed**: Default `BEHIND_CLOUDFLARE=True` vì luôn deploy qua Cloudflare Tunnel.
+**Rate Limiting fix for Docker + Daphne**
+- **Fixed**: `_is_rate_limited()` and `_is_user_rate_limited()` now catch `except Exception: return False` — handles `ConnectionError` when Redis is unreachable in Docker (previously unhandled exception caused requests to crash or bypass rate limiting).
+- **Fixed**: Default `RATE_LIMIT_REQUESTS` lowered from 300 → 60 req/60 s, `USER_RATE_LIMIT_REQUESTS` from 200 → 60 — appropriate for an admin panel.
+- **Fixed**: `User.display_header()` uses `reverse('admin:base_user_change')` instead of hardcoded `/admin/base/user/` — prevents broken links when changing admin prefix.
+- **Fixed**: Default `BEHIND_CLOUDFLARE=True` since deployments always use Cloudflare Tunnel.
 
 ### v0.2.32 (2026-03-29)
 **Security hardening & Gunicorn production readiness**
-- **Security**: `get_client_ip()` chỉ tin tưởng `CF-Connecting-IP` / `True-Client-IP` khi `BEHIND_CLOUDFLARE=True` — tránh bypass rate limit qua header giả mạo.
-- **Fixed**: `UserActivityMiddleware.__call__()` cache kết quả `do_not_track()` vào `skip` — tránh gọi 2 lần mỗi request.
-- **Removed**: `import logging` không dùng trong middleware.py.
+- **Security**: `get_client_ip()` only trusts `CF-Connecting-IP` / `True-Client-IP` when `BEHIND_CLOUDFLARE=True` — prevents rate limit bypass via spoofed headers.
+- **Fixed**: `UserActivityMiddleware.__call__()` caches `do_not_track()` result in `skip` — avoids double invocation per request.
+- **Removed**: Unused `import logging` from middleware.py.
 
 ### v0.2.31 (2026-03-29)
 **Rate Limiting, Security Hardening & Error Pages**
-- **Added**: `RateLimitMiddleware` — global IP-based rate limiting (300 req/60 s mặc định) đặt ngay sau `SecurityMiddleware`, hoạt động cả trên API lẫn browser.
-- **Improved**: `UserActivityMiddleware` bổ sung per-user rate limiting (200 req/60 s mặc định).
-- **Added**: `/ws/` vào `exclude_paths` của `UserActivityMiddleware` — WS handshake không bị log và không tính vào rate limit.
-- **Security**: Sanitize `POST` data trước khi ghi vào `UserActivity` — mask các field nhạy cảm (password, token, api_key…).
-- **Security**: Chuyển sang pattern `cache.incr()` first (atomic trên Redis) tránh race condition.
-- **Added**: Template lỗi đầy đủ: `400.html`, `403.html`, `404.html`, `429.html`, `500.html`.
-- **Added**: `base.html` skeleton tối giản cho các trang lỗi — không phụ thuộc file static ngoài.
-- **Added**: Cảnh báo startup khi production chạy không có Redis (rate limit không chính xác trên multi-worker).
+- **Added**: `RateLimitMiddleware` — global IP-based rate limiting (60 req/60 s default) placed immediately after `SecurityMiddleware`, works for both API and browser requests.
+- **Improved**: `UserActivityMiddleware` adds per-user rate limiting (60 req/60 s default).
+- **Added**: `/ws/` added to `UserActivityMiddleware` `exclude_paths` — WebSocket handshakes are not logged and not counted toward rate limits.
+- **Security**: Sanitizes `POST` data before writing to `UserActivity` — masks sensitive fields (password, token, api_key, etc.).
+- **Security**: Switched to `cache.incr()` first pattern (atomic on Redis) to prevent race conditions.
+- **Added**: Full error templates: `400.html`, `403.html`, `404.html`, `429.html`, `500.html`.
+- **Added**: Minimal `base.html` skeleton for error pages — no dependency on external static files.
+- **Added**: Startup warning when running production without Redis (rate limiting inaccurate on multi-worker).
 
 ### v0.2.30 (2026-03-29)
-- **Improved**: `AppAdmin.get_queryset()` chỉ trả về các app active mà user thực sự có quyền truy cập.
-- **Improved**: `superuser` vẫn giữ nguyên quyền nhìn thấy toàn bộ app active.
+- **Improved**: `AppAdmin.get_queryset()` returns only active apps the user actually has access to.
+- **Improved**: `superuser` retains visibility over all active apps.
 
 ### v0.2.29 (2026-03-28)
-- **Fixed**: `NotificationAdmin` không còn bị lỗi 403 khi bấm `View Linked Object`.
-- **Improved**: Action xem đối tượng liên kết được route riêng qua detail action, tương thích tốt hơn với Unfold.
-- **Improved**: Bổ sung xử lý an toàn khi notification không có `obj_link`.
+- **Fixed**: `NotificationAdmin` no longer returns 403 when clicking `View Linked Object`.
+- **Improved**: View linked object action routed via a dedicated detail action, better compatibility with Unfold.
+- **Improved**: Safe handling when notification has no `obj_link`.
 
 ### v0.2.28 (2026-03-28)
-- **Improved**: Giao diện grid view của user/app dùng icon trực quan hơn cho role và trạng thái.
-- **Improved**: Chuẩn hóa `verbose_name` cho nhiều field trong `Notification` và `NotificationConfig`.
-- **Added**: Migration `notification/0012` đồng bộ metadata field-level.
+- **Improved**: Grid view of user/app uses more intuitive icons for role and status.
+- **Improved**: Standardized `verbose_name` for multiple fields in `Notification` and `NotificationConfig`.
+- **Added**: Migration `notification/0012` to sync field-level metadata.
 
-### v0.2.27 và trước
-Xem chi tiết tại [releases](https://github.com/White-Neuron/django-whiteneuron/releases).
+### v0.2.27 and earlier
+See [releases](https://github.com/White-Neuron/django-whiteneuron/releases) for full history.
 
-## Cài đặt (ưu tiên uv)
+## Installation
 
-Package chưa phát hành lên PyPI.
-
-### Cài từ GitHub theo tag
+### From PyPI (recommended)
 
 ```bash
-uv add "git+https://github.com/White-Neuron/django-whiteneuron.git@v0.2.35"
+pip install django-whiteneuron
 ```
 
-### Cài từ source local
+Or with [uv](https://github.com/astral-sh/uv):
+
+```bash
+uv add django-whiteneuron
+```
+
+### Specific version from PyPI
+
+```bash
+uv add "django-whiteneuron==0.2.36"
+```
+
+### From GitHub tag
+
+```bash
+uv add "git+https://github.com/White-Neuron/django-whiteneuron.git@v0.2.36"
+```
+
+### From local source
 
 ```bash
 uv pip install -e .
 ```
 
-## Cấu hình Django cơ bản
+## Django Configuration
 
-Thêm các app vào đầu INSTALLED_APPS:
+Add the apps at the top of `INSTALLED_APPS`:
 
 ```python
 INSTALLED_APPS = [
@@ -110,16 +131,16 @@ INSTALLED_APPS = [
     "whiteneuron.file_management",
     "whiteneuron.contrib",
     "whiteneuron.dashboard",
-    # ... các app khác
+    # ... your other apps
 ]
 ```
 
-Thêm middleware cần thiết (thứ tự quan trọng):
+Add the required middleware **(order matters)**:
 
 ```python
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whiteneuron.base.middleware.RateLimitMiddleware",   # ← ngay sau SecurityMiddleware
+    "whiteneuron.base.middleware.RateLimitMiddleware",   # ← immediately after SecurityMiddleware
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -128,18 +149,18 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "whiteneuron.base.middleware.ReadonlyExceptionHandlerMiddleware",
-    "whiteneuron.base.middleware.UserActivityMiddleware",  # ← sau AuthenticationMiddleware
+    "whiteneuron.base.middleware.UserActivityMiddleware",  # ← after AuthenticationMiddleware
     "whiteneuron.base.middleware.ThreadLocalMiddleware",
 ]
 ```
 
-Thiết lập user model:
+Set the custom user model:
 
 ```python
 AUTH_USER_MODEL = "base.User"
 ```
 
-## Cấu hình UNFOLD mẫu
+## UNFOLD Configuration Example
 
 ```python
 from django.templatetags.static import static
@@ -149,7 +170,7 @@ UNFOLD = {
     "SITE_HEADER": _("White Neuron"),
     "SITE_TITLE": _("White Neuron Admin"),
     "SITE_SUBHEADER": _("Admin panel"),
-    # Dùng SITE_ICON thay vì SITE_LOGO để giữ SITE_TITLE hiển thị đúng
+    # Use SITE_ICON instead of SITE_LOGO to keep SITE_TITLE rendering correctly
     "SITE_ICON": {
         "light": lambda request: static("base/images/logo/WhiteNeuron.png"),
         "dark": lambda request: static("base/images/logo/WhiteNeuron.png"),
@@ -185,25 +206,25 @@ UNFOLD = {
 
 ## Frontend (Tailwind 4 + daisyUI 5)
 
-Cài dependencies frontend:
+Install frontend dependencies:
 
 ```bash
 npm install -D @tailwindcss/cli@next daisyui@latest
 ```
 
-Build CSS bằng script có sẵn:
+Build CSS using the provided script:
 
 ```bash
 bash scripts/tailwind.sh
 ```
 
-Hoặc chạy trực tiếp:
+Or run directly:
 
 ```bash
 npx @tailwindcss/cli -i styles.css -o whiteneuron/static/base/css/styles.css --minify
 ```
 
-## Chạy local package example
+## Running the Local Example
 
 ```bash
 cd whiteneuron
@@ -211,15 +232,15 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-Truy cập admin tại: http://127.0.0.1:8000/admin/
+Access the admin at: http://127.0.0.1:8000/admin/
 
-## Build package
+## Building the Package
 
 ```bash
 uv build
 ```
 
-Hoặc dùng script build tổng hợp:
+Or use the all-in-one build script:
 
 ```bash
 bash scripts/build.sh
@@ -227,7 +248,7 @@ bash scripts/build.sh
 
 ## Rate Limiting
 
-`RateLimitMiddleware` giới hạn theo IP, `UserActivityMiddleware` giới hạn theo user đã đăng nhập. Cần Redis để hoạt động chính xác trên môi trường multi-worker.
+`RateLimitMiddleware` limits by IP; `UserActivityMiddleware` limits by authenticated user. Redis is required for accuracy in multi-worker environments.
 
 ```python
 # settings.py (hoặc env)
@@ -238,34 +259,34 @@ USER_RATE_LIMIT_REQUESTS = 60  # theo user đã đăng nhập
 USER_RATE_LIMIT_WINDOW   = 60
 ```
 
-Các biến env tương ứng: `RATE_LIMIT_REQUESTS`, `RATE_LIMIT_WINDOW`, `USER_RATE_LIMIT_REQUESTS`, `USER_RATE_LIMIT_WINDOW`.
+Corresponding env vars: `RATE_LIMIT_REQUESTS`, `RATE_LIMIT_WINDOW`, `USER_RATE_LIMIT_REQUESTS`, `USER_RATE_LIMIT_WINDOW`.
 
-Khi vượt ngưỡng:
-- Request API (`/api/` hoặc `Accept: application/json`) → JSON `{"detail": "Too many requests."}` với status 429.
-- Request browser → render template `429.html` với header `Retry-After`.
+When the limit is exceeded:
+- API requests (`/api/` or `Accept: application/json`) → JSON `{"detail": "Too many requests."}` with status 429.
+- Browser requests → renders `429.html` template with `Retry-After` header.
 
 ## IP Blacklist
 
-Hai lớp bảo vệ hoạt động song song. Cả hai đều được kiểm tra trước rate limit, trả 403 ngay lập tức.
+Two protection layers operate in parallel. Both are checked before rate limiting and return 403 immediately.
 
-### Tĩnh — `.env` (CIDR ranges, infra bans)
+### Static — `.env` (CIDR ranges, infrastructure bans)
 
-Load lúc khởi động, hỗ trợ IPv4/IPv6 và CIDR:
+Loaded at startup, supports IPv4/IPv6 and CIDR:
 
 ```env
 # .env
 IP_BLACKLIST=185.220.101.5,194.165.16.0/22,2001:db8::/32
 ```
 
-Cần **restart Daphne/Gunicorn** để apply khi thêm entry mới.
+Requires a **Daphne/Gunicorn restart** to apply new entries.
 
-### Động — Django Admin + Redis (real-time)
+### Dynamic — Django Admin + Redis (real-time)
 
-Quản lý qua **System → IP Blacklist** trong admin panel (superuser only):
+Managed via **System → IP Blacklist** in the admin panel (superuser only):
 
-- **Block vĩnh viễn**: để trống `blocked_until`
-- **Block tạm thời**: set `blocked_until` → Redis TTL tự expire, không cần cron
-- **Block nhanh từ logs**: *User Activity* → chọn records → action **Block IP address** → Redis key set ngay, không restart
+- **Permanent block**: leave `blocked_until` empty
+- **Temporary block**: set `blocked_until` → Redis TTL auto-expires, no cron needed
+- **Quick block from logs**: *User Activity* → select records → **Block IP address** action → Redis key set immediately, no restart needed
 
 ```
 Request → check static env blacklist (O(1))
@@ -275,23 +296,23 @@ Request → check static env blacklist (O(1))
 
 ## Error Pages
 
-Các template lỗi nằm trong `whiteneuron/templates/` và được Django tự động sử dụng khi `DEBUG=False`:
+Error templates live in `whiteneuron/templates/` and are used automatically by Django when `DEBUG=False`:
 
-| Template | Lỗi | Ghi chú |
+| Template | Error | Notes |
 |---|---|---|
 | `400.html` | Bad Request | |
 | `403.html` | Forbidden | |
 | `404.html` | Not Found | |
-| `429.html` | Too Many Requests | Render thủ công bởi middleware, truyền `{{ retry_after }}` |
+| `429.html` | Too Many Requests | Rendered manually by middleware, passes `{{ retry_after }}` |
 | `500.html` | Server Error | |
 
-Không cần đăng ký `handler400/403/404/500` — Django tự tìm template qua `APP_DIRS=True`.
+No need to register `handler400/403/404/500` — Django resolves templates automatically via `APP_DIRS=True`.
 
-## Môi trường cấu hình
+## Environment Configuration
 
-Copy env.example thành file môi trường phù hợp cho dự án của bạn và cập nhật các biến như DATABASE, REDIS, EMAIL, ALLOWED_HOSTS.
+Copy `env.example` to your environment file and update variables such as `DATABASE`, `REDIS`, `EMAIL`, and `ALLOWED_HOSTS`.
 
-## Liên hệ
+## Contact
 
 - Email: [anhnt@whiteneuron.com](mailto:anhnt@whiteneuron.com)
 - Website: [https://whiteneuron.ai](https://whiteneuron.ai)

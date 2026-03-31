@@ -1,7 +1,7 @@
 [project]
 name = "django-whiteneuron"
 version = "0.2.36"
-description = "django-whiteneuron là một gói mở rộng giúp nâng cấp giao diện và chức năng Django Admin, mang đến trải nghiệm quản trị hiện đại, trực quan và tối ưu hiệu suất. 🚀"
+description = "A modern Django Admin extension with enhanced UI/UX, dashboard, feedback, file management, rate limiting, IP blacklisting, and advanced admin integrations built on django-unfold."
 authors = [
     {name = "White Neuron", email = "anhnt@whiteneuron.com"}
 ]
@@ -58,6 +58,9 @@ classifiers = [
 [project.urls]
 homepage = "https://github.com/White-Neuron/django-whiteneuron"
 repository = "https://github.com/White-Neuron/django-whiteneuron"
+changelog = "https://github.com/White-Neuron/django-whiteneuron/releases"
+"Bug Tracker" = "https://github.com/White-Neuron/django-whiteneuron/issues"
+"PyPI" = "https://pypi.org/project/django-whiteneuron/"
 
 [tool.setuptools]
 [tool.setuptools.packages.find]
