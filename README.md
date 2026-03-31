@@ -112,13 +112,13 @@ uv add django-whiteneuron
 ### Specific version from PyPI
 
 ```bash
-uv add "django-whiteneuron==0.2.36"
+uv add "django-whiteneuron==0.2.37"
 ```
 
 ### From GitHub tag
 
 ```bash
-uv add "git+https://github.com/White-Neuron/django-whiteneuron.git@v0.2.36"
+uv add "git+https://github.com/White-Neuron/django-whiteneuron.git@v0.2.37"
 ```
 
 ### From local source
