@@ -9,7 +9,7 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Current Version
 
-- 0.2.38
+- 0.2.39
 
 ## Compatibility
 
@@ -20,7 +20,16 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Changelog
 
-### v0.2.38 (2026-03-31) — latest
+### v0.2.39 (2026-03-31) — latest
+**Fix: `get_client_ip()` — validate IP headers, fix block-all bug with Cloudflare Tunnel**
+- **Fixed**: `CF-Connecting-IP` và `True-Client-IP` headers không được validate format trước khi dùng — raw string có thể đi thẳng vào cache key, gây rate limit sai hoặc block nhầm.
+- **Fixed**: `REMOTE_ADDR` cũng không validate — giờ đi qua `_parse_ip()` trước khi sử dụng.
+- **Fixed**: Bug block nhầm tất cả user — khi dùng Cloudflare **Tunnel** (`cloudflared`), `CF-Connecting-IP` không được set, code fall xuống XFF nhưng XFF chứa Cloudflare Edge IP là entry đầu → toàn bộ user share 1 IP → block 1 người = block tất cả.
+- **Added**: `_parse_ip()` helper — normalize và validate IP string qua `ipaddress.ip_address()`, trả `None` nếu không hợp lệ, áp dụng cho tất cả header sources (CF, XFF, REMOTE_ADDR).
+- **Improved**: XFF parsing refactored — dùng loop với `_parse_ip()` thay vì list comprehension với `is_global_ip()` trực tiếp trên raw string.
+- **Docs**: Thêm comment rõ ràng về sự khác biệt Cloudflare Proxy vs Cloudflare Tunnel và cách cấu hình `BEHIND_CLOUDFLARE`.
+
+### v0.2.38 (2026-03-31)
 **Security: UA Blacklist — block bots/crawlers by User-Agent**
 - **Added**: `UABlacklist` model (`base/ua_blacklists`) — block requests by User-Agent pattern, managed via Django Admin in real-time.
 - **Added**: `UABlacklistAdmin` — UI with Activate/Deactivate actions, `is_regex` toggle, shown in System sidebar under `block` icon, superuser only.

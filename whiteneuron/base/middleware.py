@@ -180,26 +180,41 @@ def is_global_ip(ip):
     except ValueError:
         return False
 
+def _parse_ip(raw: str | None) -> str | None:
+    """Validate và trả về IP string chuẩn hóa, None nếu không hợp lệ."""
+    if not raw:
+        return None
+    raw = raw.strip()
+    try:
+        return str(ipaddress.ip_address(raw))
+    except ValueError:
+        return None
+
 def get_client_ip(request):
     from django.conf import settings
-    # CF-Connecting-IP / True-Client-IP chỉ tin tưởng khi deploy sau Cloudflare.
+    # CF-Connecting-IP: chỉ tin tưởng khi deploy sau Cloudflare Proxy (không phải Tunnel).
+    # Cloudflare Tunnel (cloudflared) KHÔNG set header này — nếu dùng Tunnel, tắt cờ này.
     # Set BEHIND_CLOUDFLARE=True trong settings để bật.
     if getattr(settings, 'BEHIND_CLOUDFLARE', False):
         for h in ("CF-Connecting-IP", "True-Client-IP"):
-            ip = request.headers.get(h)
+            ip = _parse_ip(request.headers.get(h))
             if ip:
                 return ip, request.headers.get("User-Agent")
 
+    # X-Forwarded-For: format "client, proxy1, proxy2" — lấy IP client đầu tiên là global.
+    # Lưu ý: XFF dễ bị spoof khi không có trusted proxy; chỉ dùng khi BEHIND_CLOUDFLARE=False.
     xff = request.headers.get("X-Forwarded-For")
     if xff:
-        ip_list = [x.strip() for x in xff.split(",")]
-        ip = next((x for x in ip_list if is_global_ip(x)), None)
-        if ip:
-            return ip, request.headers.get("User-Agent")
+        for raw in xff.split(","):
+            ip = _parse_ip(raw)
+            if ip and is_global_ip(ip):
+                return ip, request.headers.get("User-Agent")
 
     ra = request.META.get("REMOTE_ADDR")
     if ra:
-        return ra, request.headers.get("User-Agent")
+        ip = _parse_ip(ra)
+        if ip:
+            return ip, request.headers.get("User-Agent")
 
     return None, request.headers.get("User-Agent")
 
