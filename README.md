@@ -11,7 +11,7 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Current Version
 
-- 0.2.40
+- 0.2.41
 
 ## Compatibility
 
@@ -22,7 +22,12 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Changelog
 
-### v0.2.40 (2026-03-31) — latest
+### v0.2.41 (2026-03-31) — latest
+**Fix: App dashboard menu not syncing after SIDEBAR changes**
+- **Fixed**: `init_app_db()` used `cache.set(..., timeout=None)` (permanent cache) — after deploy/SIDEBAR changes, the App DB was never re-synced, causing dashboard menu to show stale data.
+- **Fixed**: Cache TTL changed to 300s (5 minutes) — SIDEBAR changes now propagate automatically within 5 minutes without manual cache clearing.
+
+### v0.2.40 (2026-03-31)
 **Improve: App Dashboard — two-level category/app grid, UI polish, i18n fixes**
 - **Added**: Two-level App dashboard grid — category cards (level 1) expand to app cards (level 2) via Alpine.js client-side navigation, no page reload.
 - **Added**: `app_change_list.html` model-specific template — category mosaic (2×2 icon grid), app card grid, back button, smooth transitions.

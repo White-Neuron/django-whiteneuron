@@ -682,8 +682,8 @@ def init_app_db():
             obj.is_active= False
             obj.save(notification= False)
     
-    # Đánh dấu đã chạy xong (cache vĩnh viễn hoặc thời gian rất dài)
-    cache.set(cache_key, True, timeout=None)
+    # Re-sync every 5 minutes so SIDEBAR changes are picked up without manual cache clear
+    cache.set(cache_key, True, timeout=300)
 
 # App Model Admin
 from django.utils.module_loading import import_string
