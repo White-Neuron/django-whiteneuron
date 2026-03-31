@@ -57,7 +57,7 @@ from unfold.widgets import (
     UnfoldAdminTextInputWidget,
 )
 
-from .models import User, Tag, UserActivity, UserProfile, App, IPBlacklist
+from .models import User, Tag, UserActivity, UserProfile, App, IPBlacklist, UABlacklist
 from .sites import base_admin_site
 from django.utils.safestring import mark_safe
 
@@ -465,6 +465,53 @@ class IPBlacklistAdmin(ModelAdmin):
             obj.is_active = False
             obj.save()
         messages.success(request, _("Selected IPs have been deactivated."))
+
+    actions = ['activate', 'deactivate']
+
+
+@admin.register(UABlacklist, site=base_admin_site)
+class UABlacklistAdmin(ModelAdmin):
+    compressed_fields = True
+    list_display = ['pattern', 'is_regex', 'is_active_display', 'reason', 'created_at', 'created_by']
+    search_fields = ['pattern', 'reason']
+    list_filter = ['is_active', 'is_regex']
+    readonly_fields = ['created_at', 'created_by']
+    date_hierarchy = 'created_at'
+
+    fieldsets = (
+        (_('Target'), {
+            'fields': ('pattern', 'is_regex', 'reason'),
+        }),
+        (_('Block settings'), {
+            'fields': ('is_active',),
+        }),
+        (_('Meta'), {
+            'fields': ('created_at', 'created_by'),
+        }),
+    )
+
+    @display(label=True, boolean=True, description=_("Active"))
+    def is_active_display(self, obj):
+        return obj.is_active
+
+    def save_model(self, request, obj, form, change):
+        if not change:
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+
+    @action(description=_("Activate selected patterns"))
+    def activate(self, request, queryset):
+        for obj in queryset:
+            obj.is_active = True
+            obj.save()
+        messages.success(request, _("Selected UA patterns have been activated."))
+
+    @action(description=_("Deactivate selected patterns"))
+    def deactivate(self, request, queryset):
+        for obj in queryset:
+            obj.is_active = False
+            obj.save()
+        messages.success(request, _("Selected UA patterns have been deactivated."))
 
     actions = ['activate', 'deactivate']
 

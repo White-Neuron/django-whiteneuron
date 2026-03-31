@@ -9,7 +9,7 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Current Version
 
-- 0.2.37
+- 0.2.38
 
 ## Compatibility
 
@@ -20,7 +20,17 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Changelog
 
-### v0.2.37 (2026-03-31) — latest
+### v0.2.38 (2026-03-31) — latest
+**Security: UA Blacklist — block bots/crawlers by User-Agent**
+- **Added**: `UABlacklist` model (`base/ua_blacklists`) — block requests by User-Agent pattern, managed via Django Admin in real-time.
+- **Added**: `UABlacklistAdmin` — UI with Activate/Deactivate actions, `is_regex` toggle, shown in System sidebar under `block` icon, superuser only.
+- **Added**: `RateLimitMiddleware._is_ua_blacklisted()` — two-layer check: static keywords from `UA_BLACKLIST` env (loaded at startup) + dynamic patterns from Redis cache (managed via admin, real-time).
+- **Added**: `UA_BLACKLIST` setting in `env.example` — comma-separated substring keywords loaded at startup (no Redis required), e.g. `GPTBot,ClaudeBot,https://openai.com`.
+- **Added**: Dynamic patterns support `is_regex=True` — executes `re.search(pattern, ua, re.IGNORECASE)`, invalid regex patterns are safely skipped per-entry.
+- **Fixed**: Cache miss fallback — when Redis restarts or on first boot, patterns are loaded from DB and cache is warmed automatically (no bots slip through during cold start).
+- **Added**: Migration `base/0016_uablacklist.py`.
+
+### v0.2.37 (2026-03-31)
 **Security: guest login — remove hardcoded password, passwordless login view**
 - **Security**: Removed hardcoded password `'whiteneuron-guest-2024@'` from `init_guest.py` — guest user now created with `set_unusable_password()`, cannot be authenticated via password at all.
 - **Security**: Removed JavaScript-based guest login button that exposed the password in plain HTML source — replaced with a server-side `GuestLoginView` (POST-only, CSRF-protected).

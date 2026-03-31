@@ -264,6 +264,64 @@ class IPBlacklist(models.Model):
 
 
 ############################################
+# UA Blacklist (dynamic, managed via admin + Redis)
+############################################
+UA_PATTERNS_CACHE_KEY = 'blacklist:ua_patterns'
+
+class UABlacklist(models.Model):
+    pattern = models.CharField(
+        _("pattern"),
+        max_length=500,
+        unique=True,
+        help_text=_("Substring or regex to match against the User-Agent header. E.g. 'GPTBot', 'https://openai.com'."),
+    )
+    is_regex = models.BooleanField(
+        _("is regex"),
+        default=False,
+        help_text=_("If checked, pattern is treated as a Python regex (re.search, case-insensitive); otherwise simple case-insensitive substring match."),
+    )
+    reason = models.CharField(_("reason"), max_length=500, blank=True)
+    is_active = models.BooleanField(_("active"), default=True)
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    created_by = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="ua_blacklists",
+        verbose_name=_("created by"),
+    )
+
+    class Meta:
+        db_table = "ua_blacklists"
+        verbose_name = _("UA blacklist")
+        verbose_name_plural = _("UA blacklists")
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.pattern
+
+    @classmethod
+    def rebuild_cache(cls):
+        from django.core.cache import cache
+        try:
+            patterns = list(
+                cls.objects.filter(is_active=True).values_list('pattern', 'is_regex')
+            )
+            cache.set(UA_PATTERNS_CACHE_KEY, patterns, timeout=None)
+        except Exception:
+            pass
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.__class__.rebuild_cache()
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        self.__class__.rebuild_cache()
+
+
+############################################
 # Base Model
 ############################################
 from .thread_local import thread_local

@@ -46,6 +46,9 @@ class RateLimitMiddleware:
                     self._blacklist_nets.append(net)
             except ValueError:
                 pass
+        # UA Blacklist: static keywords từ settings (comma-separated)
+        raw_ua_blacklist = getattr(settings, 'UA_BLACKLIST', '')
+        self._ua_keywords: list = [kw.strip().lower() for kw in raw_ua_blacklist.split(',') if kw.strip()]
 
     def _is_blacklisted(self, ip: str) -> bool:
         try:
@@ -65,6 +68,38 @@ class RateLimitMiddleware:
             pass
         return False
 
+    def _is_ua_blacklisted(self, ua: str) -> bool:
+        if not ua:
+            return False
+        ua_lower = ua.lower()
+        # Static keywords từ settings
+        for kw in self._ua_keywords:
+            if kw in ua_lower:
+                return True
+        # Dynamic patterns từ Redis, fallback DB khi cache miss (Redis restart / first boot)
+        try:
+            from .models import UA_PATTERNS_CACHE_KEY, UABlacklist
+            patterns = cache.get(UA_PATTERNS_CACHE_KEY)
+            if patterns is None:
+                # Cache miss: load từ DB và warm lại cache
+                patterns = list(
+                    UABlacklist.objects.filter(is_active=True).values_list('pattern', 'is_regex')
+                )
+                cache.set(UA_PATTERNS_CACHE_KEY, patterns, timeout=None)
+            for pattern, is_regex in patterns:
+                if is_regex:
+                    try:
+                        if re.search(pattern, ua, re.IGNORECASE):
+                            return True
+                    except re.error:
+                        pass  # pattern regex không hợp lệ, bỏ qua
+                else:
+                    if pattern.lower() in ua_lower:
+                        return True
+        except Exception:
+            pass
+        return False
+
     def __call__(self, request):
         if not any(request.path.startswith(p) for p in self.EXEMPT_PATHS):
             ip, _ = get_client_ip(request)
@@ -72,6 +107,15 @@ class RateLimitMiddleware:
                 if request.path.startswith('/api/') or request.headers.get('Accept') == 'application/json':
                     return JsonResponse(
                         {'detail': 'Your IP has been blocked.'},
+                        status=403,
+                    )
+                html = render_to_string('403.html', {}, request=request)
+                return HttpResponse(html, status=403)
+            ua = request.headers.get('User-Agent', '')
+            if ua and self._is_ua_blacklisted(ua):
+                if request.path.startswith('/api/') or request.headers.get('Accept') == 'application/json':
+                    return JsonResponse(
+                        {'detail': 'Access denied.'},
                         status=403,
                     )
                 html = render_to_string('403.html', {}, request=request)

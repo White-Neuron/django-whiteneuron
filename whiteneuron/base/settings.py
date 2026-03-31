@@ -56,6 +56,10 @@ RATE_LIMIT_WINDOW = int(environ.get("RATE_LIMIT_WINDOW", 60))        # window in
 # Ví dụ: IP_BLACKLIST=1.2.3.4,5.6.7.0/24,::1
 IP_BLACKLIST = environ.get("IP_BLACKLIST", "")
 
+# UA Blacklist: danh sách User-Agent keyword ngăn chặn tĩnh (comma-separated, substring match)
+# Ví dụ: UA_BLACKLIST=GPTBot,ClaudeBot,https://openai.com
+UA_BLACKLIST = environ.get("UA_BLACKLIST", "")
+
 # Rate limiting (UserActivityMiddleware — authenticated users)
 USER_RATE_LIMIT_REQUESTS = int(environ.get("USER_RATE_LIMIT_REQUESTS", 60))   # requests per window per user
 USER_RATE_LIMIT_WINDOW = int(environ.get("USER_RATE_LIMIT_WINDOW", 60))       # window in seconds
@@ -650,6 +654,12 @@ UNFOLD = {
                         "title": _("IP Blacklist"),
                         "icon": "block",
                         "link": reverse_lazy("admin:base_ipblacklist_changelist"),
+                        "permission": "whiteneuron.base.utils.permission_superuser_callback",
+                    },
+                    {
+                        "title": _("UA Blacklist"),
+                        "icon": "block",
+                        "link": reverse_lazy("admin:base_uablacklist_changelist"),
                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
                     },
                 ],
