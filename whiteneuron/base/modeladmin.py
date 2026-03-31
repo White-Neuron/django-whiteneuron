@@ -1,7 +1,9 @@
 from unfold.admin import ModelAdmin as UnfoldAdmin
 
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponseRedirect
+from django.http.response import HttpResponseRedirectBase
 from django.db.models.query import QuerySet
+from urllib.parse import parse_qsl, urlencode, urlparse
 from django.utils.safestring import mark_safe
 from django.contrib.admin.views.main import ChangeList
 from collections import OrderedDict
@@ -88,6 +90,40 @@ class ModelAdmin(UnfoldAdmin):
 
     def has_module_permission(self, request: HttpRequest) -> bool:
         return super().has_module_permission(request)
+
+    def _fix_preserved_filters(self, request, response):
+        """Fix Django bug: add_preserved_filters() uses dict(parse_qsl()) which drops duplicate
+        filter params. E.g. ?chapter__id__exact=29&chapter__id__exact=31 → only =31 kept after save.
+
+        Root cause: get_preserved_filters() wraps filters in _changelist_filters=..., then
+        add_preserved_filters() decodes via dict(parse_qsl(...)) losing repeated keys.
+
+        Fix: read _changelist_filters directly from request.GET (inner filter string),
+        detect duplicates, then rebuild the redirect URL with parse_qsl() which keeps all values.
+        """
+        if not isinstance(response, HttpResponseRedirectBase):
+            return response
+        # Inner filter string e.g. 'chapter__id__exact=29&chapter__id__exact=31'
+        inner = request.GET.get('_changelist_filters', '')
+        if not inner:
+            return response
+        pairs = parse_qsl(inner, keep_blank_values=True)
+        keys = [k for k, v in pairs]
+        if len(keys) == len(set(keys)):
+            return response  # No duplicate keys — Django handled it correctly
+        # Rebuild URL: strip the incorrectly-added filter params, then append all pairs correctly
+        parsed = urlparse(response.url)
+        filter_keys = {k for k, v in pairs}
+        base_params = [(k, v) for k, v in parse_qsl(parsed.query) if k not in filter_keys]
+        return HttpResponseRedirect(
+            parsed._replace(query=urlencode(base_params + pairs)).geturl()
+        )
+
+    def response_post_save_change(self, request, obj):
+        return self._fix_preserved_filters(request, super().response_post_save_change(request, obj))
+
+    def response_post_save_add(self, request, obj):
+        return self._fix_preserved_filters(request, super().response_post_save_add(request, obj))
 
     # Soft delete
     def get_actions(self, request: HttpRequest) -> OrderedDict[Any, Any]:

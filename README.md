@@ -7,11 +7,11 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Downloads](https://img.shields.io/pypi/dm/django-whiteneuron)](https://pypi.org/project/django-whiteneuron/)
 
-![django-whiteneuron](docs/images/main.png)
+![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
 
-- 0.2.41
+- 0.2.42
 
 ## Compatibility
 
@@ -22,7 +22,15 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Changelog
 
-### v0.2.41 (2026-03-31) — latest
+### v0.2.42 (2026-03-31) — latest
+**Improve: persist filter/search state in admin changelist + fix Django duplicate filter bug**
+- **Added**: Filter/search state is now persisted via `sessionStorage` across navigation — selecting a filter, navigating to a detail page, then returning restores the exact filter state automatically.
+- **Fixed**: Django bug — `add_preserved_filters()` uses `dict(parse_qsl())` which drops duplicate filter params (e.g. `?chapter__id__exact=29&chapter__id__exact=31` → only `=31` kept after save). Fixed server-side in `ModelAdmin._fix_preserved_filters()` — rebuilds the redirect URL with `parse_qsl()` (preserves all values) when duplicates are detected.
+- **Fixed**: `_changelist_filters` URL param (Django's format for preserved filters when navigating from change form) — decoded to individual params before saving to storage, then the URL is redirected to clean form (no ugly `_changelist_filters=...` in browser bar).
+- **Fixed**: README image broken on PyPI — changed from relative path `docs/images/main.png` to absolute GitHub raw URL.
+- **Improved**: Single redirect point in changelist JS — eliminated multiple chained `window.location.replace()` calls; at most one redirect per page load.
+
+### v0.2.41 (2026-03-31)
 **Fix: App dashboard menu not syncing after SIDEBAR changes**
 - **Fixed**: `init_app_db()` used `cache.set(..., timeout=None)` (permanent cache) — after deploy/SIDEBAR changes, the App DB was never re-synced, causing dashboard menu to show stale data.
 - **Fixed**: Cache TTL changed to 300s (5 minutes) — SIDEBAR changes now propagate automatically within 5 minutes without manual cache clearing.

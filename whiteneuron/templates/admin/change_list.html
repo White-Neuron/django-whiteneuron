@@ -41,6 +41,92 @@
 </script>
 {% endif %}
 
+<script>
+(function () {
+    const STORAGE_KEY = 'wn_filters:' + window.location.pathname;
+    const params = new URLSearchParams(window.location.search);
+
+    // Normalize: bỏ phân trang, decode _changelist_filters, sắp xếp key để so sánh ổn định.
+    // _changelist_filters xuất hiện trong URL khi Django encode filter từ change form → list.
+    // Decode sang params riêng để giữ duplicate keys (vd: chapter__id__exact=29&chapter__id__exact=31).
+    function normalize(p) {
+        const copy = new URLSearchParams(p.toString());
+        copy.delete('p');
+        const clf = copy.get('_changelist_filters');
+        if (clf) {
+            copy.delete('_changelist_filters');
+            new URLSearchParams(clf).forEach(function(val, key) { copy.append(key, val); });
+        }
+        copy.sort();
+        return copy.toString();
+    }
+
+    // Case đặc biệt: user click "xóa filter" → reset storage và tải lại trang sạch.
+    if (params.has('_clear')) {
+        sessionStorage.removeItem(STORAGE_KEY);
+        params.delete('_clear');
+        const rest = params.toString();
+        window.location.replace(window.location.pathname + (rest ? '?' + rest : ''));
+        return;
+    }
+
+    const hasClf        = params.has('_changelist_filters');
+    const currentState  = normalize(params);
+    const savedState    = sessionStorage.getItem(STORAGE_KEY) || '';
+
+    // Phát hiện user navigate về từ change form (Close button hoặc sau save).
+    // Template tag add_preserved_filters dùng dict(parse_qsl()) → mất duplicate keys
+    // khi render nút Close. Server-side fix (_fix_preserved_filters) chỉ xử lý sau Save,
+    // không cover Close button vì là <a href> tĩnh không đi qua Django view.
+    // → Khi referrer là change form, ưu tiên savedState (đúng) thay vì URL bị rút ngắn.
+    const fromChangeForm = (function () {
+        try {
+            return /\/(\d+\/change|add)\/?$/.test(new URL(document.referrer).pathname);
+        } catch (e) { return false; }
+    })();
+
+    // Tính trạng thái đích — một điểm quyết định duy nhất, không redirect chồng nhau.
+    let targetState;
+    if (hasClf) {
+        // URL có _changelist_filters: decode và dùng (chính xác nhất)
+        targetState = currentState;
+    } else if (!currentState) {
+        // URL trống: khôi phục state đã lưu (nếu có)
+        targetState = savedState;
+    } else if (fromChangeForm && savedState && currentState !== savedState) {
+        // Từ change form về, URL có thể bị rút ngắn bởi Django template tag bug.
+        // Ưu tiên savedState đúng thay vì ghi đè bằng URL sai.
+        // (Sau Save: server đã fix đúng → currentState === savedState → branch này không trigger)
+        targetState = savedState;
+    } else {
+        // URL do user chủ động đặt: lưu và giữ nguyên
+        targetState = currentState;
+    }
+
+    // Lưu vào sessionStorage nếu có thay đổi
+    if (targetState && targetState !== savedState) {
+        sessionStorage.setItem(STORAGE_KEY, targetState);
+    }
+
+    // Redirect một lần duy nhất nếu URL hiện tại không khớp targetState
+    const needsRedirect = hasClf || (targetState !== currentState);
+    if (needsRedirect) {
+        window.location.replace(window.location.pathname + (targetState ? '?' + targetState : ''));
+        return;
+    }
+
+    // Bắt click reset filter để xóa storage trước khi trang điều hướng đi
+    document.addEventListener('click', function (e) {
+        const link = e.target.closest('a[href]');
+        if (!link) return;
+        const href = link.getAttribute('href');
+        if (!href) return;
+        if (href === '?' || href === window.location.pathname || href === './' || href.includes('_clear=1')) {
+            sessionStorage.removeItem(STORAGE_KEY);
+        }
+    });
+})();
+</script>
 
 {% endblock %}
 
