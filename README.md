@@ -7,6 +7,8 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Downloads](https://img.shields.io/pypi/dm/django-whiteneuron)](https://pypi.org/project/django-whiteneuron/)
 
+![django-whiteneuron](docs/images/main.png)
+
 ## Current Version
 
 - 0.2.40
