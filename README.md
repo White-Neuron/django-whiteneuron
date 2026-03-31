@@ -9,7 +9,7 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Current Version
 
-- 0.2.36
+- 0.2.37
 
 ## Compatibility
 
@@ -20,7 +20,15 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Changelog
 
-### v0.2.36 (2026-03-30) — latest
+### v0.2.37 (2026-03-31) — latest
+**Security: guest login — remove hardcoded password, passwordless login view**
+- **Security**: Removed hardcoded password `'whiteneuron-guest-2024@'` from `init_guest.py` — guest user now created with `set_unusable_password()`, cannot be authenticated via password at all.
+- **Security**: Removed JavaScript-based guest login button that exposed the password in plain HTML source — replaced with a server-side `GuestLoginView` (POST-only, CSRF-protected).
+- **Added**: `GuestLoginView` at `base/guest-login/` — bypasses password authentication entirely, calls `login()` directly, validates `next` redirect with `url_has_allowed_host_and_scheme()`.
+- **Improved**: `init_guest` command now sets `is_staff=True` explicitly on user creation.
+- **CI**: Added `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` to GitHub Actions workflow — prevents deprecation warnings for Node.js 20 before June 2026 deadline.
+
+### v0.2.36 (2026-03-30)
 **Security: init_admin — remove hardcoded password, random generation, auto email delivery**
 - **Security**: Removed hardcoded password `'wnadmin2024&'` from `init_admin.py` — replaced with `secrets.choice()` (CSPRNG) generating a 20-character password (uppercase, lowercase, digits, special chars).
 - **Added**: `INIT_ADMIN_PASSWORD` env var support — uses fixed password from `.env` if set, otherwise generates randomly.

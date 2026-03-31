@@ -1,21 +1,14 @@
 {% load i18n %}
 
 <div class="text-center mt-4">
-    <button type="button" id="guest-login" class="bg-secondary-600 border border-transparent flex flex-row font-semibold group items-center justify-center py-2 rounded text-sm 
+    <form method="post" action="{% url 'guest_login' %}">
+        {% csrf_token %}
+        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+        <button type="submit" class="bg-secondary-600 border border-transparent flex flex-row font-semibold group items-center justify-center py-2 rounded text-sm 
     text-gray-900 dark:text-white
     w-full">
-        {% trans "Log in as guest" %}
-        <i class="material-symbols-outlined ml-2 text-lg transition-all group-hover:-translate-x-1">person</i>
-    </button>
+            {% trans "Log in as guest" %}
+            <i class="material-symbols-outlined ml-2 text-lg transition-all group-hover:-translate-x-1">person</i>
+        </button>
+    </form>
 </div>
-
-<script>
-    document.getElementById("guest-login").addEventListener("click", function() {
-        // Điền thông tin đăng nhập cho guest (đảm bảo id của input là id_username và id_password)
-        document.getElementById("id_username").value = "guest";
-        // Điền thông tin mật khẩu
-        document.getElementById("id_password").value = "whiteneuron-guest-2024@";
-        // Submit form đăng nhập (đảm bảo form có id="login-form")
-        document.getElementById("login-form").submit();
-    });
-</script>

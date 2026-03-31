@@ -6,7 +6,7 @@ from django.urls import include, re_path
 from django.views.static import serve
 
 from .sites import base_admin_site
-from .views import HomeView
+from .views import HomeView, GuestLoginView
 
 urlpatterns = []
 
@@ -21,6 +21,7 @@ if settings.BROWSER_RELOAD:
     
 urlpatterns += [
     path("", HomeView.as_view(), name="home"),
+    path("base/guest-login/", GuestLoginView.as_view(), name="guest_login"),
     # path("i18n/", include("django.conf.urls.i18n")),
     path("ckeditor5/", include('django_ckeditor_5.urls')),
 ]
