@@ -2,23 +2,25 @@ import json
 import logging
 from django.urls import path
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth import get_user_model
+from django.utils import timezone
+from django.utils.translation import gettext as _
+from datetime import timedelta
 from whiteneuron.feedbacks.models import FeedbackData
 
-User = get_user_model()
+FEEDBACK_COOLDOWN_SECONDS = 60
+
 logger = logging.getLogger(__name__)
 
-@csrf_exempt  # Chỉ dùng nếu API không cần CSRF bảo vệ
+@require_POST
 def receive_feedback(request):
-    if request.method != "POST":
-        return JsonResponse({"success": False, "message": "Invalid request method"}, status=400)
+    if not request.user.is_authenticated:
+        return JsonResponse({"success": False, "message": _("User is not authenticated")}, status=403)
 
     try:
         # Đọc dữ liệu từ request
         body_unicode = request.body.decode("utf-8")
-        logger.info(f"Received request body: {body_unicode}")  # Log dữ liệu nhận được
 
         data = json.loads(body_unicode)
         object_id = data.get("object_id")
@@ -29,40 +31,47 @@ def receive_feedback(request):
 
         # Kiểm tra dữ liệu bắt buộc
         if not object_id or not feedback_message or not model_name or not app_label:
-            return JsonResponse({"success": False, "message": "Missing required fields"}, status=400)
-
-        # Kiểm tra user
-        if not request.user.is_authenticated:
-            return JsonResponse({"success": False, "message": "User is not authenticated"}, status=403)
-
-        user_id = request.user.id
+            return JsonResponse({"success": False, "message": _("Missing required fields")}, status=400)
 
         # Lấy ContentType
         try:
             content_type = ContentType.objects.get(model=model_name, app_label=app_label)
         except ContentType.DoesNotExist:
-            return JsonResponse({"success": False, "message": "Invalid model or app_label"}, status=400)
+            return JsonResponse({"success": False, "message": _("Invalid model or app_label")}, status=400)
+
+        # Kiểm tra cooldown chống spam — per user, không phân biệt đối tượng
+        cooldown_since = timezone.now() - timedelta(seconds=FEEDBACK_COOLDOWN_SECONDS)
+        last_feedback = FeedbackData.objects.filter(
+            user=request.user,
+            created_at__gte=cooldown_since,
+        ).order_by('-created_at').first()
+        if last_feedback:
+            remaining = FEEDBACK_COOLDOWN_SECONDS - int((timezone.now() - last_feedback.created_at).total_seconds())
+            return JsonResponse(
+                {"success": False, "message": _("Please wait %(seconds)d seconds before submitting another feedback.") % {"seconds": max(remaining, 1)}},
+                status=429,
+            )
 
         # Tạo feedback mới
         feedback = FeedbackData(
-            user=User.objects.get(id=user_id),
+            user=request.user,
             content_type=content_type,
             object_id=object_id,
             field=field,
             message=feedback_message,
         )
 
-        feedback.save()  # Lưu feedback có request để lưu thông tin người thực hiện
+        feedback.save()
 
-        logger.info(f"Feedback saved: {feedback}")
-        return JsonResponse({"success": True, "message": "Feedback saved successfully"})
+        logger.info("Feedback saved: %s", feedback)
+        return JsonResponse({"success": True, "message": _("Feedback saved successfully")})
 
     except json.JSONDecodeError:
-        logger.error("Invalid JSON format")
-        return JsonResponse({"success": False, "message": "Invalid JSON format"}, status=400)
+        logger.error("Invalid JSON format in feedback submission")
+        return JsonResponse({"success": False, "message": _("Invalid JSON format")}, status=400)
     except Exception as e:
-        logger.error(f"Error saving feedback: {e}")
-        return JsonResponse({"success": False, "message": str(e)}, status=500)
+        logger.error("Error saving feedback: %s", e, exc_info=True)
+        return JsonResponse({"success": False, "message": _("An unexpected error occurred. Please try again.")}, status=500)
 
 urlpatterns = [
     path("feedback/", receive_feedback, name="feedback_endpoint"),

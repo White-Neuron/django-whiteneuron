@@ -5,35 +5,93 @@
 {% block object-tools-items %}
     {% if user.is_superuser %}
         <li class="mr-2">
-            <button class="ui-btn ui-btn-sm ui-btn-primary w-full h-full" id="make-resolved-link">Mark as Resolved</button>
+            <button class="ui-btn ui-btn-sm ui-btn-primary" id="make-resolved-link">{% trans "Mark as Resolved" %}</button>
         </li>
+
+        {# Modal: nhập note trước khi mark as resolved #}
+        <dialog id="resolve-prompt-modal" class="ui-modal">
+            <div class="ui-modal-box">
+                <h3 class="text-lg font-bold mb-2">{% trans "Mark as Resolved" %}</h3>
+                <p class="text-sm mb-4">{% trans "Enter an optional note for this resolution:" %}</p>
+                <input id="resolve-note-input" type="text" placeholder="{% trans 'Note (optional)' %}" class="ui-input ui-input-bordered w-full" />
+                <div class="ui-modal-action">
+                    <button id="resolve-cancel-btn" class="ui-btn ui-btn-ghost">{% trans "Cancel" %}</button>
+                    <button id="resolve-confirm-btn" class="ui-btn ui-btn-primary">{% trans "Confirm" %}</button>
+                </div>
+            </div>
+            <form method="dialog" class="ui-modal-backdrop"><button aria-label="close"></button></form>
+        </dialog>
+
+        {# Modal: hiển thị kết quả #}
+        <dialog id="resolve-result-modal" class="ui-modal">
+            <div class="ui-modal-box">
+                <p id="resolve-result-message" class="text-base"></p>
+                <div class="ui-modal-action">
+                    <form method="dialog">
+                        <button id="resolve-result-close-btn" class="ui-btn ui-btn-primary">{% trans "OK" %}</button>
+                    </form>
+                </div>
+            </div>
+            <form method="dialog" class="ui-modal-backdrop"><button aria-label="close"></button></form>
+        </dialog>
+
+        {% trans "Feedback marked as resolved successfully." as msg_success %}
+        {% trans "Failed to mark feedback as resolved." as msg_error %}
         <script>
-            document.getElementById('make-resolved-link').addEventListener('click', function() {
-                // có cho phép nhập note khi mark as resolved (không bắt buộc)
-                const note = prompt('Please enter a note (optional) to mark this feedback as resolved:');
-    
-                // Kiểm tra nếu người dùng ấn Cancel (note === null)
-                if (note === null) {
-                    return; // Không làm gì cả nếu Cancel
-                }
-                
-                // Nếu có note hoặc note rỗng (OK được ấn)
-                const url = note ? `?resolved=1&note=${encodeURIComponent(note)}` : '?resolved=1';
-                
-                fetch(url)
-                    .then(response => {
-                        if (response.ok) {
-                            alert('Feedback marked as resolved successfully');
-                            location.reload(); // Reload trang để cập nhật trạng thái
-                        } else {
-                            alert('Failed to mark feedback as resolved');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Failed to mark feedback as resolved');
-                    });
-            });
+            (function () {
+                const openBtn = document.getElementById('make-resolved-link');
+                const promptModal = document.getElementById('resolve-prompt-modal');
+                const noteInput = document.getElementById('resolve-note-input');
+                const cancelBtn = document.getElementById('resolve-cancel-btn');
+                const confirmBtn = document.getElementById('resolve-confirm-btn');
+                const resultModal = document.getElementById('resolve-result-modal');
+                const resultMsg = document.getElementById('resolve-result-message');
+
+                openBtn.addEventListener('click', function () {
+                    noteInput.value = '';
+                    promptModal.showModal();
+                    noteInput.focus();
+                });
+
+                cancelBtn.addEventListener('click', function () {
+                    promptModal.close();
+                });
+
+                confirmBtn.addEventListener('click', function () {
+                    const note = noteInput.value.trim();
+                    const url = note ? '?resolved=1&note=' + encodeURIComponent(note) : '?resolved=1';
+
+                    confirmBtn.disabled = true;
+                    cancelBtn.disabled = true;
+
+                    function setResult(message) {
+                        resultMsg.textContent = message;
+                        promptModal.addEventListener('close', function handler() {
+                            promptModal.removeEventListener('close', handler);
+                            resultModal.showModal();
+                        });
+                        promptModal.close();
+                    }
+
+                    fetch(url)
+                        .then(function (response) {
+                            setResult(response.ok
+                                ? '{{ msg_success|escapejs }}'
+                                : '{{ msg_error|escapejs }}');
+                        })
+                        .catch(function (error) {
+                            console.error('Error:', error);
+                            setResult('{{ msg_error|escapejs }}');
+                            confirmBtn.disabled = false;
+                            cancelBtn.disabled = false;
+                        });
+                });
+
+                // Reload khi đóng result modal, dù bấm OK hay backdrop
+                resultModal.addEventListener('close', function () {
+                    location.reload();
+                });
+            })();
         </script>
     {% endif %}
     {{ block.super }}

@@ -1,11 +1,11 @@
 from django.contrib import admin, messages
+from django.urls import reverse
+from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
-from unfold.decorators import display
 
 from whiteneuron.base.admin import base_admin_site, ModelAdmin
 from .models import FeedbackData
-
-from django.urls import reverse
+from .urls import FEEDBACK_COOLDOWN_SECONDS
 
 from whiteneuron.notification.models import Notification
 
@@ -26,26 +26,35 @@ class FeedbackDataAdmin(ModelAdmin):
     search_fields = ('message', 'user__username', 'content_type__model')
 
     fieldsets = (
-        ('Feedback Data', {
-            'fields': ('user', ('content_type', 'object_id'), ('get_related_object_link', 'field'), 'message')
+        (_('Feedback Data'), {
+            # 'fields': ('user', ('content_type', 'object_id'), ('get_related_object_link', 'field'), 'message')
+            'fields': ('user', ('content_type', 'object_id'), 'get_related_object_link', 'message')
         }),
-        ('Status', {
+        (_('Status'), {
             'fields': ('is_resolved', 'note')
         })
     )
 
     readonly_fields = ('get_related_object_link',)  # Chỉ hiển thị link, không cho sửa
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        
+        # Người liên quan có thể xem feedback        
+        return qs.filter(user=request.user) 
+    
     def get_related_object_link(self, obj):
         """Hiển thị link đến object gốc"""
         if obj.content_object:
             admin_url = reverse(
-                f'admin:{obj.content_type.app_label}_{obj.content_type.model}_change', 
+                f'admin:{obj.content_type.app_label}_{obj.content_type.model}_change',
                 args=[obj.object_id]
             )
-            return format_html(f'<a href="{admin_url}" target="_blank">{obj.content_object}</a>')
+            return format_html('<a href="{}" target="_blank">{}</a>', admin_url, obj.content_object)
         return "-"
-    get_related_object_link.short_description = "Related Object"  # Tiêu đề trong Admin
+    get_related_object_link.short_description = _("Related Object")  # Tiêu đề trong Admin
 
     # Định nghĩa action để đánh dấu đã xử lý
     actions = ['mark_as_resolved']
@@ -90,6 +99,8 @@ class FeedbackDataAdmin(ModelAdmin):
             note= request.GET.get('note', '')
 
             obj = self.get_object(request, object_id)
+            if obj is None:
+                return super().changeform_view(request, object_id, form_url, extra_context)
             obj.is_resolved = True
             obj.note = note
             obj.save()
@@ -98,11 +109,12 @@ class FeedbackDataAdmin(ModelAdmin):
             noti= Notification(
                 user= obj.user,
                 title= _("Feedback resolved"),
-                content= f"""
-                    <p>Your feedback has been resolved.</p>
-                    <p>Object: {self.get_related_object_link(obj)}</p>
-                    <p>Note: {note}</p>
-                """,
+                content= format_html(
+                    '<p>{}</p><p>{}: {}</p><p>{}: {}</p>',
+                    _("Your feedback has been resolved."),
+                    _("Object"), self.get_related_object_link(obj),
+                    _("Note"), note,
+                ),
                 action='update',
                 flag= 'success',
             )
@@ -115,13 +127,8 @@ class FeedbackDataAdmin(ModelAdmin):
 
 # FeedBack base admin
 # Cho phép các model khác kế thừa để gọi
-from django.utils.html import format_html
 class FeedbackBaseAdmin(ModelAdmin):
     def render_change_form(self, request, context, *args, **kwargs):
-        # Thêm show_feedback = True vào context để hiển thị feedbacks
         context['show_feedback'] = True
+        context['feedback_cooldown_ms'] = FEEDBACK_COOLDOWN_SECONDS * 1000
         return super().render_change_form(request, context, *args, **kwargs)
-
-
-        
-    

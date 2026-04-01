@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-31 13:27+0700\n"
+"POT-Creation-Date: 2026-04-01 23:22+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -112,7 +112,8 @@ msgstr "Mục tiêu"
 msgid "Block settings"
 msgstr "Cài đặt chặn"
 
-#: base/admin.py:441 base/admin.py:488 file_management/admin.py:21
+#: base/admin.py:441 base/admin.py:488 base/modeladmin.py:399
+#: file_management/admin.py:21
 msgid "Meta"
 msgstr "Meta"
 
@@ -202,6 +203,51 @@ msgid "Database is operating in readonly mode. Not possible to save any data."
 msgstr ""
 "Cơ sở dữ liệu đang hoạt động ở chế độ chỉ đọc. Không thể lưu bất kỳ dữ liệu "
 "nào."
+
+#: base/modeladmin.py:85
+#, python-format
+msgid "Search by %s"
+msgstr "Tìm kiếm theo %s"
+
+#: base/modeladmin.py:143 base/modeladmin.py:144 base/modeladmin.py:193
+#: base/modeladmin.py:194
+#, python-format
+msgid "%(name)s \"%(obj)s\" has been soft-deleted by user \"%(user)s\""
+msgstr "%(name)s \"%(obj)s\" đã được xóa mềm bởi người dùng \"%(user)s\""
+
+#: base/modeladmin.py:153
+msgid "Delete selected records"
+msgstr "Xóa các bản ghi đã chọn"
+
+#: base/modeladmin.py:157 base/modeladmin.py:158
+#, python-format
+msgid "%(name)s \"%(obj)s\" has been hard-deleted by user \"%(user)s\""
+msgstr "%(name)s \"%(obj)s\" đã được xóa cứng bởi người dùng \"%(user)s\""
+
+#: base/modeladmin.py:170
+msgid "Hard delete selected records"
+msgstr "Xóa cứng các bản ghi đã chọn"
+
+#: base/modeladmin.py:174 base/modeladmin.py:175
+#, python-format
+msgid "%(name)s \"%(obj)s\" has been restored by user \"%(user)s\""
+msgstr "%(name)s \"%(obj)s\" đã được khôi phục bởi người dùng \"%(user)s\""
+
+#: base/modeladmin.py:184
+msgid "Restore selected records"
+msgstr "Khôi phục các bản ghi đã chọn"
+
+#: base/modeladmin.py:419
+msgid "Edit"
+msgstr "Sửa"
+
+#: base/modeladmin.py:422
+msgid "View"
+msgstr "Xem"
+
+#: base/modeladmin.py:427
+msgid "Delete"
+msgstr "Xóa"
 
 #: base/models.py:67
 msgid "title"
@@ -489,12 +535,12 @@ msgstr "Gửi"
 msgid "Failed"
 msgstr "Thất bại"
 
-#: base/models.py:702 file_management/models.py:12 file_management/models.py:29
-#: synchronization/models.py:19
+#: base/models.py:702 feedbacks/admin.py:33 file_management/models.py:12
+#: file_management/models.py:29 synchronization/models.py:19
 msgid "Status"
 msgstr "Trạng thái"
 
-#: base/models.py:703 feedbacks/models.py:51
+#: base/models.py:703 feedbacks/admin.py:116 feedbacks/models.py:51
 msgid "Note"
 msgstr "Ghi chú"
 
@@ -756,24 +802,40 @@ msgstr "Thành công"
 msgid "Error"
 msgstr "Lỗi"
 
-#: feedbacks/admin.py:53
+#: feedbacks/admin.py:29
+msgid "Feedback Data"
+msgstr "Dữ liệu phản hồi"
+
+#: feedbacks/admin.py:57
+msgid "Related Object"
+msgstr "Đối tượng liên quan"
+
+#: feedbacks/admin.py:62
 msgid "Mark selected feedbacks as resolved"
 msgstr "Đánh dấu các phản hồi đã chọn là đã giải quyết"
 
-#: feedbacks/admin.py:58
+#: feedbacks/admin.py:67
 #, python-format
 msgid "%d feedback(s) marked as resolved."
 msgstr "%d phản hồi đã được đánh dấu là đã giải quyết."
 
-#: feedbacks/admin.py:86
+#: feedbacks/admin.py:95
 msgid "Only superuser can mark feedback as resolved"
 msgstr "Chỉ quản trị viên mới có thể đánh dấu phản hồi là đã giải quyết"
 
-#: feedbacks/admin.py:100
+#: feedbacks/admin.py:111
 msgid "Feedback resolved"
 msgstr "Phản hồi đã được giải quyết"
 
-#: feedbacks/admin.py:112
+#: feedbacks/admin.py:114
+msgid "Your feedback has been resolved."
+msgstr "Phản hồi của bạn đã được giải quyết."
+
+#: feedbacks/admin.py:115
+msgid "Object"
+msgstr "Đối tượng"
+
+#: feedbacks/admin.py:124
 msgid "Feedback marked as resolved"
 msgstr "Phản hồi đã được đánh dấu là đã giải quyết"
 
@@ -813,9 +875,39 @@ msgstr "Liệu phản hồi đã được giải quyết hay chưa"
 msgid "Admin note for the feedback"
 msgstr "Ghi chú của quản trị viên cho phản hồi"
 
-#: feedbacks/models.py:58
+#: feedbacks/models.py:58 templates/admin/submit_line.html:11
+#: templates/admin/submit_line.html:17
 msgid "Feedback"
 msgstr "Phản hồi"
+
+#: feedbacks/urls.py:19
+msgid "User is not authenticated"
+msgstr "Người dùng chưa xác thực"
+
+#: feedbacks/urls.py:34
+msgid "Missing required fields"
+msgstr "Thiếu các trường bắt buộc"
+
+#: feedbacks/urls.py:40
+msgid "Invalid model or app_label"
+msgstr "Mô hình hoặc app_label không hợp lệ"
+
+#: feedbacks/urls.py:51
+#, python-format
+msgid "Please wait %(seconds)d seconds before submitting another feedback."
+msgstr "Vui lòng đợi %(seconds)d giây trước khi gửi phản hồi khác."
+
+#: feedbacks/urls.py:67
+msgid "Feedback saved successfully"
+msgstr "Phản hồi đã được lưu thành công"
+
+#: feedbacks/urls.py:71
+msgid "Invalid JSON format"
+msgstr "Định dạng JSON không hợp lệ"
+
+#: feedbacks/urls.py:74
+msgid "An unexpected error occurred. Please try again."
+msgstr "Đã xảy ra lỗi không mong muốn. Vui lòng thử lại."
 
 #: file_management/admin.py:15
 msgid "General Information"
@@ -1017,6 +1109,41 @@ msgstr "Quay lại"
 msgid "No apps available."
 msgstr "Không có ứng dụng nào có sẵn."
 
+#: templates/admin/feedbacks/feedback_change_form.html:8
+#: templates/admin/feedbacks/feedback_change_form.html:14
+msgid "Mark as Resolved"
+msgstr "Đánh dấu là đã giải quyết"
+
+#: templates/admin/feedbacks/feedback_change_form.html:15
+msgid "Enter an optional note for this resolution:"
+msgstr "Nhập một ghi chú tùy chọn cho việc giải quyết này:"
+
+#: templates/admin/feedbacks/feedback_change_form.html:16
+msgid "Note (optional)"
+msgstr "Ghi chú (tùy chọn)"
+
+#: templates/admin/feedbacks/feedback_change_form.html:18
+#: templates/admin/submit_line.html:21
+msgid "Cancel"
+msgstr "Hủy bỏ"
+
+#: templates/admin/feedbacks/feedback_change_form.html:19
+msgid "Confirm"
+msgstr "Xác nhận"
+
+#: templates/admin/feedbacks/feedback_change_form.html:31
+#: templates/admin/submit_line.html:36
+msgid "OK"
+msgstr "OK"
+
+#: templates/admin/feedbacks/feedback_change_form.html:38
+msgid "Feedback marked as resolved successfully."
+msgstr "Phản hồi đã được đánh dấu là đã giải quyết thành công."
+
+#: templates/admin/feedbacks/feedback_change_form.html:39
+msgid "Failed to mark feedback as resolved."
+msgstr "Không thể đánh dấu phản hồi là đã giải quyết."
+
 #: templates/admin/grid_view_results.html:83
 #, python-format
 msgid "Add %(name)s"
@@ -1076,6 +1203,27 @@ msgstr "Gõ để tìm kiếm"
 #: templates/admin/search_form.html:46
 msgid "Items per page"
 msgstr "Số mục trên mỗi trang"
+
+#: templates/admin/submit_line.html:18
+#, python-format
+msgid "Please enter your feedback message for <strong>%(name)s</strong>"
+msgstr "Vui lòng nhập tin nhắn phản hồi của bạn cho <strong>%(name)s</strong>"
+
+#: templates/admin/submit_line.html:19
+msgid "Your message..."
+msgstr "Tin nhắn của bạn..."
+
+#: templates/admin/submit_line.html:23
+msgid "Send"
+msgstr "Gửi"
+
+#: templates/admin/submit_line.html:41
+msgid "Feedback saved successfully."
+msgstr "Phản hồi đã được lưu thành công."
+
+#: templates/admin/submit_line.html:42
+msgid "Failed to save feedback."
+msgstr "Không thể lưu phản hồi."
 
 #: templates/base/forms/helpers/toolbar.html:7
 msgid "Paragraph"
@@ -1169,8 +1317,8 @@ msgstr "Trước"
 msgid "Next"
 msgstr "Tiếp theo"
 
-#~ msgid "View"
-#~ msgstr "Xem"
+#~ msgid "Xóa"
+#~ msgstr "Xóa"
 
 #~ msgid "Last week revenue"
 #~ msgstr "Giá trị doanh thu tuần trước"

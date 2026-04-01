@@ -4,64 +4,145 @@
 {% block submit-row %}
     {{ block.super }}
     {% if original and show_feedback %}
-        <button type="button" class="ui-btn ui-btn-sm ui-btn-primary h-[38px]" 
+        <button type="button" class="ui-btn ui-btn-sm ui-btn-primary h-[38px]"
                 id="feedback-link"
                 data-model-name="{{ opts.model_name }}"
                 data-app-label="{{ opts.app_label }}">
-            Feedback
+            {% trans "Feedback" %}
         </button>
+
+        {# Modal: nhập feedback message #}
+        <dialog id="feedback-prompt-modal" class="ui-modal">
+            <div class="ui-modal-box">
+                <h3 class="text-lg font-bold mb-1">{% trans "Feedback" %}</h3>
+                <p class="text-sm mb-3">{% blocktrans with name=subtitle %}Please enter your feedback message for <strong>{{ name }}</strong>{% endblocktrans %}</p>
+                <textarea id="feedback-message-input" rows="4" placeholder="{% trans 'Your message...' %}" class="ui-textarea ui-textarea-bordered w-full"></textarea>
+                <div class="ui-modal-action">
+                    <button type="button" id="feedback-cancel-btn" class="ui-btn ui-btn-ghost">{% trans "Cancel" %}</button>
+                    <button type="button" id="feedback-confirm-btn" class="ui-btn ui-btn-primary">
+                        <span id="feedback-confirm-label">{% trans "Send" %}</span>
+                        <span id="feedback-confirm-loading" class="ui-loading ui-loading-spinner ui-loading-sm hidden"></span>
+                    </button>
+                </div>
+            </div>
+            <form method="dialog" class="ui-modal-backdrop"><button aria-label="close"></button></form>
+        </dialog>
+
+        {# Modal: kết quả #}
+        <dialog id="feedback-result-modal" class="ui-modal">
+            <div class="ui-modal-box">
+                <p id="feedback-result-message" class="text-base"></p>
+                <div class="ui-modal-action">
+                    <button type="button" id="feedback-result-close-btn" class="ui-btn ui-btn-primary">{% trans "OK" %}</button>
+                </div>
+            </div>
+        </dialog>
+
+        {% trans "Feedback saved successfully." as msg_success %}
+        {% trans "Failed to save feedback." as msg_error %}
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            (function () {
                 const feedbackButton = document.getElementById('feedback-link');
-                if (feedbackButton) {
-                    feedbackButton.addEventListener('click', function() {
-                        const feedbackMessage = prompt('Please enter your feedback message for {{ subtitle }}');
+                const promptModal = document.getElementById('feedback-prompt-modal');
+                const messageInput = document.getElementById('feedback-message-input');
+                const cancelBtn = document.getElementById('feedback-cancel-btn');
+                const confirmBtn = document.getElementById('feedback-confirm-btn');
+                const confirmLabel = document.getElementById('feedback-confirm-label');
+                const confirmLoading = document.getElementById('feedback-confirm-loading');
+                const resultModal = document.getElementById('feedback-result-modal');
+                const resultMsg = document.getElementById('feedback-result-message');
+                const resultCloseBtn = document.getElementById('feedback-result-close-btn');
 
-                        if (feedbackMessage) {
-                            const modelName = feedbackButton.getAttribute("data-model-name");
-                            const appLabel = feedbackButton.getAttribute("data-app-label");
+                // Di chuyển modal ra khỏi submit row để tránh flash nội dung trong DOM khi đóng
+                document.body.appendChild(promptModal);
+                document.body.appendChild(resultModal);
 
-                            fetch("{% url 'feedback_endpoint' %}", {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    "X-CSRFToken": getCookie('csrftoken')
-                                },
-                                body: JSON.stringify({
-                                    object_id: "{{ object_id }}",
-                                    feedback_message: feedbackMessage,
-                                    model_name: modelName,
-                                    app_label: appLabel
-                                })
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    alert('Feedback saved successfully');
-                                } else {
-                                    alert('Failed to save feedback');
-                                }
-                            })
-                            .catch(error => console.error("Error:", error));
-                        }
+                feedbackButton.addEventListener('click', function () {
+                    messageInput.value = '';
+                    promptModal.showModal();
+                    messageInput.focus();
+                });
+
+                cancelBtn.addEventListener('click', function () {
+                    promptModal.close();
+                });
+
+                confirmBtn.addEventListener('click', function () {
+                    const feedbackMessage = messageInput.value.trim();
+                    if (!feedbackMessage) return;
+
+                    const modelName = feedbackButton.getAttribute('data-model-name');
+                    const appLabel = feedbackButton.getAttribute('data-app-label');
+
+                    // Loading state — giữ promptModal mở trong khi fetch
+                    confirmBtn.disabled = true;
+                    cancelBtn.disabled = true;
+                    confirmLabel.classList.add('hidden');
+                    confirmLoading.classList.remove('hidden');
+
+                    function setResult(message) {
+                        resultMsg.textContent = message;
+                        // Đóng promptModal trước, chờ close event xong mới mở resultModal
+                        promptModal.addEventListener('close', function handler() {
+                            promptModal.removeEventListener('close', handler);
+                            resultModal.showModal();
+                        });
+                        promptModal.close();
+                    }
+
+                    function resetBtn() {
+                        confirmBtn.disabled = false;
+                        cancelBtn.disabled = false;
+                        confirmLabel.classList.remove('hidden');
+                        confirmLoading.classList.add('hidden');
+                    }
+
+                    fetch("{% url 'feedback_endpoint' %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({
+                            object_id: '{{ object_id|escapejs }}',
+                            feedback_message: feedbackMessage,
+                            model_name: modelName,
+                            app_label: appLabel
+                        })
+                    })
+                    .then(function (response) { return response.json(); })
+                    .then(function (data) {
+                        setResult(data.success
+                            ? '{{ msg_success|escapejs }}'
+                            : (data.message || '{{ msg_error|escapejs }}'));
+                        resetBtn();
+                    })
+                    .catch(function (error) {
+                        console.error('Error:', error);
+                        setResult('{{ msg_error|escapejs }}');
+                        resetBtn();
                     });
-                }
-            });
+                });
 
-            function getCookie(name) {
-                let cookieValue = null;
-                if (document.cookie && document.cookie !== '') {
-                    const cookies = document.cookie.split(';');
-                    for (let i = 0; i < cookies.length; i++) {
-                        const cookie = cookies[i].trim();
-                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                            break;
+                resultCloseBtn.addEventListener('click', function () {
+                    resultModal.close();
+                });
+
+                function getCookie(name) {
+                    let cookieValue = null;
+                    if (document.cookie && document.cookie !== '') {
+                        const cookies = document.cookie.split(';');
+                        for (let i = 0; i < cookies.length; i++) {
+                            const cookie = cookies[i].trim();
+                            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                break;
+                            }
                         }
                     }
+                    return cookieValue;
                 }
-                return cookieValue;
-            }
+            })();
         </script>
     {% endif %}
 {% endblock %}

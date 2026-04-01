@@ -24,6 +24,8 @@ from .filters import FieldSelectionFilter
 from django.urls import path
 from django.shortcuts import render
 
+from django.utils.translation import gettext_lazy as _
+
 from unfold.contrib.filters.admin import (
     AutocompleteSelectFilter,
     AutocompleteSelectMultipleFilter,
@@ -80,7 +82,7 @@ class ModelAdmin(UnfoldAdmin):
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
-        self.search_help_text= f'Search by {", ".join([get_verbose_name_field(model, f) for f in self.search_fields])}'
+        self.search_help_text= _('Search by %s') % ', '.join([get_verbose_name_field(model, f) for f in self.search_fields])
 
         if self.text_field_widget == 'ckeditor':
             self.formfield_overrides[models.TextField]["widget"]= CKEditor5Widget(
@@ -138,8 +140,8 @@ class ModelAdmin(UnfoldAdmin):
 
     def soft_delete(self, cl, request, queryset):
         for obj in queryset:
-            title= f"{obj._meta.verbose_name} \"{obj}\" has been soft-deleted by user \"{request.user}\""
-            content_html= f"{obj._meta.verbose_name} \"{obj}\" has been soft-deleted by user \"{request.user}\""
+            title= _('%(name)s "%(obj)s" has been soft-deleted by user "%(user)s"') % {'name': obj._meta.verbose_name, 'obj': obj, 'user': request.user}
+            content_html= _('%(name)s "%(obj)s" has been soft-deleted by user "%(user)s"') % {'name': obj._meta.verbose_name, 'obj': obj, 'user': request.user}
             obj.delete()
             # send notification to superuser when delete successfully
             for user in User.objects.filter(is_superuser= True):
@@ -148,12 +150,12 @@ class ModelAdmin(UnfoldAdmin):
                                             flag= 'danger',
                                             action= 'delete',
                                             content= content_html)
-    soft_delete.short_description = 'Delete selected records'
+    soft_delete.short_description = _('Delete selected records')
 
     def hard_delete(self, cl, request, queryset):
         for obj in queryset:
-            title= f"{obj._meta.verbose_name} \"{obj}\" has been hard-deleted by user \"{request.user}\""
-            content_html= f"{obj._meta.verbose_name} \"{obj}\" has been hard-deleted by user \"{request.user}\""
+            title= _('%(name)s "%(obj)s" has been hard-deleted by user "%(user)s"') % {'name': obj._meta.verbose_name, 'obj': obj, 'user': request.user}
+            content_html= _('%(name)s "%(obj)s" has been hard-deleted by user "%(user)s"') % {'name': obj._meta.verbose_name, 'obj': obj, 'user': request.user}
             if hasattr(obj, 'hard_delete'):
                 obj.hard_delete()
             else:
@@ -165,12 +167,12 @@ class ModelAdmin(UnfoldAdmin):
                                             flag= 'danger',
                                             action= 'delete',
                                             content= content_html)
-    hard_delete.short_description = 'Hard delete selected records'
+    hard_delete.short_description = _('Hard delete selected records')
 
     def restore(self, cl, request, queryset):
         for obj in queryset:
-            title= f"{obj._meta.verbose_name} \"{obj}\" has been restored by user \"{request.user}\""
-            content_html= f"{obj._meta.verbose_name} \"{obj}\" has been restored by user \"{request.user}\""
+            title= _('%(name)s "%(obj)s" has been restored by user "%(user)s"') % {'name': obj._meta.verbose_name, 'obj': obj, 'user': request.user}
+            content_html= _('%(name)s "%(obj)s" has been restored by user "%(user)s"') % {'name': obj._meta.verbose_name, 'obj': obj, 'user': request.user}
             obj.restore(request)
             # send notification to superuser when delete successfully
             for user in User.objects.filter(is_superuser= True):
@@ -179,7 +181,7 @@ class ModelAdmin(UnfoldAdmin):
                                             flag= 'info',
                                             action= 'restore',
                                             content= content_html)
-    restore.short_description = 'Restore selected records'
+    restore.short_description = _('Restore selected records')
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
         if request.user.is_superuser and request.user.show_softdelete:
@@ -188,8 +190,8 @@ class ModelAdmin(UnfoldAdmin):
         return self.model.objects.all()
 
     def delete_model(self, request, obj):
-        title= f"{obj._meta.verbose_name} \"{obj}\" has been soft-deleted by user \"{request.user}\""
-        content_html= f"{obj._meta.verbose_name} \"{obj}\" has been soft-deleted by user \"{request.user}\""
+        title= _('%(name)s "%(obj)s" has been soft-deleted by user "%(user)s"') % {'name': obj._meta.verbose_name, 'obj': obj, 'user': request.user}
+        content_html= _('%(name)s "%(obj)s" has been soft-deleted by user "%(user)s"') % {'name': obj._meta.verbose_name, 'obj': obj, 'user': request.user}
         super().delete_model(request, obj)
         # send notification to superuser when delete successfully
         for user in User.objects.filter(is_superuser= True):
@@ -394,7 +396,7 @@ class ModelAdmin(UnfoldAdmin):
                 meta_fields.remove('updated_at')
                 meta_fields.remove('updated_by')
                 meta_fields.append(('updated_at', 'updated_by'))
-            fieldsets.append(('Meta', {'fields': meta_fields, 'classes': ["tab"]}))
+            fieldsets.append((_('Meta'), {'fields': meta_fields, 'classes': ["collapse"]}))
         return fieldsets
     
     def buttons(self, obj):
@@ -414,15 +416,15 @@ class ModelAdmin(UnfoldAdmin):
         path_delete= reverse_lazy(path + '_delete', args=[obj.pk])
         c= 0
         if self.has_change_permission(self.request, obj):
-            button_edit = f'<a class="btn-edit col-span-1" href="{path_change}"> <img src="{svg_url_edit}" alt="Sửa" style="width: {width}px; height: {height}px;"></a>'
+            button_edit = f'<a class="btn-edit col-span-1" href="{path_change}"> <img src="{svg_url_edit}" alt="{_("Edit")}" style="width: {width}px; height: {height}px;"></a>'
             c+= 1
         else:
-            button_view = f'<a class="btn-view col-span-1" href="{path_change}"> <img src="{svg_url_view}" alt="Xem" style="width: {width}px; height: {height}px;"></a>'
+            button_view = f'<a class="btn-view col-span-1" href="{path_change}"> <img src="{svg_url_view}" alt="{_("View")}" style="width: {width}px; height: {height}px;"></a>'
             c+= 1
 
         if self.has_delete_permission(self.request, obj):
             c+= 1
-            button_delete = f'<a class="btn-delete btn-danger col-span-1" href="{path_delete}"> <img src="{svg_url_delete}" alt="Xóa" style="width: {width}px; height: {height}px;"></a>'
+            button_delete = f'<a class="btn-delete btn-danger col-span-1" href="{path_delete}"> <img src="{svg_url_delete}" alt="{_("Delete")}" style="width: {width}px; height: {height}px;"></a>'
 
         return mark_safe(f'''
                          <div id="action_buttoms_{obj.pk}" class="action_buttoms grid gap-1 grid-cols-{c}" style="width: {33*c}px;">{button_view} {button_edit} {button_delete} </div> 

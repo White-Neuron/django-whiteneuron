@@ -11,7 +11,7 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Current Version
 
-- 0.2.42
+- 0.2.43
 
 ## Compatibility
 
@@ -22,7 +22,21 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Changelog
 
-### v0.2.42 (2026-03-31) — latest
+### v0.2.43 (2026-04-01) — latest
+**Feature: Feedback System — DaisyUI modals, anti-spam cooldown, i18n, security hardening**
+- **Added**: DaisyUI `<dialog>` modals replace native `prompt()`/`alert()` in both `feedback_change_form.html` (Mark as Resolved flow) and `submit_line.html` (Feedback submission) — smooth animations, no browser dialogs.
+- **Added**: Server-side anti-spam cooldown — 60s per user globally; HTTP 429 with dynamically calculated remaining seconds (`remaining = 60 - elapsed`).
+- **Security**: Replaced `@csrf_exempt` with `@require_POST` in feedback endpoint — CSRF protection fully enforced via `X-CSRFToken` header.
+- **Security**: Auth check moved before body parse; removed redundant `User.objects.get()` in favor of `request.user`.
+- **Fixed**: `FeedbackDataAdmin.changeform_view()` — null guard added after `get_object()` to prevent `AttributeError` when object does not exist.
+- **Fixed**: OK button in result modal now wrapped in `<form method="dialog">` — dialog closes correctly, `close` event fires `location.reload()`.
+- **Fixed**: Buttons missing `type="button"` were inadvertently submitting the admin form — fixed across all modals.
+- **Fixed**: Modals moved to `document.body` via JS — eliminates content flash at page bottom during closing animation.
+- **Fixed**: Import cleanup in `feedbacks/admin.py` — removed unused `display` import, moved `FEEDBACK_COOLDOWN_SECONDS` import to top.
+- **Added**: Full i18n (`{% trans %}`, `{% blocktrans %}`, `gettext_lazy`) across feedback templates and `modeladmin.py` (12 strings); Vietnamese translations updated in `locale/vi`.
+- **Added**: `feedback_cooldown_ms` passed from server via `FeedbackBaseAdmin.render_change_form()` — no more hardcoded 60000ms in template.
+
+### v0.2.42 (2026-03-31)
 **Improve: persist filter/search state in admin changelist + fix Django duplicate filter bug**
 - **Added**: Filter/search state is now persisted via `sessionStorage` across navigation — selecting a filter, navigating to a detail page, then returning restores the exact filter state automatically.
 - **Fixed**: Django bug — `add_preserved_filters()` uses `dict(parse_qsl())` which drops duplicate filter params (e.g. `?chapter__id__exact=29&chapter__id__exact=31` → only `=31` kept after save). Fixed server-side in `ModelAdmin._fix_preserved_filters()` — rebuilds the redirect URL with `parse_qsl()` (preserves all values) when duplicates are detected.
