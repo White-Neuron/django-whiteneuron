@@ -11,7 +11,7 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Current Version
 
-- 0.2.43
+- 0.2.44
 
 ## Compatibility
 
@@ -22,7 +22,16 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Changelog
 
-### v0.2.43 (2026-04-01) — latest
+### v0.2.44 (2026-04-02) — latest
+**Fixes & Improvements: Feedback System — Error handling, input limits, i18n lazy evaluation**
+- **Fixed**: `changeform_view` now returns `JsonResponse({"success": True})` after a successful resolve instead of falling through to `super()` with a POST request — prevents a spurious HTTP 403 caused by `has_change_permission = False`.
+- **Fixed**: `note` is read from `request.POST` instead of `request.GET` — prevents HTTP 414 (URI Too Long) when the note is lengthy.
+- **Fixed**: JS `fetch` upgraded to POST + `FormData` with CSRF token; error handling now maps status codes (403/404/500/network) to specific user-facing messages.
+- **Added**: Two-sided character limits — `maxlength` attribute + live counter on client; server-side validation: `note ≤ 500`, `feedback_message ≤ 2000`.
+- **Added**: `get_short_message()` in `FeedbackDataAdmin.list_display` — truncates to 200 words via Django's `Truncator`.
+- **Fixed**: `search_help_text` moved from `__init__` to a `@property` using `format_lazy` — now re-evaluates per request and responds correctly to language switches instead of being frozen at server startup.
+
+### v0.2.43 (2026-04-01)
 **Feature: Feedback System — DaisyUI modals, anti-spam cooldown, i18n, security hardening**
 - **Added**: DaisyUI `<dialog>` modals replace native `prompt()`/`alert()` in both `feedback_change_form.html` (Mark as Resolved flow) and `submit_line.html` (Feedback submission) — smooth animations, no browser dialogs.
 - **Added**: Server-side anti-spam cooldown — 60s per user globally; HTTP 429 with dynamically calculated remaining seconds (`remaining = 60 - elapsed`).

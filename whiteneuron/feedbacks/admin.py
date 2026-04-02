@@ -1,6 +1,8 @@
 from django.contrib import admin, messages
+from django.http import JsonResponse
 from django.urls import reverse
 from django.utils.html import format_html
+from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
 from whiteneuron.base.admin import base_admin_site, ModelAdmin
@@ -18,7 +20,7 @@ class FeedbackDataAdmin(ModelAdmin):
         'user',
         'content_type',
         'get_related_object_link',  # Hiển thị link đến object gốc
-        'message',
+        'get_short_message',
         'is_resolved',
         'created_at',
     )
@@ -45,6 +47,10 @@ class FeedbackDataAdmin(ModelAdmin):
         # Người liên quan có thể xem feedback        
         return qs.filter(user=request.user) 
     
+    def get_short_message(self, obj):
+        return Truncator(obj.message).words(200)
+    get_short_message.short_description = _('Message')
+
     def get_related_object_link(self, obj):
         """Hiển thị link đến object gốc"""
         if obj.content_object:
@@ -92,15 +98,16 @@ class FeedbackDataAdmin(ModelAdmin):
         if request.GET.get('resolved') == '1' and object_id:
             # chỉ cho phép superuser thực hiện
             if not request.user.is_superuser:
-                self.message_user(request, _("Only superuser can mark feedback as resolved"), messages.ERROR)
-                return super().changeform_view(request, object_id, form_url, extra_context)
+                return JsonResponse({"success": False, "message": str(_("Only superuser can mark feedback as resolved"))}, status=403)
             
             # note
-            note= request.GET.get('note', '')
+            note= request.POST.get('note', '')
+            if len(note) > 500:
+                return JsonResponse({"success": False, "message": str(_("Note must not exceed 500 characters."))}, status=400)
 
             obj = self.get_object(request, object_id)
             if obj is None:
-                return super().changeform_view(request, object_id, form_url, extra_context)
+                return JsonResponse({"success": False, "message": str(_("Feedback not found."))}, status=404)
             obj.is_resolved = True
             obj.note = note
             obj.save()
@@ -120,8 +127,7 @@ class FeedbackDataAdmin(ModelAdmin):
             )
             noti.save()
 
-            # reload và thông báo
-            self.message_user(request, _("Feedback marked as resolved"), messages.SUCCESS)
+            return JsonResponse({"success": True})
 
         return super().changeform_view(request, object_id, form_url, extra_context)
 

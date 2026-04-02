@@ -16,7 +16,8 @@
             <div class="ui-modal-box">
                 <h3 class="text-lg font-bold mb-1">{% trans "Feedback" %}</h3>
                 <p class="text-sm mb-3">{% blocktrans with name=subtitle %}Please enter your feedback message for <strong>{{ name }}</strong>{% endblocktrans %}</p>
-                <textarea id="feedback-message-input" rows="4" placeholder="{% trans 'Your message...' %}" class="ui-textarea ui-textarea-bordered w-full"></textarea>
+                <textarea id="feedback-message-input" rows="4" maxlength="2000" placeholder="{% trans 'Your message...' %}" class="ui-textarea ui-textarea-bordered w-full"></textarea>
+                <p class="text-xs text-right mt-1 text-base-400"><span id="feedback-char-count">0</span>/2000</p>
                 <div class="ui-modal-action">
                     <button type="button" id="feedback-cancel-btn" class="ui-btn ui-btn-ghost">{% trans "Cancel" %}</button>
                     <button type="button" id="feedback-confirm-btn" class="ui-btn ui-btn-primary">
@@ -57,8 +58,15 @@
                 document.body.appendChild(promptModal);
                 document.body.appendChild(resultModal);
 
+                const charCount = document.getElementById('feedback-char-count');
+
+                messageInput.addEventListener('input', function () {
+                    charCount.textContent = messageInput.value.length;
+                });
+
                 feedbackButton.addEventListener('click', function () {
                     messageInput.value = '';
+                    charCount.textContent = '0';
                     promptModal.showModal();
                     messageInput.focus();
                 });
@@ -70,6 +78,7 @@
                 confirmBtn.addEventListener('click', function () {
                     const feedbackMessage = messageInput.value.trim();
                     if (!feedbackMessage) return;
+                    if (feedbackMessage.length > 2000) return;
 
                     const modelName = feedbackButton.getAttribute('data-model-name');
                     const appLabel = feedbackButton.getAttribute('data-app-label');

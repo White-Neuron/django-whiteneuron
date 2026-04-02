@@ -33,6 +33,9 @@ def receive_feedback(request):
         if not object_id or not feedback_message or not model_name or not app_label:
             return JsonResponse({"success": False, "message": _("Missing required fields")}, status=400)
 
+        if len(feedback_message) > 2000:
+            return JsonResponse({"success": False, "message": _("Feedback message must not exceed 2000 characters.")}, status=400)
+
         # Lấy ContentType
         try:
             content_type = ContentType.objects.get(model=model_name, app_label=app_label)

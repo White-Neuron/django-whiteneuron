@@ -13,7 +13,8 @@
             <div class="ui-modal-box">
                 <h3 class="text-lg font-bold mb-2">{% trans "Mark as Resolved" %}</h3>
                 <p class="text-sm mb-4">{% trans "Enter an optional note for this resolution:" %}</p>
-                <input id="resolve-note-input" type="text" placeholder="{% trans 'Note (optional)' %}" class="ui-input ui-input-bordered w-full" />
+                <input id="resolve-note-input" type="text" maxlength="500" placeholder="{% trans 'Note (optional)' %}" class="ui-input ui-input-bordered w-full" />
+                <p class="text-xs text-right mt-1 text-base-400"><span id="resolve-note-count">0</span>/500</p>
                 <div class="ui-modal-action">
                     <button id="resolve-cancel-btn" class="ui-btn ui-btn-ghost">{% trans "Cancel" %}</button>
                     <button id="resolve-confirm-btn" class="ui-btn ui-btn-primary">{% trans "Confirm" %}</button>
@@ -36,7 +37,11 @@
         </dialog>
 
         {% trans "Feedback marked as resolved successfully." as msg_success %}
-        {% trans "Failed to mark feedback as resolved." as msg_error %}
+        {% trans "Permission denied. Only superusers can perform this action." as msg_403 %}
+        {% trans "Feedback not found." as msg_404 %}
+        {% trans "Server error. Please try again later." as msg_500 %}
+        {% trans "Network error. Please check your connection." as msg_network %}
+        {% trans "Unexpected error (HTTP {status})." as msg_unknown %}
         <script>
             (function () {
                 const openBtn = document.getElementById('make-resolved-link');
@@ -47,8 +52,21 @@
                 const resultModal = document.getElementById('resolve-result-modal');
                 const resultMsg = document.getElementById('resolve-result-message');
 
+                const STATUS_MESSAGES = {
+                    403: '{{ msg_403|escapejs }}',
+                    404: '{{ msg_404|escapejs }}',
+                    500: '{{ msg_500|escapejs }}',
+                };
+
+                const noteCount = document.getElementById('resolve-note-count');
+
+                noteInput.addEventListener('input', function () {
+                    noteCount.textContent = noteInput.value.length;
+                });
+
                 openBtn.addEventListener('click', function () {
                     noteInput.value = '';
+                    noteCount.textContent = '0';
                     promptModal.showModal();
                     noteInput.focus();
                 });
@@ -59,13 +77,14 @@
 
                 confirmBtn.addEventListener('click', function () {
                     const note = noteInput.value.trim();
-                    const url = note ? '?resolved=1&note=' + encodeURIComponent(note) : '?resolved=1';
+                    const url = '?resolved=1';
 
                     confirmBtn.disabled = true;
                     cancelBtn.disabled = true;
 
-                    function setResult(message) {
+                    function setResult(message, isError) {
                         resultMsg.textContent = message;
+                        resultMsg.className = isError ? 'text-base text-error' : 'text-base text-success';
                         promptModal.addEventListener('close', function handler() {
                             promptModal.removeEventListener('close', handler);
                             resultModal.showModal();
@@ -73,17 +92,31 @@
                         promptModal.close();
                     }
 
-                    fetch(url)
+                    const csrfToken = document.cookie.match(/csrftoken=([^;]+)/);
+                    const formData = new FormData();
+                    formData.append('note', note);
+                    if (csrfToken) formData.append('csrfmiddlewaretoken', csrfToken[1]);
+
+                    fetch(url, { method: 'POST', body: formData })
                         .then(function (response) {
-                            setResult(response.ok
-                                ? '{{ msg_success|escapejs }}'
-                                : '{{ msg_error|escapejs }}');
+                            return response.json().then(function (data) {
+                                if (response.ok) {
+                                    setResult('{{ msg_success|escapejs }}', false);
+                                } else {
+                                    const msg = data.message
+                                        || STATUS_MESSAGES[response.status]
+                                        || '{{ msg_unknown|escapejs }}'.replace('{status}', response.status);
+                                    confirmBtn.disabled = false;
+                                    cancelBtn.disabled = false;
+                                    setResult(msg, true);
+                                }
+                            });
                         })
                         .catch(function (error) {
                             console.error('Error:', error);
-                            setResult('{{ msg_error|escapejs }}');
                             confirmBtn.disabled = false;
                             cancelBtn.disabled = false;
+                            setResult('{{ msg_network|escapejs }}', true);
                         });
                 });
 

@@ -15,7 +15,7 @@ def timeit(func):
 from django.utils import timezone
 from django.core.exceptions import FieldDoesNotExist
 
-def base_badge_callback(request, model):
+def base_badge_callback(request, model, filter_kwargs=None):
     today = timezone.localtime().replace(hour=0, minute=0, second=0, microsecond=0)
 
     # try:
@@ -42,7 +42,11 @@ def base_badge_callback(request, model):
 
     c = getattr(model, 'objects_all', model.objects).filter(
       updated_at__gte=today,
-    ).count()
+    )
+    if filter_kwargs:
+        c = c.filter(**filter_kwargs).count()
+    else:        
+        c = c.count()
     return c
 
 

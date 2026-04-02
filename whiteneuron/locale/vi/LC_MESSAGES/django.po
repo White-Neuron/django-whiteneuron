@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-01 23:22+0700\n"
+"POT-Creation-Date: 2026-04-02 04:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,64 +18,47 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: base/admin.py:150 base/admin.py:192 base/admin.py:446 base/admin.py:493
-#: base/models.py:911
-msgid "Active"
-msgstr "Hoạt động"
-
-#: base/admin.py:152 base/admin.py:192
-msgid "Inactive"
-msgstr "Không hoạt động"
-
-#: base/admin.py:155 base/admin.py:170 base/admin.py:300
-msgid "Staff"
-msgstr "Nhân viên"
-
-#: base/admin.py:158
-msgid "Admin"
-msgstr "Trang quản trị"
-
-#: base/admin.py:163
-msgid "Unknown User"
-msgstr "Người dùng không xác định"
-
-#: base/admin.py:164
-msgid "No username"
-msgstr "Không có tên người dùng"
-
-#: base/admin.py:168 base/admin.py:304
-msgid "Superuser"
-msgstr "Quản trị viên"
-
-#: base/admin.py:172
-msgid "Bot"
-msgstr "Máy"
-
-#: base/admin.py:226 base/admin.py:250 base/admin.py:532
+#: build/lib/whiteneuron/base/admin.py:177
+#: build/lib/whiteneuron/base/admin.py:185
+#: build/lib/whiteneuron/base/admin.py:344 whiteneuron/base/admin.py:226
+#: whiteneuron/base/admin.py:250 whiteneuron/base/admin.py:532
 msgid "Personal info"
 msgstr "Thông tin cá nhân"
 
-#: base/admin.py:232 base/admin.py:257
+#: build/lib/whiteneuron/base/admin.py:192 whiteneuron/base/admin.py:232
+#: whiteneuron/base/admin.py:257
 msgid "Permissions"
 msgstr "Quyền"
 
-#: base/admin.py:271
+#: build/lib/whiteneuron/base/admin.py:205 whiteneuron/base/admin.py:271
 msgid "Important dates"
 msgstr "Ngày quan trọng"
 
-#: base/admin.py:292 feedbacks/models.py:15
+#: build/lib/whiteneuron/base/admin.py:226
+#: build/lib/whiteneuron/feedbacks/models.py:15 whiteneuron/base/admin.py:292
+#: whiteneuron/feedbacks/models.py:15
 msgid "User"
 msgstr "Người dùng"
 
-#: base/admin.py:296
+#: build/lib/whiteneuron/base/admin.py:230 whiteneuron/base/admin.py:296
 msgid "Avatar"
 msgstr "Ảnh đại diện"
 
-#: base/admin.py:308
+#: build/lib/whiteneuron/base/admin.py:234 whiteneuron/base/admin.py:155
+#: whiteneuron/base/admin.py:170 whiteneuron/base/admin.py:300
+msgid "Staff"
+msgstr "Nhân viên"
+
+#: build/lib/whiteneuron/base/admin.py:238 whiteneuron/base/admin.py:168
+#: whiteneuron/base/admin.py:304
+msgid "Superuser"
+msgstr "Quản trị viên"
+
+#: build/lib/whiteneuron/base/admin.py:242 whiteneuron/base/admin.py:308
 msgid "Created"
 msgstr "Đã tạo"
 
-#: base/admin.py:321
+#: build/lib/whiteneuron/base/admin.py:255 whiteneuron/base/admin.py:321
 msgid ""
 "Failed to send email notification! Please change the password so that the "
 "user can log in."
@@ -83,302 +66,578 @@ msgstr ""
 "Không thể gửi thông báo qua email! Vui lòng thay đổi mật khẩu để người dùng "
 "có thể đăng nhập."
 
-#: base/admin.py:324
+#: build/lib/whiteneuron/base/admin.py:258 whiteneuron/base/admin.py:324
 msgid "Email notification has been sent, please check your inbox!"
 msgstr ""
 "Thông báo qua email đã được gửi, vui lòng kiểm tra hộp thư đến của bạn!"
 
-#: base/admin.py:371
+#: build/lib/whiteneuron/base/admin.py:305 whiteneuron/base/admin.py:371
 msgid "Client information"
 msgstr "Thông tin khách hàng"
 
-#: base/admin.py:380
+#: build/lib/whiteneuron/base/admin.py:314 whiteneuron/base/admin.py:380
 msgid "Request information"
 msgstr "Thông tin yêu cầu"
 
-#: base/admin.py:397
-msgid "Block IP address"
-msgstr "Chặn địa chỉ IP"
+#: build/lib/whiteneuron/base/admin.py:391 whiteneuron/notification/admin.py:70
+msgid "Notification information"
+msgstr "Thông tin thông báo"
 
-#: base/admin.py:418
-msgid ", "
-msgstr ""
-
-#: base/admin.py:435 base/admin.py:482
-msgid "Target"
-msgstr "Mục tiêu"
-
-#: base/admin.py:438 base/admin.py:485
-msgid "Block settings"
-msgstr "Cài đặt chặn"
-
-#: base/admin.py:441 base/admin.py:488 base/modeladmin.py:399
-#: file_management/admin.py:21
-msgid "Meta"
-msgstr "Meta"
-
-#: base/admin.py:455
-msgid "Activate selected IPs"
-msgstr "Kích hoạt các IP đã chọn"
-
-#: base/admin.py:460
-msgid "Selected IPs have been activated."
-msgstr "Các IP đã chọn đã được kích hoạt."
-
-#: base/admin.py:462
-msgid "Deactivate selected IPs"
-msgstr "Hủy kích hoạt các IP đã chọn"
-
-#: base/admin.py:467
-msgid "Selected IPs have been deactivated."
-msgstr "Các IP đã chọn đã được hủy kích hoạt."
-
-#: base/admin.py:502
-msgid "Activate selected patterns"
-msgstr "Kích hoạt các mẫu đã chọn"
-
-#: base/admin.py:507
-msgid "Selected UA patterns have been activated."
-msgstr "Các mẫu UA đã chọn đã được kích hoạt."
-
-#: base/admin.py:509
-msgid "Deactivate selected patterns"
-msgstr "Hủy kích hoạt các mẫu đã chọn"
-
-#: base/admin.py:514
-msgid "Selected UA patterns have been deactivated."
-msgstr "Các mẫu UA đã chọn đã được hủy kích hoạt."
-
-#: base/admin.py:564
-msgid "Configuration"
-msgstr "Cấu hình"
-
-#: base/admin.py:579
-msgid "Image info"
-msgstr "Thông tin hình ảnh"
-
-#: base/admin.py:606
-msgid "Mail info"
-msgstr "Thông tin thư"
-
-#: base/admin.py:622 base/models.py:697 notification/admin.py:146
+#: build/lib/whiteneuron/base/admin.py:445
+#: build/lib/whiteneuron/base/admin.py:508
+#: build/lib/whiteneuron/base/models.py:514 whiteneuron/base/admin.py:622
+#: whiteneuron/base/models.py:697 whiteneuron/notification/admin.py:146
 msgid "Content"
 msgstr "Nội dung"
 
-#: base/admin.py:702
-msgid "App info"
-msgstr "Thông tin ứng dụng"
+#: build/lib/whiteneuron/base/admin.py:449
+#: whiteneuron/notification/admin.py:150
+#: whiteneuron/synchronization/models.py:14
+msgid "Action"
+msgstr "Hành động"
 
-#: base/admin.py:718 base/models.py:912
-msgid "Icon"
-msgstr "Icon"
+#: build/lib/whiteneuron/base/admin.py:453
+#: whiteneuron/notification/admin.py:154
+msgid "Flag"
+msgstr "Cờ"
 
-#: base/admin.py:786
-msgid "This app is not active."
-msgstr "Ứng dụng này không hoạt động."
+#: build/lib/whiteneuron/base/admin.py:465 whiteneuron/base/admin.py:579
+msgid "Image info"
+msgstr "Thông tin hình ảnh"
 
-#: base/admin.py:789
-msgid "You do not have permission to access this app."
-msgstr "Bạn không có quyền truy cập ứng dụng này."
+#: build/lib/whiteneuron/base/admin.py:492 whiteneuron/base/admin.py:606
+msgid "Mail info"
+msgstr "Thông tin thư"
 
-#: base/admin.py:799 base/settings.py:562 dashboard/apps.py:8
-#: dashboard/views.py:169 templates/admin/index.html:8
-msgid "Dashboard"
-msgstr "Bảng điều khiển"
-
-#: base/apps.py:8
-msgid "Base"
-msgstr "Cơ sở"
-
-#: base/filters.py:4
+#: build/lib/whiteneuron/base/filters.py:4 whiteneuron/base/filters.py:4
 msgid "field(s) to display"
 msgstr "Trường hiển thị"
 
-#: base/filters.py:7
+#: build/lib/whiteneuron/base/filters.py:7 whiteneuron/base/filters.py:7
 msgid "Default fields"
 msgstr "Trường mặc định"
 
-#: base/middleware.py:170
+#: build/lib/whiteneuron/base/middleware.py:24
+#: whiteneuron/base/middleware.py:170
 msgid "Database is operating in readonly mode. Not possible to save any data."
 msgstr ""
 "Cơ sở dữ liệu đang hoạt động ở chế độ chỉ đọc. Không thể lưu bất kỳ dữ liệu "
 "nào."
 
-#: base/modeladmin.py:85
-#, python-format
-msgid "Search by %s"
-msgstr "Tìm kiếm theo %s"
+#: build/lib/whiteneuron/base/models.py:67 whiteneuron/base/models.py:67
+msgid "title"
+msgstr "Tiêu đề"
 
-#: base/modeladmin.py:143 base/modeladmin.py:144 base/modeladmin.py:193
-#: base/modeladmin.py:194
+#: build/lib/whiteneuron/base/models.py:68 whiteneuron/base/models.py:68
+msgid "slug"
+msgstr "Đường dẫn"
+
+#: build/lib/whiteneuron/base/models.py:70 whiteneuron/base/models.py:70
+msgid "content type"
+msgstr "Kiểu nội dung"
+
+#: build/lib/whiteneuron/base/models.py:72 whiteneuron/base/models.py:72
+msgid "object id"
+msgstr "ID đối tượng"
+
+#: build/lib/whiteneuron/base/models.py:80 whiteneuron/base/models.py:80
+msgid "tag"
+msgstr "Thẻ"
+
+#: build/lib/whiteneuron/base/models.py:81 whiteneuron/base/models.py:81
+msgid "tags"
+msgstr "Thẻ"
+
+#: build/lib/whiteneuron/base/models.py:89 whiteneuron/base/models.py:89
+msgid "avatar"
+msgstr "ảnh đại diện"
+
+#: build/lib/whiteneuron/base/models.py:90 whiteneuron/base/models.py:90
+msgid "biography"
+msgstr "tiểu sử"
+
+#: build/lib/whiteneuron/base/models.py:92 whiteneuron/base/models.py:92
+#: whiteneuron/base/models.py:213 whiteneuron/base/models.py:285
+msgid "created at"
+msgstr "tạo lúc"
+
+#: build/lib/whiteneuron/base/models.py:93 whiteneuron/base/models.py:93
+msgid "updated at"
+msgstr "cập nhật lúc"
+
+#: build/lib/whiteneuron/base/models.py:97 whiteneuron/base/models.py:101
+msgid "user"
+msgstr "người dùng"
+
+#: build/lib/whiteneuron/base/models.py:98 whiteneuron/base/models.py:102
+msgid "users"
+msgstr "người dùng"
+
+#: build/lib/whiteneuron/base/models.py:152 whiteneuron/base/models.py:166
+msgid "user profile"
+msgstr "hồ sơ người dùng"
+
+#: build/lib/whiteneuron/base/models.py:153 whiteneuron/base/models.py:167
+msgid "user profiles"
+msgstr "hồ sơ người dùng"
+
+#: build/lib/whiteneuron/base/models.py:160 whiteneuron/base/models.py:174
+#: whiteneuron/base/models.py:200
+msgid "IP address"
+msgstr "Địa chỉ IP"
+
+#: build/lib/whiteneuron/base/models.py:161 whiteneuron/base/models.py:175
+msgid "User agent"
+msgstr "Trình duyệt người dùng"
+
+#: build/lib/whiteneuron/base/models.py:162 whiteneuron/base/models.py:176
+msgid "Path"
+msgstr "Đường dẫn"
+
+#: build/lib/whiteneuron/base/models.py:163 whiteneuron/base/models.py:177
+#: whiteneuron/file_management/models.py:15
+#: whiteneuron/file_management/models.py:40
+msgid "Method"
+msgstr "Phương thức"
+
+#: build/lib/whiteneuron/base/models.py:164 whiteneuron/base/models.py:178
+msgid "Data"
+msgstr "Dữ liệu"
+
+#: build/lib/whiteneuron/base/models.py:165 whiteneuron/base/models.py:179
+msgid "Status code"
+msgstr "Mã trạng thái"
+
+#: build/lib/whiteneuron/base/models.py:166 whiteneuron/base/models.py:180
+#: whiteneuron/synchronization/models.py:20
+msgid "Timestamp"
+msgstr "Thời gian"
+
+#: build/lib/whiteneuron/base/models.py:167 whiteneuron/base/models.py:181
+msgid "Timelapse"
+msgstr "Khoảng thời gian"
+
+#: build/lib/whiteneuron/base/models.py:171 whiteneuron/base/models.py:185
+msgid "user activity"
+msgstr "hoạt động người dùng"
+
+#: build/lib/whiteneuron/base/models.py:172 whiteneuron/base/models.py:186
+msgid "user activities"
+msgstr "hoạt động người dùng"
+
+#: build/lib/whiteneuron/base/models.py:185 whiteneuron/base/models.py:330
+#: whiteneuron/templates/admin/grid_view_results.html:42
+msgid "Deleted"
+msgstr "Đã xóa"
+
+#: build/lib/whiteneuron/base/models.py:186 whiteneuron/base/models.py:331
+msgid "Deleted at"
+msgstr "Đã xóa lúc"
+
+#: build/lib/whiteneuron/base/models.py:211 whiteneuron/base/models.py:358
+msgid "Date created"
+msgstr "Ngày tạo"
+
+#: build/lib/whiteneuron/base/models.py:212 whiteneuron/base/models.py:359
+msgid "Created by"
+msgstr "Tạo bởi"
+
+#: build/lib/whiteneuron/base/models.py:214 whiteneuron/base/models.py:361
+msgid "Date updated"
+msgstr "Ngày cập nhật"
+
+#: build/lib/whiteneuron/base/models.py:215 whiteneuron/base/models.py:362
+msgid "Updated by"
+msgstr "Cập nhật bởi"
+
+#: build/lib/whiteneuron/base/models.py:217 whiteneuron/base/models.py:364
+msgid "Hidden"
+msgstr "Ẩn"
+
+#: build/lib/whiteneuron/base/models.py:243
+#: whiteneuron/notification/models.py:72
+msgid "Read"
+msgstr "Đã đọc"
+
+#: build/lib/whiteneuron/base/models.py:256
+#: whiteneuron/notification/models.py:89
+msgid "notification"
+msgstr "thông báo"
+
+#: build/lib/whiteneuron/base/models.py:257
+#: whiteneuron/notification/models.py:90
+msgid "notifications"
+msgstr "thông báo"
+
+#: build/lib/whiteneuron/base/models.py:349 whiteneuron/base/models.py:532
+msgid "Image"
+msgstr "Hình ảnh"
+
+#: build/lib/whiteneuron/base/models.py:350
+#: build/lib/whiteneuron/base/models.py:426 whiteneuron/base/models.py:533
+#: whiteneuron/base/models.py:609
+msgid "Thumbnail"
+msgstr "Hình thu nhỏ"
+
+#: build/lib/whiteneuron/base/models.py:352
+#: build/lib/whiteneuron/base/models.py:438 whiteneuron/base/models.py:535
+#: whiteneuron/base/models.py:621
+msgid "Preview"
+msgstr "Xem trước"
+
+#: build/lib/whiteneuron/base/models.py:354 whiteneuron/base/models.py:537
+#: whiteneuron/file_management/models.py:8
+msgid "Description"
+msgstr "Mô tả"
+
+#: build/lib/whiteneuron/base/models.py:358 whiteneuron/base/models.py:541
+msgid "System image"
+msgstr "Hình ảnh hệ thống"
+
+#: build/lib/whiteneuron/base/models.py:359 whiteneuron/base/models.py:542
+msgid "System images"
+msgstr "Hình ảnh hệ thống"
+
+#: build/lib/whiteneuron/base/models.py:423
+#: build/lib/whiteneuron/base/models.py:432 whiteneuron/base/models.py:606
+#: whiteneuron/base/models.py:615
+msgid "Image not found"
+msgstr "Hình ảnh không tìm thấy"
+
+#: build/lib/whiteneuron/base/models.py:434 whiteneuron/base/models.py:617
+msgid "View original image size"
+msgstr "Xem kích thước hình ảnh gốc"
+
+#: build/lib/whiteneuron/base/models.py:513 whiteneuron/base/models.py:696
+msgid "Subject"
+msgstr "Chủ đề"
+
+#: build/lib/whiteneuron/base/models.py:515 whiteneuron/base/models.py:698
+msgid "Receiver"
+msgstr "Người nhận"
+
+#: build/lib/whiteneuron/base/models.py:516 whiteneuron/base/models.py:699
+#: whiteneuron/file_management/models.py:9
+#: whiteneuron/file_management/models.py:20
+msgid "Pending"
+msgstr "Đang chờ"
+
+#: build/lib/whiteneuron/base/models.py:517 whiteneuron/base/models.py:700
+msgid "Sent"
+msgstr "Gửi"
+
+#: build/lib/whiteneuron/base/models.py:518 whiteneuron/base/models.py:701
+msgid "Failed"
+msgstr "Thất bại"
+
+#: build/lib/whiteneuron/base/models.py:519 whiteneuron/base/models.py:702
+#: whiteneuron/feedbacks/admin.py:35 whiteneuron/file_management/models.py:12
+#: whiteneuron/file_management/models.py:29
+#: whiteneuron/synchronization/models.py:19
+msgid "Status"
+msgstr "Trạng thái"
+
+#: build/lib/whiteneuron/base/models.py:520
+#: build/lib/whiteneuron/feedbacks/models.py:42 whiteneuron/base/models.py:703
+#: whiteneuron/feedbacks/admin.py:123 whiteneuron/feedbacks/models.py:51
+msgid "Note"
+msgstr "Ghi chú"
+
+#: build/lib/whiteneuron/base/models.py:524 whiteneuron/base/models.py:707
+msgid "Email notification"
+msgstr "Thông báo qua email"
+
+#: build/lib/whiteneuron/base/models.py:525 whiteneuron/base/models.py:708
+msgid "Email notifications"
+msgstr "Thông báo qua email"
+
+#: build/lib/whiteneuron/contrib/wn_import_export/admin.py:32
+#: whiteneuron/contrib/wn_import_export/admin.py:32
+msgid "Export selected records"
+msgstr "Xuất các bản ghi đã chọn"
+
+#: build/lib/whiteneuron/contrib/wn_modeltranslation/admin.py:44
+#: whiteneuron/contrib/wn_modeltranslation/admin.py:44
+msgid "Translate to Vietnamese"
+msgstr "Dịch sang tiếng Việt"
+
+#: build/lib/whiteneuron/contrib/wn_modeltranslation/utils.py:34
+#: whiteneuron/contrib/wn_modeltranslation/utils.py:37
+msgid "You must be a superuser to use this action"
+msgstr "Bạn phải là quản trị viên để sử dụng hành động này"
+
+#: build/lib/whiteneuron/contrib/wn_modeltranslation/utils.py:69
+#: whiteneuron/contrib/wn_modeltranslation/utils.py:80
+#, python-format
+msgid "Translate failed: %s"
+msgstr "Dịch không thành công: %s"
+
+#: build/lib/whiteneuron/contrib/wn_modeltranslation/utils.py:70
+#: whiteneuron/contrib/wn_modeltranslation/utils.py:81
+msgid "Translate successfully"
+msgstr "Dịch thành công"
+
+#: build/lib/whiteneuron/feedbacks/admin.py:53
+#: whiteneuron/feedbacks/admin.py:68
+msgid "Mark selected feedbacks as resolved"
+msgstr "Đánh dấu các phản hồi đã chọn là đã giải quyết"
+
+#: build/lib/whiteneuron/feedbacks/admin.py:58
+#: whiteneuron/feedbacks/admin.py:73
+#, python-format
+msgid "%d feedback(s) marked as resolved."
+msgstr "%d phản hồi đã được đánh dấu là đã giải quyết."
+
+#: build/lib/whiteneuron/feedbacks/admin.py:86
+#: whiteneuron/feedbacks/admin.py:101
+msgid "Only superuser can mark feedback as resolved"
+msgstr "Chỉ quản trị viên mới có thể đánh dấu phản hồi là đã giải quyết"
+
+#: build/lib/whiteneuron/feedbacks/admin.py:100
+#: whiteneuron/feedbacks/admin.py:118
+msgid "Feedback resolved"
+msgstr "Phản hồi đã được giải quyết"
+
+#: build/lib/whiteneuron/feedbacks/admin.py:112
+msgid "Feedback marked as resolved"
+msgstr "Phản hồi đã được đánh dấu là đã giải quyết"
+
+#: build/lib/whiteneuron/feedbacks/models.py:21
+#: whiteneuron/feedbacks/models.py:21
+msgid "Content Type"
+msgstr "Loại nội dung"
+
+#: build/lib/whiteneuron/feedbacks/models.py:25
+#: whiteneuron/feedbacks/models.py:26
+msgid "Object ID"
+msgstr "ID đối tượng"
+
+#: build/lib/whiteneuron/feedbacks/models.py:31
+#: whiteneuron/feedbacks/admin.py:52 whiteneuron/feedbacks/models.py:40
+msgid "Message"
+msgstr "Tin nhắn"
+
+#: build/lib/whiteneuron/feedbacks/models.py:32
+#: whiteneuron/feedbacks/models.py:41
+msgid "The message of the feedback"
+msgstr "Tin nhắn của phản hồi"
+
+#: build/lib/whiteneuron/feedbacks/models.py:37
+#: whiteneuron/feedbacks/models.py:46
+msgid "Is Resolved"
+msgstr "Đã giải quyết"
+
+#: build/lib/whiteneuron/feedbacks/models.py:38
+#: whiteneuron/feedbacks/models.py:47
+msgid "Whether the feedback is resolved"
+msgstr "Liệu phản hồi đã được giải quyết hay chưa"
+
+#: build/lib/whiteneuron/feedbacks/models.py:43
+#: whiteneuron/feedbacks/models.py:52
+msgid "Admin note for the feedback"
+msgstr "Ghi chú của quản trị viên cho phản hồi"
+
+#: build/lib/whiteneuron/feedbacks/models.py:49
+#: whiteneuron/feedbacks/models.py:58
+#: whiteneuron/templates/admin/submit_line.html:11
+#: whiteneuron/templates/admin/submit_line.html:17
+msgid "Feedback"
+msgstr "Phản hồi"
+
+#: build/lib/whiteneuron/feedbacks/models.py:50
+#: whiteneuron/base/settings.py:576 whiteneuron/feedbacks/apps.py:8
+#: whiteneuron/feedbacks/models.py:59
+msgid "Feedbacks"
+msgstr "Phản hồi"
+
+#: whiteneuron/base/admin.py:150 whiteneuron/base/admin.py:192
+#: whiteneuron/base/admin.py:446 whiteneuron/base/admin.py:493
+#: whiteneuron/base/models.py:911
+msgid "Active"
+msgstr "Hoạt động"
+
+#: whiteneuron/base/admin.py:152 whiteneuron/base/admin.py:192
+msgid "Inactive"
+msgstr "Không hoạt động"
+
+#: whiteneuron/base/admin.py:158
+msgid "Admin"
+msgstr "Trang quản trị"
+
+#: whiteneuron/base/admin.py:163
+msgid "Unknown User"
+msgstr "Người dùng không xác định"
+
+#: whiteneuron/base/admin.py:164
+msgid "No username"
+msgstr "Không có tên người dùng"
+
+#: whiteneuron/base/admin.py:172
+msgid "Bot"
+msgstr "Máy"
+
+#: whiteneuron/base/admin.py:397
+msgid "Block IP address"
+msgstr "Chặn địa chỉ IP"
+
+#: whiteneuron/base/admin.py:418
+msgid ", "
+msgstr ""
+
+#: whiteneuron/base/admin.py:435 whiteneuron/base/admin.py:482
+msgid "Target"
+msgstr "Mục tiêu"
+
+#: whiteneuron/base/admin.py:438 whiteneuron/base/admin.py:485
+msgid "Block settings"
+msgstr "Cài đặt chặn"
+
+#: whiteneuron/base/admin.py:441 whiteneuron/base/admin.py:488
+#: whiteneuron/base/modeladmin.py:403 whiteneuron/file_management/admin.py:21
+msgid "Meta"
+msgstr "Meta"
+
+#: whiteneuron/base/admin.py:455
+msgid "Activate selected IPs"
+msgstr "Kích hoạt các IP đã chọn"
+
+#: whiteneuron/base/admin.py:460
+msgid "Selected IPs have been activated."
+msgstr "Các IP đã chọn đã được kích hoạt."
+
+#: whiteneuron/base/admin.py:462
+msgid "Deactivate selected IPs"
+msgstr "Hủy kích hoạt các IP đã chọn"
+
+#: whiteneuron/base/admin.py:467
+msgid "Selected IPs have been deactivated."
+msgstr "Các IP đã chọn đã được hủy kích hoạt."
+
+#: whiteneuron/base/admin.py:502
+msgid "Activate selected patterns"
+msgstr "Kích hoạt các mẫu đã chọn"
+
+#: whiteneuron/base/admin.py:507
+msgid "Selected UA patterns have been activated."
+msgstr "Các mẫu UA đã chọn đã được kích hoạt."
+
+#: whiteneuron/base/admin.py:509
+msgid "Deactivate selected patterns"
+msgstr "Hủy kích hoạt các mẫu đã chọn"
+
+#: whiteneuron/base/admin.py:514
+msgid "Selected UA patterns have been deactivated."
+msgstr "Các mẫu UA đã chọn đã được hủy kích hoạt."
+
+#: whiteneuron/base/admin.py:564
+msgid "Configuration"
+msgstr "Cấu hình"
+
+#: whiteneuron/base/admin.py:702
+msgid "App info"
+msgstr "Thông tin ứng dụng"
+
+#: whiteneuron/base/admin.py:718 whiteneuron/base/models.py:912
+msgid "Icon"
+msgstr "Icon"
+
+#: whiteneuron/base/admin.py:786
+msgid "This app is not active."
+msgstr "Ứng dụng này không hoạt động."
+
+#: whiteneuron/base/admin.py:789
+msgid "You do not have permission to access this app."
+msgstr "Bạn không có quyền truy cập ứng dụng này."
+
+#: whiteneuron/base/admin.py:799 whiteneuron/base/settings.py:562
+#: whiteneuron/dashboard/apps.py:8 whiteneuron/dashboard/views.py:169
+#: whiteneuron/templates/admin/index.html:8
+msgid "Dashboard"
+msgstr "Bảng điều khiển"
+
+#: whiteneuron/base/apps.py:8
+msgid "Base"
+msgstr "Cơ sở"
+
+#: whiteneuron/base/modeladmin.py:87
+#, python-brace-format
+msgid "Search by {fields}"
+msgstr "Tìm kiếm theo {fields}"
+
+#: whiteneuron/base/modeladmin.py:147 whiteneuron/base/modeladmin.py:148
+#: whiteneuron/base/modeladmin.py:197 whiteneuron/base/modeladmin.py:198
 #, python-format
 msgid "%(name)s \"%(obj)s\" has been soft-deleted by user \"%(user)s\""
 msgstr "%(name)s \"%(obj)s\" đã được xóa mềm bởi người dùng \"%(user)s\""
 
-#: base/modeladmin.py:153
+#: whiteneuron/base/modeladmin.py:157
 msgid "Delete selected records"
 msgstr "Xóa các bản ghi đã chọn"
 
-#: base/modeladmin.py:157 base/modeladmin.py:158
+#: whiteneuron/base/modeladmin.py:161 whiteneuron/base/modeladmin.py:162
 #, python-format
 msgid "%(name)s \"%(obj)s\" has been hard-deleted by user \"%(user)s\""
 msgstr "%(name)s \"%(obj)s\" đã được xóa cứng bởi người dùng \"%(user)s\""
 
-#: base/modeladmin.py:170
+#: whiteneuron/base/modeladmin.py:174
 msgid "Hard delete selected records"
 msgstr "Xóa cứng các bản ghi đã chọn"
 
-#: base/modeladmin.py:174 base/modeladmin.py:175
+#: whiteneuron/base/modeladmin.py:178 whiteneuron/base/modeladmin.py:179
 #, python-format
 msgid "%(name)s \"%(obj)s\" has been restored by user \"%(user)s\""
 msgstr "%(name)s \"%(obj)s\" đã được khôi phục bởi người dùng \"%(user)s\""
 
-#: base/modeladmin.py:184
+#: whiteneuron/base/modeladmin.py:188
 msgid "Restore selected records"
 msgstr "Khôi phục các bản ghi đã chọn"
 
-#: base/modeladmin.py:419
+#: whiteneuron/base/modeladmin.py:423
 msgid "Edit"
 msgstr "Sửa"
 
-#: base/modeladmin.py:422
+#: whiteneuron/base/modeladmin.py:426
 msgid "View"
 msgstr "Xem"
 
-#: base/modeladmin.py:427
+#: whiteneuron/base/modeladmin.py:431
 msgid "Delete"
 msgstr "Xóa"
 
-#: base/models.py:67
-msgid "title"
-msgstr "Tiêu đề"
-
-#: base/models.py:68
-msgid "slug"
-msgstr "Đường dẫn"
-
-#: base/models.py:70
-msgid "content type"
-msgstr "Kiểu nội dung"
-
-#: base/models.py:72
-msgid "object id"
-msgstr "ID đối tượng"
-
-#: base/models.py:80
-msgid "tag"
-msgstr "Thẻ"
-
-#: base/models.py:81
-msgid "tags"
-msgstr "Thẻ"
-
-#: base/models.py:89
-msgid "avatar"
-msgstr "ảnh đại diện"
-
-#: base/models.py:90
-msgid "biography"
-msgstr "tiểu sử"
-
-#: base/models.py:92 base/models.py:213 base/models.py:285
-msgid "created at"
-msgstr "tạo lúc"
-
-#: base/models.py:93
-msgid "updated at"
-msgstr "cập nhật lúc"
-
-#: base/models.py:96
+#: whiteneuron/base/models.py:96
 msgid "show soft delete"
 msgstr "Hiển thị xóa mềm"
 
-#: base/models.py:96
+#: whiteneuron/base/models.py:96
 msgid "Show soft deleted items in the list view"
 msgstr "Hiển thị các mục đã xóa mềm trong chế độ xem danh sách"
 
-#: base/models.py:97
+#: whiteneuron/base/models.py:97
 msgid "is bot"
 msgstr "là bot"
 
-#: base/models.py:97
+#: whiteneuron/base/models.py:97
 msgid "Designate whether the user is a bot account"
 msgstr "Đánh dấu người dùng có phải là tài khoản bot không"
 
-#: base/models.py:101
-msgid "user"
-msgstr "người dùng"
-
-#: base/models.py:102
-msgid "users"
-msgstr "người dùng"
-
-#: base/models.py:166
-msgid "user profile"
-msgstr "hồ sơ người dùng"
-
-#: base/models.py:167
-msgid "user profiles"
-msgstr "hồ sơ người dùng"
-
-#: base/models.py:174 base/models.py:200
-msgid "IP address"
-msgstr "Địa chỉ IP"
-
-#: base/models.py:175
-msgid "User agent"
-msgstr "Trình duyệt người dùng"
-
-#: base/models.py:176
-msgid "Path"
-msgstr "Đường dẫn"
-
-#: base/models.py:177 file_management/models.py:15 file_management/models.py:40
-msgid "Method"
-msgstr "Phương thức"
-
-#: base/models.py:178
-msgid "Data"
-msgstr "Dữ liệu"
-
-#: base/models.py:179
-msgid "Status code"
-msgstr "Mã trạng thái"
-
-#: base/models.py:180 synchronization/models.py:20
-msgid "Timestamp"
-msgstr "Thời gian"
-
-#: base/models.py:181
-msgid "Timelapse"
-msgstr "Khoảng thời gian"
-
-#: base/models.py:185
-msgid "user activity"
-msgstr "hoạt động người dùng"
-
-#: base/models.py:186
-msgid "user activities"
-msgstr "hoạt động người dùng"
-
-#: base/models.py:203
+#: whiteneuron/base/models.py:203
 msgid "Single IPv4 or IPv6 address. Use IP_BLACKLIST in .env for CIDR ranges."
 msgstr ""
 "Địa chỉ IPv4 hoặc IPv6 đơn. Sử dụng IP_BLACKLIST trong .env cho các dải CIDR."
 
-#: base/models.py:205 base/models.py:283
+#: whiteneuron/base/models.py:205 whiteneuron/base/models.py:283
 msgid "reason"
 msgstr "lý do"
 
-#: base/models.py:206 base/models.py:284
+#: whiteneuron/base/models.py:206 whiteneuron/base/models.py:284
 msgid "active"
 msgstr "hoạt động"
 
-#: base/models.py:208
+#: whiteneuron/base/models.py:208
 msgid "blocked until"
 msgstr "bị chặn cho đến"
 
-#: base/models.py:211
+#: whiteneuron/base/models.py:211
 msgid ""
 "Leave empty for permanent block. Temporary blocks expire automatically via "
 "Redis TTL."
@@ -386,23 +645,23 @@ msgstr ""
 "Để trống để khóa vĩnh viễn. Các khóa tạm thời sẽ tự động hết hạn thông qua "
 "Redis TTL."
 
-#: base/models.py:220 base/models.py:292
+#: whiteneuron/base/models.py:220 whiteneuron/base/models.py:292
 msgid "created by"
 msgstr "tạo bởi"
 
-#: base/models.py:225
+#: whiteneuron/base/models.py:225
 msgid "IP blacklist"
 msgstr "Danh sách đen IP"
 
-#: base/models.py:226
+#: whiteneuron/base/models.py:226
 msgid "IP blacklists"
 msgstr "Danh sách đen IP"
 
-#: base/models.py:273
+#: whiteneuron/base/models.py:273
 msgid "pattern"
 msgstr "mẫu"
 
-#: base/models.py:276
+#: whiteneuron/base/models.py:276
 msgid ""
 "Substring or regex to match against the User-Agent header. E.g. 'GPTBot', "
 "'https://openai.com'."
@@ -410,11 +669,11 @@ msgstr ""
 "Chuỗi con hoặc regex để khớp với header User-Agent. Ví dụ: 'GPTBot', "
 "'https://openai.com'."
 
-#: base/models.py:279
+#: whiteneuron/base/models.py:279
 msgid "is regex"
 msgstr "là regex"
 
-#: base/models.py:281
+#: whiteneuron/base/models.py:281
 msgid ""
 "If checked, pattern is treated as a Python regex (re.search, case-"
 "insensitive); otherwise simple case-insensitive substring match."
@@ -423,759 +682,590 @@ msgstr ""
 "chữ hoa chữ thường); nếu không, khớp chuỗi con không phân biệt chữ hoa chữ "
 "thường đơn giản."
 
-#: base/models.py:297
+#: whiteneuron/base/models.py:297
 msgid "UA blacklist"
 msgstr "Danh sách đen UA"
 
-#: base/models.py:298
+#: whiteneuron/base/models.py:298
 msgid "UA blacklists"
 msgstr "Danh sách đen UA"
 
-#: base/models.py:330 templates/admin/grid_view_results.html:42
-msgid "Deleted"
-msgstr "Đã xóa"
-
-#: base/models.py:331
-msgid "Deleted at"
-msgstr "Đã xóa lúc"
-
-#: base/models.py:358
-msgid "Date created"
-msgstr "Ngày tạo"
-
-#: base/models.py:359
-msgid "Created by"
-msgstr "Tạo bởi"
-
-#: base/models.py:361
-msgid "Date updated"
-msgstr "Ngày cập nhật"
-
-#: base/models.py:362
-msgid "Updated by"
-msgstr "Cập nhật bởi"
-
-#: base/models.py:364
-msgid "Hidden"
-msgstr "Ẩn"
-
-#: base/models.py:404 base/models.py:444
+#: whiteneuron/base/models.py:404 whiteneuron/base/models.py:444
 msgid "New"
 msgstr "Mới"
 
-#: base/models.py:404 base/models.py:444
+#: whiteneuron/base/models.py:404 whiteneuron/base/models.py:444
 msgid "has been created by user"
 msgstr "Đã được tạo bởi người dùng"
 
-#: base/models.py:428
+#: whiteneuron/base/models.py:428
 msgid "Update"
 msgstr "Cập nhật"
 
-#: base/models.py:428
+#: whiteneuron/base/models.py:428
 msgid "has been updated by user"
 msgstr "Đã được cập nhật bởi người dùng"
 
-#: base/models.py:447
+#: whiteneuron/base/models.py:447
 msgid "You can view it at"
 msgstr "Bạn có thể xem tại"
 
-#: base/models.py:447
+#: whiteneuron/base/models.py:447
 msgid "this link"
 msgstr "liên kết này"
 
-#: base/models.py:532
-msgid "Image"
-msgstr "Hình ảnh"
-
-#: base/models.py:533 base/models.py:609
-msgid "Thumbnail"
-msgstr "Hình thu nhỏ"
-
-#: base/models.py:535 base/models.py:621
-msgid "Preview"
-msgstr "Xem trước"
-
-#: base/models.py:537 file_management/models.py:8
-msgid "Description"
-msgstr "Mô tả"
-
-#: base/models.py:541
-msgid "System image"
-msgstr "Hình ảnh hệ thống"
-
-#: base/models.py:542
-msgid "System images"
-msgstr "Hình ảnh hệ thống"
-
-#: base/models.py:606 base/models.py:615
-msgid "Image not found"
-msgstr "Hình ảnh không tìm thấy"
-
-#: base/models.py:617
-msgid "View original image size"
-msgstr "Xem kích thước hình ảnh gốc"
-
-#: base/models.py:696
-msgid "Subject"
-msgstr "Chủ đề"
-
-#: base/models.py:698
-msgid "Receiver"
-msgstr "Người nhận"
-
-#: base/models.py:699 file_management/models.py:9 file_management/models.py:20
-msgid "Pending"
-msgstr "Đang chờ"
-
-#: base/models.py:700
-msgid "Sent"
-msgstr "Gửi"
-
-#: base/models.py:701
-msgid "Failed"
-msgstr "Thất bại"
-
-#: base/models.py:702 feedbacks/admin.py:33 file_management/models.py:12
-#: file_management/models.py:29 synchronization/models.py:19
-msgid "Status"
-msgstr "Trạng thái"
-
-#: base/models.py:703 feedbacks/admin.py:116 feedbacks/models.py:51
-msgid "Note"
-msgstr "Ghi chú"
-
-#: base/models.py:707
-msgid "Email notification"
-msgstr "Thông báo qua email"
-
-#: base/models.py:708
-msgid "Email notifications"
-msgstr "Thông báo qua email"
-
-#: base/models.py:910
+#: whiteneuron/base/models.py:910
 msgid "App name"
 msgstr "Tên ứng dụng"
 
-#: base/models.py:912
+#: whiteneuron/base/models.py:912
 msgid "Icon name (Material Symbols Outlined) or URL"
 msgstr "Tên icon (Material Symbols Outlined) hoặc URL"
 
-#: base/models.py:913
+#: whiteneuron/base/models.py:913
 msgid "URL"
 msgstr "URL"
 
-#: base/models.py:914
+#: whiteneuron/base/models.py:914
 msgid "Category"
 msgstr "Danh mục"
 
-#: base/models.py:915
+#: whiteneuron/base/models.py:915
 msgid "Permission"
 msgstr "Quyền"
 
-#: base/models.py:915
+#: whiteneuron/base/models.py:915
 msgid "Permission required to access this app"
 msgstr "Quyền truy cập vào ứng dụng này"
 
-#: base/models.py:916
+#: whiteneuron/base/models.py:916
 msgid "Thumbnail URL"
 msgstr "Hình thu nhỏ URL"
 
-#: base/models.py:919
+#: whiteneuron/base/models.py:919
 msgid "App"
 msgstr "Ứng dụng"
 
-#: base/models.py:920
+#: whiteneuron/base/models.py:920
 msgid "Apps"
 msgstr "Ứng dụng"
 
-#: base/settings.py:357
+#: whiteneuron/base/settings.py:357
 msgid "Vietnamese"
 msgstr "Tiếng Việt"
 
-#: base/settings.py:358
+#: whiteneuron/base/settings.py:358
 msgid "English"
 msgstr "Tiếng Anh"
 
-#: base/settings.py:449
+#: whiteneuron/base/settings.py:449
 msgid "Admin panel"
 msgstr "Trang quản trị"
 
-#: base/settings.py:453
+#: whiteneuron/base/settings.py:453
 msgid "White Neuron Co. Ltd."
 msgstr "Công ty TNHH White Neuron"
 
-#: base/settings.py:458
+#: whiteneuron/base/settings.py:458
 msgid "Email: anhnt@whiteneuron.com"
 msgstr "Email: anhnt@whiteneuron.com"
 
-#: base/settings.py:553
+#: whiteneuron/base/settings.py:553
 msgid "Navigation"
 msgstr "Điều hướng"
 
-#: base/settings.py:569
+#: whiteneuron/base/settings.py:569
 msgid "Notifications"
 msgstr "Thông báo"
 
-#: base/settings.py:576 feedbacks/apps.py:8 feedbacks/models.py:59
-msgid "Feedbacks"
-msgstr "Phản hồi"
-
-#: base/settings.py:585 file_management/apps.py:7
+#: whiteneuron/base/settings.py:585 whiteneuron/file_management/apps.py:7
 msgid "File Management"
 msgstr "Quản lý tệp"
 
-#: base/settings.py:589 file_management/models.py:58
+#: whiteneuron/base/settings.py:589 whiteneuron/file_management/models.py:58
 msgid "Excel Files"
 msgstr "Tệp Excel"
 
-#: base/settings.py:596 file_management/models.py:65
+#: whiteneuron/base/settings.py:596 whiteneuron/file_management/models.py:65
 msgid "PDF Files"
 msgstr "Tệp PDF"
 
-#: base/settings.py:605
+#: whiteneuron/base/settings.py:605
 msgid "Users & Groups"
 msgstr "Người dùng & Nhóm"
 
-#: base/settings.py:609 notification/models.py:59
+#: whiteneuron/base/settings.py:609 whiteneuron/notification/models.py:59
 msgid "Users"
 msgstr "Người dùng"
 
-#: base/settings.py:616
+#: whiteneuron/base/settings.py:616
 msgid "User activity"
 msgstr "Hoạt động người dùng"
 
-#: base/settings.py:623
+#: whiteneuron/base/settings.py:623
 msgid "Groups"
 msgstr "Nhóm"
 
-#: base/settings.py:632
+#: whiteneuron/base/settings.py:632
 msgid "System"
 msgstr "Hệ thống"
 
-#: base/settings.py:636
+#: whiteneuron/base/settings.py:636
 msgid "Images"
 msgstr "Hình ảnh"
 
-#: base/settings.py:642
+#: whiteneuron/base/settings.py:642
 msgid "Emails"
 msgstr "Email"
 
-#: base/settings.py:648
+#: whiteneuron/base/settings.py:648
 msgid "Notifications config"
 msgstr "Cấu hình thông báo"
 
-#: base/settings.py:654
+#: whiteneuron/base/settings.py:654
 msgid "IP Blacklist"
 msgstr "Danh sách đen IP"
 
-#: base/settings.py:660
+#: whiteneuron/base/settings.py:660
 msgid "UA Blacklist"
 msgstr "Danh sách đen UA"
 
-#: base/settings.py:668
+#: whiteneuron/base/settings.py:668
 msgid "Celery Tasks"
 msgstr "Nhiệm vụ Celery"
 
-#: base/settings.py:672
+#: whiteneuron/base/settings.py:672
 msgid "Clocked"
 msgstr "Khóa"
 
-#: base/settings.py:680
+#: whiteneuron/base/settings.py:680
 msgid "Crontabs"
 msgstr "Crontabs"
 
-#: base/settings.py:688
+#: whiteneuron/base/settings.py:688
 msgid "Intervals"
 msgstr "Khoảng thời gian"
 
-#: base/settings.py:696
+#: whiteneuron/base/settings.py:696
 msgid "Periodic tasks"
 msgstr "Nhiệm vụ định kỳ"
 
-#: base/settings.py:704
+#: whiteneuron/base/settings.py:704
 msgid "Solar events"
 msgstr "Sự kiện Solar"
 
-#: contrib/wn_import_export/admin.py:32
-msgid "Export selected records"
-msgstr "Xuất các bản ghi đã chọn"
-
-#: contrib/wn_modeltranslation/admin.py:44
-msgid "Translate to Vietnamese"
-msgstr "Dịch sang tiếng Việt"
-
-#: contrib/wn_modeltranslation/utils.py:37
-msgid "You must be a superuser to use this action"
-msgstr "Bạn phải là quản trị viên để sử dụng hành động này"
-
-#: contrib/wn_modeltranslation/utils.py:44
+#: whiteneuron/contrib/wn_modeltranslation/utils.py:44
 msgid "OpenAI API key not found"
 msgstr "Không tìm thấy khóa API OpenAI"
 
-#: contrib/wn_modeltranslation/utils.py:80
-#, python-format
-msgid "Translate failed: %s"
-msgstr "Dịch không thành công: %s"
-
-#: contrib/wn_modeltranslation/utils.py:81
-msgid "Translate successfully"
-msgstr "Dịch thành công"
-
-#: dashboard/views.py:28
+#: whiteneuron/dashboard/views.py:28
 msgid "today"
 msgstr "hôm nay"
 
-#: dashboard/views.py:29 dashboard/views.py:180
+#: whiteneuron/dashboard/views.py:29 whiteneuron/dashboard/views.py:180
 msgid "7 days"
 msgstr "7 ngày"
 
-#: dashboard/views.py:30
+#: whiteneuron/dashboard/views.py:30
 msgid "week"
 msgstr "tuần"
 
-#: dashboard/views.py:31
+#: whiteneuron/dashboard/views.py:31
 msgid "month"
 msgstr "tháng"
 
-#: dashboard/views.py:32
+#: whiteneuron/dashboard/views.py:32
 msgid "year"
 msgstr "năm"
 
-#: dashboard/views.py:72
+#: whiteneuron/dashboard/views.py:72
 msgid "Invalid time"
 msgstr "Thời gian không hợp lệ"
 
-#: dashboard/views.py:151
+#: whiteneuron/dashboard/views.py:151
 msgid "progress from last"
 msgstr "tiến trình từ lần cuối"
 
-#: dashboard/views.py:154
+#: whiteneuron/dashboard/views.py:154
 msgid "in"
 msgstr "trong"
 
-#: dashboard/views.py:170
+#: whiteneuron/dashboard/views.py:170
 msgid "Analytics"
 msgstr "Phân tích"
 
-#: dashboard/views.py:171
+#: whiteneuron/dashboard/views.py:171
 msgid "Settings"
 msgstr "Cài đặt"
 
-#: dashboard/views.py:175
+#: whiteneuron/dashboard/views.py:175
 msgid "Today"
 msgstr "Hôm nay"
 
-#: dashboard/views.py:185
+#: whiteneuron/dashboard/views.py:185
 msgid "Week"
 msgstr "Tuần"
 
-#: dashboard/views.py:190
+#: whiteneuron/dashboard/views.py:190
 msgid "Month"
 msgstr "Tháng"
 
-#: dashboard/views.py:195
+#: whiteneuron/dashboard/views.py:195
 msgid "Year"
 msgstr "Năm"
 
-#: dashboard/views.py:201 dashboard/views.py:202
+#: whiteneuron/dashboard/views.py:201 whiteneuron/dashboard/views.py:202
 msgid "Activity"
 msgstr "Hành động"
 
-#: dashboard/views.py:201
+#: whiteneuron/dashboard/views.py:201
 msgid "Activities"
 msgstr "Hành động"
 
-#: dashboard/views.py:202
+#: whiteneuron/dashboard/views.py:202
 msgid "Success activities"
 msgstr "Hoạt động thành công"
 
-#: dashboard/views.py:250
+#: whiteneuron/dashboard/views.py:250
 msgid "Average"
 msgstr "Trung bình"
 
-#: dashboard/views.py:257
+#: whiteneuron/dashboard/views.py:257
 msgid "Success"
 msgstr "Thành công"
 
-#: dashboard/views.py:262 file_management/models.py:11
-#: file_management/models.py:26
+#: whiteneuron/dashboard/views.py:262 whiteneuron/file_management/models.py:11
+#: whiteneuron/file_management/models.py:26
 msgid "Error"
 msgstr "Lỗi"
 
-#: feedbacks/admin.py:29
+#: whiteneuron/feedbacks/admin.py:31
 msgid "Feedback Data"
 msgstr "Dữ liệu phản hồi"
 
-#: feedbacks/admin.py:57
+#: whiteneuron/feedbacks/admin.py:63
 msgid "Related Object"
 msgstr "Đối tượng liên quan"
 
-#: feedbacks/admin.py:62
-msgid "Mark selected feedbacks as resolved"
-msgstr "Đánh dấu các phản hồi đã chọn là đã giải quyết"
+#: whiteneuron/feedbacks/admin.py:106
+msgid "Note must not exceed 500 characters."
+msgstr "Ghi chú không được vượt quá 500 ký tự."
 
-#: feedbacks/admin.py:67
-#, python-format
-msgid "%d feedback(s) marked as resolved."
-msgstr "%d phản hồi đã được đánh dấu là đã giải quyết."
+#: whiteneuron/feedbacks/admin.py:110
+#: whiteneuron/templates/admin/feedbacks/feedback_change_form.html:41
+msgid "Feedback not found."
+msgstr "Không tìm thấy phản hồi."
 
-#: feedbacks/admin.py:95
-msgid "Only superuser can mark feedback as resolved"
-msgstr "Chỉ quản trị viên mới có thể đánh dấu phản hồi là đã giải quyết"
-
-#: feedbacks/admin.py:111
-msgid "Feedback resolved"
-msgstr "Phản hồi đã được giải quyết"
-
-#: feedbacks/admin.py:114
+#: whiteneuron/feedbacks/admin.py:121
 msgid "Your feedback has been resolved."
 msgstr "Phản hồi của bạn đã được giải quyết."
 
-#: feedbacks/admin.py:115
+#: whiteneuron/feedbacks/admin.py:122
 msgid "Object"
 msgstr "Đối tượng"
 
-#: feedbacks/admin.py:124
-msgid "Feedback marked as resolved"
-msgstr "Phản hồi đã được đánh dấu là đã giải quyết"
-
-#: feedbacks/models.py:21
-msgid "Content Type"
-msgstr "Loại nội dung"
-
-#: feedbacks/models.py:26
-msgid "Object ID"
-msgstr "ID đối tượng"
-
-#: feedbacks/models.py:31
+#: whiteneuron/feedbacks/models.py:31
 msgid "Field"
 msgstr "Trường"
 
-#: feedbacks/models.py:32
+#: whiteneuron/feedbacks/models.py:32
 msgid "The specific field of the object the feedback is about"
 msgstr "Trường cụ thể của đối tượng phản hồi"
 
-#: feedbacks/models.py:40
-msgid "Message"
-msgstr "Tin nhắn"
-
-#: feedbacks/models.py:41
-msgid "The message of the feedback"
-msgstr "Tin nhắn của phản hồi"
-
-#: feedbacks/models.py:46
-msgid "Is Resolved"
-msgstr "Đã giải quyết"
-
-#: feedbacks/models.py:47
-msgid "Whether the feedback is resolved"
-msgstr "Liệu phản hồi đã được giải quyết hay chưa"
-
-#: feedbacks/models.py:52
-msgid "Admin note for the feedback"
-msgstr "Ghi chú của quản trị viên cho phản hồi"
-
-#: feedbacks/models.py:58 templates/admin/submit_line.html:11
-#: templates/admin/submit_line.html:17
-msgid "Feedback"
-msgstr "Phản hồi"
-
-#: feedbacks/urls.py:19
+#: whiteneuron/feedbacks/urls.py:19
 msgid "User is not authenticated"
 msgstr "Người dùng chưa xác thực"
 
-#: feedbacks/urls.py:34
+#: whiteneuron/feedbacks/urls.py:34
 msgid "Missing required fields"
 msgstr "Thiếu các trường bắt buộc"
 
-#: feedbacks/urls.py:40
+#: whiteneuron/feedbacks/urls.py:37
+msgid "Feedback message must not exceed 2000 characters."
+msgstr "Tin nhắn phản hồi không được vượt quá 2000 ký tự."
+
+#: whiteneuron/feedbacks/urls.py:43
 msgid "Invalid model or app_label"
 msgstr "Mô hình hoặc app_label không hợp lệ"
 
-#: feedbacks/urls.py:51
+#: whiteneuron/feedbacks/urls.py:54
 #, python-format
 msgid "Please wait %(seconds)d seconds before submitting another feedback."
 msgstr "Vui lòng đợi %(seconds)d giây trước khi gửi phản hồi khác."
 
-#: feedbacks/urls.py:67
+#: whiteneuron/feedbacks/urls.py:70
 msgid "Feedback saved successfully"
 msgstr "Phản hồi đã được lưu thành công"
 
-#: feedbacks/urls.py:71
+#: whiteneuron/feedbacks/urls.py:74
 msgid "Invalid JSON format"
 msgstr "Định dạng JSON không hợp lệ"
 
-#: feedbacks/urls.py:74
+#: whiteneuron/feedbacks/urls.py:77
 msgid "An unexpected error occurred. Please try again."
 msgstr "Đã xảy ra lỗi không mong muốn. Vui lòng thử lại."
 
-#: file_management/admin.py:15
+#: whiteneuron/file_management/admin.py:15
 msgid "General Information"
 msgstr "Thông tin chung"
 
-#: file_management/models.py:10 file_management/models.py:23
+#: whiteneuron/file_management/models.py:10
+#: whiteneuron/file_management/models.py:23
 msgid "Done"
 msgstr "Hoàn thành"
 
-#: file_management/models.py:13 file_management/models.py:34
+#: whiteneuron/file_management/models.py:13
+#: whiteneuron/file_management/models.py:34
 msgid "Upload"
 msgstr "Tải lên"
 
-#: file_management/models.py:14 file_management/models.py:37
+#: whiteneuron/file_management/models.py:14
+#: whiteneuron/file_management/models.py:37
 msgid "Auto"
 msgstr "Tự động"
 
-#: file_management/models.py:57
+#: whiteneuron/file_management/models.py:57
 msgid "Excel File"
 msgstr "Tệp Excel"
 
-#: file_management/models.py:64
+#: whiteneuron/file_management/models.py:64
 msgid "PDF File"
 msgstr "Tệp PDF"
 
-#: notification/admin.py:34
+#: whiteneuron/notification/admin.py:34
 msgid "Notification Recipients"
 msgstr "Người nhận thông báo"
 
-#: notification/admin.py:70
-msgid "Notification information"
-msgstr "Thông tin thông báo"
-
-#: notification/admin.py:90
+#: whiteneuron/notification/admin.py:90
 msgid "View Linked Object"
 msgstr "Xem đối tượng được liên kết"
 
-#: notification/admin.py:97
+#: whiteneuron/notification/admin.py:97
 msgid "No object link available for this notification."
 msgstr "Không có liên kết đối tượng nào có sẵn cho thông báo này."
 
-#: notification/admin.py:150 synchronization/models.py:14
-msgid "Action"
-msgstr "Hành động"
-
-#: notification/admin.py:154
-msgid "Flag"
-msgstr "Cờ"
-
-#: notification/admin.py:160
+#: whiteneuron/notification/admin.py:160
 msgid "Title"
 msgstr "Tiêu đề"
 
-#: notification/admin.py:203
+#: whiteneuron/notification/admin.py:203
 msgid "No changes"
 msgstr "Không có thay đổi nào"
 
-#: notification/admin.py:204 notification/models.py:71
+#: whiteneuron/notification/admin.py:204 whiteneuron/notification/models.py:71
 msgid "Changed Data"
 msgstr "Thay đổi dữ liệu"
 
-#: notification/apps.py:7
+#: whiteneuron/notification/apps.py:7
 msgid "Notification"
 msgstr "Thông báo"
 
-#: notification/models.py:13
+#: whiteneuron/notification/models.py:13
 msgid "The model this configuration applies to."
 msgstr "Mô hình mà cấu hình này áp dụng."
 
-#: notification/models.py:14
+#: whiteneuron/notification/models.py:14
 msgid "Model"
 msgstr "Mô hình"
 
-#: notification/models.py:18
+#: whiteneuron/notification/models.py:18
 msgid ""
 "The type of event this configuration applies to (e.g., 'create', 'update', "
 "'delete')."
 msgstr ""
 "Loại sự kiện mà cấu hình này áp dụng (ví dụ: 'tạo', 'cập nhật', 'xóa')."
 
-#: notification/models.py:25
+#: whiteneuron/notification/models.py:25
 msgid "Event Type"
 msgstr "Loại sự kiện"
 
-#: notification/models.py:30
+#: whiteneuron/notification/models.py:30
 msgid "Whether to send notifications to the admin."
 msgstr "Liệu có gửi thông báo đến quản trị viên hay không."
 
-#: notification/models.py:31
+#: whiteneuron/notification/models.py:31
 msgid "Send to Admin"
 msgstr "Gửi đến quản trị viên"
 
-#: notification/models.py:36
+#: whiteneuron/notification/models.py:36
 msgid "Whether to send notifications to the user."
 msgstr "Liệu có gửi thông báo đến người dùng hay không."
 
-#: notification/models.py:37
+#: whiteneuron/notification/models.py:37
 msgid "Send to User"
 msgstr "Gửi đến người dùng"
 
-#: notification/models.py:42
+#: whiteneuron/notification/models.py:42
 msgid "Whether to send notifications to group users."
 msgstr "Liệu có gửi thông báo đến nhóm người dùng hay không."
 
-#: notification/models.py:43
+#: whiteneuron/notification/models.py:43
 msgid "Send to Group Users"
 msgstr "Gửi đến nhóm người dùng"
 
-#: notification/models.py:50
+#: whiteneuron/notification/models.py:50
 msgid "Groups of users to send notifications to."
 msgstr "Nhóm người dùng để gửi thông báo đến."
 
-#: notification/models.py:51
+#: whiteneuron/notification/models.py:51
 msgid "Group Users"
 msgstr "Nhóm người dùng"
 
-#: notification/models.py:58
+#: whiteneuron/notification/models.py:58
 msgid "Specific users to send notifications to."
 msgstr "Người dùng cụ thể để gửi thông báo đến."
 
-#: notification/models.py:66
+#: whiteneuron/notification/models.py:66
 msgid "User to Notify"
 msgstr "Thông báo cho người dùng"
 
-#: notification/models.py:68
+#: whiteneuron/notification/models.py:68
 msgid "Object Link"
 msgstr "Đối tượng liên kết"
 
-#: notification/models.py:72
-msgid "Read"
-msgstr "Đã đọc"
-
-#: notification/models.py:77
+#: whiteneuron/notification/models.py:77
 msgid "Notification Type"
 msgstr "Loại thông báo"
 
-#: notification/models.py:81
+#: whiteneuron/notification/models.py:81
 msgid "Action Type"
 msgstr "Loại hành động"
 
-#: notification/models.py:82
+#: whiteneuron/notification/models.py:82
 msgid "Created At"
 msgstr "Đã tạo lúc"
 
-#: notification/models.py:84
+#: whiteneuron/notification/models.py:84
 msgid "Action By"
 msgstr "Hành động bởi"
 
-#: notification/models.py:89
-msgid "notification"
-msgstr "thông báo"
-
-#: notification/models.py:90
-msgid "notifications"
-msgstr "thông báo"
-
-#: synchronization/models.py:14
+#: whiteneuron/synchronization/models.py:14
 msgid "The synchronization action performed"
 msgstr "Hành động đồng bộ hóa"
 
-#: synchronization/models.py:19
+#: whiteneuron/synchronization/models.py:19
 msgid "The status of the synchronization action"
 msgstr "Trạng thái hành động đồng bộ hóa"
 
-#: synchronization/models.py:20
+#: whiteneuron/synchronization/models.py:20
 msgid "The time when the action was performed"
 msgstr "Thời gian hành động được thực hiện"
 
-#: synchronization/models.py:21
+#: whiteneuron/synchronization/models.py:21
 msgid "Details"
 msgstr "Chi tiết"
 
-#: synchronization/models.py:21
+#: whiteneuron/synchronization/models.py:21
 msgid "Additional details about the synchronization action"
 msgstr "Chi tiết hành động đồng bộ hóa"
 
-#: synchronization/models.py:27
+#: whiteneuron/synchronization/models.py:27
 msgid "Synchronization Log"
 msgstr "Log đồng bộ hóa"
 
-#: synchronization/models.py:28
+#: whiteneuron/synchronization/models.py:28
 msgid "Synchronization Logs"
 msgstr "Log đồng bộ hóa"
 
-#: templates/admin/base/app_change_list.html:103
-#: templates/admin/base/app_change_list.html:130
+#: whiteneuron/templates/admin/base/app_change_list.html:103
+#: whiteneuron/templates/admin/base/app_change_list.html:130
 msgid "Other"
 msgstr "Khác"
 
-#: templates/admin/base/app_change_list.html:105
+#: whiteneuron/templates/admin/base/app_change_list.html:105
 msgid "apps"
 msgstr "ứng dụng"
 
-#: templates/admin/base/app_change_list.html:127
+#: whiteneuron/templates/admin/base/app_change_list.html:127
 msgid "Back"
 msgstr "Quay lại"
 
-#: templates/admin/base/app_change_list.html:168
+#: whiteneuron/templates/admin/base/app_change_list.html:168
 msgid "No apps available."
 msgstr "Không có ứng dụng nào có sẵn."
 
-#: templates/admin/feedbacks/feedback_change_form.html:8
-#: templates/admin/feedbacks/feedback_change_form.html:14
+#: whiteneuron/templates/admin/feedbacks/feedback_change_form.html:8
+#: whiteneuron/templates/admin/feedbacks/feedback_change_form.html:14
 msgid "Mark as Resolved"
 msgstr "Đánh dấu là đã giải quyết"
 
-#: templates/admin/feedbacks/feedback_change_form.html:15
+#: whiteneuron/templates/admin/feedbacks/feedback_change_form.html:15
 msgid "Enter an optional note for this resolution:"
 msgstr "Nhập một ghi chú tùy chọn cho việc giải quyết này:"
 
-#: templates/admin/feedbacks/feedback_change_form.html:16
+#: whiteneuron/templates/admin/feedbacks/feedback_change_form.html:16
 msgid "Note (optional)"
 msgstr "Ghi chú (tùy chọn)"
 
-#: templates/admin/feedbacks/feedback_change_form.html:18
-#: templates/admin/submit_line.html:21
+#: whiteneuron/templates/admin/feedbacks/feedback_change_form.html:19
+#: whiteneuron/templates/admin/submit_line.html:22
 msgid "Cancel"
 msgstr "Hủy bỏ"
 
-#: templates/admin/feedbacks/feedback_change_form.html:19
+#: whiteneuron/templates/admin/feedbacks/feedback_change_form.html:20
 msgid "Confirm"
 msgstr "Xác nhận"
 
-#: templates/admin/feedbacks/feedback_change_form.html:31
-#: templates/admin/submit_line.html:36
+#: whiteneuron/templates/admin/feedbacks/feedback_change_form.html:32
+#: whiteneuron/templates/admin/submit_line.html:37
 msgid "OK"
 msgstr "OK"
 
-#: templates/admin/feedbacks/feedback_change_form.html:38
+#: whiteneuron/templates/admin/feedbacks/feedback_change_form.html:39
 msgid "Feedback marked as resolved successfully."
 msgstr "Phản hồi đã được đánh dấu là đã giải quyết thành công."
 
-#: templates/admin/feedbacks/feedback_change_form.html:39
-msgid "Failed to mark feedback as resolved."
-msgstr "Không thể đánh dấu phản hồi là đã giải quyết."
+#: whiteneuron/templates/admin/feedbacks/feedback_change_form.html:40
+msgid "Permission denied. Only superusers can perform this action."
+msgstr "Không có quyền. Chỉ quản trị viên mới có thể thực hiện hành động này."
 
-#: templates/admin/grid_view_results.html:83
+#: whiteneuron/templates/admin/feedbacks/feedback_change_form.html:42
+msgid "Server error. Please try again later."
+msgstr "Lỗi máy chủ. Vui lòng thử lại sau."
+
+#: whiteneuron/templates/admin/feedbacks/feedback_change_form.html:43
+msgid "Network error. Please check your connection."
+msgstr "Lỗi mạng. Vui lòng kiểm tra kết nối của bạn."
+
+#: whiteneuron/templates/admin/feedbacks/feedback_change_form.html:44
+#, python-brace-format
+msgid "Unexpected error (HTTP {status})."
+msgstr "Lỗi không mong muốn (HTTP {status})."
+
+#: whiteneuron/templates/admin/grid_view_results.html:83
 #, python-format
 msgid "Add %(name)s"
 msgstr "Thêm %(name)s"
 
-#: templates/admin/grid_view_results.html:91
+#: whiteneuron/templates/admin/grid_view_results.html:91
 msgid "No results found"
 msgstr "Không tìm thấy kết quả"
 
-#: templates/admin/grid_view_results.html:95
+#: whiteneuron/templates/admin/grid_view_results.html:95
 msgid ""
 "This page yielded into no results. Create a new item or reset your filters."
 msgstr ""
 "Trang này không có kết quả nào. Tạo một mục mới hoặc đặt lại bộ lọc của bạn."
 
-#: templates/admin/grid_view_results.html:108
+#: whiteneuron/templates/admin/grid_view_results.html:108
 msgid "Reset filters"
 msgstr "Đặt lại bộ lọc"
 
-#: templates/admin/header.html:26 templates/admin/index.html:49
+#: whiteneuron/templates/admin/header.html:26
+#: whiteneuron/templates/admin/index.html:49
 msgid "Website performance in last 28 days"
 msgstr "Hiệu suất trang web trong 28 ngày qua"
 
-#: templates/admin/index.html:8 templates/admin/login.html:5
+#: whiteneuron/templates/admin/index.html:8
+#: whiteneuron/templates/admin/login.html:5
 msgid "Django site admin"
 msgstr "Quản trị trang Django"
 
-#: templates/admin/login.html:5
+#: whiteneuron/templates/admin/login.html:5
 msgid "Welcome back to"
 msgstr "Chào mừng trở lại với"
 
-#: templates/admin/login.html:16
+#: whiteneuron/templates/admin/login.html:16
 #, python-format
 msgid ""
 "You are authenticated as %(username)s, but are not authorized to access this "
@@ -1184,138 +1274,141 @@ msgstr ""
 "Bạn đã xác thực với tư cách %(username)s, nhưng không được phép truy cập "
 "trang này. Bạn có muốn đăng nhập vào tài khoản khác không?"
 
-#: templates/admin/login.html:38
+#: whiteneuron/templates/admin/login.html:38
 msgid "Log in"
 msgstr "Đăng nhập"
 
-#: templates/admin/login.html:46
+#: whiteneuron/templates/admin/login.html:46
 msgid "Forgotten your password or username?"
 msgstr "Quên mật khẩu hoặc tên người dùng?"
 
-#: templates/admin/login_after.html:10
+#: whiteneuron/templates/admin/login_after.html:10
 msgid "Log in as guest"
 msgstr "Đăng nhập với tư cách khách"
 
-#: templates/admin/search_form.html:9
+#: whiteneuron/templates/admin/search_form.html:9
 msgid "Type to search"
 msgstr "Gõ để tìm kiếm"
 
-#: templates/admin/search_form.html:46
+#: whiteneuron/templates/admin/search_form.html:46
 msgid "Items per page"
 msgstr "Số mục trên mỗi trang"
 
-#: templates/admin/submit_line.html:18
+#: whiteneuron/templates/admin/submit_line.html:18
 #, python-format
 msgid "Please enter your feedback message for <strong>%(name)s</strong>"
 msgstr "Vui lòng nhập tin nhắn phản hồi của bạn cho <strong>%(name)s</strong>"
 
-#: templates/admin/submit_line.html:19
+#: whiteneuron/templates/admin/submit_line.html:19
 msgid "Your message..."
 msgstr "Tin nhắn của bạn..."
 
-#: templates/admin/submit_line.html:23
+#: whiteneuron/templates/admin/submit_line.html:24
 msgid "Send"
 msgstr "Gửi"
 
-#: templates/admin/submit_line.html:41
+#: whiteneuron/templates/admin/submit_line.html:42
 msgid "Feedback saved successfully."
 msgstr "Phản hồi đã được lưu thành công."
 
-#: templates/admin/submit_line.html:42
+#: whiteneuron/templates/admin/submit_line.html:43
 msgid "Failed to save feedback."
 msgstr "Không thể lưu phản hồi."
 
-#: templates/base/forms/helpers/toolbar.html:7
+#: whiteneuron/templates/base/forms/helpers/toolbar.html:7
 msgid "Paragraph"
 msgstr "Đoạn văn"
 
-#: templates/base/forms/helpers/toolbar.html:11
+#: whiteneuron/templates/base/forms/helpers/toolbar.html:11
 msgid "Underlined"
 msgstr "Gạch chân"
 
-#: templates/base/forms/helpers/toolbar.html:15
+#: whiteneuron/templates/base/forms/helpers/toolbar.html:15
 msgid "Bold"
 msgstr "Bold"
 
-#: templates/base/forms/helpers/toolbar.html:19
+#: whiteneuron/templates/base/forms/helpers/toolbar.html:19
 msgid "Italic"
 msgstr "Italic"
 
-#: templates/base/forms/helpers/toolbar.html:23
+#: whiteneuron/templates/base/forms/helpers/toolbar.html:23
 msgid "Strike"
 msgstr "Strike"
 
-#: templates/base/forms/helpers/toolbar.html:27
-#: templates/base/forms/helpers/toolbar.html:95
+#: whiteneuron/templates/base/forms/helpers/toolbar.html:27
+#: whiteneuron/templates/base/forms/helpers/toolbar.html:95
 msgid "Link"
 msgstr "Liên kết"
 
-#: templates/base/forms/helpers/toolbar.html:35
-#: templates/base/forms/helpers/toolbar.html:39
-#: templates/base/forms/helpers/toolbar.html:43
-#: templates/base/forms/helpers/toolbar.html:47
+#: whiteneuron/templates/base/forms/helpers/toolbar.html:35
+#: whiteneuron/templates/base/forms/helpers/toolbar.html:39
+#: whiteneuron/templates/base/forms/helpers/toolbar.html:43
+#: whiteneuron/templates/base/forms/helpers/toolbar.html:47
 msgid "Heading"
 msgstr "Tiêu đề"
 
-#: templates/base/forms/helpers/toolbar.html:55
+#: whiteneuron/templates/base/forms/helpers/toolbar.html:55
 msgid "Quote"
 msgstr "Trích dẫn"
 
-#: templates/base/forms/helpers/toolbar.html:59
+#: whiteneuron/templates/base/forms/helpers/toolbar.html:59
 msgid "Code"
 msgstr "Mã nguồn"
 
-#: templates/base/forms/helpers/toolbar.html:63
+#: whiteneuron/templates/base/forms/helpers/toolbar.html:63
 msgid "Unordered list"
 msgstr "Danh sách không có thứ tự"
 
-#: templates/base/forms/helpers/toolbar.html:67
+#: whiteneuron/templates/base/forms/helpers/toolbar.html:67
 msgid "Ordered list"
 msgstr "Danh sách có thứ tự"
 
-#: templates/base/forms/helpers/toolbar.html:71
+#: whiteneuron/templates/base/forms/helpers/toolbar.html:71
 msgid "Indent increase"
 msgstr "Tăng lề"
 
-#: templates/base/forms/helpers/toolbar.html:75
+#: whiteneuron/templates/base/forms/helpers/toolbar.html:75
 msgid "Indent decrease"
 msgstr "Giảm lề"
 
-#: templates/base/forms/helpers/toolbar.html:83
+#: whiteneuron/templates/base/forms/helpers/toolbar.html:83
 msgid "HTML Editor"
 msgstr "Biên soạn HTML"
 
-#: templates/base/forms/helpers/toolbar.html:92
+#: whiteneuron/templates/base/forms/helpers/toolbar.html:92
 msgid "Enter an URL"
 msgstr "Nhập một URL"
 
-#: templates/base/forms/helpers/toolbar.html:99
+#: whiteneuron/templates/base/forms/helpers/toolbar.html:99
 msgid "Unlink"
 msgstr "Bỏ liên kết"
 
-#: templates/unfold/helpers/account_links.html:69
+#: whiteneuron/templates/unfold/helpers/account_links.html:69
 msgid "User profile"
 msgstr "Hồ sơ người dùng"
 
-#: templates/unfold/helpers/account_links.html:81
+#: whiteneuron/templates/unfold/helpers/account_links.html:81
 msgid "View site"
 msgstr "Xem trang"
 
-#: templates/unfold/helpers/account_links.html:104
+#: whiteneuron/templates/unfold/helpers/account_links.html:104
 msgid "Change password"
 msgstr "Đổi mật khẩu"
 
-#: templates/unfold/helpers/account_links.html:119
+#: whiteneuron/templates/unfold/helpers/account_links.html:119
 msgid "Log out"
 msgstr "Đăng xuất"
 
-#: templates/unfold/helpers/pagination.html:7
+#: whiteneuron/templates/unfold/helpers/pagination.html:7
 msgid "Previous"
 msgstr "Trước"
 
-#: templates/unfold/helpers/pagination.html:11
+#: whiteneuron/templates/unfold/helpers/pagination.html:11
 msgid "Next"
 msgstr "Tiếp theo"
+
+#~ msgid "Failed to mark feedback as resolved."
+#~ msgstr "Không thể đánh dấu phản hồi là đã giải quyết."
 
 #~ msgid "Xóa"
 #~ msgstr "Xóa"
