@@ -30,6 +30,7 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 - **Added**: Two-sided character limits — `maxlength` attribute + live counter on client; server-side validation: `note ≤ 500`, `feedback_message ≤ 2000`.
 - **Added**: `get_short_message()` in `FeedbackDataAdmin.list_display` — truncates to 200 words via Django's `Truncator`.
 - **Fixed**: `search_help_text` moved from `__init__` to a `@property` using `format_lazy` — now re-evaluates per request and responds correctly to language switches instead of being frozen at server startup.
+- **Improved**: `base_badge_callback()` accepts an optional `filter_kwargs` parameter; `feedback_data_badge_callback()` now scopes the badge count to the current user for non-superusers.
 
 ### v0.2.43 (2026-04-01)
 **Feature: Feedback System — DaisyUI modals, anti-spam cooldown, i18n, security hardening**
