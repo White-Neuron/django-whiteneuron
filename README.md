@@ -11,18 +11,26 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Current Version
 
-- 0.2.44
+- 0.2.45
 
 ## Compatibility
 
 - Python >= 3.11
-- Django >= 5.1.6
+- Django >= 5.2.12
 - django-unfold >= 0.85.0
 - Tailwind CSS 4.x + daisyUI 5.x (for the bundled frontend styles)
 
 ## Changelog
 
-### v0.2.44 (2026-04-02) — latest
+### v0.2.45 (2026-04-03) — latest
+**Security: 11 CVE fixes across django, pillow, cryptography, pyasn1**
+- **Security**: `django` lower bound raised from `>=5.1.6` to `>=5.2.12` — patches 7 CVEs including SQL Injection (CVE-2026-1207), DoS ×5, race condition in file-system storage (CVE-2026-25674), and URLField vulnerability (CVE-2026-25673).
+- **Security**: `pillow` lower bound raised from `>=11.0.0` to `>=12.1.1` — patches heap buffer overflow (CVE-2026-25990).
+- **Security**: `cryptography>=46.0.5` added as explicit dependency — patches Improper Input Validation (CVE-2026-26007); previously uncontrolled transitive dependency.
+- **Security**: `pyasn1>=0.6.2` added as explicit dependency — patches CVE-2026-23490; `==0.6.1` was the sole affected version.
+- **Validation**: `safety` scan confirms 0 known vulnerabilities after upgrade (down from 11).
+
+### v0.2.44 (2026-04-02)
 **Fixes & Improvements: Feedback System — Error handling, input limits, i18n lazy evaluation**
 - **Fixed**: `changeform_view` now returns `JsonResponse({"success": True})` after a successful resolve instead of falling through to `super()` with a POST request — prevents a spurious HTTP 403 caused by `has_change_permission = False`.
 - **Fixed**: `note` is read from `request.POST` instead of `request.GET` — prevents HTTP 414 (URI Too Long) when the note is lengthy.
