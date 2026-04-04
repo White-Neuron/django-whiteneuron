@@ -137,7 +137,7 @@ Trân trọng,
               <tr>
                 <td style="vertical-align: top">
                   <img
-                    src="https://api.logo.com/api/v2/images?logo=logo_0a119d06-c73b-4296-b551-8c17eec5b19c&amp;name=NEURON&amp;u=2024-04-19T10%3A12%3A02.379Z&amp;width=500&amp;height=500&amp;format=webp&amp;fit=contain&amp;margin_ratio=0.3&amp;quality=30"
+                    src="https://ci3.googleusercontent.com/mail-sig/AIorK4xT4rd9QM6AKtfHJrkL5q-vAckl7ehKZ1PACpIy0Lg-x09Zwo-6VHjO8A4a2phJJbLsi8bX6OxpueMP"
                     alt="logo image"
                     style="
                       display: block;
@@ -187,19 +187,20 @@ Trân trọng,
                     style="
                       font-size: 14px;
                       margin: 0px;
-                      padding: 0px 8px 0px 0px;
+                      padding: 0px 0px 0px 0px;
                     "
-                    >White Neuron Company Limited</span
-                  ><span
+                    >White Neuron Co., Ltd</span
+                  >
+                  <span
                     style="
                       font-size: 14px;
                       margin: 0px;
-                      padding: 0px 20px 0px 8px;
+                      padding: 0px 8px 0px 8px;
                       border-left-width: 1px;
                       border-left-style: solid;
                       border-left-color: rgb(0, 0, 0);
                     "
-                    >CEO</span
+                    > Founder & CTO</span
                   >
                 </td>
               </tr>
@@ -255,7 +256,7 @@ Trân trọng,
                         padding: 0px 20px 0px 0px;
                         color: rgb(0, 0, 0);
                       "
-                      >whiteneuron.ai</span
+                      >https://whiteneuron.ai</span
                     ></a
                   >
                 </td>
