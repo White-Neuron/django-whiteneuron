@@ -803,7 +803,7 @@ wheels = [
 
 [[package]]
 name = "django-whiteneuron"
-version = "0.2.44"
+version = "0.2.46"
 source = { editable = "." }
 dependencies = [
     { name = "channels" },
@@ -835,7 +835,6 @@ dependencies = [
     { name = "openpyxl" },
     { name = "pandas" },
     { name = "pillow" },
-    { name = "pyasn1" },
     { name = "python-dotenv" },
     { name = "redis" },
     { name = "sentry-sdk" },
@@ -883,7 +882,6 @@ requires-dist = [
     { name = "pandas", specifier = ">=2.2.3" },
     { name = "pillow", specifier = ">=12.1.1" },
     { name = "pre-commit", marker = "extra == 'dev'" },
-    { name = "pyasn1", specifier = ">=0.6.2" },
     { name = "pytest", marker = "extra == 'dev'" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
     { name = "redis", specifier = ">=5.2.1" },

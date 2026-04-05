@@ -1,9 +1,9 @@
 [project]
 name = "django-whiteneuron"
-version = "0.2.46"
+version = "0.2.47"
 description = "A modern Django Admin extension with enhanced UI/UX, dashboard, feedback, file management, rate limiting, IP blacklisting, and advanced admin integrations built on django-unfold."
 authors = [
-    {name = "White Neuron", email = "anhnt@whiteneuron.com"}
+    {name = "White Neuron", email = "anhnt@whiteneuron.ai"}
 ]
 license = {file = "LICENSE"}
 readme = "README.md"
@@ -41,7 +41,6 @@ dependencies = [
     "django-unfold>=0.85.0",
     "djangoql>=0.18.1",
     "cryptography>=46.0.5",
-    "pyasn1>=0.6.2",
 ]
 requires-python = ">=3.11"
 
@@ -49,7 +48,7 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Framework :: Django",
-    "Framework :: Django :: 5.0",
+    "Framework :: Django :: 5.2",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -58,36 +57,22 @@ classifiers = [
 ]
 
 [project.urls]
-homepage = "https://github.com/White-Neuron/django-whiteneuron"
+homepage = "https://whiteneuron.ai"
 repository = "https://github.com/White-Neuron/django-whiteneuron"
 changelog = "https://github.com/White-Neuron/django-whiteneuron/releases"
 "Bug Tracker" = "https://github.com/White-Neuron/django-whiteneuron/issues"
 "PyPI" = "https://pypi.org/project/django-whiteneuron/"
 
-[tool.setuptools]
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["whiteneuron*"]
 
 [tool.setuptools.package-data]
 "whiteneuron" = [
-    "base/templates/**/*",
-    "base/static/**/*",
-    "feedbacks/templates/**/*",
-    "feedbacks/static/**/*",
     "templates/**/*",
-    "templates/**/**/*",
-    "templates/**/**/**/*",
     "static/**/*",
-    "static/**/**/*",
-    "static/**/**/**/*",
-    'locale/**/*',
-    'locale/**/**/*',
-    'locale/**/**/**/*',
+    "locale/**/*",
 ]
-
-[tool.uv.workspace]
-members = ["demo"]
 
 [project.optional-dependencies]
 dev = ["pytest", "black", "flake8", "pre-commit"]

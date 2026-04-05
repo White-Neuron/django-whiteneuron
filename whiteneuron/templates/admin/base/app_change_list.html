@@ -1,170 +1,202 @@
 {% extends "admin/change_list.html" %}
-{% load i18n admin_urls static %}
+{% load i18n static %}
 
-{% block extrahead %}
-{{ block.super }}
+{% block extrahead %}{{ block.super }}
 <style>[x-cloak]{display:none!important}</style>
 {% endblock %}
 
 {% block search %}{% endblock %}
+{% block pagination %}{% endblock %}
+{% block filters %}{% endblock %}
 
 {% block result_list %}
 {% if app_by_category %}
-<div x-data="{ cat: -1 }" class="mt-2">
+<div x-data="{
+  view: localStorage.getItem('wn_app_view') || 'grid',
+  cat: -1,
+  setView(v) { this.view = v; this.cat = -1; localStorage.setItem('wn_app_view', v); }
+}" class="mt-2">
 
-  {# ── CATEGORY CARDS ──────────────────────────────────────────── #}
-  <div x-show="cat === -1"
-       x-transition:enter="transition ease-out duration-150"
-       x-transition:enter-start="opacity-0 scale-95"
-       x-transition:enter-end="opacity-100 scale-100">
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2">
-      {% for category, apps in app_by_category.items %}
-      <button type="button"
-              @click="cat = {{ forloop.counter0 }}"
-              class="group flex flex-col items-center justify-center gap-3 p-5
-                     bg-base-100 dark:bg-base-800
-                     border border-base-200 dark:border-base-700
-                     hover:border-primary/40 dark:hover:border-primary/50
-                     hover:shadow-lg dark:hover:shadow-base-content/10
-                     transition-all duration-200 cursor-pointer rounded-2xl w-full">
+  {# ── Toolbar ─────────────────────────────────────────────────── #}
+  <div class="flex items-center justify-end mb-4 gap-1">
+    <button type="button" @click="setView('grid')"
+            :class="view === 'grid' ? 'bg-primary text-primary-content shadow-sm' : 'text-base-content/50 hover:text-base-content hover:bg-base-200 dark:hover:bg-base-700'"
+            class="inline-flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-150"
+            title="{% trans 'Category view' %}">
+      <span class="material-symbols-outlined" style="font-size:1.1rem;line-height:1">grid_view</span>
+    </button>
+    <button type="button" @click="setView('list')"
+            :class="view === 'list' ? 'bg-primary text-primary-content shadow-sm' : 'text-base-content/50 hover:text-base-content hover:bg-base-200 dark:hover:bg-base-700'"
+            class="inline-flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-150"
+            title="{% trans 'List view' %}">
+      <span class="material-symbols-outlined" style="font-size:1.1rem;line-height:1">apps</span>
+    </button>
+  </div>
 
-        {# Icon area: single icon if 1 app, 2×2 mosaic otherwise #}
-        {% if apps|length == 1 %}
-          {% with a=apps|first %}
+  {# ══════════════════════════════════════════════════════════════ #}
+  {# VIEW 1 — Category cards (2-level)                             #}
+  {# ══════════════════════════════════════════════════════════════ #}
+  <div x-show="view === 'grid'" x-cloak>
+
+    {# Level 1: Category cards #}
+    <div x-show="cat === -1"
+         x-transition:enter="transition ease-out duration-150"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100">
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
+        {% for category, apps in app_by_category.items %}
+        <button type="button" @click="cat = {{ forloop.counter0 }}"
+                class="group flex flex-col items-center justify-center gap-3 p-5
+                       bg-base-100 dark:bg-base-800
+                       border border-base-200 dark:border-base-700
+                       hover:border-primary/40 dark:hover:border-primary/50
+                       hover:shadow-lg dark:hover:shadow-base-content/10
+                       active:scale-95 transition-all duration-200 cursor-pointer rounded-2xl w-full">
+
+          {# Mosaic / single icon #}
+          {% if apps|length == 1 %}{% with a=apps|first %}
           <div class="flex items-center justify-center w-14 h-14 rounded-2xl
                       bg-base-200/60 dark:bg-base-700/40
                       group-hover:bg-primary/10 dark:group-hover:bg-primary/15
-                      transition-colors duration-200 text-primary">
-            {% if a.thumbnail_url %}
-              <img src="{{ a.thumbnail_url }}" class="w-10 h-10 object-contain"/>
-            {% elif a.icon|slice:":4" == "http" %}
-              <img src="{{ a.icon }}" class="w-10 h-10 object-contain"/>
-            {% elif a.icon %}
-              <span class="material-symbols-outlined text-primary" style="font-size:2.2rem;line-height:1">{{ a.icon }}</span>
+                      group-hover:scale-110 transition-all duration-200 text-primary overflow-hidden">
+            {% if a.thumbnail_url %}{% if a.thumbnail_url|slice:":2" == "//" or a.thumbnail_url|slice:":4" == "http" %}<img src="{{ a.thumbnail_url }}" class="w-9 h-9 object-contain" loading="lazy"/>{% else %}<img src="{% static a.thumbnail_url %}" class="w-9 h-9 object-contain" loading="lazy"/>{% endif %}
+            {% elif a.icon|slice:":2" == "//" or a.icon|slice:":4" == "http" %}<img src="{{ a.icon }}" class="w-9 h-9 object-contain" loading="lazy"/>
+            {% elif a.icon %}<span class="material-symbols-outlined" style="font-size:2rem;line-height:1">{{ a.icon }}</span>
+            {% else %}<span class="material-symbols-outlined text-base-content/30" style="font-size:2rem;line-height:1">apps</span>{% endif %}
+          </div>
+          {% endwith %}{% else %}
+          <div class="grid grid-cols-2 gap-0.5 w-14 h-14 p-1.5 rounded-2xl
+                      bg-base-200/60 dark:bg-base-700/40
+                      group-hover:bg-primary/10 dark:group-hover:bg-primary/15
+                      group-hover:scale-110 transition-all duration-200 overflow-hidden">
+            {% if apps|length > 4 %}
+              {% for a in apps|slice:":3" %}
+              <div class="flex items-center justify-center rounded-sm bg-base-100 dark:bg-base-800 overflow-hidden w-full h-full">
+                {% if a.thumbnail_url %}<img src="{{ a.thumbnail_url }}" class="w-full h-full object-contain" loading="lazy"/>
+                {% elif a.icon|slice:":2" == "//" or a.icon|slice:":4" == "http" %}<img src="{{ a.icon }}" class="w-full h-full object-contain" loading="lazy"/>
+                {% elif a.icon %}<span class="material-symbols-outlined text-primary" style="font-size:0.85rem">{{ a.icon }}</span>
+                {% else %}<span class="material-symbols-outlined text-base-content/20" style="font-size:0.85rem">apps</span>{% endif %}
+              </div>
+              {% endfor %}
+              <div class="flex items-center justify-center rounded-sm bg-primary/15 dark:bg-primary/20 w-full h-full">
+                <span class="text-primary font-bold" style="font-size:0.6rem;line-height:1">+{{ apps|length|add:"-3" }}</span>
+              </div>
             {% else %}
-              <span class="material-symbols-outlined text-base-content/30" style="font-size:2.2rem;line-height:1">apps</span>
+              {% for a in apps|slice:":4" %}
+              <div class="flex items-center justify-center rounded-sm bg-base-100 dark:bg-base-800 overflow-hidden w-full h-full">
+                {% if a.thumbnail_url %}<img src="{{ a.thumbnail_url }}" class="w-full h-full object-contain" loading="lazy"/>
+                {% elif a.icon|slice:":2" == "//" or a.icon|slice:":4" == "http" %}<img src="{{ a.icon }}" class="w-full h-full object-contain" loading="lazy"/>
+                {% elif a.icon %}<span class="material-symbols-outlined text-primary" style="font-size:0.85rem">{{ a.icon }}</span>
+                {% else %}<span class="material-symbols-outlined text-base-content/20" style="font-size:0.85rem">apps</span>{% endif %}
+              </div>
+              {% endfor %}
+              {% if apps|length == 2 %}<div class="rounded-sm bg-base-200/40 dark:bg-base-700/20"></div><div class="rounded-sm bg-base-200/40 dark:bg-base-700/20"></div>
+              {% elif apps|length == 3 %}<div class="rounded-sm bg-base-200/40 dark:bg-base-700/20"></div>{% endif %}
             {% endif %}
           </div>
-          {% endwith %}
-        {% else %}
-        {# 2×2 mosaic of first 4 app icons #}
-        <div class="grid grid-cols-2 gap-0.5 w-14 h-14 p-1.5 rounded-2xl
-                    bg-base-200/60 dark:bg-base-700/40
-                    group-hover:bg-primary/10 dark:group-hover:bg-primary/15
-                    transition-colors duration-200">
-          {% if apps|length > 4 %}
-            {# Show first 3 icons + "+N" counter on 4th cell #}
-            {% for a in apps|slice:":3" %}
-            <div class="flex items-center justify-center rounded-lg
-                        bg-base-100 dark:bg-base-800 overflow-hidden w-full h-full">
-              {% if a.thumbnail_url %}
-                <img src="{{ a.thumbnail_url }}" class="w-full h-full object-contain"/>
-              {% elif a.icon|slice:":4" == "http" %}
-                <img src="{{ a.icon }}" class="w-full h-full object-contain"/>
-              {% elif a.icon %}
-                <span class="material-symbols-outlined text-primary" style="font-size:0.95rem">{{ a.icon }}</span>
-              {% else %}
-                <span class="material-symbols-outlined text-base-content/30" style="font-size:0.95rem">apps</span>
-              {% endif %}
-            </div>
-            {% endfor %}
-            <div class="flex items-center justify-center rounded-lg
-                        bg-primary/15 dark:bg-primary/20 w-full h-full">
-              <span class="text-primary font-bold" style="font-size:0.6rem;line-height:1">+{{ apps|length|add:"-3" }}</span>
-            </div>
-          {% else %}
-          {% for a in apps|slice:":4" %}
-          <div class="flex items-center justify-center rounded-lg
-                      bg-base-100 dark:bg-base-800 overflow-hidden w-full h-full">
-            {% if a.thumbnail_url %}
-              <img src="{{ a.thumbnail_url }}" class="w-full h-full object-contain"/>
-            {% elif a.icon|slice:":4" == "http" %}
-              <img src="{{ a.icon }}" class="w-full h-full object-contain"/>
-            {% elif a.icon %}
-              <span class="material-symbols-outlined text-primary" style="font-size:0.95rem">{{ a.icon }}</span>
-            {% else %}
-              <span class="material-symbols-outlined text-base-content/30" style="font-size:0.95rem">apps</span>
-            {% endif %}
-          </div>
-          {% endfor %}
-          {# Fill empty cells in mosaic so 2×2 grid is always complete #}
-          {% if apps|length == 2 %}
-            <div class="rounded-lg bg-base-200/40 dark:bg-base-700/20 w-full h-full"></div>
-            <div class="rounded-lg bg-base-200/40 dark:bg-base-700/20 w-full h-full"></div>
-          {% elif apps|length == 3 %}
-            <div class="rounded-lg bg-base-200/40 dark:bg-base-700/20 w-full h-full"></div>
           {% endif %}
-          {% endif %}
-        </div>
-        {% endif %}
 
-        <div class="flex flex-col items-center text-center gap-0.5 w-full">
-          <span class="font-semibold text-sm leading-snug">
-            {% if category %}{% trans category %}{% else %}{% trans "Other" %}{% endif %}
+          <div class="flex flex-col items-center text-center gap-0.5 w-full">
+            <span class="font-semibold text-sm leading-snug">
+              {% if category %}{% trans category %}{% else %}{% trans "Other" %}{% endif %}
+            </span>
+            <span class="text-xs text-base-content/40">{{ apps|length }}&nbsp;{% trans "apps" %}</span>
+          </div>
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+
+    {# Level 2: Apps in selected category #}
+    {% for category, apps in app_by_category.items %}
+    <div x-show="cat === {{ forloop.counter0 }}" x-cloak
+         x-transition:enter="transition ease-out duration-150"
+         x-transition:enter-start="opacity-0 translate-x-4"
+         x-transition:enter-end="opacity-100 translate-x-0">
+      <div class="flex items-center gap-3 mb-4">
+        <button type="button" @click="cat = -1"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium
+                       rounded-lg bg-base-200 dark:bg-base-700
+                       hover:bg-base-300 dark:hover:bg-base-600 transition-colors duration-150">
+          <span class="material-symbols-outlined" style="font-size:1rem;line-height:1">arrow_back</span>
+          {% trans "Back" %}
+        </button>
+        <span class="font-semibold text-base">
+          {% if category %}{% trans category %}{% else %}{% trans "Other" %}{% endif %}
+        </span>
+      </div>
+      <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-3">
+        {% for app in apps %}
+        <a href="{{ app.url }}"
+           class="group flex flex-col items-center gap-2.5 p-3 rounded-2xl
+                  hover:bg-base-200/60 dark:hover:bg-base-700/50
+                  active:scale-95 transition-all duration-150 cursor-pointer select-none">
+          <div class="flex items-center justify-center w-14 h-14 rounded-2xl
+                      bg-base-200/80 dark:bg-base-700/60
+                      group-hover:bg-primary/10 dark:group-hover:bg-primary/20
+                      group-hover:shadow-md group-hover:scale-110
+                      transition-all duration-200 text-primary overflow-hidden">
+            {% if app.thumbnail_url %}{% if app.thumbnail_url|slice:":2" == "//" or app.thumbnail_url|slice:":4" == "http" %}<img src="{{ app.thumbnail_url }}" class="w-10 h-10 object-contain" loading="lazy"/>{% else %}<img src="{% static app.thumbnail_url %}" class="w-10 h-10 object-contain" loading="lazy"/>{% endif %}
+            {% elif app.icon|slice:":2" == "//" or app.icon|slice:":4" == "http" %}<img src="{{ app.icon }}" class="w-10 h-10 object-contain" loading="lazy"/>
+            {% elif app.icon %}<span class="material-symbols-outlined" style="font-size:2rem;line-height:1">{{ app.icon }}</span>
+            {% else %}<span class="material-symbols-outlined text-base-content/30" style="font-size:2rem;line-height:1">apps</span>{% endif %}
+          </div>
+          <span class="text-xs font-medium leading-tight line-clamp-2 text-center
+                       text-base-content/70 group-hover:text-base-content transition-colors duration-150">
+            {% trans app.name %}
           </span>
-          <span class="text-xs text-base-content/40">{{ apps|length }}&nbsp;{% trans "apps" %}</span>
-        </div>
-      </button>
-      {% endfor %}
+        </a>
+        {% endfor %}
+      </div>
     </div>
-  </div>
+    {% endfor %}
 
-  {# ── APP CARDS (one section per category) ────────────────────── #}
-  {% for category, apps in app_by_category.items %}
-  <div x-show="cat === {{ forloop.counter0 }}" x-cloak
-       x-transition:enter="transition ease-out duration-150"
-       x-transition:enter-start="opacity-0 scale-95"
-       x-transition:enter-end="opacity-100 scale-100">
+  </div>{# end view=grid #}
 
-    {# Back button + category title #}
-    <div class="flex items-center gap-3 mb-4">
-      <button type="button" @click="cat = -1"
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium
-                     rounded-lg bg-base-200 dark:bg-base-700
-                     hover:bg-base-300 dark:hover:bg-base-600
-                     transition-colors duration-150">
-        <span class="material-symbols-outlined" style="font-size:1rem;line-height:1">arrow_back</span>
-        {% trans "Back" %}
-      </button>
-      <span class="font-semibold text-base">
-        {% if category %}{% trans category %}{% else %}{% trans "Other" %}{% endif %}
-      </span>
-    </div>
-
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2">
-      {% for app in apps %}
-      <a href="{% url 'admin:base_app_change' app.pk %}"
-         class="group flex flex-col items-center justify-center gap-3 p-5
-                bg-base-100 dark:bg-base-800
-                border border-base-200 dark:border-base-700
-                hover:border-primary/40 dark:hover:border-primary/50
-                hover:shadow-lg dark:hover:shadow-base-content/10
-                transition-all duration-200 cursor-pointer rounded-2xl">
-
-        <div class="flex items-center justify-center w-16 h-16 rounded-2xl
-                    bg-base-200/60 dark:bg-base-700/40
-                    group-hover:bg-primary/10 dark:group-hover:bg-primary/15
-                    transition-colors duration-200 text-primary">
-          {% if app.thumbnail_url %}
-            <img src="{{ app.thumbnail_url }}" class="w-14 h-14 object-contain rounded-xl"/>
-          {% elif app.icon|slice:":4" == "http" %}
-            <img src="{{ app.icon }}" class="w-14 h-14 object-contain rounded-xl"/>
-          {% elif app.icon %}
-            <span class="material-symbols-outlined" style="font-size:3.5rem;line-height:1">{{ app.icon }}</span>
-          {% else %}
-            <span class="material-symbols-outlined text-base-content/30" style="font-size:3.5rem;line-height:1">apps</span>
-          {% endif %}
-        </div>
-
-        <span class="font-semibold text-sm leading-snug line-clamp-2 text-center">{% trans app.name %}</span>
-      </a>
-      {% endfor %}
-    </div>
-  </div>
-  {% endfor %}
+  {# ══════════════════════════════════════════════════════════════ #}
+  {# VIEW 2 — Flat grouped list                                    #}
+  {# ══════════════════════════════════════════════════════════════ #}
+  <div x-show="view === 'list'" x-cloak class="space-y-8">
+    {% for category, apps in app_by_category.items %}
+    <section>
+      {% if category %}
+      <div class="flex items-center gap-3 mb-4">
+        <span class="text-xs font-semibold uppercase tracking-widest text-base-content/40 shrink-0">{% trans category %}</span>
+        <div class="flex-1 h-px bg-base-200 dark:bg-base-700"></div>
+        <span class="text-xs text-base-content/30 shrink-0">{{ apps|length }}&nbsp;{% trans "apps" %}</span>
+      </div>
+      {% endif %}
+      <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-3">
+        {% for app in apps %}
+        <a href="{{ app.url }}"
+           class="group flex flex-col items-center gap-2.5 p-3 rounded-2xl
+                  hover:bg-base-200/60 dark:hover:bg-base-700/50
+                  active:scale-95 transition-all duration-150 cursor-pointer select-none">
+          <div class="flex items-center justify-center w-14 h-14 rounded-2xl
+                      bg-base-200/80 dark:bg-base-700/60
+                      group-hover:bg-primary/10 dark:group-hover:bg-primary/20
+                      group-hover:shadow-md group-hover:scale-110
+                      transition-all duration-200 text-primary overflow-hidden">
+            {% if app.thumbnail_url %}{% if app.thumbnail_url|slice:":2" == "//" or app.thumbnail_url|slice:":4" == "http" %}<img src="{{ app.thumbnail_url }}" class="w-10 h-10 object-contain" loading="lazy"/>{% else %}<img src="{% static app.thumbnail_url %}" class="w-10 h-10 object-contain" loading="lazy"/>{% endif %}
+            {% elif app.icon|slice:":2" == "//" or app.icon|slice:":4" == "http" %}<img src="{{ app.icon }}" class="w-10 h-10 object-contain" loading="lazy"/>
+            {% elif app.icon %}<span class="material-symbols-outlined" style="font-size:2rem;line-height:1">{{ app.icon }}</span>
+            {% else %}<span class="material-symbols-outlined text-base-content/30" style="font-size:2rem;line-height:1">apps</span>{% endif %}
+          </div>
+          <span class="text-xs font-medium leading-tight line-clamp-2 text-center
+                       text-base-content/70 group-hover:text-base-content transition-colors duration-150">
+            {% trans app.name %}
+          </span>
+        </a>
+        {% endfor %}
+      </div>
+    </section>
+    {% endfor %}
+  </div>{# end view=list #}
 
 </div>
 {% else %}
-  <p class="text-base-content/40 text-sm py-8 text-center">{% trans "No apps available." %}</p>
+  <p class="text-base-content/40 text-sm py-12 text-center">{% trans "No apps available." %}</p>
 {% endif %}
 {% endblock %}
+
+

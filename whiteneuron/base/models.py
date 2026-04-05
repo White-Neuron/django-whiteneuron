@@ -341,7 +341,6 @@ class SoftDeleteModel(models.Model):
     def hard_delete(self, using=None, keep_parents=False):
         super(SoftDeleteModel, self).delete(using=using, keep_parents=keep_parents)
 
-
     def restore(self, request=None):
         self.is_deleted = False
         self.deleted_at = None
@@ -456,6 +455,108 @@ class BaseModel(SoftDeleteModel):
                                                     changed_data= str(changed_data),
                                                     content= content_html)
                 obj.alert()
+
+# ── M2M tracking ────────────────────────────────────────────────────────────
+# Changes to ManyToMany fields (.add / .remove / .set / .clear) never call
+# save(), so updated_at / updated_by would silently stay stale.
+# We fix this by connecting to m2m_changed for every concrete BaseModel
+# subclass.  A direct queryset update is used to avoid re-triggering save(),
+# then a notification is sent to all superusers (same behaviour as save()).
+from django.db.models.signals import class_prepared, m2m_changed as _m2m_changed
+
+
+def _base_model_m2m_changed(sender, instance, action, pk_set, model, **kwargs):
+    if action not in ('post_add', 'post_remove', 'post_clear'):
+        return
+    if not isinstance(instance, BaseModel) or instance.pk is None:
+        return
+
+    request = getattr(thread_local, 'request', None)
+    if request is None or not hasattr(request, 'user'):
+        user = User.objects.filter(is_superuser=True).first()
+    else:
+        user = request.user
+        if user.is_anonymous:
+            user = User.objects.filter(is_superuser=True).first()
+
+    now = timezone.now()
+    # Guard: if no user found, still update timestamps but skip notification
+    if user is None:
+        instance.__class__.objects_all.filter(pk=instance.pk).update(updated_at=now)
+        instance.updated_at = now
+        return
+    # Use queryset.update() to avoid re-triggering save() / infinite loop
+    instance.__class__.objects_all.filter(pk=instance.pk).update(updated_at=now, updated_by=user)
+    instance.updated_at = now
+    instance.updated_by = user
+
+    # ── Resolve the M2M field name & verbose_name ──
+    field_name = None
+    field_verbose = None
+    for f in instance.__class__._meta.local_many_to_many:
+        if f.remote_field.through == sender:
+            field_name = f.name
+            field_verbose = str(f.verbose_name)
+            break
+    if field_name is None:
+        field_name = sender.__name__
+        field_verbose = field_name
+
+    # ── Build change description (same format as save()) ──
+    pk_list = list(pk_set or [])
+    if action == 'post_add':
+        old_value = []
+        new_value = pk_list
+        desc = f"{_('added')}: {pk_list}"
+    elif action == 'post_remove':
+        old_value = pk_list
+        new_value = []
+        desc = f"{_('removed')}: {pk_list}"
+    else:  # post_clear
+        old_value = '(all)'
+        new_value = []
+        desc = str(_('cleared'))
+
+    changed_data = [{'field_name': field_name, 'old_value': old_value, 'new_value': new_value}]
+
+    title = (
+        f"{_('Update')} {instance._meta.verbose_name} "
+        f"<strong>{instance}</strong>({instance.id}) "
+        f"{_('has been updated by user')} \"{user}\""
+    )
+    content_html = (
+        f"{instance._meta.verbose_name} <strong>{instance}</strong>({instance.id}) "
+        f"has been updated by user \"{user}\" with the following changes: "
+        f"<ul><li>{field_verbose}: {desc}</li></ul>"
+    )
+    obj_link = instance.path()
+
+    for superuser in User.objects.filter(is_superuser=True):
+        try:
+            notif = Notification.objects.create(
+                user=superuser,
+                title=title,
+                action_by=user,
+                flag='info',
+                action='update',
+                obj_link=obj_link,
+                changed_data=str(changed_data),
+                content=content_html,
+            )
+            notif.alert()
+        except Exception:
+            pass
+
+
+def _connect_m2m_for_base_model(sender, **kwargs):
+    if sender._meta.abstract or not issubclass(sender, BaseModel):
+        return
+    for field in sender._meta.local_many_to_many:
+        _m2m_changed.connect(_base_model_m2m_changed, sender=field.remote_field.through)
+
+
+class_prepared.connect(_connect_m2m_for_base_model)
+# ─────────────────────────────────────────────────────────────────────────────
 
 ############################################
 # Image Model
@@ -755,157 +856,6 @@ class Mail(BaseModel):
     
 
 # Apps
-
-# Init data cho bảng App with Model Manager and Settings
-# UNFOLD = {
-#.    ..........
-#     "SIDEBAR": {
-#         "show_search": True,
-#         "show_all_applications": False,
-#         "navigation": [
-#             {
-#                 "title": _("Navigation"),
-#                 "items": [
-#                     {
-#                         "title": _("Dashboard"),
-#                         "icon": "dashboard",
-#                         "link": reverse_lazy("admin:index"),
-#                     },
-#                     {
-#                         "title": _("Notifications"),
-#                         "icon": "notifications",
-#                         "link": reverse_lazy("admin:notification_notification_changelist"),
-#                         "badge": "whiteneuron.notification.utils.notification_badge_callback",
-#                     },
-#                     {
-#                         "title": _("Feedbacks"),
-#                         "icon": "feedback",
-#                         "link": reverse_lazy("admin:feedbacks_feedbackdata_changelist"),
-#                         "badge": "whiteneuron.feedbacks.utils.feedback_data_badge_callback",
-#                     },
-#                 ],
-#             },
-#             {
-#                 "title": _("File Management"),
-#                 "collapsible": True,
-#                 "items": [
-#                     {
-#                         "title": _("Excel Files"),
-#                         "icon": "table",
-#                         "link": reverse_lazy("admin:file_management_excelfile_changelist"),
-#                         "badge": "whiteneuron.file_management.utils.excelfile_badge_callback",
-#                         "permission": "whiteneuron.base.utils.permission_non_guest_callback",
-#                     },
-#                     {
-#                         "title": _("PDF Files"),
-#                         "icon": "picture_as_pdf",
-#                         "link": reverse_lazy("admin:file_management_pdffile_changelist"),
-#                         "badge": "whiteneuron.file_management.utils.pdffile_badge_callback",
-#                         "permission": "whiteneuron.base.utils.permission_non_guest_callback",
-#                     },
-#                 ],
-#             },
-#             {
-#                 "title": _("Users & Groups"),
-#                 "collapsible": True,
-#                 "items": [
-#                     {
-#                         "title": _("Users"),
-#                         "icon": "person",
-#                         "link": reverse_lazy("admin:base_user_changelist"),
-#                         "badge": "whiteneuron.base.utils.user_badge_callback",
-#                         "permission": "whiteneuron.base.utils.permission_admin_callback",
-#                     },
-#                     {
-#                         "title": _("User activity"),
-#                         "icon": "history",
-#                         "link": reverse_lazy("admin:base_useractivity_changelist"),
-#                         "badge": "whiteneuron.base.utils.useractivity_badge_callback",
-#                         "permission": "whiteneuron.base.utils.permission_admin_callback",
-#                     },
-#                     {
-#                         "title": _("Groups"),
-#                         "icon": "group",
-#                         "link": reverse_lazy("admin:auth_group_changelist"),
-#                         "badge": "whiteneuron.base.utils.group_badge_callback",
-#                         "permission": "whiteneuron.base.utils.permission_admin_callback",
-#                     },
-#                 ],
-#             },
-#             {
-#                 "title": _("System"),
-#                 "collapsible": True,
-#                 "items": [
-#                     {
-#                         "title": _("Images"),
-#                         "icon": "image",
-#                         "link": reverse_lazy("admin:base_image_changelist"),
-#                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
-#                     },
-#                     {
-#                         "title": _("Emails"),
-#                         "icon": "email",
-#                         "link": reverse_lazy("admin:base_mail_changelist"),
-#                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
-#                     },
-#                     {
-#                         "title": _("Notifications config"),
-#                         "icon": "notifications",
-#                         "link": reverse_lazy("admin:notification_notificationconfig_changelist"),
-#                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
-#                     }
-#                 ],
-#             },
-#             {
-#                 "title": _("Celery Tasks"),
-#                 "collapsible": True,
-#                 "items": [
-#                     {
-#                         "title": _("Clocked"),
-#                         "icon": "hourglass_bottom",
-#                         "link": reverse_lazy(
-#                             "admin:django_celery_beat_clockedschedule_changelist"
-#                         ),
-#                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
-#                     },
-#                     {
-#                         "title": _("Crontabs"),
-#                         "icon": "update",
-#                         "link": reverse_lazy(
-#                             "admin:django_celery_beat_crontabschedule_changelist"
-#                         ),
-#                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
-#                     },
-#                     {
-#                         "title": _("Intervals"),
-#                         "icon": "arrow_range",
-#                         "link": reverse_lazy(
-#                             "admin:django_celery_beat_intervalschedule_changelist"
-#                         ),
-#                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
-#                     },
-#                     {
-#                         "title": _("Periodic tasks"),
-#                         "icon": "task",
-#                         "link": reverse_lazy(
-#                             "admin:django_celery_beat_periodictask_changelist"
-#                         ),
-#                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
-#                     },
-#                     {
-#                         "title": _("Solar events"),
-#                         "icon": "event",
-#                         "link": reverse_lazy(
-#                             "admin:django_celery_beat_solarschedule_changelist"
-#                         ),
-#                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
-#                     },
-#                 ],
-#             },
-#         ],
-#     },
-# }
-
 class App(BaseModel):
     name = models.CharField(max_length=255, verbose_name= _('App name'))
     is_active = models.BooleanField(default=True, verbose_name= _('Active'))
@@ -922,5 +872,5 @@ class App(BaseModel):
 
     def __str__(self):
         if self.name:
-            return self.name
+            return _(self.name)
         return f'App {self.id}'

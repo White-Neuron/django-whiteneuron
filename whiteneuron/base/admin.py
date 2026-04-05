@@ -1,3 +1,4 @@
+import types as _types
 from typing import Sequence
 from django import forms
 from django.contrib import admin, messages
@@ -623,67 +624,32 @@ class MailAdmin(ModelAdmin):
 
 
 from django.conf import settings
-from django.core.cache import cache
 
-def init_app_db():
-    # Kiểm tra xem hàm đã được chạy chưa
-    cache_key = 'init_app_db_executed'
-    cached_value = cache.get(cache_key)
-    # Đã chạy rồi, bỏ qua
-    if cached_value is not None:
-        return
-    
-    # Get apps from SIDEBAR in UNFOLD settings
-    sidebar_apps= []
+def _parse_sidebar_apps():
+    """Parse UNFOLD SIDEBAR settings into app-like objects. No DB access."""
+    apps = []
     try:
-        sidebar= settings.UNFOLD.get('SIDEBAR', {})
-        navigation= sidebar.get('navigation', [])
+        navigation = settings.UNFOLD.get('SIDEBAR', {}).get('navigation', [])
         for section in navigation:
-            category= section.get('title', None)
-            items= section.get('items', [])
-            for item in items:
-                app_name= item.get('title', None)
-                link= item.get('link', None)
-                if '/base/app/' in str(link):
-                    # bỏ qua link quản trị app
+            category = section.get('title')
+            for item in section.get('items', []):
+                name = item.get('title')
+                link = item.get('link')
+                if not (name and link) or '/base/app/' in str(link):
                     continue
-                icon= item.get('icon', None)
-                permission= item.get('permission', None)
-                thumbnail_url= item.get('thumbnail', None)
-                if app_name and link:
-                    sidebar_apps.append({
-                        'name': app_name,
-                        'url': link,
-                        'icon': icon,
-                        'category': category,
-                        'permission': permission,
-                        'thumbnail_url': thumbnail_url,
-                    })
-    except:
+                apps.append(_types.SimpleNamespace(
+                    pk=None,
+                    name=name,
+                    url=link,
+                    icon=item.get('icon'),
+                    category=category,
+                    permission=item.get('permission'),
+                    thumbnail_url=item.get('thumbnail'),
+                    is_active=True,
+                ))
+    except Exception:
         pass
-    # Cập nhật hoặc tạo mới các app từ sidebar_apps
-    for app in sidebar_apps:
-        obj= App.objects.filter(url= app['url']).first()
-        if obj is None:
-            obj= App()
-        obj.name= app['name']
-        obj.url= app['url']
-        obj.icon= app['icon']
-        obj.category= app['category']
-        obj.permission= app['permission']
-        obj.thumbnail_url= app['thumbnail_url']
-        obj.is_active= True
-        obj.save(notification= False)
-
-    # set active= False cho các app không có trong sidebar_apps
-    existing_apps= App.objects.all()
-    for obj in existing_apps:
-        if not any(app['url'] == obj.url for app in sidebar_apps):
-            obj.is_active= False
-            obj.save(notification= False)
-    
-    # Re-sync every 5 minutes so SIDEBAR changes are picked up without manual cache clear
-    cache.set(cache_key, True, timeout=300)
+    return apps
 
 # App Model Admin
 from django.utils.module_loading import import_string
@@ -694,28 +660,7 @@ class AppAdmin(ModelAdmin):
     list_before_template= 'admin/header.html'
     change_list_template= 'admin/base/app_change_list.html'
 
-    list_display = ['icon_display', 'name', 'is_active', 'category', 'permission']
-    search_fields = ['name']
-    list_filter = ['is_active', 'category']
-    readonly_fields = ['icon_display']
-    fieldsets = (
-        (_('App info'), {
-            'fields': ('name', 'is_active', 'icon', 'url')
-        }),
-    )
-
-    list_filter_submit= False
-
     default_toggle_sidebar= False
-
-    def icon_display(self, instance: App):
-        if instance.icon:
-            if instance.icon.startswith('http://') or instance.icon.startswith('https://'):
-                return format_html(f'<img src="{instance.icon}" height="48"/>')
-            else:
-                return format_html(f'<span class="material-symbols-outlined" style="font-size: 48px;">{instance.icon}</span>')
-        return None
-    icon_display.short_description = _('Icon')
 
     def has_add_permission(self, request):
         return False
@@ -726,90 +671,32 @@ class AppAdmin(ModelAdmin):
     def has_delete_permission(self, request, obj = ...):
         return False
 
-    grid_view= True
-    grid_exclude_fields_list_display= ['icon_display', 'is_active', 'name', 'category', 'permission']
-    action_buttons= False
-
-    def grid_item_header(self, obj):
-        if obj.thumbnail_url:
-            icon_html = f'<img src="{static(obj.thumbnail_url)}" class="w-14 h-14 object-contain rounded-xl"/>'
-        elif obj.icon and (obj.icon.startswith('http://') or obj.icon.startswith('https://')):
-            icon_html = f'<img src="{obj.icon}" class="w-14 h-14 object-contain rounded-xl"/>'
-        elif obj.icon:
-            icon_html = f'<span class="material-symbols-outlined" style="font-size:3.5rem;line-height:1">{obj.icon}</span>'
-        else:
-            icon_html = '<span class="material-symbols-outlined text-base-content/30" style="font-size:3.5rem;line-height:1">apps</span>'
-
-        category_html = (
-            f'<span class="text-xs text-base-content/40 mt-1 truncate max-w-full">{_(obj.category)}</span>'
-            if obj.category else ''
-        )
-
-        string = f"""
-<div class="ui-card h-full flex flex-col items-center justify-center gap-3 p-5 bg-base-100 dark:bg-base-800 border border-base-200 dark:border-base-700 hover:border-primary/40 dark:hover:border-primary/50 hover:shadow-lg dark:hover:shadow-base-content/10 transition-all duration-200 cursor-pointer group rounded-2xl">
-    <div class="flex items-center justify-center w-16 h-16 rounded-2xl bg-base-200/60 dark:bg-base-700/40 group-hover:bg-primary/10 dark:group-hover:bg-primary/15 transition-colors duration-200 text-primary">
-        {icon_html}
-    </div>
-    <div class="flex flex-col items-center text-center gap-0.5 w-full">
-        <span class="font-semibold text-sm leading-snug line-clamp-2">{_(obj.name)}</span>
-        {category_html}
-    </div>
-</div>
-"""
-        return mark_safe(string)
-    grid_item_header.short_description = "Header"
-
-    def has_permission(self, request, obj= None):
+    def has_permission(self, request, obj=None):
         if request.user.is_superuser:
             return True
-        permission= obj.permission if obj else None # string like: 'whiteneuron.base.utils.permission_admin_callback'
+        permission = obj.permission if obj else None
         if permission:
-            perm_func= import_string(permission)
-            if perm_func:
-                return perm_func(request)
+            perm_func = permission if callable(permission) else import_string(permission)
+            return perm_func(request)
         return True
 
     def get_queryset(self, request):
-        init_app_db()
-        queryset = super(AppAdmin, self).get_queryset(request).filter(is_active=True)
-
-        if request.user.is_superuser:
-            return queryset
-
-        allowed_ids = [obj.pk for obj in queryset if self.has_permission(request, obj)]
-        return queryset.filter(pk__in=allowed_ids)
-    
-    def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
-        ## Điều hướng tới url của app
-        app= get_object_or_404(App, pk= object_id)
-        if not app.is_active:
-            messages.error(request, _("This app is not active."))
-            return redirect(reverse_lazy('admin:base_app_changelist'))
-        if not self.has_permission(request, app):
-            messages.error(request, _("You do not have permission to access this app."))
-            return redirect(reverse_lazy('admin:base_app_changelist'))
-        if app.url:
-            return redirect(app.url)
-        return super().changeform_view(request, object_id, form_url, extra_context)
+        return super().get_queryset(request).none()
 
     def changelist_view(self, request, extra_context=None):
         if extra_context is None:
-            extra_context= {}
+            extra_context = {}
         extra_context.update(dashboard_callback(request, extra_context))
-        extra_context['title']= _('Dashboard')
+        extra_context['title'] = _('Dashboard')
 
-        # Group apps by category for two-level grid UI
-        qs = self.get_queryset(request)
+        apps = _parse_sidebar_apps()
+        if not request.user.is_superuser:
+            apps = [app for app in apps if self.has_permission(request, app)]
+
         app_by_category = {}
-        for app in qs:
+        for app in apps:
             cat = app.category or ''
             app_by_category.setdefault(cat, []).append(app)
-        # Sort: named categories alphabetically, unnamed ("Other") last
-        extra_context['app_by_category'] = dict(
-            sorted(app_by_category.items(), key=lambda x: (x[0] == '', x[0].lower()))
-        )
+        extra_context['app_by_category'] = app_by_category
 
         return super().changelist_view(request, extra_context)
-
-    def get_list_filter(self, request):
-        return ['category']

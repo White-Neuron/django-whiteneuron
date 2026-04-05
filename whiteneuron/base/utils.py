@@ -1,5 +1,5 @@
 from django.utils import timezone
-from .models import User, UserActivity, App
+from .models import User, UserActivity
 from django.contrib.auth.models import Group
 
 # count time run function
@@ -40,9 +40,16 @@ def base_badge_callback(request, model, filter_kwargs=None):
     #         updated_at__gte=today,
     #     ).count()
 
-    c = getattr(model, 'objects_all', model.objects).filter(
-      updated_at__gte=today,
-    )
+    c = getattr(model, 'objects_all', model.objects)
+    if hasattr(model, 'updated_at'):
+        c = c.filter(
+          updated_at__gte=today,
+        )
+    elif hasattr(model, 'created_at'):
+        c = c.filter(
+          created_at__gte=today,
+        )
+        
     if filter_kwargs:
         c = c.filter(**filter_kwargs).count()
     else:        
@@ -66,7 +73,15 @@ def group_badge_callback(request):
     return 0
 
 def app_badge_callback(request):
-    return base_badge_callback(request, App)
+    from django.conf import settings
+    try:
+        navigation = settings.UNFOLD.get('SIDEBAR', {}).get('navigation', [])
+        return sum(
+            1 for section in navigation for item in section.get('items', [])
+            if item.get('title') and item.get('link') and '/base/app/' not in str(item.get('link'))
+        )
+    except Exception:
+        return 0
 
 def permission_callback(request):
     return False
