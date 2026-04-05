@@ -11,7 +11,7 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Current Version
 
-- 0.2.45
+- 0.2.47
 
 ## Compatibility
 
@@ -22,7 +22,26 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Changelog
 
-### v0.2.45 (2026-04-03) — latest
+### v0.2.47 (2026-04-05) — latest
+**Feature: M2M change tracking, zero-DB App dashboard, dual-view UI**
+- **Added**: `m2m_changed` signal handler for all concrete `BaseModel` subclasses — `.add()`, `.remove()`, `.set()`, `.clear()` on any ManyToMany field now correctly updates `updated_at`/`updated_by` and sends a notification to superusers with the same `changed_data` format as `save()`.
+- **Added**: App dashboard — two toggle-able view modes: **grid** (2-level category → app cards) and **list** (flat grouped), persisted via `localStorage`.
+- **Removed**: `init_app_db()` DB-write mechanism — App dashboard now reads directly from `settings.UNFOLD['SIDEBAR']` via a new `_parse_sidebar_apps()` helper; zero DB writes on page load.
+- **Fixed**: `app_badge_callback()` counted from stale DB; now counts from `settings.UNFOLD['SIDEBAR']` — badge is always in sync with config.
+- **Fixed**: `has_permission()` in `AppAdmin` now handles callable UNFOLD permissions (lambdas) in addition to dotted-string imports.
+- **Fixed**: Protocol-relative URLs (`//cdn…`) in app icons/thumbnails were incorrectly routed to `{% static %}`; added `|slice:":2" == "//"` check across all render paths.
+- **Fixed**: Mosaic `+N` counter (categories with >4 apps) correctly shows 3 icons + overflow count.
+- **Improved**: Pagination and filter bars hidden on App dashboard via `{% block pagination %}` and `{% block filters %}` override.
+- **Improved**: `pyproject.toml` — `package-data` reduced from 14 lines to 3; removed unused `pyasn1` dep, dead `[tool.uv.workspace]`, empty `[tool.setuptools]`; fixed `Framework :: Django :: 5.2` classifier.
+
+### v0.2.46 (2026-04-04)
+**Fix: Email template — logo URL, company name, and contact details**
+- **Fixed**: Logo URL updated from `api.logo.com` to stable Google-hosted URL.
+- **Fixed**: Company name updated to `White Neuron Co., Ltd` (official name).
+- **Fixed**: Title updated to `Founder & CTO`.
+- **Fixed**: Website URL in signature changed to full `https://whiteneuron.ai`.
+
+### v0.2.45 (2026-04-03)
 **Security: 11 CVE fixes across django, pillow, cryptography, pyasn1**
 - **Security**: `django` lower bound raised from `>=5.1.6` to `>=5.2.12` — patches 7 CVEs including SQL Injection (CVE-2026-1207), DoS ×5, race condition in file-system storage (CVE-2026-25674), and URLField vulnerability (CVE-2026-25673).
 - **Security**: `pillow` lower bound raised from `>=11.0.0` to `>=12.1.1` — patches heap buffer overflow (CVE-2026-25990).
