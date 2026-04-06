@@ -51,7 +51,6 @@
     // Decode sang params riêng để giữ duplicate keys (vd: chapter__id__exact=29&chapter__id__exact=31).
     function normalize(p) {
         const copy = new URLSearchParams(p.toString());
-        copy.delete('p');
         const clf = copy.get('_changelist_filters');
         if (clf) {
             copy.delete('_changelist_filters');

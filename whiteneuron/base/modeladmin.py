@@ -9,7 +9,8 @@ from django.contrib.admin.views.main import ChangeList
 from collections import OrderedDict
 from typing import Any, Sequence
 
-from django.urls import reverse_lazy
+import ast
+from django.urls import reverse, reverse_lazy
 
 from unfold.contrib.forms.widgets import WysiwygWidget as UnfoldWysiwygWidget
 from whiteneuron.base.widgets import WysiwygWidget, CKEditor5Widget
@@ -48,6 +49,9 @@ def get_verbose_name_field(model, field):
         return field
 
 class ModelAdmin(UnfoldAdmin):
+
+    show_history = True  # Show history panel in change form, data from Notification model
+    change_form_template = 'admin/wn_change_form.html'
 
     # MAX OBJECTS PER PAGE
     list_per_page = 50
@@ -205,63 +209,6 @@ class ModelAdmin(UnfoldAdmin):
                                         flag= 'danger',
                                         action= 'delete',
                                         content= content_html)
-    
-    # def save_model(self, request, obj, form, change):
-        # save created_by and updated_by when create or update
-        # title= ''
-        # content_html= ''
-        # action= ''
-        # user= request.user
-        # obj_link= f"/admin/{obj._meta.app_label}/{obj._meta.model_name}/{obj.id}/change/"
-        # if not change: # check if the object is being created
-        #     obj.updated_by= user
-        #     obj.created_by= user
-        #     action= 'create'
-        #     title= f"New {obj._meta.verbose_name} \"{obj}\" has been created by user \"{obj.created_by}\""
-        #     content_html= f"New {obj._meta.verbose_name} <a href='{obj_link}'>{obj}</a> has been created by user \"{obj.created_by}\""
-
-        # # check if the object is being updated with a new version
-        # else:
-        #     fields_changed= []
-        #     isUpdate= False
-        #     if hasattr(obj.__class__, 'objects_all'):
-        #         old= obj.__class__.objects_all.get(pk= obj.pk)
-        #     else:
-        #         old= obj.__class__.objects.get(pk= obj.pk)
-
-        #     for attr in obj.__dict__:
-        #         if attr in ['_state', 'created_at', 'created_by', 'updated_at', 'updated_by']:
-        #             continue
-        #         # kiểm tra attr có phải là field không
-        #         if not hasattr(obj.__class__, attr):
-        #             continue
-        #         # print(attr)
-        #         try:
-        #             if getattr(obj, attr) != getattr(old, attr):
-        #                 isUpdate= True
-        #                 fields_changed.append((attr, getattr(old, attr), getattr(obj, attr)))
-        #         except Exception as e:
-        #             print(e)
-        #             pass
-        #     if isUpdate:
-        #         obj.updated_by= user
-        #         action= 'update'
-        #         title= f"{obj._meta.verbose_name} \"{obj}\" has been updated by user \"{obj.updated_by}\""
-        #         content_html= f"{obj._meta.verbose_name} \"{obj}\" has been updated by user \"{obj.updated_by}\" with the following changes: <ul>"
-        #         for field in fields_changed:
-        #             content_html+= f"<li>{field[0].verbose_name if hasattr(field[0], 'verbose_name') else field[0]}: {field[1]} -> {field[2]}</li>"
-        #         content_html+= "</ul>"
-        # super().save_model(request, obj, form, change)
-        # send notification to superuser when create or update successfully
-        # if title:
-        #     for user in User.objects.filter(is_superuser= True):
-        #         obj= Notification.objects.create(user= user, title= title,
-        #                                     action_by= obj.updated_by if action == 'update' else obj.created_by,
-        #                                     flag= 'info',
-        #                                     action= action,
-        #                                     obj_link= obj_link,
-        #                                     content= content_html)
-        #         obj.alert(request) # send alert to user
 
 
 
@@ -504,7 +451,12 @@ class ModelAdmin(UnfoldAdmin):
         res = super().changelist_view(request, extra_context)
         return res
     
-    def changeform_view(self, request, object_id = None, form_url = "", extra_context = None):
+    def has_view_history_permission(self, request, obj=None):
+        if request.user.is_superuser:
+            return True
+        return self.has_change_permission(request, obj)
+
+    def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
         extra_context = extra_context or {}
         extra_context["sidebar_default"] = self.default_toggle_sidebar
         extra_context["sidebar_model_key"] = (
@@ -512,6 +464,31 @@ class ModelAdmin(UnfoldAdmin):
         )
         if self.default_toggle_sidebar is not None:
             request.session["toggle_sidebar"] = self.default_toggle_sidebar
+
+        can_view_history = self.show_history and self.has_view_history_permission(request)
+        extra_context['show_history'] = can_view_history
+        if can_view_history and object_id:
+            try:
+                obj_link = reverse(
+                    'admin:%s_%s_change' % (self.model._meta.app_label, self.model._meta.model_name),
+                    args=[object_id],
+                )
+                notifications = (
+                    Notification.objects
+                    .filter(obj_link=obj_link)
+                    .select_related('action_by')
+                    .order_by('-created_at')[:50]
+                )
+                # Parse changed_data string → list of dicts for each notification
+                for notif in notifications:
+                    try:
+                        notif.parsed_changed_data = ast.literal_eval(notif.changed_data) if notif.changed_data else []
+                    except Exception:
+                        notif.parsed_changed_data = []
+                extra_context['history_notifications'] = notifications
+            except Exception:
+                extra_context['history_notifications'] = []
+
         return super().changeform_view(request, object_id, form_url, extra_context)
     
     # GridItemHeader

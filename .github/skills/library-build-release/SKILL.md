@@ -61,16 +61,30 @@ This skill executes a reliable package build/release workflow based on [scripts/
 - Use [release description template](./assets/release-description-template.md).
 - If language is Vietnamese, always write proper Vietnamese diacritics.
 
-6. Git operations (release mode)
+6. Changelog & README update (mandatory before git tag)
+- **MUST be done before any git commit/tag** — this is a blocking step.
+- Update `README.md` changelog:
+  - Add new version entry at the top of `## Changelog` section.
+  - Move `— latest` tag from previous version to the new one.
+  - Follow the existing format: `### v<version> (<date>) — latest`.
+- Create release notes file at `docs/reports/releases/<date>-v<version>.md`:
+  - Use the professional release description from step 5.
+  - Structure: summary, main changes (Added/Fixed/Improved), files changed table, compatibility notes, upgrade guide.
+  - Note: `docs/reports/` is gitignored — use `git add -f` to force-stage this file.
+- Rebuild with `uv build` once after all content edits (README, release notes, version bump are done).
+
+7. Git operations (release mode)
 - Before tag/push, run [library smoke-check skill](../library-smoke-check/SKILL.md) and require PASS.
 - Stage only intended files (avoid blind `git add .` when unrelated changes exist).
+- Use `git add -f docs/reports/releases/<date>-v<version>.md` for the release notes file.
 - Create commit message:
-  - `Release v<version>: <professional-summary>`
+  - `v<version>: <professional-summary>`
 - Create annotated tag:
   - `v<version>` with aligned tag message
-- Push current branch and tag.
+- Push current branch and tag:
+  - `git push && git push origin v<version>`
 
-7. Final report
+8. Final report
 - Report:
   - version before/after
   - files changed

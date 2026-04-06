@@ -504,14 +504,37 @@ def _base_model_m2m_changed(sender, instance, action, pk_set, model, **kwargs):
 
     # ── Build change description (same format as save()) ──
     pk_list = list(pk_set or [])
+
+    def _labels_from_qs(qs):
+        """Return list of '__str__ (pk)' for a queryset."""
+        return [f"{o} ({o.pk})" for o in qs]
+
+    def _resolve_labels(pks):
+        """Return list of '__str__ (pk)' for pk list, fallback to pk on error."""
+        try:
+            objs = {o.pk: o for o in model.objects.filter(pk__in=pks)}
+            return [f"{objs[pk]} ({pk})" if pk in objs else str(pk) for pk in pks]
+        except Exception:
+            return [str(pk) for pk in pks]
+
+    # current state (post-signal, so add already happened / remove already happened)
+    try:
+        current_qs = getattr(instance, field_name).all()
+        current_labels = _labels_from_qs(current_qs)
+    except Exception:
+        current_labels = []
+
     if action == 'post_add':
-        old_value = []
-        new_value = pk_list
-        desc = f"{_('added')}: {pk_list}"
+        added_labels = _resolve_labels(pk_list)
+        added_set = set(pk_list)
+        old_value = [lbl for lbl in current_labels if not any(f"({pk})" in lbl for pk in added_set)]
+        new_value = current_labels
+        desc = f"{_('added')}: {added_labels}"
     elif action == 'post_remove':
-        old_value = pk_list
-        new_value = []
-        desc = f"{_('removed')}: {pk_list}"
+        removed_labels = _resolve_labels(pk_list)
+        old_value = current_labels + removed_labels
+        new_value = current_labels
+        desc = f"{_('removed')}: {removed_labels}"
     else:  # post_clear
         old_value = '(all)'
         new_value = []

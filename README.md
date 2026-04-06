@@ -11,7 +11,7 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Current Version
 
-- 0.2.47
+- 0.2.48
 
 ## Compatibility
 
@@ -22,7 +22,21 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Changelog
 
-### v0.2.47 (2026-04-05) — latest
+### v0.2.48 (2026-04-06) — latest
+**Feature: Change history panel — modal UI, M2M diff, permission gate**
+- **Added**: Change history panel shown on every change-form — floating "History" button (bottom-right, `fixed position`) opens a scrollable modal listing the 50 most recent `Notification` records for the object.
+- **Added**: Each history entry displays: action badge (Create/Update/Delete/Restore), actor avatar + username, timestamp, and an **old → new diff** for every changed field using `changed_data` from the `Notification` model.
+- **Added**: `has_view_history_permission()` on `ModelAdmin` — panel is shown only to superusers or users with `change` permission; read-only staff cannot see history.
+- **Added**: `show_history = True` class attribute on `ModelAdmin` — subclasses can opt out per model by setting `show_history = False`.
+- **Fixed**: DaisyUI v5 `ui-` prefix applied correctly to `ui-modal`, `ui-modal-box`, `ui-modal-backdrop`, `ui-btn` — resolves invisible/broken modal.
+- **Fixed**: Trigger `<button type="button">` — prevents accidental form submission when clicking the History button.
+- **Fixed**: Close button and backdrop use `dialog.close()` via JS — avoids nested `<form method="dialog">` inside the admin form (HTML spec violation that caused the button to escape DOM).
+- **Fixed**: UNFOLD's built-in "Lịch sử" button hidden via `{% block object-tools-items %}{% endblock %}` — eliminates duplicate history link in the toolbar.
+- **Improved**: `import ast` and `reverse` moved to module-level imports in `modeladmin.py`.
+- **Improved**: All panel strings wrapped in `{% trans %}` for full i18n support.
+- **Improved**: `change_list.html` — pagination state (`p=...`) now preserved in `sessionStorage` alongside filters; navigating back from a change form restores the correct page instead of jumping to page 1.
+
+### v0.2.47 (2026-04-05)
 **Feature: M2M change tracking, zero-DB App dashboard, dual-view UI**
 - **Added**: `m2m_changed` signal handler for all concrete `BaseModel` subclasses — `.add()`, `.remove()`, `.set()`, `.clear()` on any ManyToMany field now correctly updates `updated_at`/`updated_by` and sends a notification to superusers with the same `changed_data` format as `save()`.
 - **Added**: App dashboard — two toggle-able view modes: **grid** (2-level category → app cards) and **list** (flat grouped), persisted via `localStorage`.

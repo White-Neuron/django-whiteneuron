@@ -1,0 +1,12 @@
+{% extends "admin/change_form.html" %}
+{% load i18n static %}
+
+{# Ẩn nút Lịch sử mặc định của UNFOLD vì đã có history panel riêng #}
+{% block object-tools-items %}{% endblock %}
+
+{% block after_related_objects %}
+{{ block.super }}
+{% if show_history and history_notifications %}
+{% include "admin/wn_history_panel.html" %}
+{% endif %}
+{% endblock %}

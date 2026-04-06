@@ -1,0 +1,113 @@
+{% load i18n static %}
+
+{# Floating trigger button — fixed bottom-right #}
+<button
+  type="button"
+  onclick="document.getElementById('wn-history-modal').showModal()"
+  class="fixed bottom-20 right-6 z-40 inline-flex items-center gap-2 px-4 py-2.5 rounded-full shadow-lg
+         bg-primary text-primary-content text-sm font-medium
+         hover:bg-primary/90 active:scale-95 transition-all">
+  <span class="material-symbols-outlined" style="font-size:1rem;line-height:1">history</span>
+  {% trans "History" %}
+  <span class="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full bg-white/25 text-xs font-bold">
+    {{ history_notifications|length }}
+  </span>
+</button>
+
+{# Modal #}
+<dialog id="wn-history-modal" class="ui-modal">
+  <div class="ui-modal-box w-full max-w-2xl max-h-[85vh] flex flex-col p-0 rounded-2xl overflow-hidden">
+
+    {# Header #}
+    <div class="flex items-center gap-3 px-5 py-4 border-b border-base-200 dark:border-base-700 shrink-0">
+      <span class="material-symbols-outlined text-base-content/50" style="font-size:1.2rem">history</span>
+      <h3 class="flex-1 font-semibold text-sm uppercase tracking-widest text-base-content/50">
+        {% trans "Change history" %}
+      </h3>
+      <span class="text-xs text-base-content/30 mr-2">{{ history_notifications|length }}&nbsp;{% trans "records" %}</span>
+      <button type="button" onclick="document.getElementById('wn-history-modal').close()" class="ui-btn ui-btn-sm ui-btn-circle ui-btn-ghost text-base-content/40 hover:text-base-content">
+        <span class="material-symbols-outlined" style="font-size:1.1rem;line-height:1">close</span>
+      </button>
+    </div>
+
+    {# Scrollable list #}
+    <div class="flex-1 overflow-y-auto px-5 py-4 space-y-2">
+      {% for notif in history_notifications %}
+      <div class="flex gap-3 p-3 rounded-xl
+                  bg-base-100 dark:bg-base-800
+                  border border-base-200 dark:border-base-700
+                  {% if notif.action == 'create' %}border-l-4 border-l-success
+                  {% elif notif.action == 'delete' %}border-l-4 border-l-error
+                  {% elif notif.action == 'restore' %}border-l-4 border-l-warning
+                  {% else %}border-l-4 border-l-primary{% endif %}">
+
+        {# Avatar #}
+        <div class="shrink-0 mt-0.5">
+          {% if notif.action_by %}
+            {% if notif.action_by.avatar %}
+              <img src="{{ notif.action_by.avatar.url }}" class="w-7 h-7 rounded-full object-cover"/>
+            {% else %}
+              <span class="material-symbols-outlined text-base-content/30" style="font-size:1.75rem;line-height:1">
+                {% if notif.action_by.is_bot %}smart_toy{% else %}person{% endif %}
+              </span>
+            {% endif %}
+          {% else %}
+            <span class="material-symbols-outlined text-base-content/20" style="font-size:1.75rem;line-height:1">person</span>
+          {% endif %}
+        </div>
+
+        {# Content #}
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 flex-wrap mb-1">
+            {# Action badge #}
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold
+              {% if notif.action == 'create' %}bg-success/15 text-success
+              {% elif notif.action == 'delete' %}bg-error/15 text-error
+              {% elif notif.action == 'restore' %}bg-warning/15 text-warning
+              {% else %}bg-primary/15 text-primary{% endif %}">
+              <span class="material-symbols-outlined" style="font-size:0.85rem;line-height:1">
+                {% if notif.action == 'create' %}add_circle
+                {% elif notif.action == 'delete' %}delete
+                {% elif notif.action == 'restore' %}restore
+                {% else %}edit{% endif %}
+              </span>
+              {% if notif.action == 'create' %}{% trans "Create" %}{% elif notif.action == 'delete' %}{% trans "Delete" %}{% elif notif.action == 'restore' %}{% trans "Restore" %}{% else %}{% trans "Update" %}{% endif %}
+            </span>
+
+            {# Actor #}
+            {% if notif.action_by %}
+            <span class="text-xs font-medium text-base-content/70">{{ notif.action_by }}</span>
+            {% endif %}
+
+            {# Timestamp #}
+            <span class="text-xs text-base-content/35 ml-auto">{{ notif.created_at|date:"d/m/Y H:i" }}</span>
+          </div>
+
+          {# Changed fields — old → new diff #}
+          {% if notif.parsed_changed_data %}
+          <div class="mt-1.5 space-y-1.5">
+            {% for change in notif.parsed_changed_data %}
+            <div class="text-xs">
+              <span class="font-medium text-base-content/60">{{ change.field_name }}</span>
+              <div class="flex items-start gap-1.5 mt-0.5 ml-2">
+                <span class="text-base-content/30 line-through break-all">
+                  {% if change.old_value %}{{ change.old_value }}{% else %}—{% endif %}
+                </span>
+                <span class="material-symbols-outlined text-base-content/30 shrink-0" style="font-size:0.8rem;line-height:1.4">arrow_forward</span>
+                <span class="text-base-content/80 break-all">
+                  {% if change.new_value %}{{ change.new_value }}{% else %}—{% endif %}
+                </span>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+  {# Click backdrop to close #}
+  <div class="ui-modal-backdrop" onclick="document.getElementById('wn-history-modal').close()"></div>
+</dialog>
