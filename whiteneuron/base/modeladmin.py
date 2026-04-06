@@ -473,18 +473,24 @@ class ModelAdmin(UnfoldAdmin):
                     'admin:%s_%s_change' % (self.model._meta.app_label, self.model._meta.model_name),
                     args=[object_id],
                 )
-                notifications = (
-                    Notification.objects
-                    .filter(obj_link=obj_link)
-                    .select_related('action_by')
-                    .order_by('-created_at')[:50]
-                )
-                # Parse changed_data string → list of dicts for each notification
-                for notif in notifications:
-                    try:
-                        notif.parsed_changed_data = ast.literal_eval(notif.changed_data) if notif.changed_data else []
-                    except Exception:
-                        notif.parsed_changed_data = []
+                # Query notifications for one superuser — each event is recorded once per superuser,
+                # so filtering by one superuser gives exactly one entry per event.
+                # Prefer request.user if superuser to avoid extra DB query.
+                ref_user = request.user if request.user.is_superuser else User.objects.filter(is_superuser=True).first()
+                notifications = []
+                if ref_user:
+                    qs = (
+                        Notification.objects
+                        .filter(obj_link=obj_link, user=ref_user)
+                        .select_related('action_by')
+                        .order_by('-created_at')[:50]
+                    )
+                    for notif in qs:
+                        try:
+                            notif.parsed_changed_data = ast.literal_eval(notif.changed_data) if notif.changed_data else []
+                        except Exception:
+                            notif.parsed_changed_data = []
+                        notifications.append(notif)
                 extra_context['history_notifications'] = notifications
             except Exception:
                 extra_context['history_notifications'] = []

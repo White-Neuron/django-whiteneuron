@@ -22,7 +22,11 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Changelog
 
-### v0.2.48 (2026-04-06) — latest
+### v0.2.48.1 (2026-04-06) — latest
+**Fix: Duplicate history entries in change history panel**
+- **Fixed**: History panel showed duplicate entries when multiple superusers exist — each save event creates one `Notification` per superuser. Fix: query is now filtered by `request.user` (if superuser) or the first superuser, guaranteeing exactly one row per event with no dedup overhead.
+
+### v0.2.48 (2026-04-06)
 **Feature: Change history panel — modal UI, M2M diff, permission gate**
 - **Added**: Change history panel shown on every change-form — floating "History" button (bottom-right, `fixed position`) opens a scrollable modal listing the 50 most recent `Notification` records for the object.
 - **Added**: Each history entry displays: action badge (Create/Update/Delete/Restore), actor avatar + username, timestamp, and an **old → new diff** for every changed field using `changed_data` from the `Notification` model.
