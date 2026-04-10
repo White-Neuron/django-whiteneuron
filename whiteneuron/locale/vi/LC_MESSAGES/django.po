@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-06 10:48+0700\n"
+"POT-Creation-Date: 2026-04-10 15:12+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -112,7 +112,7 @@ msgstr "Mục tiêu"
 msgid "Block settings"
 msgstr "Cài đặt chặn"
 
-#: base/admin.py:442 base/admin.py:489 base/modeladmin.py:350
+#: base/admin.py:442 base/admin.py:489 base/modeladmin.py:351
 #: file_management/admin.py:21
 msgid "Meta"
 msgstr "Meta"
@@ -161,7 +161,7 @@ msgstr "Thông tin hình ảnh"
 msgid "Mail info"
 msgstr "Thông tin thư"
 
-#: base/admin.py:623 base/models.py:821 notification/admin.py:146
+#: base/admin.py:623 base/models.py:821 notification/admin.py:148
 msgid "Content"
 msgstr "Nội dung"
 
@@ -188,48 +188,48 @@ msgstr ""
 "Cơ sở dữ liệu đang hoạt động ở chế độ chỉ đọc. Không thể lưu bất kỳ dữ liệu "
 "nào."
 
-#: base/modeladmin.py:90
+#: base/modeladmin.py:91
 #, python-brace-format
 msgid "Search by {fields}"
 msgstr "Tìm kiếm theo {fields}"
 
-#: base/modeladmin.py:151 base/modeladmin.py:152 base/modeladmin.py:201
-#: base/modeladmin.py:202
+#: base/modeladmin.py:152 base/modeladmin.py:153 base/modeladmin.py:202
+#: base/modeladmin.py:203
 #, python-format
 msgid "%(name)s \"%(obj)s\" has been soft-deleted by user \"%(user)s\""
 msgstr "%(name)s \"%(obj)s\" đã được xóa mềm bởi người dùng \"%(user)s\""
 
-#: base/modeladmin.py:161
+#: base/modeladmin.py:162
 msgid "Delete selected records"
 msgstr "Xóa các bản ghi đã chọn"
 
-#: base/modeladmin.py:165 base/modeladmin.py:166
+#: base/modeladmin.py:166 base/modeladmin.py:167
 #, python-format
 msgid "%(name)s \"%(obj)s\" has been hard-deleted by user \"%(user)s\""
 msgstr "%(name)s \"%(obj)s\" đã được xóa cứng bởi người dùng \"%(user)s\""
 
-#: base/modeladmin.py:178
+#: base/modeladmin.py:179
 msgid "Hard delete selected records"
 msgstr "Xóa cứng các bản ghi đã chọn"
 
-#: base/modeladmin.py:182 base/modeladmin.py:183
+#: base/modeladmin.py:183 base/modeladmin.py:184
 #, python-format
 msgid "%(name)s \"%(obj)s\" has been restored by user \"%(user)s\""
 msgstr "%(name)s \"%(obj)s\" đã được khôi phục bởi người dùng \"%(user)s\""
 
-#: base/modeladmin.py:192
+#: base/modeladmin.py:193
 msgid "Restore selected records"
 msgstr "Khôi phục các bản ghi đã chọn"
 
-#: base/modeladmin.py:370
+#: base/modeladmin.py:371
 msgid "Edit"
 msgstr "Sửa"
 
-#: base/modeladmin.py:373
+#: base/modeladmin.py:374
 msgid "View"
 msgstr "Xem"
 
-#: base/modeladmin.py:378 templates/admin/wn_history_panel.html:74
+#: base/modeladmin.py:379 templates/admin/wn_history_panel.html:74
 msgid "Delete"
 msgstr "Xóa"
 
@@ -943,39 +943,43 @@ msgstr "Tệp Excel"
 msgid "PDF File"
 msgstr "Tệp PDF"
 
-#: notification/admin.py:34
+#: notification/admin.py:36
 msgid "Notification Recipients"
 msgstr "Người nhận thông báo"
 
-#: notification/admin.py:70
+#: notification/admin.py:72
 msgid "Notification information"
 msgstr "Thông tin thông báo"
 
-#: notification/admin.py:90
+#: notification/admin.py:92
 msgid "View Linked Object"
 msgstr "Xem đối tượng được liên kết"
 
-#: notification/admin.py:97
+#: notification/admin.py:99
 msgid "No object link available for this notification."
 msgstr "Không có liên kết đối tượng nào có sẵn cho thông báo này."
 
-#: notification/admin.py:150 synchronization/models.py:14
+#: notification/admin.py:152 synchronization/models.py:14
 msgid "Action"
 msgstr "Hành động"
 
-#: notification/admin.py:154
+#: notification/admin.py:156
 msgid "Flag"
 msgstr "Cờ"
 
-#: notification/admin.py:160
+#: notification/admin.py:231
+msgid "by"
+msgstr "bởi"
+
+#: notification/admin.py:243
 msgid "Title"
 msgstr "Tiêu đề"
 
-#: notification/admin.py:203
+#: notification/admin.py:286
 msgid "No changes"
 msgstr "Không có thay đổi nào"
 
-#: notification/admin.py:204 notification/models.py:71
+#: notification/admin.py:287 notification/models.py:71
 msgid "Changed Data"
 msgstr "Thay đổi dữ liệu"
 
@@ -1050,27 +1054,63 @@ msgstr "Đối tượng liên kết"
 msgid "Read"
 msgstr "Đã đọc"
 
+#: notification/models.py:73
+msgid "info"
+msgstr "thông tin"
+
+#: notification/models.py:74
+msgid "success"
+msgstr "thành công"
+
+#: notification/models.py:75
+msgid "warning"
+msgstr "cảnh báo"
+
+#: notification/models.py:76
+msgid "error"
+msgstr "lỗi"
+
 #: notification/models.py:77
+msgid "danger"
+msgstr "nguy hiểm"
+
+#: notification/models.py:78
 msgid "Notification Type"
 msgstr "Loại thông báo"
 
+#: notification/models.py:79
+msgid "update"
+msgstr "cập nhật"
+
+#: notification/models.py:80
+msgid "create"
+msgstr "tạo"
+
 #: notification/models.py:81
+msgid "restore"
+msgstr "khôi phục"
+
+#: notification/models.py:82
+msgid "delete"
+msgstr "xóa"
+
+#: notification/models.py:82
 msgid "Action Type"
 msgstr "Loại hành động"
 
-#: notification/models.py:82
+#: notification/models.py:83
 msgid "Created At"
 msgstr "Đã tạo lúc"
 
-#: notification/models.py:84
+#: notification/models.py:85
 msgid "Action By"
 msgstr "Hành động bởi"
 
-#: notification/models.py:89
+#: notification/models.py:90
 msgid "notification"
 msgstr "thông báo"
 
-#: notification/models.py:90
+#: notification/models.py:91
 msgid "notifications"
 msgstr "thông báo"
 
@@ -1371,9 +1411,6 @@ msgstr "Tiếp theo"
 
 #~ msgid "Feedback marked as resolved"
 #~ msgstr "Phản hồi đã được đánh dấu là đã giải quyết"
-
-#~ msgid "App info"
-#~ msgstr "Thông tin ứng dụng"
 
 #~ msgid "This app is not active."
 #~ msgstr "Ứng dụng này không hoạt động."

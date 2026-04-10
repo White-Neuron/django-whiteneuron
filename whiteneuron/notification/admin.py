@@ -1,7 +1,9 @@
 from django.contrib import admin
 import ast
 import json
+import re
 from typing import Sequence
+from django.contrib.contenttypes.models import ContentType
 
 from whiteneuron.base.admin import base_admin_site
 from whiteneuron.base.admin import ModelAdmin
@@ -45,9 +47,9 @@ class NotificationAdmin(ModelAdmin):
     list_display = [
         # "user",
         "display_title",
-        "action_by",
-        "display_action",
-        "display_flag",
+        # "action_by",
+        # "display_action",
+        # "display_flag",
         "is_read",
         "created_at",
     ]
@@ -86,6 +88,8 @@ class NotificationAdmin(ModelAdmin):
     )
 
     actions_detail = ["view_obj_link"]
+
+    using_grid_view= False
 
     @action(description=_("View Linked Object"),
             permissions= ["view_obj_link"],
@@ -155,8 +159,92 @@ class NotificationAdmin(ModelAdmin):
     def display_flag(self, instance: Notification):
         return instance.flag
     
+    def get_components(self, instance: Notification):
+        app_label = None
+        model_verbose = None
+        object_id = None
+        obj_str = None
+        if instance.obj_link:
+            m = re.search(r'/([^/]+)/([^/]+)/(\d+)/change/', instance.obj_link)
+            if m:
+                app_label = m.group(1)
+                raw_model = m.group(2)
+                object_id = m.group(3)
+                try:
+                    ct = ContentType.objects.get(app_label=app_label, model=raw_model)
+                    mc = ct.model_class()
+                    model_verbose = mc._meta.verbose_name.title()
+                    try:
+                        manager = getattr(mc, 'objects_all', mc.objects)
+                        obj = manager.get(pk=int(object_id))
+                        obj_str = str(obj)
+                    except Exception:
+                        obj_str = f"#{object_id}"
+                except Exception:
+                    model_verbose = raw_model.replace('_', ' ').title()
+                    obj_str = f"#{object_id}"
+        return app_label, model_verbose, object_id, obj_str
+    
     def display_title(self, instance: Notification):
-        return mark_safe(f"{instance.title}")
+        # Parse obj_link → extract app_label, model_name, object_id
+        app_label, model_verbose, object_id, obj_str = self.get_components(instance)
+
+        _action_cls = {
+            'create': 'ui-badge-success',
+            'update': 'ui-badge-info',
+            'delete': 'ui-badge-error',
+            'restore': 'ui-badge-warning',
+        }
+        action_cls = _action_cls.get(instance.action or '', '')
+        action_label = _(instance.action) if instance.action else '—'
+
+        parts = []
+
+        # [Model name]
+        if model_verbose:
+            parts.append(
+                f'<span class="ui-badge ui-badge-xs font-mono opacity-70">'
+                f'<strong>{model_verbose}</strong></span>'
+            )
+
+        # [#ID] — clickable link
+        if object_id:
+            if instance.obj_link:
+                parts.append(
+                    f'<a href="{instance.obj_link}" class="ui-badge ui-badge-xs font-mono">'
+                    f'#{object_id}</a>'
+                )
+            else:
+                parts.append(
+                    f'<span class="ui-badge ui-badge-xs font-mono">#{object_id}</span>'
+                )
+
+        # [Object name]
+        if obj_str:
+            parts.append(f'<span class="text-sm font-semibold">{obj_str}</span>')
+
+        # [Action]
+        parts.append(
+            f'<span class="ui-badge ui-badge-xs {action_cls}">{action_label}</span>'
+        )
+
+        # by [Alias] [@username]
+        if instance.action_by:
+            ab = instance.action_by
+            alias = getattr(ab, 'full_name', None) or ''
+            username = ab.username
+            parts.append(f'<span class="text-xs opacity-50">{_("by")}</span>')
+            if alias and alias != username:
+                parts.append(
+                    f'<span class="ui-badge ui-badge-xs">{alias}</span>'
+                    f'<span class="ui-badge ui-badge-xs opacity-60">@{username}</span>'
+                )
+            else:
+                parts.append(f'<span class="ui-badge ui-badge-xs">@{username}</span>')
+
+        return mark_safe(
+            '<div class="flex flex-wrap items-center gap-1">' + ''.join(parts) + '</div>'
+        )
     display_title.short_description = _("Title")
     
     def display_changed_data(self, instance: Notification):

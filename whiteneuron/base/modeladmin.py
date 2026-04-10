@@ -44,8 +44,16 @@ from unfold.paginator import InfinitePaginator
 
 def get_verbose_name_field(model, field):
     try:
-        return str(model._meta.get_field(field).verbose_name)
-    except:
+        parts = field.split('__')
+        current_model = model
+        labels = []
+        for part in parts:
+            f = current_model._meta.get_field(part)
+            labels.append(str(f.verbose_name))
+            if hasattr(f, 'related_model') and f.related_model:
+                current_model = f.related_model
+        return ' / '.join(labels)
+    except Exception:
         return field
 
 class ModelAdmin(UnfoldAdmin):

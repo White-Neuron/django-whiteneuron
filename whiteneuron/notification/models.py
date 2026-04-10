@@ -70,15 +70,16 @@ class Notification(models.Model):
     content = models.TextField()
     changed_data= models.TextField(null=True, blank=True, verbose_name=_("Changed Data"))
     is_read = models.BooleanField(default=False, verbose_name=_("Read"))
-    flag = models.CharField(max_length=25, choices=[("info", "info"), 
-                                                    ("success", "success"), 
-                                                    ("warning", "warning"), 
-                                                    ("error", "error"),
-                                                    ("danger", "danger")], verbose_name=_("Notification Type"))
-    action = models.CharField(max_length=25, null=True, blank=True, choices=[("update", "update"),
-                                                                             ("create", "create"),
-                                                                             ('restore', 'restore'),
-                                                                             ("delete", "delete")], verbose_name=_("Action Type"))
+    flag = models.CharField(max_length=25, choices=[("info", _("info")),
+                                                    ("success", _("success")),
+                                                    ("warning", _("warning")),
+                                                    ("error", _("error")),
+                                                    ("danger", _("danger"))
+                                                    ], verbose_name=_("Notification Type"))
+    action = models.CharField(max_length=25, null=True, blank=True, choices=[("update",  _("update")),
+                                                                             ("create",  _("create")),
+                                                                             ('restore', _('restore')),
+                                                                             ("delete",  _("delete"))], verbose_name=_("Action Type"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
     action_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, 
                                   verbose_name=_("Action By"),
@@ -90,7 +91,7 @@ class Notification(models.Model):
         verbose_name_plural = _("notifications")
 
     def __str__(self):
-        return f"[{self.flag}] {self.title}"
+        return f"{self.user.username} - {self.id} - {self.action} - {self.flag}"
     
     def mark_as_read(self):
         self.is_read = True

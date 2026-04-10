@@ -13,6 +13,7 @@ from whiteneuron.notification.models import Notification
 
 @admin.register(FeedbackData, site=base_admin_site)
 class FeedbackDataAdmin(ModelAdmin):
+    using_grid_view = False
     date_hierarchy = 'created_at'
     change_form_template = 'admin/feedbacks/feedback_change_form.html'
     list_display = (

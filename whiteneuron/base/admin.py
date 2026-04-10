@@ -346,6 +346,7 @@ class UserActivityAdmin(ModelAdmin):
     """
 
     compressed_fields = True
+    using_grid_view = False
 
     list_display = [
         "user",

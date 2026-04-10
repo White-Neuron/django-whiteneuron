@@ -11,7 +11,7 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Current Version
 
-- 0.2.48
+- 0.2.48.3
 
 ## Compatibility
 
@@ -22,7 +22,13 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Changelog
 
-### v0.2.48.2 (2026-04-10) — latest
+### v0.2.48.3 (2026-04-10) — latest
+**Improve: Notification list — DaisyUI badge display, search field verbose names**
+- **Improved**: `NotificationAdmin.display_title` rewritten — renders `[Model][#ID][Object name][Action] by [Alias][@username]` using `ui-badge ui-badge-xs` badges with correct color mapping (`ui-badge-success/info/error/warning`).
+- **Fixed**: `obj_link` parsing regex updated to handle paths without `/admin/` prefix — e.g. `/techniques/technique/58316/change/`.
+- **Fixed**: `get_verbose_name_field` now traverses `__`-separated lookup paths (e.g. `user__username`) to resolve proper verbose names for all search fields in `search_help_text`.
+
+### v0.2.48.2 (2026-04-10)
 **Security: Nâng cấp django 5.2.13 và thêm pyOpenSSL 26.0.0**
 - **Security**: `django` lower bound nâng từ `>=5.2.12` lên `>=5.2.13` — bản vá bảo mật mới nhất của Django.
 - **Security**: `pyopenssl==26.0.0` thêm vào explicit dependencies — đảm bảo phiên bản mới nhất của pyOpenSSL được sử dụng, vá các lỗ hổng tiềm ẩn trong TLS/SSL handling.
