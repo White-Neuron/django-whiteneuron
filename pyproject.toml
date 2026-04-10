@@ -1,6 +1,6 @@
 [project]
 name = "django-whiteneuron"
-version = "0.2.48.1"
+version = "0.2.48.2"
 description = "A modern Django Admin extension with enhanced UI/UX, dashboard, feedback, file management, rate limiting, IP blacklisting, and advanced admin integrations built on django-unfold."
 authors = [
     {name = "White Neuron", email = "anhnt@whiteneuron.ai"}
@@ -10,7 +10,7 @@ readme = "README.md"
 keywords = ["django", "plugin", "admin", "dashboard", "whiteneuron"]
 dependencies = [
     "django-debug-toolbar>=5.0.1",
-    "django>=5.2.12",
+    "django>=5.2.13",
     "django-celery-beat>=2.7.0",
     "django-guardian>=2.4.0",
     "django-imagekit>=5.0.0",
@@ -41,6 +41,7 @@ dependencies = [
     "django-unfold>=0.85.0",
     "djangoql>=0.18.1",
     "cryptography>=46.0.5",
+    "pyopenssl==26.0.0",
 ]
 requires-python = ">=3.11"
 

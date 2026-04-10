@@ -22,7 +22,12 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Changelog
 
-### v0.2.48.1 (2026-04-06) — latest
+### v0.2.48.2 (2026-04-10) — latest
+**Security: Nâng cấp django 5.2.13 và thêm pyOpenSSL 26.0.0**
+- **Security**: `django` lower bound nâng từ `>=5.2.12` lên `>=5.2.13` — bản vá bảo mật mới nhất của Django.
+- **Security**: `pyopenssl==26.0.0` thêm vào explicit dependencies — đảm bảo phiên bản mới nhất của pyOpenSSL được sử dụng, vá các lỗ hổng tiềm ẩn trong TLS/SSL handling.
+
+### v0.2.48.1 (2026-04-06)
 **Fix: Duplicate history entries in change history panel**
 - **Fixed**: History panel showed duplicate entries when multiple superusers exist — each save event creates one `Notification` per superuser. Fix: query is now filtered by `request.user` (if superuser) or the first superuser, guaranteeing exactly one row per event with no dedup overhead.
 
