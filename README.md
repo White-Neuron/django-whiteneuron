@@ -22,7 +22,12 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Changelog
 
-### v0.2.48.3 (2026-04-10) — latest
+### v0.2.48.4 (2026-04-11) — latest
+**Security: Nâng cấp cbor2 5.9.0 và ujson 5.12.0**
+- **Security**: `cbor2` nâng từ `v5.8.0` lên `v5.9.0` — bản vá lỗi và cải thiện encoding/decoding CBOR.
+- **Security**: `ujson` nâng từ `v5.11.0` lên `v5.12.0` — bản vá bảo mật và cải thiện hiệu suất JSON serialization.
+
+### v0.2.48.3 (2026-04-10)
 **Improve: Notification list — DaisyUI badge display, search field verbose names**
 - **Improved**: `NotificationAdmin.display_title` rewritten — renders `[Model][#ID][Object name][Action] by [Alias][@username]` using `ui-badge ui-badge-xs` badges with correct color mapping (`ui-badge-success/info/error/warning`).
 - **Fixed**: `obj_link` parsing regex updated to handle paths without `/admin/` prefix — e.g. `/techniques/technique/58316/change/`.
