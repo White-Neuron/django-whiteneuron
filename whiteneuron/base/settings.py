@@ -556,14 +556,14 @@ UNFOLD = {
                     #     "title": _("Dashboard"),
                     #     "icon": "dashboard",
                     #     "link": reverse_lazy("admin:index"),
-                    #     "permission": "whiteneuron.base.utils.prmission_viewer_callback",
+                    #     "permission": "whiteneuron.base.utils.permission_viewer_callback",
                     # },
                     {
                         "title": _("Dashboard"),
                         "icon": "dashboard",
                         "link": reverse_lazy("admin:base_app_changelist"),
                         "badge": "whiteneuron.base.utils.app_badge_callback",
-                        "permission": "whiteneuron.base.utils.prmission_viewer_callback",
+                        "permission": "whiteneuron.base.utils.permission_viewer_callback",
                     },
                     {
                         "title": _("Notifications"),

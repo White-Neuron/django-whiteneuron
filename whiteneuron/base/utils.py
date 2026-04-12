@@ -83,6 +83,14 @@ def app_badge_callback(request):
     except Exception:
         return 0
 
+def is_guest_user(user):
+    if not user or not user.is_authenticated:
+        return True
+    if user.username.lower() == "guest":
+        return True
+    return user.groups.filter(name__in=["Khách thăm", "Guest", "guest"]).exists()
+
+
 def permission_callback(request):
     return False
 
@@ -95,9 +103,9 @@ def permission_admin_callback(request):
     return request.user.groups.filter(name='Quản trị viên').exists()
 
 def permission_non_guest_callback(request):
-    return not request.user.groups.filter(name='Khách thăm').exists()
+    return not is_guest_user(request.user)
 
-def prmission_viewer_callback(request):
+def permission_viewer_callback(request):
     return True
 
 
