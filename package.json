@@ -5,5 +5,8 @@
     "@tailwindcss/typography": "^0.5.16",
     "daisyui": "^5.3.8",
     "tailwindcss": "^4.1.16"
+  },
+  "overrides": {
+    "picomatch": ">=2.3.2"
   }
 }
