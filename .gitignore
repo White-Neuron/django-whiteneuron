@@ -181,3 +181,4 @@ docs/reports/unfold-upgrades/
 
 # Local smoke-check helper (if created during manual validation)
 whiteneuron/base/test_urls.py
+whiteneuron/templates/admin/signature_ceo.html
