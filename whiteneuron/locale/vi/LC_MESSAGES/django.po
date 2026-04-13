@@ -1409,6 +1409,62 @@ msgstr "Trước"
 msgid "Next"
 msgstr "Tiếp theo"
 
+#: whiteneuron/file_management/admin.py
+msgid "Integrity"
+msgstr "Toàn vẹn"
+
+#: whiteneuron/file_management/admin.py
+msgid "Stored hash"
+msgstr "Hash lưu trữ"
+
+#: whiteneuron/file_management/admin.py
+msgid "Current hash (live)"
+msgstr "Hash hiện tại (thực tế)"
+
+#: whiteneuron/file_management/admin.py
+msgid "Cannot read file"
+msgstr "Không đọc được file"
+
+#: whiteneuron/file_management/admin.py
+msgid "Cannot read file from storage"
+msgstr "Không đọc được file từ storage"
+
+#: whiteneuron/file_management/admin.py
+msgid "File has been modified"
+msgstr "File bị thay đổi"
+
+#: whiteneuron/file_management/admin.py
+msgid "Verified Download"
+msgstr "Tải xuống (đã xác thực)"
+
+#: whiteneuron/file_management/admin.py
+msgid "Download (Verified)"
+msgstr "Tải xuống (đã xác thực)"
+
+#: whiteneuron/file_management/admin.py
+msgid "File missing"
+msgstr "File không tồn tại"
+
+#: whiteneuron/file_management/admin.py
+msgid "Tampered — download blocked"
+msgstr "File bị thay đổi — không thể tải"
+
+#: whiteneuron/file_management/admin.py
+msgid "Cannot read the file from storage. It may have been deleted externally."
+msgstr "Không đọc được file từ storage. File có thể đã bị xóa bên ngoài hệ thống."
+
+#: whiteneuron/file_management/admin.py
+msgid "File integrity check failed: the file on storage does not match its stored hash. It may have been tampered with or corrupted."
+msgstr "Kiểm tra toàn vẹn thất bại: file trên storage không khớp với hash đã lưu. File có thể đã bị thay đổi hoặc bị hỏng."
+
+#: whiteneuron/file_management/views.py
+msgid "Cannot read file from storage. The file may be missing."
+msgstr "Không đọc được file từ storage. File có thể đã bị xóa."
+
+#: whiteneuron/file_management/views.py
+msgid "File integrity check failed. This file may have been tampered with and cannot be downloaded."
+msgstr "Kiểm tra toàn vẹn thất bại. File có thể đã bị thay đổi và không thể tải xuống."
+
 #~ msgid "Feedback marked as resolved"
 #~ msgstr "Phản hồi đã được đánh dấu là đã giải quyết"
 

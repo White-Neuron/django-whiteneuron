@@ -24,4 +24,5 @@ urlpatterns += [
     path("base/guest-login/", GuestLoginView.as_view(), name="guest_login"),
     # path("i18n/", include("django.conf.urls.i18n")),
     path("ckeditor5/", include('django_ckeditor_5.urls')),
+    path("file-management/", include('whiteneuron.file_management.urls')),
 ]

@@ -11,7 +11,7 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Current Version
 
-- 0.2.48.3
+- 0.3.0
 
 ## Compatibility
 
@@ -22,7 +22,20 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Changelog
 
-### v0.2.48.4 (2026-04-11) — latest
+### v0.3.0 (2026-04-13) — latest
+**Feature: File integrity protection — SHA-256 hash verification for ExcelFile & PDFFile**
+- **Added**: `compute_file_hash()` function — computes SHA-256 of a `FieldFile` via direct `storage.open()` to avoid Django internal state issues (works for both in-memory uploads and committed storage files).
+- **Added**: `BaseFile.save()` override — automatically computes and stores SHA-256 hash on every new upload; resets `status='done'` when file is replaced after an error; backfills hash for existing files with no hash.
+- **Added**: `BaseFile.verify_integrity()` — compares live storage hash against stored hash; returns `False` if missing or mismatched.
+- **Added**: `download_file` view — `@login_required` endpoint at `file-management/download/<type>/<pk>/`; enrolls legacy records on first download, blocks tampered files with `403 Forbidden`, marks them `status='error'`.
+- **Added**: `file_management/urls.py` — wired into `base/urls.py`.
+- **Added**: `FileInputNoDownload` widget — extends `UnfoldAdminFileFieldWidget` with a custom template that removes the direct download button; adds `accepted_file_types` support per admin subclass (`.xlsx,.xls,.csv` for Excel; `.pdf` for PDF).
+- **Added**: `BaseFileAdmin` enhancements — `integrity_status`, `hash_display`, `current_hash_display` readonly fields; `verified_download` smart button (primary button when OK, error badge when tampered/missing); `change_view` shows Django error message banner on integrity failure; `get_fieldsets` context-aware layout (auto/upload/new).
+- **Fixed**: `status_view` / `method_view` XSS — replaced f-string + `format_html` pattern with proper `format_html(template, *args)` escaping.
+- **Fixed**: `file.delete(save=False)` in `BaseFile.delete()` — prevents extra `save()` call after file deletion.
+- **Improved**: `accepted_file_types` class attribute on admin subclasses — browser-level file type filtering in upload dialog.
+
+### v0.2.48.4 (2026-04-11)
 **Security: Nâng cấp cbor2 5.9.0 và ujson 5.12.0**
 - **Security**: `cbor2` nâng từ `v5.8.0` lên `v5.9.0` — bản vá lỗi và cải thiện encoding/decoding CBOR.
 - **Security**: `ujson` nâng từ `v5.11.0` lên `v5.12.0` — bản vá bảo mật và cải thiện hiệu suất JSON serialization.
