@@ -11,7 +11,7 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Current Version
 
-- 0.3.0
+- 0.3.0.2
 
 ## Compatibility
 
@@ -22,13 +22,17 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Changelog
 
-### v0.3.0.1 (2026-04-13) — latest
-**Hotfix: Email signature tách file + loại trừ signature_ceo.html khỏi build**
-- **Fixed**: `TEMPLATE` trong `base/utils.py` — thay thế inline HTML signature bằng `{signature}` placeholder; đọc nội dung từ `templates/admin/signature.html` tại thời điểm gọi `send_email_login`.
-- **Added**: `_load_signature()` helper — đọc `signature.html` từ đường dẫn tương đối so với file `utils.py`.
-- **Added**: `templates/admin/signature.html` — file HTML chữ ký độc lập (CTO).
-- **Added**: `templates/admin/signature_ceo.html` — file HTML chữ ký CEO (chỉ dùng local, không build vào package).
-- **Config**: `pyproject.toml` — thêm `[tool.setuptools.exclude-package-data]` để loại `signature_ceo.html` khỏi wheel/sdist.
+### v0.3.0.2 (2026-04-13) — latest
+**Hotfix: Loading overlay no longer auto-hides after timeout**
+- **Fixed**: `loading.js` — removed the auto-hide logic that dismissed the overlay after 45 seconds. The overlay now only hides when the server sends back the `wn_loading_done` cookie, or via `pageshow`/`visibilitychange`/`focus` events.
+
+### v0.3.0.1 (2026-04-13)
+**Hotfix: Email signature extracted to standalone file; exclude signature_ceo.html from build**
+- **Fixed**: `TEMPLATE` in `base/utils.py` — replaced hardcoded inline HTML signature with a `{signature}` placeholder; content is now read from `templates/admin/signature.html` at the time `send_email_login` is called.
+- **Added**: `_load_signature()` helper — reads `signature.html` relative to `utils.py`.
+- **Added**: `templates/admin/signature.html` — standalone HTML email signature (CTO).
+- **Added**: `templates/admin/signature_ceo.html` — CEO email signature (local-only, excluded from package build).
+- **Config**: `pyproject.toml` — added `[tool.setuptools.exclude-package-data]` to exclude `signature_ceo.html` from wheel/sdist.
 
 ### v0.3.0 (2026-04-13)
 **Feature: File integrity protection — SHA-256 hash verification for ExcelFile & PDFFile**
@@ -44,9 +48,9 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 - **Improved**: `accepted_file_types` class attribute on admin subclasses — browser-level file type filtering in upload dialog.
 
 ### v0.2.48.4 (2026-04-11)
-**Security: Nâng cấp cbor2 5.9.0 và ujson 5.12.0**
-- **Security**: `cbor2` nâng từ `v5.8.0` lên `v5.9.0` — bản vá lỗi và cải thiện encoding/decoding CBOR.
-- **Security**: `ujson` nâng từ `v5.11.0` lên `v5.12.0` — bản vá bảo mật và cải thiện hiệu suất JSON serialization.
+**Security: Upgrade cbor2 5.9.0 and ujson 5.12.0**
+- **Security**: `cbor2` upgraded from `v5.8.0` to `v5.9.0` — patch release with bug fixes and improved CBOR encoding/decoding.
+- **Security**: `ujson` upgraded from `v5.11.0` to `v5.12.0` — security patch and improved JSON serialization performance.
 
 ### v0.2.48.3 (2026-04-10)
 **Improve: Notification list — DaisyUI badge display, search field verbose names**
@@ -55,9 +59,9 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 - **Fixed**: `get_verbose_name_field` now traverses `__`-separated lookup paths (e.g. `user__username`) to resolve proper verbose names for all search fields in `search_help_text`.
 
 ### v0.2.48.2 (2026-04-10)
-**Security: Nâng cấp django 5.2.13 và thêm pyOpenSSL 26.0.0**
-- **Security**: `django` lower bound nâng từ `>=5.2.12` lên `>=5.2.13` — bản vá bảo mật mới nhất của Django.
-- **Security**: `pyopenssl==26.0.0` thêm vào explicit dependencies — đảm bảo phiên bản mới nhất của pyOpenSSL được sử dụng, vá các lỗ hổng tiềm ẩn trong TLS/SSL handling.
+**Security: Upgrade django 5.2.13 and add pyOpenSSL 26.0.0**
+- **Security**: `django` lower bound raised from `>=5.2.12` to `>=5.2.13` — latest Django security patch.
+- **Security**: `pyopenssl==26.0.0` added as an explicit dependency — ensures the latest version of pyOpenSSL is used, patching potential vulnerabilities in TLS/SSL handling.
 
 ### v0.2.48.1 (2026-04-06)
 **Fix: Duplicate history entries in change history panel**

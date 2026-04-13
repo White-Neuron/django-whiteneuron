@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const REQUEST_TOKEN_COOKIE = 'wn_loading_token';
     const RESPONSE_DONE_COOKIE = 'wn_loading_done';
     let downloadPollTimer = null;
-    let downloadPollDeadline = 0;
 
     const hideOverlay = function () {
         loadingOverlay.style.display = 'none';
@@ -48,17 +47,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const startDownloadPolling = function (requestToken) {
         stopDownloadPolling();
-        downloadPollDeadline = Date.now() + 45000;
 
         downloadPollTimer = window.setInterval(function () {
-            if (Date.now() > downloadPollDeadline) {
-                stopDownloadPolling();
-                hideOverlay();
-                clearCookie(REQUEST_TOKEN_COOKIE);
-                clearCookie(RESPONSE_DONE_COOKIE);
-                return;
-            }
-
             const doneToken = getCookie(RESPONSE_DONE_COOKIE);
             if (doneToken !== requestToken) {
                 return;
