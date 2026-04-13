@@ -22,7 +22,15 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Changelog
 
-### v0.3.0 (2026-04-13) — latest
+### v0.3.0.1 (2026-04-13) — latest
+**Hotfix: Email signature tách file + loại trừ signature_ceo.html khỏi build**
+- **Fixed**: `TEMPLATE` trong `base/utils.py` — thay thế inline HTML signature bằng `{signature}` placeholder; đọc nội dung từ `templates/admin/signature.html` tại thời điểm gọi `send_email_login`.
+- **Added**: `_load_signature()` helper — đọc `signature.html` từ đường dẫn tương đối so với file `utils.py`.
+- **Added**: `templates/admin/signature.html` — file HTML chữ ký độc lập (CTO).
+- **Added**: `templates/admin/signature_ceo.html` — file HTML chữ ký CEO (chỉ dùng local, không build vào package).
+- **Config**: `pyproject.toml` — thêm `[tool.setuptools.exclude-package-data]` để loại `signature_ceo.html` khỏi wheel/sdist.
+
+### v0.3.0 (2026-04-13)
 **Feature: File integrity protection — SHA-256 hash verification for ExcelFile & PDFFile**
 - **Added**: `compute_file_hash()` function — computes SHA-256 of a `FieldFile` via direct `storage.open()` to avoid Django internal state issues (works for both in-memory uploads and committed storage files).
 - **Added**: `BaseFile.save()` override — automatically computes and stores SHA-256 hash on every new upload; resets `status='done'` when file is replaced after an error; backfills hash for existing files with no hash.

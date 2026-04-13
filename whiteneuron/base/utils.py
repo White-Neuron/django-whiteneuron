@@ -109,6 +109,16 @@ def permission_viewer_callback(request):
     return True
 
 
+import os as _os
+
+def _load_signature():
+    sig_path = _os.path.normpath(
+        _os.path.join(_os.path.dirname(__file__), '..', 'templates', 'admin', 'signature.html')
+    )
+    with open(sig_path, 'r', encoding='utf-8') as f:
+        return f.read()
+
+
 TEMPLATE="""
 Chào {username},
 <br />
@@ -131,240 +141,7 @@ với bộ phận hỗ trợ kỹ thuật của chúng tôi.
 <br />
 Trân trọng,
 <br />
-<div dir="ltr">
-  <table
-    cellpadding="0"
-    cellspacing="0"
-    style="
-      white-space: nowrap;
-      color: rgb(0, 0, 0);
-      border-collapse: collapse;
-      table-layout: fixed;
-      font-family: Arial;
-    "
-  >
-    <tbody>
-      <tr>
-        <td style="vertical-align: top; padding: 4px 16px 0px 0px">
-          <table
-            cellpadding="0"
-            cellspacing="0"
-            width="120px"
-            style="
-              border-collapse: collapse;
-              table-layout: fixed;
-              margin: 0px auto;
-            "
-          >
-            <tbody>
-              <tr>
-                <td style="vertical-align: top">
-                  <img
-                    src="https://ci3.googleusercontent.com/mail-sig/AIorK4xT4rd9QM6AKtfHJrkL5q-vAckl7ehKZ1PACpIy0Lg-x09Zwo-6VHjO8A4a2phJJbLsi8bX6OxpueMP"
-                    alt="logo image"
-                    style="
-                      display: block;
-                      max-width: 100%;
-                      height: auto;
-                      margin-bottom: 6px;
-                      border-radius: 50%;
-                    "
-                  />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </td>
-        <td
-          style="
-            vertical-align: top;
-            border-left-width: 1px;
-            border-left-style: solid;
-            border-left-color: rgb(0, 0, 0);
-            padding: 0px 0px 0px 16px;
-          "
-        >
-          <table
-            cellpadding="0"
-            cellspacing="0"
-            style="border-collapse: collapse; table-layout: fixed"
-          >
-            <tbody>
-              <tr>
-                <td style="vertical-align: top; line-height: 24px">
-                  <span
-                    style="
-                      font-size: 18px;
-                      margin: 0px;
-                      padding: 0px 20px 0px 0px;
-                      color: rgb(17, 17, 17);
-                      font-weight: bold;
-                    "
-                    >Tu Anh Nguyen</span
-                  >
-                </td>
-              </tr>
-              <tr>
-                <td style="vertical-align: top; line-height: 24px">
-                  <span
-                    style="
-                      font-size: 14px;
-                      margin: 0px;
-                      padding: 0px 0px 0px 0px;
-                    "
-                    >White Neuron Co., Ltd</span
-                  >
-                  <span
-                    style="
-                      font-size: 14px;
-                      margin: 0px;
-                      padding: 0px 8px 0px 8px;
-                      border-left-width: 1px;
-                      border-left-style: solid;
-                      border-left-color: rgb(0, 0, 0);
-                    "
-                    > Founder & CTO</span
-                  >
-                </td>
-              </tr>
-              <tr>
-                <td style="vertical-align: top; line-height: 16px">
-                  <a
-                    href="tel:+84339802255"
-                    rel="nofollow noreferrer"
-                    style="text-decoration: none"
-                    target="_blank"
-                    ><span
-                      style="
-                        font-size: 12px;
-                        margin: 0px;
-                        padding: 0px 20px 0px 0px;
-                        color: rgb(0, 0, 0);
-                      "
-                      >+84339802255</span
-                    ></a
-                  >
-                </td>
-              </tr>
-              <tr>
-                <td style="vertical-align: top; line-height: 16px">
-                  <a
-                    href="mailto:anhnt@whiteneuron.ai"
-                    rel="nofollow noreferrer"
-                    style="text-decoration: none"
-                    target="_blank"
-                    ><span
-                      style="
-                        font-size: 12px;
-                        margin: 0px;
-                        padding: 0px 20px 0px 0px;
-                        color: rgb(0, 0, 0);
-                      "
-                      >anhnt@whiteneuron.ai</span
-                    ></a
-                  >
-                </td>
-              </tr>
-              <tr>
-                <td style="vertical-align: top; line-height: 16px">
-                  <a
-                    href="https://whiteneuron.ai/"
-                    rel="nofollow noreferrer"
-                    style="text-decoration: none"
-                    target="_blank"
-                    ><span
-                      style="
-                        font-size: 12px;
-                        margin: 0px;
-                        padding: 0px 20px 0px 0px;
-                        color: rgb(0, 0, 0);
-                      "
-                      >https://whiteneuron.ai</span
-                    ></a
-                  >
-                </td>
-              </tr>
-              <tr>
-                <td style="vertical-align: top; line-height: 16px">
-                  <a
-                    href="https://www.google.com/maps/search/?api=1&amp;query=333%2C%2020%20cluster%2C%20Kien%20Hung%20Ward%2C%20Ha%20Dong%20district%2C%20Ha%20Noi%2010000%20Vietnam"
-                    rel="nofollow noreferrer"
-                    style="text-decoration: none"
-                    target="_blank"
-                    ><span
-                      style="
-                        font-size: 12px;
-                        margin: 0px;
-                        padding: 0px 20px 0px 0px;
-                        color: rgb(0, 0, 0);
-                      "
-                      >333, 20 cluster, Kien Hung, Hanoi, Vietnam</span
-                    ></a
-                  >
-                </td>
-              </tr>
-              <tr>
-                <td style="vertical-align: top; line-height: 24px">
-                  <table
-                    cellpadding="0"
-                    cellspacing="0"
-                    style="
-                      border-collapse: collapse;
-                      table-layout: fixed;
-                      margin: 8px 0px 0px;
-                    "
-                  >
-                    <tbody>
-                      <tr>
-                        <td
-                          style="vertical-align: top; padding: 0px 6px 0px 0px"
-                        >
-                          <a
-                            href="https://www.youtube.com/@neuron97"
-                            rel="noreferrer"
-                            target="_blank"
-                            ><img
-                              src="https://api.logo.com/api/v2/icons/circle/FFFFFF/111111/youtube.png?u=asdfg"
-                              alt="youtube icon"
-                              style="display: block; width: 23px; height: 23px"
-                          /></a>
-                        </td>
-                        <td
-                          style="vertical-align: top; padding: 0px 6px 0px 0px"
-                        >
-                          <a
-                            href="https://www.facebook.com/tuanh.226"
-                            rel="noreferrer"
-                            target="_blank"
-                            ><img
-                              src="https://api.logo.com/api/v2/icons/circle/FFFFFF/111111/facebook.png?u=asdfg"
-                              alt="facebook icon"
-                              style="display: block; width: 23px; height: 23px"
-                          /></a>
-                        </td>
-                        <td style="vertical-align: top">
-                          <a
-                            href="https://www.tiktok.com/@anhneuron"
-                            rel="noreferrer"
-                            target="_blank"
-                            ><img
-                              src="https://api.logo.com/api/v2/icons/circle/FFFFFF/111111/tiktok.png?u=asdfg"
-                              alt="tiktok icon"
-                              style="display: block; width: 23px; height: 23px"
-                          /></a>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+{signature}
 """
 
 from django.conf import settings
@@ -377,7 +154,7 @@ def send_email_login(username, password, receiver, is_reset=False):
     subject= SUBJECT
     template= TEMPLATE
     system_name= SYSTEM_NAME
-    context= template.format(username= username, password= password, url= URL, system_name= system_name)
+    context= template.format(username= username, password= password, url= URL, system_name= system_name, signature= _load_signature())
     mail= Mail.objects.create(subject= subject, content= context, receiver= receiver)
     mail.send()
     return mail.is_sent()
