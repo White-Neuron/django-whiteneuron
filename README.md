@@ -22,7 +22,12 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Changelog
 
-### v0.3.0.2 (2026-04-13) — latest
+### v0.3.0.3 (2026-04-14) — latest
+**Dependency: Upgrade pillow ≥12.2.0, cryptography ≥46.0.7**
+- **Updated**: `pillow` minimum version bumped from `12.1.1` to `12.2.0` — latest upstream patch.
+- **Updated**: `cryptography` minimum version bumped from `46.0.5` to `46.0.7` — security and bug-fix release.
+
+### v0.3.0.2 (2026-04-13)
 **Hotfix: Loading overlay no longer auto-hides after timeout**
 - **Fixed**: `loading.js` — removed the auto-hide logic that dismissed the overlay after 45 seconds. The overlay now only hides when the server sends back the `wn_loading_done` cookie, or via `pageshow`/`visibilitychange`/`focus` events.
 
