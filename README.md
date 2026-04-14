@@ -22,7 +22,11 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Changelog
 
-### v0.3.0.3 (2026-04-14) — latest
+### v0.3.0.4 (2026-04-14) — latest
+**Fix: Logout GET request returns 403 CSRF on production**
+- **Fixed**: `base/sites.py` — overrode `logout()` in `BaseAdminSite` to redirect GET requests to login page instead of failing with 403 CSRF verification error (Django 4.1+ requires POST for logout).
+
+### v0.3.0.3 (2026-04-14)
 **Dependency: Upgrade pillow ≥12.2.0, cryptography ≥46.0.7**
 - **Updated**: `pillow` minimum version bumped from `12.1.1` to `12.2.0` — latest upstream patch.
 - **Updated**: `cryptography` minimum version bumped from `46.0.5` to `46.0.7` — security and bug-fix release.
