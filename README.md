@@ -11,12 +11,12 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Current Version
 
-- 0.3.0.2
+- 0.3.0.3
 
 ## Compatibility
 
 - Python >= 3.11
-- Django >= 5.2.12
+- Django >= 5.2.13
 - django-unfold >= 0.85.0
 - Tailwind CSS 4.x + daisyUI 5.x (for the bundled frontend styles)
 
