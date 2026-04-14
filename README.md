@@ -22,7 +22,11 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Changelog
 
-### v0.3.0.4 (2026-04-14) — latest
+### v0.3.0.5 (2026-04-14) — latest
+**Fix: CSRF 403 on production behind reverse proxy (nginx/Cloudflare)**
+- **Fixed**: `base/settings.py` — added `SECURE_PROXY_SSL_HEADER` so Django recognizes HTTPS via `X-Forwarded-Proto` header from reverse proxy, resolving CSRF origin mismatch.
+
+### v0.3.0.4 (2026-04-14)
 **Fix: Logout GET request returns 403 CSRF on production**
 - **Fixed**: `base/sites.py` — overrode `logout()` in `BaseAdminSite` to redirect GET requests to login page instead of failing with 403 CSRF verification error (Django 4.1+ requires POST for logout).
 
