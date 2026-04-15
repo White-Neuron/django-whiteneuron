@@ -23,15 +23,15 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ## Changelog
 
 ### v0.3.1 (2026-04-15) — latest
-**Feature: Announcement system — hiển thị thông báo quan trọng trên header admin**
-- **Added**: `settings.py` — ba setting mới: `VERSION` (lấy từ env, mặc định `"0.1.0"`), `ANNOUNCEMENT_CALLBACK` (đường dẫn tới hàm callback trả về context thông báo), `ANNOUNCEMENT_CONTENT_HTML_FILE` (đường dẫn tới template nội dung thông báo).
-- **Added**: `sites.py` — override `each_context()` trong `BaseAdminSite` để tự động gọi `ANNOUNCEMENT_CALLBACK` và inject `announcement` vào context mọi trang admin.
-- **Added**: `utils.py` — `announcement_callback()` mặc định; trả về dict `{title, version, badge}` sử dụng `format_lazy` và `gettext_lazy` để hỗ trợ i18n.
-- **Added**: `views.py` — `get_announcement_content` view trả về nội dung HTML lazy-loaded qua `render_to_string` từ `ANNOUNCEMENT_CONTENT_HTML_FILE`.
-- **Added**: `urls.py` — endpoint `/announcement/` kết nối với `get_announcement_content`.
-- **Added**: `templates/base/announcement.html` — modal dialog (DaisyUI style) với header, scrollable content, footer; tự động lazy-load nội dung via `fetch()` khi mở lần đầu.
-- **Added**: `templates/unfold/helpers/userlinks.html` — nút thông báo trên header với animation `wn-glow-pulse` và `wn-flame-icon`; hiển thị khi `announcement` có trong context.
-- **Updated**: `locale/vi` — bổ sung bản dịch tiếng Việt cho các chuỗi mới.
+**Feature: Announcement system — display important notices in the admin header**
+- **Added**: `settings.py` — three new settings: `VERSION` (read from env, default `"0.1.0"`), `ANNOUNCEMENT_CALLBACK` (dotted path to a callback that returns the announcement context), `ANNOUNCEMENT_CONTENT_HTML_FILE` (template name or absolute `Path` pointing to the announcement HTML content file).
+- **Added**: `sites.py` — overrode `each_context()` in `BaseAdminSite` to automatically call `ANNOUNCEMENT_CALLBACK` and inject `announcement` into every admin page context; errors in the callback are silently suppressed.
+- **Added**: `utils.py` — default `announcement_callback()` returning a `{title, version, badge}` dict using `format_lazy` and `gettext_lazy` for full i18n support.
+- **Added**: `views.py` — `get_announcement_content` view; renders `ANNOUNCEMENT_CONTENT_HTML_FILE` via `render_to_string` and returns it as an `HttpResponse`.
+- **Added**: `urls.py` — `/announcement/` endpoint wired to `get_announcement_content`.
+- **Added**: `templates/base/announcement.html` — DaisyUI-style modal dialog with header, scrollable content area, and footer; content is lazy-loaded via `fetch()` on first open.
+- **Added**: `templates/unfold/helpers/userlinks.html` — announcement button in the admin header with `wn-glow-pulse` and `wn-flame-icon` animations; rendered only when `announcement` is present in context.
+- **Updated**: `locale/vi` — new Vietnamese translations for announcement-related strings.
 
 ### v0.3.0.5 (2026-04-14)
 **Fix: CSRF 403 on production behind reverse proxy (nginx/Cloudflare)**
