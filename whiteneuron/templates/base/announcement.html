@@ -1,0 +1,75 @@
+{% load i18n %}
+
+<dialog id="wn-announcement-modal" class="ui-modal" data-content-url="/announcement/">
+    <div class="ui-modal-box w-full max-w-3xl max-h-[90vh] flex flex-col p-0 rounded-2xl overflow-hidden">
+
+        {# Header #}
+        <div class="flex items-center gap-3 px-6 py-4 border-b border-base-200 dark:border-base-700 shrink-0">
+            <span class="material-symbols-outlined text-primary" style="font-size:1.3rem">campaign</span>
+            <div class="flex-1 min-w-0">
+                <h3 class="font-semibold text-base text-base-content truncate">
+                    {{ announcement.title }}
+                </h3>
+                {% if announcement.version %}
+                    <p class="text-xs text-base-content/40 mt-0.5">{{ announcement.version }}</p>
+                {% endif %}
+            </div>
+            {% if announcement.badge %}
+                <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-primary text-primary-content text-[11px] font-bold shrink-0">
+                    {{ announcement.badge }}
+                </span>
+            {% endif %}
+            <button
+                type="button"
+                onclick="document.getElementById('wn-announcement-modal').close()"
+                class="ui-btn ui-btn-sm ui-btn-circle ui-btn-ghost text-base-content/40 hover:text-base-content ml-1"
+            >
+                <span class="material-symbols-outlined" style="font-size:1.1rem;line-height:1">close</span>
+            </button>
+        </div>
+
+        {# Scrollable content — lazy loaded on open #}
+        <div class="flex-1 overflow-y-auto px-6 py-5" id="wn-announcement-content">
+            <div class="flex items-center justify-center py-8 text-base-content/30">
+                <span class="material-symbols-outlined animate-spin mr-2" style="font-size:1.2rem">progress_activity</span>
+            </div>
+        </div>
+
+        {# Footer #}
+        <div class="shrink-0 px-6 py-3 border-t border-base-200 dark:border-base-700 flex justify-end">
+            <button
+                type="button"
+                onclick="document.getElementById('wn-announcement-modal').close()"
+                class="ui-btn ui-btn-sm ui-btn-primary"
+            >
+                {% trans "Got it" %}
+            </button>
+        </div>
+
+    </div>
+    <div class="ui-modal-backdrop" onclick="document.getElementById('wn-announcement-modal').close()"></div>
+</dialog>
+
+<script>
+(function () {
+    var modal = document.getElementById('wn-announcement-modal');
+    var loaded = false;
+    modal.addEventListener('toggle', function () {
+        if (modal.open && !loaded) {
+            loaded = true;
+            var url = modal.dataset.contentUrl || '/announcement/';
+            fetch(url, {credentials: 'same-origin'})
+                .then(function(r){ return r.text(); })
+                .then(function(html){
+                    var el = document.getElementById('wn-announcement-content');
+                    if (html.trim()) {
+                        el.innerHTML = '<div class="prose prose-sm max-w-none dark:prose-invert prose-headings:font-semibold prose-headings:tracking-tight prose-p:text-sm prose-p:leading-relaxed prose-li:text-sm">' + html + '</div>';
+                    } else {
+                        el.innerHTML = '';
+                    }
+                })
+                .catch(function(){ document.getElementById('wn-announcement-content').innerHTML = ''; });
+        }
+    });
+})();
+</script>

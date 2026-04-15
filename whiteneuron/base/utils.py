@@ -1,6 +1,8 @@
 from django.utils import timezone
 from .models import User, UserActivity
 from django.contrib.auth.models import Group
+from django.utils.translation import gettext_lazy as _
+from django.utils.text import format_lazy
 
 # count time run function
 def timeit(func):
@@ -163,3 +165,19 @@ def make_random_password():
     import random
     import string
     return ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+
+from django.utils.safestring import mark_safe
+def announcement_callback(request):
+    from django.conf import settings
+    if not getattr(settings, 'ANNOUNCEMENT_CONTENT_HTML_FILE', None):
+        return None
+    version = getattr(settings, 'VERSION', '0.1.0')
+    return {
+        "title": format_lazy(
+            _("New announcement for {NAME} - version {VERSION}!"),
+            NAME=_(settings.NAME),
+            VERSION=version,
+        ),
+        "version": version,
+        "badge": _("NEW"),
+    }

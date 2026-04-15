@@ -1,0 +1,46 @@
+{% load i18n static unfold %}
+
+<div class="flex flex-row gap-4 items-center ml-auto">
+    {% if announcement %}
+        <style>
+        @keyframes wn-glow-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(251,146,60,0); border-color: rgba(251,146,60,0.25); }
+            50%       { box-shadow: 0 0 6px 1px rgba(251,146,60,0.25); border-color: rgba(251,146,60,0.55); }
+        }
+        @keyframes wn-flame {
+            0%, 100% { transform: scale(1) rotate(-3deg); }
+            50%       { transform: scale(1.15) rotate(3deg); color: #ef4444; }
+        }
+        .wn-announcement-btn { animation: wn-glow-pulse 3s ease-in-out infinite; }
+        .wn-announcement-btn .wn-flame-icon { animation: wn-flame 2s ease-in-out infinite; display:inline-block; }
+        </style>
+        <button
+            type="button"
+            onclick="var m=document.getElementById('wn-announcement-modal');if(m)m.showModal()"
+            title="{{ announcement.title }}"
+            class="wn-announcement-btn flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer
+                   bg-orange-50 text-orange-600 border border-orange-200
+                   hover:bg-orange-100 transition-colors
+                   dark:bg-orange-950/40 dark:text-orange-400 dark:border-orange-800 dark:hover:bg-orange-900/40"
+        >
+            <span class="material-symbols-outlined wn-flame-icon shrink-0" style="font-size:0.95rem;line-height:1">local_fire_department</span>
+            <span class="whitespace-nowrap">{{ announcement.title }}</span>
+            {% if announcement.badge %}
+                <span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded-full bg-orange-500 text-white text-[10px] font-bold shrink-0 leading-none">
+                    {{ announcement.badge }}
+                </span>
+            {% endif %}
+        </button>
+        {% include "base/announcement.html" %}
+    {% endif %}
+    
+    {% if environment %}
+        {% include "unfold/helpers/label.html" with text=environment.0 type=environment.1 %}
+    {% endif %}
+
+    {% action_list %}
+
+    {% if nav_global_side %}
+        {{ nav_global_side }}
+    {% endif %}
+</div>

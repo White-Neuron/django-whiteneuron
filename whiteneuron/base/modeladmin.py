@@ -254,6 +254,8 @@ class ModelAdmin(UnfoldAdmin):
                 readonly_fields += (field,)
         return readonly_fields
     
+
+    
     def get_list_display_links(self, request, list_display):
         if not self.has_display_links:
             return None

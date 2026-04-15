@@ -11,7 +11,7 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Current Version
 
-- 0.3.0.3
+- 0.3.1
 
 ## Compatibility
 
@@ -22,7 +22,18 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Changelog
 
-### v0.3.0.5 (2026-04-14) — latest
+### v0.3.1 (2026-04-15) — latest
+**Feature: Announcement system — hiển thị thông báo quan trọng trên header admin**
+- **Added**: `settings.py` — ba setting mới: `VERSION` (lấy từ env, mặc định `"0.1.0"`), `ANNOUNCEMENT_CALLBACK` (đường dẫn tới hàm callback trả về context thông báo), `ANNOUNCEMENT_CONTENT_HTML_FILE` (đường dẫn tới template nội dung thông báo).
+- **Added**: `sites.py` — override `each_context()` trong `BaseAdminSite` để tự động gọi `ANNOUNCEMENT_CALLBACK` và inject `announcement` vào context mọi trang admin.
+- **Added**: `utils.py` — `announcement_callback()` mặc định; trả về dict `{title, version, badge}` sử dụng `format_lazy` và `gettext_lazy` để hỗ trợ i18n.
+- **Added**: `views.py` — `get_announcement_content` view trả về nội dung HTML lazy-loaded qua `render_to_string` từ `ANNOUNCEMENT_CONTENT_HTML_FILE`.
+- **Added**: `urls.py` — endpoint `/announcement/` kết nối với `get_announcement_content`.
+- **Added**: `templates/base/announcement.html` — modal dialog (DaisyUI style) với header, scrollable content, footer; tự động lazy-load nội dung via `fetch()` khi mở lần đầu.
+- **Added**: `templates/unfold/helpers/userlinks.html` — nút thông báo trên header với animation `wn-glow-pulse` và `wn-flame-icon`; hiển thị khi `announcement` có trong context.
+- **Updated**: `locale/vi` — bổ sung bản dịch tiếng Việt cho các chuỗi mới.
+
+### v0.3.0.5 (2026-04-14)
 **Fix: CSRF 403 on production behind reverse proxy (nginx/Cloudflare)**
 - **Fixed**: `base/settings.py` — added `SECURE_PROXY_SSL_HEADER` so Django recognizes HTTPS via `X-Forwarded-Proto` header from reverse proxy, resolving CSRF origin mismatch.
 

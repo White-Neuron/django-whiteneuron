@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-10 15:12+0700\n"
+"POT-Creation-Date: 2026-04-15 13:32+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: base/admin.py:151 base/admin.py:193 base/admin.py:447 base/admin.py:494
+#: base/admin.py:151 base/admin.py:193 base/admin.py:448 base/admin.py:495
 #: base/models.py:884
 msgid "Active"
 msgstr "Hoạt động"
@@ -51,7 +51,7 @@ msgstr "Quản trị viên"
 msgid "Bot"
 msgstr "Máy"
 
-#: base/admin.py:227 base/admin.py:251 base/admin.py:533
+#: base/admin.py:227 base/admin.py:251 base/admin.py:534
 msgid "Personal info"
 msgstr "Thông tin cá nhân"
 
@@ -88,84 +88,84 @@ msgid "Email notification has been sent, please check your inbox!"
 msgstr ""
 "Thông báo qua email đã được gửi, vui lòng kiểm tra hộp thư đến của bạn!"
 
-#: base/admin.py:372
+#: base/admin.py:373
 msgid "Client information"
 msgstr "Thông tin khách hàng"
 
-#: base/admin.py:381
+#: base/admin.py:382
 msgid "Request information"
 msgstr "Thông tin yêu cầu"
 
-#: base/admin.py:398
+#: base/admin.py:399
 msgid "Block IP address"
 msgstr "Chặn địa chỉ IP"
 
-#: base/admin.py:419
+#: base/admin.py:420
 msgid ", "
 msgstr ", "
 
-#: base/admin.py:436 base/admin.py:483
+#: base/admin.py:437 base/admin.py:484
 msgid "Target"
 msgstr "Mục tiêu"
 
-#: base/admin.py:439 base/admin.py:486
+#: base/admin.py:440 base/admin.py:487
 msgid "Block settings"
 msgstr "Cài đặt chặn"
 
-#: base/admin.py:442 base/admin.py:489 base/modeladmin.py:351
-#: file_management/admin.py:21
+#: base/admin.py:443 base/admin.py:490 base/modeladmin.py:361
+#: file_management/admin.py:71
 msgid "Meta"
 msgstr "Meta"
 
-#: base/admin.py:456
+#: base/admin.py:457
 msgid "Activate selected IPs"
 msgstr "Kích hoạt các IP đã chọn"
 
-#: base/admin.py:461
+#: base/admin.py:462
 msgid "Selected IPs have been activated."
 msgstr "Các IP đã chọn đã được kích hoạt."
 
-#: base/admin.py:463
+#: base/admin.py:464
 msgid "Deactivate selected IPs"
 msgstr "Hủy kích hoạt các IP đã chọn"
 
-#: base/admin.py:468
+#: base/admin.py:469
 msgid "Selected IPs have been deactivated."
 msgstr "Các IP đã chọn đã được hủy kích hoạt."
 
-#: base/admin.py:503
+#: base/admin.py:504
 msgid "Activate selected patterns"
 msgstr "Kích hoạt các mẫu đã chọn"
 
-#: base/admin.py:508
+#: base/admin.py:509
 msgid "Selected UA patterns have been activated."
 msgstr "Các mẫu UA đã chọn đã được kích hoạt."
 
-#: base/admin.py:510
+#: base/admin.py:511
 msgid "Deactivate selected patterns"
 msgstr "Hủy kích hoạt các mẫu đã chọn"
 
-#: base/admin.py:515
+#: base/admin.py:516
 msgid "Selected UA patterns have been deactivated."
 msgstr "Các mẫu UA đã chọn đã được hủy kích hoạt."
 
-#: base/admin.py:565
+#: base/admin.py:566
 msgid "Configuration"
 msgstr "Cấu hình"
 
-#: base/admin.py:580
+#: base/admin.py:581
 msgid "Image info"
 msgstr "Thông tin hình ảnh"
 
-#: base/admin.py:607
+#: base/admin.py:608
 msgid "Mail info"
 msgstr "Thông tin thư"
 
-#: base/admin.py:623 base/models.py:821 notification/admin.py:148
+#: base/admin.py:624 base/models.py:821 notification/admin.py:150
 msgid "Content"
 msgstr "Nội dung"
 
-#: base/admin.py:690 base/settings.py:562 dashboard/apps.py:8
+#: base/admin.py:691 base/settings.py:564 dashboard/apps.py:8
 #: dashboard/views.py:169 templates/admin/index.html:8
 msgid "Dashboard"
 msgstr "Bảng điều khiển"
@@ -188,48 +188,48 @@ msgstr ""
 "Cơ sở dữ liệu đang hoạt động ở chế độ chỉ đọc. Không thể lưu bất kỳ dữ liệu "
 "nào."
 
-#: base/modeladmin.py:91
+#: base/modeladmin.py:99
 #, python-brace-format
 msgid "Search by {fields}"
 msgstr "Tìm kiếm theo {fields}"
 
-#: base/modeladmin.py:152 base/modeladmin.py:153 base/modeladmin.py:202
-#: base/modeladmin.py:203
+#: base/modeladmin.py:160 base/modeladmin.py:161 base/modeladmin.py:210
+#: base/modeladmin.py:211
 #, python-format
 msgid "%(name)s \"%(obj)s\" has been soft-deleted by user \"%(user)s\""
 msgstr "%(name)s \"%(obj)s\" đã được xóa mềm bởi người dùng \"%(user)s\""
 
-#: base/modeladmin.py:162
+#: base/modeladmin.py:170
 msgid "Delete selected records"
 msgstr "Xóa các bản ghi đã chọn"
 
-#: base/modeladmin.py:166 base/modeladmin.py:167
+#: base/modeladmin.py:174 base/modeladmin.py:175
 #, python-format
 msgid "%(name)s \"%(obj)s\" has been hard-deleted by user \"%(user)s\""
 msgstr "%(name)s \"%(obj)s\" đã được xóa cứng bởi người dùng \"%(user)s\""
 
-#: base/modeladmin.py:179
+#: base/modeladmin.py:187
 msgid "Hard delete selected records"
 msgstr "Xóa cứng các bản ghi đã chọn"
 
-#: base/modeladmin.py:183 base/modeladmin.py:184
+#: base/modeladmin.py:191 base/modeladmin.py:192
 #, python-format
 msgid "%(name)s \"%(obj)s\" has been restored by user \"%(user)s\""
 msgstr "%(name)s \"%(obj)s\" đã được khôi phục bởi người dùng \"%(user)s\""
 
-#: base/modeladmin.py:193
+#: base/modeladmin.py:201
 msgid "Restore selected records"
 msgstr "Khôi phục các bản ghi đã chọn"
 
-#: base/modeladmin.py:371
+#: base/modeladmin.py:381
 msgid "Edit"
 msgstr "Sửa"
 
-#: base/modeladmin.py:374
+#: base/modeladmin.py:384
 msgid "View"
 msgstr "Xem"
 
-#: base/modeladmin.py:379 templates/admin/wn_history_panel.html:74
+#: base/modeladmin.py:389 templates/admin/wn_history_panel.html:74
 msgid "Delete"
 msgstr "Xóa"
 
@@ -317,7 +317,7 @@ msgstr "Trình duyệt người dùng"
 msgid "Path"
 msgstr "Đường dẫn"
 
-#: base/models.py:177 file_management/models.py:15 file_management/models.py:40
+#: base/models.py:177 file_management/models.py:42 file_management/models.py:72
 msgid "Method"
 msgstr "Phương thức"
 
@@ -492,7 +492,7 @@ msgstr "Hình thu nhỏ"
 msgid "Preview"
 msgstr "Xem trước"
 
-#: base/models.py:661 file_management/models.py:8
+#: base/models.py:661 file_management/models.py:35
 msgid "Description"
 msgstr "Mô tả"
 
@@ -520,7 +520,7 @@ msgstr "Chủ đề"
 msgid "Receiver"
 msgstr "Người nhận"
 
-#: base/models.py:823 file_management/models.py:9 file_management/models.py:20
+#: base/models.py:823 file_management/models.py:36 file_management/models.py:48
 msgid "Pending"
 msgstr "Đang chờ"
 
@@ -532,12 +532,12 @@ msgstr "Gửi"
 msgid "Failed"
 msgstr "Thất bại"
 
-#: base/models.py:826 feedbacks/admin.py:35 file_management/models.py:12
-#: file_management/models.py:29 synchronization/models.py:19
+#: base/models.py:826 feedbacks/admin.py:36 file_management/models.py:39
+#: file_management/models.py:59 synchronization/models.py:19
 msgid "Status"
 msgstr "Trạng thái"
 
-#: base/models.py:827 feedbacks/admin.py:123 feedbacks/models.py:51
+#: base/models.py:827 feedbacks/admin.py:124 feedbacks/models.py:51
 msgid "Note"
 msgstr "Ghi chú"
 
@@ -589,113 +589,121 @@ msgstr "Ứng dụng"
 msgid "Apps"
 msgstr "Ứng dụng"
 
-#: base/settings.py:357
+#: base/settings.py:359
 msgid "Vietnamese"
 msgstr "Tiếng Việt"
 
-#: base/settings.py:358
+#: base/settings.py:360
 msgid "English"
 msgstr "Tiếng Anh"
 
-#: base/settings.py:449
+#: base/settings.py:451
 msgid "Admin panel"
 msgstr "Trang quản trị"
 
-#: base/settings.py:453
+#: base/settings.py:455
 msgid "White Neuron Co. Ltd."
 msgstr "Công ty TNHH White Neuron"
 
-#: base/settings.py:458
+#: base/settings.py:460
 msgid "Email: anhnt@whiteneuron.com"
 msgstr "Email: anhnt@whiteneuron.com"
 
-#: base/settings.py:553
+#: base/settings.py:555
 msgid "Navigation"
 msgstr "Điều hướng"
 
-#: base/settings.py:569
+#: base/settings.py:571
 msgid "Notifications"
 msgstr "Thông báo"
 
-#: base/settings.py:576 feedbacks/apps.py:8 feedbacks/models.py:59
+#: base/settings.py:578 feedbacks/apps.py:8 feedbacks/models.py:59
 msgid "Feedbacks"
 msgstr "Phản hồi"
 
-#: base/settings.py:585 file_management/apps.py:7
+#: base/settings.py:587 file_management/apps.py:7
 msgid "File Management"
 msgstr "Quản lý tệp"
 
-#: base/settings.py:589 file_management/models.py:58
+#: base/settings.py:591 file_management/models.py:114
 msgid "Excel Files"
 msgstr "Tệp Excel"
 
-#: base/settings.py:596 file_management/models.py:65
+#: base/settings.py:598 file_management/models.py:121
 msgid "PDF Files"
 msgstr "Tệp PDF"
 
-#: base/settings.py:605
+#: base/settings.py:607
 msgid "Users & Groups"
 msgstr "Người dùng & Nhóm"
 
-#: base/settings.py:609 notification/models.py:59
+#: base/settings.py:611 notification/models.py:59
 msgid "Users"
 msgstr "Người dùng"
 
-#: base/settings.py:616
+#: base/settings.py:618
 msgid "User activity"
 msgstr "Hoạt động người dùng"
 
-#: base/settings.py:623
+#: base/settings.py:625
 msgid "Groups"
 msgstr "Nhóm"
 
-#: base/settings.py:632
+#: base/settings.py:634
 msgid "System"
 msgstr "Hệ thống"
 
-#: base/settings.py:636
+#: base/settings.py:638
 msgid "Images"
 msgstr "Hình ảnh"
 
-#: base/settings.py:642
+#: base/settings.py:644
 msgid "Emails"
 msgstr "Email"
 
-#: base/settings.py:648
+#: base/settings.py:650
 msgid "Notifications config"
 msgstr "Cấu hình thông báo"
 
-#: base/settings.py:654
+#: base/settings.py:656
 msgid "IP Blacklist"
 msgstr "Danh sách đen IP"
 
-#: base/settings.py:660
+#: base/settings.py:662
 msgid "UA Blacklist"
 msgstr "Danh sách đen UA"
 
-#: base/settings.py:668
+#: base/settings.py:670
 msgid "Celery Tasks"
 msgstr "Nhiệm vụ Celery"
 
-#: base/settings.py:672
+#: base/settings.py:674
 msgid "Clocked"
 msgstr "Khóa"
 
-#: base/settings.py:680
+#: base/settings.py:682
 msgid "Crontabs"
 msgstr "Crontabs"
 
-#: base/settings.py:688
+#: base/settings.py:690
 msgid "Intervals"
 msgstr "Khoảng thời gian"
 
-#: base/settings.py:696
+#: base/settings.py:698
 msgid "Periodic tasks"
 msgstr "Nhiệm vụ định kỳ"
 
-#: base/settings.py:704
+#: base/settings.py:706
 msgid "Solar events"
 msgstr "Sự kiện Solar"
+
+#: base/utils.py:179
+msgid "New announcement for {NAME} - version {VERSION}!"
+msgstr "Thông báo mới cho {NAME} - phiên bản {VERSION}!"
+
+#: base/utils.py:184
+msgid "NEW"
+msgstr "MỚI"
 
 #: contrib/wn_import_export/admin.py:32
 msgid "Export selected records"
@@ -798,54 +806,54 @@ msgstr "Trung bình"
 msgid "Success"
 msgstr "Thành công"
 
-#: dashboard/views.py:262 file_management/models.py:11
-#: file_management/models.py:26
+#: dashboard/views.py:262 file_management/models.py:38
+#: file_management/models.py:54
 msgid "Error"
 msgstr "Lỗi"
 
-#: feedbacks/admin.py:31
+#: feedbacks/admin.py:32
 msgid "Feedback Data"
 msgstr "Dữ liệu phản hồi"
 
-#: feedbacks/admin.py:52 feedbacks/models.py:40
+#: feedbacks/admin.py:53 feedbacks/models.py:40
 msgid "Message"
 msgstr "Tin nhắn"
 
-#: feedbacks/admin.py:63
+#: feedbacks/admin.py:64
 msgid "Related Object"
 msgstr "Đối tượng liên quan"
 
-#: feedbacks/admin.py:68
+#: feedbacks/admin.py:69
 msgid "Mark selected feedbacks as resolved"
 msgstr "Đánh dấu các phản hồi đã chọn là đã giải quyết"
 
-#: feedbacks/admin.py:73
+#: feedbacks/admin.py:74
 #, python-format
 msgid "%d feedback(s) marked as resolved."
 msgstr "%d phản hồi đã được đánh dấu là đã giải quyết."
 
-#: feedbacks/admin.py:101
+#: feedbacks/admin.py:102
 msgid "Only superuser can mark feedback as resolved"
 msgstr "Chỉ quản trị viên mới có thể đánh dấu phản hồi là đã giải quyết"
 
-#: feedbacks/admin.py:106
+#: feedbacks/admin.py:107
 msgid "Note must not exceed 500 characters."
 msgstr "Ghi chú không được vượt quá 500 ký tự."
 
-#: feedbacks/admin.py:110
+#: feedbacks/admin.py:111
 #: templates/admin/feedbacks/feedback_change_form.html:41
 msgid "Feedback not found."
 msgstr "Không tìm thấy phản hồi."
 
-#: feedbacks/admin.py:118
+#: feedbacks/admin.py:119
 msgid "Feedback resolved"
 msgstr "Phản hồi đã được giải quyết"
 
-#: feedbacks/admin.py:121
+#: feedbacks/admin.py:122
 msgid "Your feedback has been resolved."
 msgstr "Phản hồi của bạn đã được giải quyết."
 
-#: feedbacks/admin.py:122
+#: feedbacks/admin.py:123
 msgid "Object"
 msgstr "Đối tượng"
 
@@ -919,29 +927,98 @@ msgstr "Định dạng JSON không hợp lệ"
 msgid "An unexpected error occurred. Please try again."
 msgstr "Đã xảy ra lỗi không mong muốn. Vui lòng thử lại."
 
-#: file_management/admin.py:15
+#: file_management/admin.py:64
 msgid "General Information"
 msgstr "Thông tin chung"
 
-#: file_management/models.py:10 file_management/models.py:23
+#: file_management/admin.py:81
+msgid "Cannot read file"
+msgstr "Không đọc được file"
+
+#: file_management/admin.py:84
+msgid "File has been modified"
+msgstr "File bị thay đổi"
+
+#: file_management/admin.py:85
+msgid "Integrity"
+msgstr "Toàn vẹn"
+
+#: file_management/admin.py:94
+msgid "Stored hash"
+msgstr "Hash lưu trữ"
+
+#: file_management/admin.py:101
+msgid "Cannot read file from storage"
+msgstr "Không đọc được file từ storage"
+
+#: file_management/admin.py:107
+msgid "Current hash (live)"
+msgstr "Hash hiện tại (thực tế)"
+
+#: file_management/admin.py:114
+msgid "Cannot read the file from storage. It may have been deleted externally."
+msgstr ""
+"Không đọc được file từ storage. File có thể đã bị xóa bên ngoài hệ thống."
+
+#: file_management/admin.py:118
+msgid ""
+"File integrity check failed: the file on storage does not match its stored "
+"hash. It may have been tampered with or corrupted."
+msgstr ""
+"Kiểm tra toàn vẹn thất bại: file trên storage không khớp với hash đã lưu. "
+"File có thể đã bị thay đổi hoặc bị hỏng."
+
+#: file_management/admin.py:134
+msgid "File missing"
+msgstr "File không tồn tại"
+
+#: file_management/admin.py:142
+msgid "Tampered — download blocked"
+msgstr "File bị thay đổi — không thể tải"
+
+#: file_management/admin.py:149
+msgid "Download (Verified)"
+msgstr "Tải xuống (đã xác thực)"
+
+#: file_management/admin.py:151
+msgid "Verified Download"
+msgstr "Tải xuống (đã xác thực)"
+
+#: file_management/models.py:37 file_management/models.py:51
 msgid "Done"
 msgstr "Hoàn thành"
 
-#: file_management/models.py:13 file_management/models.py:34
+#: file_management/models.py:40 file_management/models.py:64
 msgid "Upload"
 msgstr "Tải lên"
 
-#: file_management/models.py:14 file_management/models.py:37
+#: file_management/models.py:41 file_management/models.py:67
 msgid "Auto"
 msgstr "Tự động"
 
-#: file_management/models.py:57
+#: file_management/models.py:43
+msgid "Hash"
+msgstr "Hash"
+
+#: file_management/models.py:113
 msgid "Excel File"
 msgstr "Tệp Excel"
 
-#: file_management/models.py:64
+#: file_management/models.py:120
 msgid "PDF File"
 msgstr "Tệp PDF"
+
+#: file_management/views.py:31 file_management/views.py:38
+msgid "Cannot read file from storage. The file may be missing."
+msgstr "Không đọc được file từ storage. File có thể đã bị xóa."
+
+#: file_management/views.py:46
+msgid ""
+"File integrity check failed. This file may have been tampered with and "
+"cannot be downloaded."
+msgstr ""
+"Kiểm tra toàn vẹn thất bại. File có thể đã bị thay đổi và không thể tải "
+"xuống."
 
 #: notification/admin.py:36
 msgid "Notification Recipients"
@@ -951,35 +1028,35 @@ msgstr "Người nhận thông báo"
 msgid "Notification information"
 msgstr "Thông tin thông báo"
 
-#: notification/admin.py:92
+#: notification/admin.py:94
 msgid "View Linked Object"
 msgstr "Xem đối tượng được liên kết"
 
-#: notification/admin.py:99
+#: notification/admin.py:101
 msgid "No object link available for this notification."
 msgstr "Không có liên kết đối tượng nào có sẵn cho thông báo này."
 
-#: notification/admin.py:152 synchronization/models.py:14
+#: notification/admin.py:154 synchronization/models.py:14
 msgid "Action"
 msgstr "Hành động"
 
-#: notification/admin.py:156
+#: notification/admin.py:158
 msgid "Flag"
 msgstr "Cờ"
 
-#: notification/admin.py:231
+#: notification/admin.py:236
 msgid "by"
 msgstr "bởi"
 
-#: notification/admin.py:243
+#: notification/admin.py:248
 msgid "Title"
 msgstr "Tiêu đề"
 
-#: notification/admin.py:286
+#: notification/admin.py:291
 msgid "No changes"
 msgstr "Không có thay đổi nào"
 
-#: notification/admin.py:287 notification/models.py:71
+#: notification/admin.py:292 notification/models.py:71
 msgid "Changed Data"
 msgstr "Thay đổi dữ liệu"
 
@@ -1317,6 +1394,10 @@ msgstr "Tạo"
 msgid "Restore"
 msgstr "Khôi phục"
 
+#: templates/announcement.html:54
+msgid "Got it"
+msgstr "Đã hiểu"
+
 #: templates/base/forms/helpers/toolbar.html:7
 msgid "Paragraph"
 msgstr "Đoạn văn"
@@ -1385,6 +1466,10 @@ msgstr "Nhập một URL"
 msgid "Unlink"
 msgstr "Bỏ liên kết"
 
+#: templates/file_management/widgets/clearable_file_input_no_download.html:6
+msgid "Choose file to upload"
+msgstr "Chọn file để tải lên"
+
 #: templates/unfold/helpers/account_links.html:69
 msgid "User profile"
 msgstr "Hồ sơ người dùng"
@@ -1409,61 +1494,10 @@ msgstr "Trước"
 msgid "Next"
 msgstr "Tiếp theo"
 
-#: whiteneuron/file_management/admin.py
-msgid "Integrity"
-msgstr "Toàn vẹn"
-
-#: whiteneuron/file_management/admin.py
-msgid "Stored hash"
-msgstr "Hash lưu trữ"
-
-#: whiteneuron/file_management/admin.py
-msgid "Current hash (live)"
-msgstr "Hash hiện tại (thực tế)"
-
-#: whiteneuron/file_management/admin.py
-msgid "Cannot read file"
-msgstr "Không đọc được file"
-
-#: whiteneuron/file_management/admin.py
-msgid "Cannot read file from storage"
-msgstr "Không đọc được file từ storage"
-
-#: whiteneuron/file_management/admin.py
-msgid "File has been modified"
-msgstr "File bị thay đổi"
-
-#: whiteneuron/file_management/admin.py
-msgid "Verified Download"
-msgstr "Tải xuống (đã xác thực)"
-
-#: whiteneuron/file_management/admin.py
-msgid "Download (Verified)"
-msgstr "Tải xuống (đã xác thực)"
-
-#: whiteneuron/file_management/admin.py
-msgid "File missing"
-msgstr "File không tồn tại"
-
-#: whiteneuron/file_management/admin.py
-msgid "Tampered — download blocked"
-msgstr "File bị thay đổi — không thể tải"
-
-#: whiteneuron/file_management/admin.py
-msgid "Cannot read the file from storage. It may have been deleted externally."
-msgstr "Không đọc được file từ storage. File có thể đã bị xóa bên ngoài hệ thống."
-
-#: whiteneuron/file_management/admin.py
-msgid "File integrity check failed: the file on storage does not match its stored hash. It may have been tampered with or corrupted."
-msgstr "Kiểm tra toàn vẹn thất bại: file trên storage không khớp với hash đã lưu. File có thể đã bị thay đổi hoặc bị hỏng."
-
-#: whiteneuron/file_management/views.py
-msgid "Cannot read file from storage. The file may be missing."
-msgstr "Không đọc được file từ storage. File có thể đã bị xóa."
-
-#: whiteneuron/file_management/views.py
-msgid "File integrity check failed. This file may have been tampered with and cannot be downloaded."
-msgstr "Kiểm tra toàn vẹn thất bại. File có thể đã bị thay đổi và không thể tải xuống."
+#, python-brace-format
+#~ msgid "Welcome to the {NAME} - version {VERSION}! (Click for details)"
+#~ msgstr ""
+#~ "Chào mừng đến với {NAME} - phiên bản {VERSION}! (Nhấp để biết chi tiết)"
 
 #~ msgid "Feedback marked as resolved"
 #~ msgstr "Phản hồi đã được đánh dấu là đã giải quyết"

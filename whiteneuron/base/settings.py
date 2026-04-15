@@ -6,6 +6,7 @@ from django.core.management.utils import get_random_secret_key
 from django.templatetags.static import static
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
+from django.utils.text import format_lazy
 load_dotenv()
 
 import sentry_sdk
@@ -841,3 +842,12 @@ CKEDITOR_5_CONFIGS = {
         'placeholder': 'Start typing your content here...'
     },
 }
+
+######################################################################
+# Announcement (displayed in header, can be used for important notices)
+######################################################################
+VERSION = environ.get("VERSION", "0.1.0")
+ANNOUNCEMENT_CALLBACK = "whiteneuron.base.utils.announcement_callback"
+# Set to an absolute Path or a template name to enable announcement content.
+# Example: ANNOUNCEMENT_CONTENT_HTML_FILE = BASE_DIR / "templates" / "announcement_content.html"
+ANNOUNCEMENT_CONTENT_HTML_FILE = "announcement_content.html"

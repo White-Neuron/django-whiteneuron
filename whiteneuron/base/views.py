@@ -38,3 +38,12 @@ class GuestLoginView(View):
         if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
             return redirect(next_url)
         return redirect('admin:index')
+    
+from django.http import HttpResponse
+def get_announcement_content(request):
+    from django.conf import settings
+    content_file= getattr(settings, 'ANNOUNCEMENT_CONTENT_HTML_FILE', None)
+    if not content_file:
+        return None
+    content = render_to_string(content_file, request=request)
+    return HttpResponse(content)
