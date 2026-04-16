@@ -11,24 +11,23 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Current Version
 
-- 0.3.1.1
+- 0.3.1.2
 
 ## Compatibility
 
 - Python >= 3.11
 - Django >= 5.2.13
-- django-unfold >= 0.85.0
+- django-unfold >= 0.89.0
 - Tailwind CSS 4.x + daisyUI 5.x (for the bundled frontend styles)
 
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
-### Latest: v0.3.1.1 (2026-04-16)
-**Fix: permission_viewer_callback missing unauthenticated guard; add md2html-tailwind4 dependency**
-- **Fixed**: `base/utils.py` — `permission_viewer_callback` now checks `request.user.is_authenticated` before returning `True`, preventing unauthenticated (anonymous) users from passing the permission check.
-- **Fixed**: `base/settings.py` — UNFOLD navigation Feedbacks menu item permission callback changed from `permission_non_guest_callback` to `permission_viewer_callback` for consistency.
-- **Added**: `pyproject.toml` — added `md2html-tailwind4>=1.0.0` as a dependency.
+### Latest: v0.3.1.2 (2026-04-16)
+**Dependency: Bump django-unfold floor constraint to >=0.89.0**
+- **Updated**: `pyproject.toml` — raised `django-unfold` minimum version from `>=0.85.0` to `>=0.89.0`; incorporates improvements from 0.86.0–0.89.0 (compressed fields by default, removal of unbound template blocks, inline before/after templates).
+- **Updated**: `uv.lock` — lock file refreshed to reflect the updated constraint.
 
 ## Installation
 

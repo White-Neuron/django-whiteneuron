@@ -1,7 +1,7 @@
 ---
 name: library-build-release
 description: 'Build and release django-whiteneuron package using scripts/build.sh workflow. Use when building Tailwind, running migrations, uv build, optional version bump, git tag, push, and auto-writing a professional release description.'
-argument-hint: 'Release mode (build-only|release), target version (optional), and message language (vi|en).'
+argument-hint: 'Release mode (build-only|release), target version (optional).'
 user-invocable: true
 ---
 
@@ -21,9 +21,6 @@ This skill executes a reliable package build/release workflow based on [scripts/
   - `release`
 - Target version:
   - optional, if omitted keep current version in `pyproject.toml`
-- Message language:
-  - `vi` (default)
-  - `en`
 
 ## Procedure
 1. Preflight checks
@@ -59,10 +56,11 @@ This skill executes a reliable package build/release workflow based on [scripts/
   - Validation performed
   - Upgrade guidance and rollback note
 - Use [release description template](./assets/release-description-template.md).
-- If language is Vietnamese, always write proper Vietnamese diacritics.
+- **Language: English only. All release descriptions, summaries, bullet points, and notes MUST be written in English.**
 
 6. Changelog & README update (mandatory before git tag)
 - **MUST be done before any git commit/tag** — this is a blocking step.
+- **Language: English only. All content written in CHANGELOG.md, README.md, and the release notes file MUST be in English. This is a hard requirement with no exceptions.**
 - Update `CHANGELOG.md` (root of repo):
   - Add new version entry at the very top, below the `# Changelog` heading.
   - Format: `### v<version> (<date>) — latest`

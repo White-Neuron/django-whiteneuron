@@ -1,6 +1,11 @@
 # Changelog
 
-### v0.3.1.1 (2026-04-16) — latest
+### v0.3.1.2 (2026-04-16) — latest
+**Dependency: Bump django-unfold floor constraint to >=0.89.0**
+- **Updated**: `pyproject.toml` — raised `django-unfold` minimum version from `>=0.85.0` to `>=0.89.0` to align with the installed version; incorporates improvements from 0.86.0–0.89.0 (compressed fields by default, removal of unbound template blocks, inline before/after templates, UI component enhancements).
+- **Updated**: `uv.lock` — lock file refreshed to reflect the updated constraint.
+
+### v0.3.1.1 (2026-04-16)
 **Fix: permission_viewer_callback missing unauthenticated guard; add md2html-tailwind4 dependency**
 - **Fixed**: `base/utils.py` — `permission_viewer_callback` now checks `request.user.is_authenticated` before returning `True`, preventing unauthenticated (anonymous) users from passing the permission check.
 - **Fixed**: `base/settings.py` — UNFOLD navigation Feedbacks menu item permission callback changed from `permission_non_guest_callback` to `permission_viewer_callback` for consistency.
