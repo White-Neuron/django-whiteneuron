@@ -108,6 +108,8 @@ def permission_non_guest_callback(request):
     return not is_guest_user(request.user)
 
 def permission_viewer_callback(request):
+    if not request.user.is_authenticated:
+        return False
     return True
 
 

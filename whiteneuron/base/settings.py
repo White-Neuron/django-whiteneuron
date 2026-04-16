@@ -579,7 +579,7 @@ UNFOLD = {
                         "icon": "feedback",
                         "link": reverse_lazy("admin:feedbacks_feedbackdata_changelist"),
                         "badge": "whiteneuron.feedbacks.utils.feedback_data_badge_callback",
-                        "permission": "whiteneuron.base.utils.permission_non_guest_callback",
+                        "permission": "whiteneuron.base.utils.permission_viewer_callback",
                     },
                 ],
             },

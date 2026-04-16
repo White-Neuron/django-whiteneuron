@@ -63,20 +63,27 @@ This skill executes a reliable package build/release workflow based on [scripts/
 
 6. Changelog & README update (mandatory before git tag)
 - **MUST be done before any git commit/tag** — this is a blocking step.
-- Update `README.md` changelog:
-  - Add new version entry at the top of `## Changelog` section.
-  - Move `— latest` tag from previous version to the new one.
-  - Follow the existing format: `### v<version> (<date>) — latest`.
+- Update `CHANGELOG.md` (root of repo):
+  - Add new version entry at the very top, below the `# Changelog` heading.
+  - Format: `### v<version> (<date>) — latest`
+  - Move `— latest` tag from the previous top entry to the new one.
+  - Keep all existing entries intact below.
+- Update `README.md`:
+  - Update `## Current Version` value to the new version.
+  - In `## Changelog`, replace the `### Latest:` entry with the new version's summary.
+    - Format: `### Latest: v<version> (<date>)` followed by the same bullet points as CHANGELOG.md.
+  - The link `See [CHANGELOG.md](CHANGELOG.md) for the full version history.` must remain present.
 - Create release notes file at `docs/reports/releases/<date>-v<version>.md`:
   - Use the professional release description from step 5.
   - Structure: summary, main changes (Added/Fixed/Improved), files changed table, compatibility notes, upgrade guide.
   - Note: `docs/reports/` is gitignored — use `git add -f` to force-stage this file.
-- Rebuild with `uv build` once after all content edits (README, release notes, version bump are done).
+- Rebuild with `uv build` once after all content edits (CHANGELOG.md, README.md, release notes, version bump are done).
 
 7. Git operations (release mode)
 - Before tag/push, run [library smoke-check skill](../library-smoke-check/SKILL.md) and require PASS.
 - Stage only intended files (avoid blind `git add .` when unrelated changes exist).
 - Use `git add -f docs/reports/releases/<date>-v<version>.md` for the release notes file.
+- Staged files should include: `pyproject.toml`, `uv.lock`, `CHANGELOG.md`, `README.md`, and any changed source files.
 - Create commit message:
   - `v<version>: <professional-summary>`
 - Create annotated tag:
