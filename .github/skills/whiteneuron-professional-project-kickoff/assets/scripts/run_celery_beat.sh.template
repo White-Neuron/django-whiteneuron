@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-
-cd src
-celery -A ${PROJECT_MODULE:-config} beat -l info

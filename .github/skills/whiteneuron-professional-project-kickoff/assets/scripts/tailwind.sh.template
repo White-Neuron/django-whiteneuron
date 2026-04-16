@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-
-npx @tailwindcss/cli -i styles.css -o src/static/css/styles.css --minify

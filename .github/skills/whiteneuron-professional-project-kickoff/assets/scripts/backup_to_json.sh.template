@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-
-cd src
-python manage.py dumpdata --natural-foreign --natural-primary --indent 2 > dump.json
