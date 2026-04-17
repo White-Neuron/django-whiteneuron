@@ -1,6 +1,12 @@
 # Changelog
 
-### v0.3.1.2 (2026-04-16) — latest
+### v0.3.1.3 (2026-04-17) — latest
+**Fix: Announcement modal URL uses Django `{% url %}` tag; bump md2html-tailwind4 to >=1.1.0**
+- **Fixed**: `templates/base/announcement.html` — replaced hardcoded `/announcement/` path with `{% url 'announcement' %}` in both `data-content-url` attribute and the JavaScript fallback, ensuring correct URL resolution regardless of URL prefix configuration.
+- **Updated**: `pyproject.toml` — bumped `md2html-tailwind4` minimum version from `>=1.0.0` to `>=1.1.0`; added `[tool.uv.sources]` pointing to GitHub at rev `1.1.0`.
+- **Updated**: `uv.lock` — lock file refreshed.
+
+### v0.3.1.2 (2026-04-16)
 **Dependency: Bump django-unfold floor constraint to >=0.89.0**
 - **Updated**: `pyproject.toml` — raised `django-unfold` minimum version from `>=0.85.0` to `>=0.89.0` to align with the installed version; incorporates improvements from 0.86.0–0.89.0 (compressed fields by default, removal of unbound template blocks, inline before/after templates, UI component enhancements).
 - **Updated**: `uv.lock` — lock file refreshed to reflect the updated constraint.

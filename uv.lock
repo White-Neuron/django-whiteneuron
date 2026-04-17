@@ -790,7 +790,7 @@ wheels = [
 
 [[package]]
 name = "django-whiteneuron"
-version = "0.3.1.1"
+version = "0.3.1.2"
 source = { editable = "." }
 dependencies = [
     { name = "channels" },
@@ -865,7 +865,7 @@ requires-dist = [
     { name = "gunicorn", specifier = ">=23.0.0" },
     { name = "hiredis", specifier = ">=3.1.0" },
     { name = "markdown", specifier = ">=3.7" },
-    { name = "md2html-tailwind4", specifier = ">=1.0.0" },
+    { name = "md2html-tailwind4", git = "https://github.com/White-Neuron/md2html-tailwind4?rev=1.1.0" },
     { name = "openai", specifier = ">=1.58.1" },
     { name = "openpyxl", specifier = ">=3.1.5" },
     { name = "pandas", specifier = ">=2.2.3" },
@@ -1222,15 +1222,11 @@ wheels = [
 
 [[package]]
 name = "md2html-tailwind4"
-version = "1.0.0"
-source = { registry = "https://pypi.org/simple" }
+version = "1.1.0"
+source = { git = "https://github.com/White-Neuron/md2html-tailwind4?rev=1.1.0#db3df5a76c0498212c8a10d29a858a82f311e8b8" }
 dependencies = [
     { name = "beautifulsoup4" },
     { name = "markdown" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/18/c8/26c69e3bb1d30cfd43da787b6eef4b7fd8e9f7f0a6c31fb9349bc1e1b1a0/md2html_tailwind4-1.0.0.tar.gz", hash = "sha256:f11dad30e46b4d0b31d6fd46c87f3831c058ae15a8bbe1d560b772a714ef3f41", size = 9602 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/ed/5d/ffa050b943d011f7e62ac2dad2f7e4132b6155fd2bb1c1f340414646a7dc/md2html_tailwind4-1.0.0-py3-none-any.whl", hash = "sha256:192e10cca5cf3fe4e6ca194edf9320f7419f94b436cdf0da03c8116dade3311b", size = 7244 },
 ]
 
 [[package]]

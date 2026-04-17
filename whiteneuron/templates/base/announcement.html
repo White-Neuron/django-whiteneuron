@@ -1,6 +1,6 @@
 {% load i18n %}
 
-<dialog id="wn-announcement-modal" class="ui-modal" data-content-url="/announcement/">
+<dialog id="wn-announcement-modal" class="ui-modal" data-content-url="{% url 'announcement' %}">
     <div class="ui-modal-box w-full max-w-3xl max-h-[90vh] flex flex-col p-0 rounded-2xl overflow-hidden">
 
         {# Header #}
@@ -57,7 +57,7 @@
     modal.addEventListener('toggle', function () {
         if (modal.open && !loaded) {
             loaded = true;
-            var url = modal.dataset.contentUrl || '/announcement/';
+            var url = modal.dataset.contentUrl || '{% url "announcement" %}';
             fetch(url, {credentials: 'same-origin'})
                 .then(function(r){ return r.text(); })
                 .then(function(html){

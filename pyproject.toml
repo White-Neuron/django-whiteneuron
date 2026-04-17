@@ -1,6 +1,6 @@
 [project]
 name = "django-whiteneuron"
-version = "0.3.1.2"
+version = "0.3.1.3"
 description = "A modern Django Admin extension with enhanced UI/UX, dashboard, feedback, file management, rate limiting, IP blacklisting, and advanced admin integrations built on django-unfold."
 authors = [
     {name = "White Neuron", email = "anhnt@whiteneuron.ai"}
@@ -42,7 +42,7 @@ dependencies = [
     "djangoql>=0.18.1",
     "cryptography>=46.0.7",
     "pyopenssl==26.0.0",
-    "md2html-tailwind4>=1.0.0",
+    "md2html-tailwind4>=1.1.0",
 ]
 requires-python = ">=3.11"
 
@@ -80,6 +80,9 @@ include = ["whiteneuron*"]
 "whiteneuron" = [
     "templates/admin/signature_ceo.html",
 ]
+
+[tool.uv.sources]
+md2html-tailwind4 = { git = "https://github.com/White-Neuron/md2html-tailwind4", rev = "1.1.0" }
 
 [project.optional-dependencies]
 dev = ["pytest", "black", "flake8", "pre-commit"]
