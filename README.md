@@ -11,7 +11,7 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Current Version
 
-- 0.3.1.3
+- 0.3.1.4
 
 ## Compatibility
 
@@ -24,10 +24,9 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
-### Latest: v0.3.1.3 (2026-04-17)
-**Fix: Announcement modal URL uses Django `{% url %}` tag; bump md2html-tailwind4 to >=1.1.0**
-- **Fixed**: `templates/base/announcement.html` — replaced hardcoded `/announcement/` path with `{% url 'announcement' %}` in both `data-content-url` attribute and the JavaScript fallback.
-- **Updated**: `pyproject.toml` — bumped `md2html-tailwind4` from `>=1.0.0` to `>=1.1.0`; added `[tool.uv.sources]` at rev `1.1.0`.
+### Latest: v0.3.1.4 (2026-04-17)
+**Dependency: Bump md2html-tailwind4 source to v1.2.0**
+- **Updated**: `pyproject.toml` — updated `[tool.uv.sources]` rev for `md2html-tailwind4` from `1.1.0` to `v1.2.0`; removed redundant version constraint.
 - **Updated**: `uv.lock` — lock file refreshed.
 
 ## Installation
