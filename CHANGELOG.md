@@ -1,6 +1,11 @@
 # Changelog
 
-### v0.3.1.4 (2026-04-17) — latest
+### v0.3.1.5 (2026-04-19) — latest
+**Dependency: Bump md2html-tailwind4 source to v1.4.2**
+- **Updated**: `pyproject.toml` — updated `[tool.uv.sources]` rev for `md2html-tailwind4` from `v1.2.0` to `v1.4.2`.
+- **Updated**: `uv.lock` — lock file refreshed.
+
+### v0.3.1.4 (2026-04-17)
 **Dependency: Bump md2html-tailwind4 source to v1.2.0**
 - **Updated**: `pyproject.toml` — updated `[tool.uv.sources]` rev for `md2html-tailwind4` from `1.1.0` to `v1.2.0`; removed redundant version constraint from `dependencies` (pinned via uv source).
 - **Updated**: `uv.lock` — lock file refreshed.
