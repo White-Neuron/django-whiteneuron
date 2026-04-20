@@ -1,6 +1,7 @@
 @layer theme, base, components, utilities;
 @import 'tailwindcss/theme' layer(theme);
 @import 'tailwindcss/utilities' layer(utilities);
+@source ".venv/lib/python3.11/site-packages/md2html_tailwind4/**/*.py";
 
 @custom-variant dark (&:is(.dark, .dark *, [data-theme=dark], [data-theme=dark] *));
 

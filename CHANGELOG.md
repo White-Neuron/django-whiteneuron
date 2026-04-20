@@ -1,6 +1,13 @@
 # Changelog
 
-### v0.3.1.5 (2026-04-19) — latest
+### v0.3.1.6 (2026-04-20) — latest
+**Dependency: Bump md2html-tailwind4 to v1.5.0; add Tailwind @source directive for md2html_tailwind4**
+- **Updated**: `pyproject.toml` — bumped `[tool.uv.sources]` rev for `md2html-tailwind4` from `v1.4.2` to `v1.5.0`.
+- **Updated**: `uv.lock` — lock file refreshed; `pymdown-extensions` v10.21.2 added as new transitive dependency of `md2html-tailwind4`.
+- **Updated**: `styles.css` — added `@source` directive pointing to the installed `md2html_tailwind4` package so Tailwind CLI scans its Python templates for utility classes.
+- **Updated**: `whiteneuron/static/base/css/styles.css` — rebuilt CSS artifact.
+
+### v0.3.1.5 (2026-04-19)
 **Dependency: Bump md2html-tailwind4 source to v1.4.2**
 - **Updated**: `pyproject.toml` — updated `[tool.uv.sources]` rev for `md2html-tailwind4` from `v1.2.0` to `v1.4.2`.
 - **Updated**: `uv.lock` — lock file refreshed.
