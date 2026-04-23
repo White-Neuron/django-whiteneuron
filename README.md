@@ -11,7 +11,7 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Current Version
 
-- 0.3.1.6
+- 0.3.1.7
 
 ## Compatibility
 
@@ -24,10 +24,11 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
-### Latest: v0.3.1.6 (2026-04-20)
-**Dependency: Bump md2html-tailwind4 to v1.5.0; add Tailwind @source directive for md2html_tailwind4**
-- **Updated**: `pyproject.toml` — bumped `[tool.uv.sources]` rev for `md2html-tailwind4` from `v1.4.2` to `v1.5.0`.
-- **Updated**: `uv.lock` — lock file refreshed; `pymdown-extensions` v10.21.2 added as new transitive dependency.
+### Latest: v0.3.1.7 (2026-04-23)
+**Fix: post_save signal sends email to new users; fix format_html compat for Django 6; uncomment uv.sources for md2html-tailwind4**
+- **Added**: `base/models.py` — `post_save` signal sends login email for every new user creation path.
+- **Fixed**: `base/admin.py` — `format_html(obj.content)` → `mark_safe(obj.content)` for Django 6 compatibility.
+- **Fixed**: `pyproject.toml` — uncommented `[tool.uv.sources]` so `md2html-tailwind4` resolves from GitHub (`v1.5.0`).
 - **Updated**: `styles.css` — added `@source` directive for Tailwind to scan `md2html_tailwind4` utility classes.
 - **Updated**: `whiteneuron/static/base/css/styles.css` — rebuilt CSS artifact.
 

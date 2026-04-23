@@ -1,6 +1,13 @@
 # Changelog
 
-### v0.3.1.6 (2026-04-20) — latest
+### v0.3.1.7 (2026-04-23) — latest
+**Fix: post_save signal sends email to new users; fix format_html compat for Django 6; uncomment uv.sources for md2html-tailwind4**
+- **Added**: `whiteneuron/base/models.py` — `post_save` signal `_send_email_to_new_user` now fires for every new `User` creation path (API, management commands, shell), not only admin form. Generates a random password, sets it, and calls `send_email_login`. Users with no email address are silently skipped.
+- **Added**: `whiteneuron/base/admin.py` — sets `_skip_new_user_email = True` on the instance inside `save_model` so the new signal does not send a duplicate email when the admin form already handles it.
+- **Fixed**: `whiteneuron/base/admin.py` — `preview_email` in `MailAdmin` changed from `format_html(obj.content)` to `mark_safe(obj.content)`. Django 6 raises `TypeError` when `format_html` is called without positional/keyword arguments.
+- **Fixed**: `pyproject.toml` — uncommented `[tool.uv.sources]` block so `md2html-tailwind4` is resolved from the GitHub git source (`v1.5.0`) rather than PyPI, which only has `<=1.2.0`. `uv.lock` updated accordingly.
+
+### v0.3.1.6 (2026-04-20)
 **Dependency: Bump md2html-tailwind4 to v1.5.0; add Tailwind @source directive for md2html_tailwind4**
 - **Updated**: `pyproject.toml` — bumped `[tool.uv.sources]` rev for `md2html-tailwind4` from `v1.4.2` to `v1.5.0`.
 - **Updated**: `uv.lock` — lock file refreshed; `pymdown-extensions` v10.21.2 added as new transitive dependency of `md2html-tailwind4`.

@@ -313,6 +313,7 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
     # tự tạo mật khẩu mặc định cho user mới và gửi email thông báo
     def save_model(self, request: HttpRequest, obj, form, change: bool) -> None:
         if not obj.pk:
+            obj._skip_new_user_email = True  # signal sẽ bỏ qua, admin form tự xử lý
             # random password
             password = make_random_password()
             # send email
@@ -620,7 +621,7 @@ class MailAdmin(ModelAdmin):
         return False
     
     def preview_email(self, obj):
-        return format_html(obj.content)
+        return mark_safe(obj.content)
     preview_email.short_description = _('Content')
 
 

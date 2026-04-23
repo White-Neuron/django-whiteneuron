@@ -462,7 +462,7 @@ class BaseModel(SoftDeleteModel):
 # We fix this by connecting to m2m_changed for every concrete BaseModel
 # subclass.  A direct queryset update is used to avoid re-triggering save(),
 # then a notification is sent to all superusers (same behaviour as save()).
-from django.db.models.signals import class_prepared, m2m_changed as _m2m_changed
+from django.db.models.signals import class_prepared, m2m_changed as _m2m_changed, post_save
 
 
 def _base_model_m2m_changed(sender, instance, action, pk_set, model, **kwargs):
@@ -897,3 +897,28 @@ class App(BaseModel):
         if self.name:
             return _(self.name)
         return f'App {self.id}'
+
+
+# ── Gửi email thông tin đăng nhập khi tạo user mới ─────────────────────────
+# Hoạt động với MỌI nguồn tạo user (admin form, API, management command, shell...).
+# Nếu admin form đã tự xử lý (save_model), nó sẽ đặt flag _skip_new_user_email=True
+# trên instance để tránh gửi email 2 lần.
+def _send_email_to_new_user(sender, instance, created, **kwargs):
+    if not created:
+        return
+    if getattr(instance, '_skip_new_user_email', False):
+        return
+    if not instance.email:
+        return
+    from .utils import send_email_login, make_random_password
+    password = make_random_password()
+    instance.set_password(password)
+    instance.save(update_fields=['password'])
+    send_email_login(instance.username, password, instance.email)
+
+
+post_save.connect(
+    _send_email_to_new_user,
+    sender=User,
+    dispatch_uid='base.models._send_email_to_new_user',
+)
