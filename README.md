@@ -11,7 +11,7 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Current Version
 
-- 0.3.1.7
+- 0.3.1.8
 
 ## Compatibility
 
@@ -24,13 +24,10 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
-### Latest: v0.3.1.7 (2026-04-23)
-**Fix: post_save signal sends email to new users; fix format_html compat for Django 6; uncomment uv.sources for md2html-tailwind4**
-- **Added**: `base/models.py` — `post_save` signal sends login email for every new user creation path.
-- **Fixed**: `base/admin.py` — `format_html(obj.content)` → `mark_safe(obj.content)` for Django 6 compatibility.
-- **Fixed**: `pyproject.toml` — uncommented `[tool.uv.sources]` so `md2html-tailwind4` resolves from GitHub (`v1.5.0`).
-- **Updated**: `styles.css` — added `@source` directive for Tailwind to scan `md2html_tailwind4` utility classes.
-- **Updated**: `whiteneuron/static/base/css/styles.css` — rebuilt CSS artifact.
+### Latest: v0.3.1.8 (2026-04-24)
+**Feature: Add UUID field to User model with admin display support**
+- **Added**: `base/models.py` — new `uuid` field on custom `User` model (unique, auto-generated).
+- **Added**: `base/admin.py` — uuid shown in changelist and readonly in change form.
 
 ## Installation
 

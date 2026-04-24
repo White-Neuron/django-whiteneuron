@@ -1,6 +1,12 @@
 # Changelog
 
-### v0.3.1.7 (2026-04-23) — latest
+### v0.3.1.8 (2026-04-24) — latest
+**Feature: Add UUID field to User model with admin display support**
+- **Added**: `whiteneuron/base/models.py` — new `uuid` field (`UUIDField`, unique, auto-generated via `uuid.uuid4`) on the custom `User` model.
+- **Added**: `whiteneuron/base/admin.py` — `uuid` displayed in User changelist list_display; shown as readonly field in User change form under "Personal info" section; excluded from grid view cards.
+- **Migration**: `0018_user_uuid` — safely adds uuid to existing users via data migration (nullable → backfill → unique constraint).
+
+### v0.3.1.7 (2026-04-23)
 **Fix: post_save signal sends email to new users; fix format_html compat for Django 6; uncomment uv.sources for md2html-tailwind4**
 - **Added**: `whiteneuron/base/models.py` — `post_save` signal `_send_email_to_new_user` now fires for every new `User` creation path (API, management commands, shell), not only admin form. Generates a random password, sets it, and calls `send_email_login`. Users with no email address are silently skipped.
 - **Added**: `whiteneuron/base/admin.py` — sets `_skip_new_user_email = True` on the instance inside `save_model` so the new signal does not send a duplicate email when the admin form already handles it.

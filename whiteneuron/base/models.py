@@ -1,4 +1,4 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -8,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from django.db import models
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
+import uuid
 import os
 from django.utils.safestring import mark_safe
 
@@ -83,8 +84,8 @@ class Tag(models.Model):
             models.Index(fields=["content_type", "object_id"]),
         ]
 
-from django.contrib.auth.models import Group
 class User(AbstractUser):
+    uuid = models.UUIDField(_("UUID"), default=uuid.uuid4, unique=True, editable=False)
     # avatar_obj= models.OneToOneField(ImageModel, on_delete=models.CASCADE, null=True, blank=True, default=None, related_name='user_avatar')
     avatar = models.ImageField(_("avatar"), upload_to="avatars/", null=True, blank=True, default=None)
     biography = models.TextField(_("biography"), null=True, blank=True, default=None)
@@ -146,19 +147,7 @@ class User(AbstractUser):
         #     self.avatar_obj = ImageModel.objects.create()
         # self.avatar_obj.listen(self.avatar)
         
-        # Nếu tạo mới thi mac dinh is_staff = True
-        fl= False
-        if not self.pk:
-            self.is_staff = True
-            fl= True
         super().save(*args, **kwargs)
-        if fl:
-            try:
-                group_staff= Group.objects.get(name='Nhân viên')
-                self.groups.add(group_staff)
-            except:
-                print('Group Nhân viên không tồn tại')
-                pass
 
 class UserProfile(User):
     class Meta:

@@ -131,7 +131,7 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
     grid_exclude_fields_list_display= ['display_created', 
                                        "first_name",
                                        "last_name", 'is_active', 
-                                       'display_staff', 'display_superuser', 'display_header']
+                                       'display_staff', 'display_superuser', 'display_header', 'uuid']
 
     def grid_item_header(self, obj):
         if obj.is_bot:
@@ -211,6 +211,7 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
         "is_active",
         "display_staff",
         "display_superuser",
+        "uuid",
         "display_created",
     ]
 
@@ -250,7 +251,7 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
         (
             _("Personal info"),
             {
-                "fields": (("first_name", "last_name"), "email", "avatar", "biography"),
+                "fields": (("first_name", "last_name"), "email", "avatar", "biography", "uuid"),
                 "classes": ["tab"],
             },
         ),
@@ -288,7 +289,7 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
             "widget": UnfoldAdminSplitDateTimeWidget,
         },
     }
-    readonly_fields = ["last_login", "date_joined"]
+    readonly_fields = ["last_login", "date_joined", "uuid"]
 
     @display(description=_("User"))
     def display_header(self, instance: User):
