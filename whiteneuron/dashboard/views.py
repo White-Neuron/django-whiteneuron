@@ -11,7 +11,7 @@ class HomeView(RedirectView):
     pattern_name = "admin:index"
 
 
-from whiteneuron.base.models import UserActivity
+from whiteneuron.base.models import UserActivity, AnonymousActivity
 import datetime
 # timezones
 from django.utils import timezone
@@ -101,11 +101,18 @@ def dashboard_callback(request, context):
     total_activities = user_activities.count()
     total_activities_last = user_activities_last.count()
 
-    # total_activities_success = user_activities.filter(status_code__lt="400").count()
+    # total_activities_success = user_activities.filter(status_code__lt=400).count()
     # total_activities_last_week_success = user_activities_last_week.filter(status_code="200").count()
 
-    total_activities_success = user_activities.filter(status_code__lt="400").count()
-    total_activities_last_success = user_activities_last.filter(status_code__lt="400").count()
+    total_activities_success = user_activities.filter(status_code__lt=400).count()
+    total_activities_last_success = user_activities_last.filter(status_code__lt=400).count()
+
+    anonymous_activities = AnonymousActivity.objects.filter(timestamp__range=(start, end))
+    anonymous_activities_last = AnonymousActivity.objects.filter(timestamp__range=(start_last, end_last))
+    total_anonymous_activities = anonymous_activities.count()
+    total_anonymous_activities_last = anonymous_activities_last.count()
+    total_anonymous_activities_success = anonymous_activities.filter(status_code__lt=400).count()
+    total_anonymous_activities_last_success = anonymous_activities_last.filter(status_code__lt=400).count()
 
     # total_activities_icd10 = user_activities.filter(path__startswith="/admin/icd10").count()
     # total_activities_last_week_icd10 = user_activities_last_week.filter(path__startswith="/admin/icd10").count()
@@ -119,22 +126,33 @@ def dashboard_callback(request, context):
 
     # chart data 28 days for activities success, error
     user_activities_28_days = UserActivity.objects.filter(timestamp__gte=timezone.now()-datetime.timedelta(days=28))
-    user_activities_28_days_success = user_activities_28_days.filter(status_code__lt="400").annotate(day= TruncDay("timestamp")).values("day").annotate(count=Count("id")).values("day", "count")
-    user_activities_28_days_error = user_activities_28_days.exclude(status_code__lt="400").annotate(day=TruncDay("timestamp")).values("day").annotate(count=Count("id")).values("day", "count") 
+    user_activities_28_days_success = user_activities_28_days.filter(status_code__lt=400).annotate(day= TruncDay("timestamp")).values("day").annotate(count=Count("id")).values("day", "count")
+    user_activities_28_days_error = user_activities_28_days.exclude(status_code__lt=400).annotate(day=TruncDay("timestamp")).values("day").annotate(count=Count("id")).values("day", "count") 
     # convert data to fit day of week
     # print(user_activities_28_days_success)
     user_activities_28_days_success = {item["day"].strftime("%Y-%m-%d"): item["count"] for item in user_activities_28_days_success}
     user_activities_28_days_error = {item["day"].strftime("%Y-%m-%d"): item["count"] for item in user_activities_28_days_error}
+
+    anonymous_activities_28_days = AnonymousActivity.objects.filter(timestamp__gte=timezone.now()-datetime.timedelta(days=28))
+    anonymous_success_dict = {item["day"].strftime("%Y-%m-%d"): item["count"] for item in 
+        anonymous_activities_28_days.filter(status_code__lt=400).annotate(day=TruncDay("timestamp")).values("day").annotate(count=Count("id")).values("day", "count")}
+    anonymous_error_dict = {item["day"].strftime("%Y-%m-%d"): item["count"] for item in 
+        anonymous_activities_28_days.exclude(status_code__lt=400).annotate(day=TruncDay("timestamp")).values("day").annotate(count=Count("id")).values("day", "count")}
+
     # Update data 0 for missing day
     # print(user_activities_28_days_success)
     user_activities_28_days= {
         'success': [],
-        'error': []
+        'error': [],
+        'anonymous_success': [],
+        'anonymous_error': [],
     }
     for day in range(28): # 28 days
         day = (timezone.now() - datetime.timedelta(days=day)).strftime("%Y-%m-%d")
         user_activities_28_days['success'].append(user_activities_28_days_success.get(day, 0))  
         user_activities_28_days['error'].append(user_activities_28_days_error.get(day, 0))
+        user_activities_28_days['anonymous_success'].append(anonymous_success_dict.get(day, 0))
+        user_activities_28_days['anonymous_error'].append(anonymous_error_dict.get(day, 0))
     
     # Lấy thứ của ngày hiện tại
     last_day = datetime.datetime.now().weekday() 
@@ -142,17 +160,22 @@ def dashboard_callback(request, context):
     _28_days= [WEEKDAYS[(last_day - i) % 7] for i in range(28)][::-1]
     user_activities_28_days['success'].reverse()
     user_activities_28_days['error'].reverse()
+    user_activities_28_days['anonymous_success'].reverse()
+    user_activities_28_days['anonymous_error'].reverse()
     user_activities_28_days['average'] = ((np.array(user_activities_28_days['success']) + np.array(user_activities_28_days['error'])) / 2).tolist()
+    user_activities_28_days['anonymous_average'] = ((np.array(user_activities_28_days['anonymous_success']) + np.array(user_activities_28_days['anonymous_error'])) / 2).tolist()
 
-    def render_kpi(label, object_name, value, last_value, time):
+    def render_kpi(label, object_name, value, last_value, time, success=None):
         is_increase = value > last_value
         diff = value - last_value
         diff_percent = diff / last_value * 100 if last_value else 0
         footer = f'<strong class="text-{"green" if is_increase else "red"}-600 font-medium">{"+" if is_increase else "-"}{abs(diff)} ({diff_percent:.2f}%)</strong>&nbsp;{_("progress from last")} - {MAPTIME[time] if time != "today" else "day"}'
+        rate = round(success / value * 100, 1) if value and success else None
         return {
             "label": label,
             "title": f"{_(object_name)} {_('in')} {_(MAPTIME[time])}",
-            "metric": value,
+            "metric_total": value,
+            "metric_success": f"{success} successful ({rate}%)" if rate is not None else None,
             "footer": mark_safe(footer),
         }
 
@@ -198,8 +221,8 @@ def dashboard_callback(request, context):
                 },
             ],
             "kpi": [
-                render_kpi(_("Activity"), _("Activities"), total_activities, total_activities_last, time),
-                render_kpi(_("Activity"), _("Success activities"), total_activities_success, total_activities_last_success, time),
+                render_kpi(_("User"), _("Activities"), total_activities, total_activities_last, time, success=total_activities_success),
+                render_kpi(_("Anonymous"), _("Visits"), total_anonymous_activities, total_anonymous_activities_last, time, success=total_anonymous_activities_success),
                 # render_kpi("Activity", "ICD-10 activities", total_activities_icd10, total_activities_last_icd10, time),
                 # {
                 #     "title": "Product A Performance",
@@ -247,21 +270,38 @@ def dashboard_callback(request, context):
                     "labels": _28_days,
                     "datasets": [
                         {
-                            "label": _("Average"),
+                            "label": _("User average"),
                             "type": "line",
                             "data": user_activities_28_days['average'],
                             "backgroundColor": "#f0abfc",
                             "borderColor": "#f0abfc",
                         },
                         {
-                            "label": _("Success"),
+                            "label": _("Anonymous average"),
+                            "type": "line",
+                            "data": user_activities_28_days['anonymous_average'],
+                            "backgroundColor": "#a78bfa",
+                            "borderColor": "#a78bfa",
+                        },
+                        {
+                            "label": _("User success"),
                             "data": user_activities_28_days['success'],
                             "backgroundColor": "#9333ea",
                         },
                         {
-                            "label": _("Error"),
+                            "label": _("Anonymous success"),
+                            "data": user_activities_28_days['anonymous_success'],
+                            "backgroundColor": "#22d3ee",
+                        },
+                        {
+                            "label": _("User error"),
                             "data": user_activities_28_days['error'],
                             "backgroundColor": "#f43f5e",
+                        },
+                        {
+                            "label": _("Anonymous error"),
+                            "data": user_activities_28_days['anonymous_error'],
+                            "backgroundColor": "#fb923c",
                         },
                     ],
                 }

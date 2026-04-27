@@ -1,5 +1,23 @@
 # Changelog
 
+### v0.3.2 (2026-04-27)
+**Feature: VisitProfile-based activity tracking for authenticated + anonymous users, dashboard analytics**
+- **Added**: `VisitProfile` model (`whiteneuron/base/models.py`) — deduplicates visits by `(ip_address, user_agent)` combo; tracks `first_seen`, `last_seen`; unique constraint on the pair.
+- **Added**: `AnonymousActivity` model — tracks anonymous visitor activity (path, method, status_code, timelapse) linked to `VisitProfile`.
+- **Refactored**: `UserActivity` — removed direct `ip_address`/`user_agent` fields; replaced with FK `profile` → `VisitProfile`; data migration backfills existing records.
+- **Added**: `UserActivityMiddleware` now creates `VisitProfile` for both authenticated and anonymous requests; handles race conditions via `IntegrityError` retry in `_get_or_create_visit_profile()`.
+- **Improved**: `_sanitize_post()` is now recursive — sanitizes nested dicts/lists, not just top-level keys.
+- **Added**: Dashboard analytics (`dashboard/views.py`) — new KPI cards for anonymous visits with success rate; 28-day chart expanded from 3 to 6 datasets (user avg/success/error + anonymous avg/success/error).
+- **Fixed**: Dashboard `status_code` comparison changed from string `"400"` to int `400`.
+- **Added**: Admin — `VisitProfileAdmin`, `AnonymousActivityAdmin`; `BaseActivityInline`/`UserActivityInline` for viewing activities from User detail page; `block_ip` action now handles null profiles gracefully.
+- **Added**: Sidebar navigation entries in `settings.py` — "Anonymous activity" and "Visit profiles" links with badge callbacks.
+- **Added**: Badge callbacks (`utils.py`) — `anonymousactivity_badge_callback`, `visitprofile_badge_callback`.
+- **Added**: Management command `cleanup_old_activities.py` — deletes UserActivity, AnonymousActivity, Notification records older than N days (default 90), plus orphan VisitProfiles; supports `--dry-run`.
+- **Updated**: Templates — KPI cards now show `metric_total` + optional `metric_success` subtitle in header/index; account_links.html refactored from modal dialog to dropdown menu items (~60 lines saved); search_form.html per_page select width fixed.
+- **Fixed**: `Tag.__str__()` changed from `self.tag` → `self.title`.
+- **Fixed**: `BaseModel.notify_superuser()` — uses `values_list('id', flat=True)` + `user_id=` to avoid loading full User queryset into memory.
+- **Config**: `.gitignore` — added `.opencode`; `init_admin.py` — sets `_skip_new_user_email = True` to prevent duplicate welcome emails.
+
 ### v0.3.1.8 (2026-04-24) — latest
 **Feature: Add UUID field to User model with admin display support**
 - **Added**: `whiteneuron/base/models.py` — new `uuid` field (`UUIDField`, unique, auto-generated via `uuid.uuid4`) on the custom `User` model.

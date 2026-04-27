@@ -622,6 +622,20 @@ UNFOLD = {
                         "permission": "whiteneuron.base.utils.permission_admin_callback",
                     },
                     {
+                        "title": _("Anonymous activity"),
+                        "icon": "person_search",
+                        "link": reverse_lazy("admin:base_anonymousactivity_changelist"),
+                        "badge": "whiteneuron.base.utils.anonymousactivity_badge_callback",
+                        "permission": "whiteneuron.base.utils.permission_admin_callback",
+                    },
+                    {
+                        "title": _("Visit profiles"),
+                        "icon": "group_work",
+                        "link": reverse_lazy("admin:base_visitprofile_changelist"),
+                        "badge": "whiteneuron.base.utils.visitprofile_badge_callback",
+                        "permission": "whiteneuron.base.utils.permission_admin_callback",
+                    },
+                    {
                         "title": _("Groups"),
                         "icon": "group",
                         "link": reverse_lazy("admin:auth_group_changelist"),
@@ -846,7 +860,7 @@ CKEDITOR_5_CONFIGS = {
 ######################################################################
 # Announcement (displayed in header, can be used for important notices)
 ######################################################################
-VERSION = environ.get("VERSION", "0.1.0")
+VERSION = environ.get("VERSION", "0.3.2")
 ANNOUNCEMENT_CALLBACK = "whiteneuron.base.utils.announcement_callback"
 # Set to an absolute Path or a template name to enable announcement content.
 # Example: ANNOUNCEMENT_CONTENT_HTML_FILE = BASE_DIR / "templates" / "announcement_content.html"

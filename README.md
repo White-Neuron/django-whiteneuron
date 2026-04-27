@@ -11,7 +11,7 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Current Version
 
-- 0.3.1.8
+- 0.3.2
 
 ## Compatibility
 
@@ -24,10 +24,12 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
-### Latest: v0.3.1.8 (2026-04-24)
-**Feature: Add UUID field to User model with admin display support**
-- **Added**: `base/models.py` — new `uuid` field on custom `User` model (unique, auto-generated).
-- **Added**: `base/admin.py` — uuid shown in changelist and readonly in change form.
+### Latest: v0.3.2 (2026-04-27)
+**Feature: VisitProfile-based activity tracking for authenticated + anonymous users, dashboard analytics expansion**
+- **Added**: `VisitProfile` model — deduplicates visits by IP+UserAgent; new `AnonymousActivity` model for unauthenticated tracking.
+- **Refactored**: `UserActivity` — replaced direct ip_address/user_agent with FK to VisitProfile.
+- **Added**: Dashboard KPI cards and 28-day chart expanded for anonymous visit analytics.
+- **Added**: Admin views for VisitProfile, AnonymousActivity; inline activity viewing from User detail page.
 
 ## Installation
 

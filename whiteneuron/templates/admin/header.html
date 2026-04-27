@@ -18,8 +18,13 @@
                             {{ stats.title }}
                         {% endcomponent %}   
                         {% component "unfold/components/title.html" %}
-                            {{ stats.metric }}
-                        {% endcomponent %}                                  
+                            {{ stats.metric_total }}
+                        {% endcomponent %}
+                        {% if stats.metric_success %}
+                            {% component "unfold/components/text.html" with class="text-xs text-base-500 mt-1" %}
+                                {{ stats.metric_success }}
+                            {% endcomponent %}
+                        {% endif %}                                  
                     {% endcomponent %}
                 {% endfor %}
             {% endcomponent %}

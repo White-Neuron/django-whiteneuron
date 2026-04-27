@@ -33,17 +33,22 @@
         {% endcomponent %}
 
         {% component "unfold/components/flex.html" with class="gap-8 mb-8 flex-col lg:flex-row" %}
-            {% for stats in kpi %}
-                {% trans stats.label as label %}
-                {% component "unfold/components/card.html" with class="" label=label footer=stats.footer %}
-                    {% component "unfold/components/text.html" %}
-                        {{ stats.title }}
-                    {% endcomponent %}   
-                    {% component "unfold/components/title.html" %}
-                        {{ stats.metric }}
-                    {% endcomponent %}                                  
-                {% endcomponent %}
-            {% endfor %}
+                {% for stats in kpi %}
+                    {% trans stats.label as label %}
+                    {% component "unfold/components/card.html" with class="" label=label footer=stats.footer %}
+                        {% component "unfold/components/text.html" %}
+                            {{ stats.title }}
+                        {% endcomponent %}   
+                        {% component "unfold/components/title.html" %}
+                            {{ stats.metric_total }}
+                        {% endcomponent %}
+                        {% if stats.metric_success %}
+                            {% component "unfold/components/text.html" with class="text-xs text-base-500 mt-1" %}
+                                {{ stats.metric_success }}
+                            {% endcomponent %}
+                        {% endif %}                                  
+                    {% endcomponent %}
+                {% endfor %}
         {% endcomponent %}
         
         {% trans "Website performance in last 28 days" as title %}

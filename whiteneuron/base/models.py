@@ -3,9 +3,8 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.template.defaultfilters import truncatechars
 
-
-from django.db import models
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 import uuid
@@ -74,7 +73,7 @@ class Tag(models.Model):
     content_object = GenericForeignKey("content_type", "object_id")
 
     def __str__(self):
-        return self.tag
+        return self.title
 
     class Meta:
         db_table = "tags"
@@ -158,10 +157,29 @@ class UserProfile(User):
     def __str__(self):
         return self.username
 
+class VisitProfile(models.Model):
+    ip_address = models.GenericIPAddressField(_("IP address"))
+    user_agent = models.CharField(_("User agent"), max_length=500)
+    first_seen = models.DateTimeField(_("First seen"), auto_now_add=True)
+    last_seen = models.DateTimeField(_("Last seen"), auto_now=True)
+
+    class Meta:
+        db_table = "visit_profiles"
+        verbose_name = _("visit profile")
+        verbose_name_plural = _("visit profiles")
+        unique_together = [["ip_address", "user_agent"]]
+        indexes = [
+            models.Index(fields=["ip_address"]),
+            models.Index(fields=["first_seen"]),
+        ]
+
+    def __str__(self):
+        return f"P{self.id} - {self.ip_address} - {truncatechars(self.user_agent, 20)}"
+
+
 class UserActivity(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    ip_address = models.GenericIPAddressField(_("IP address"), null=True, blank=True)
-    user_agent = models.TextField(_("User agent"), null=True, blank=True)
+    profile = models.ForeignKey(VisitProfile, on_delete=models.SET_NULL, null=True, blank=True, related_name='useractivities')
     path = models.CharField(_("Path"), max_length=255, null=True, blank=True)
     method = models.CharField(_("Method"), max_length=10, choices=[("GET", "GET"), ("POST", "POST")], null=True, blank=True)
     data = models.JSONField(_("Data"), null=True, blank=True)
@@ -175,10 +193,34 @@ class UserActivity(models.Model):
         verbose_name_plural = _("user activities")
         indexes = [
             models.Index(fields=["user", "timestamp"]),
+            models.Index(fields=["profile", "timestamp"]),
         ]
+        ordering = ["-timestamp"]
 
     def __str__(self):
         return f"{self.user.username} - {self.path} at {self.timestamp}"
+
+
+class AnonymousActivity(models.Model):
+    profile = models.ForeignKey(VisitProfile, on_delete=models.SET_NULL, null=True, blank=True, related_name='anonymousactivities')
+    path = models.CharField(_("Path"), max_length=255, null=True, blank=True)
+    method = models.CharField(_("Method"), max_length=10, choices=[("GET", "GET"), ("POST", "POST")], null=True, blank=True)
+    data = models.JSONField(_("Data"), null=True, blank=True)
+    status_code = models.IntegerField(_("Status code"), null=True, blank=True)
+    timestamp = models.DateTimeField(_("Timestamp"), auto_now_add=True)
+    timelapse = models.DurationField(_("Timelapse"), null=True, blank=True)
+
+    class Meta:
+        ordering = ["-timestamp"]
+        db_table = "anonymous_activities"
+        verbose_name = _("anonymous activity")
+        verbose_name_plural = _("anonymous activities")
+        indexes = [
+            models.Index(fields=["profile", "timestamp"]),
+        ]
+
+    def __str__(self):
+        return f"{self.profile.ip_address if self.profile else 'N/A'} - {self.path} at {self.timestamp}"
 
 
 ############################################
@@ -435,9 +477,11 @@ class BaseModel(SoftDeleteModel):
                     content_html+= f"""<p>{_('You can view it at')} <a href="{self.path()}">{_('this link')}</a>.</p>"""
 
             obj_link= self.path() if hasattr(self, 'path') else None
-            for user in User.objects.filter(is_superuser= True):
-                obj= Notification.objects.create(   user= user, title= title,
-                                                    action_by= self.updated_by if action == 'update' else self.created_by,
+            action_by_user = self.updated_by if action == 'update' else self.created_by
+            superuser_ids = User.objects.filter(is_superuser=True).values_list('id', flat=True)
+            for user_id in superuser_ids:
+                obj= Notification.objects.create(   user_id=user_id, title= title,
+                                                    action_by=action_by_user,
                                                     flag= 'info',
                                                     action= action,
                                                     obj_link= obj_link,

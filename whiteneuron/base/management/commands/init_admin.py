@@ -69,6 +69,7 @@ def init_admin(reset_password: bool = False):
             )
         # Tạo mới: _apply_password sẽ set password và save (1 lần ghi DB duy nhất)
         user = User(username='admin', email=admin_email, is_staff=True, is_superuser=True)
+        user._skip_new_user_email = True
         _apply_password(user, is_reset=False)
         print('Tạo người dùng admin thành công')
         return 'created'

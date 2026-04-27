@@ -188,3 +188,4 @@ whiteneuron/templates/admin/signature_ceo.html
 .github/prompts/
 .github/hooks/
 scripts/hooks/
+.opencode

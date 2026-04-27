@@ -58,7 +58,7 @@ from unfold.widgets import (
     UnfoldAdminTextInputWidget,
 )
 
-from .models import User, Tag, UserActivity, UserProfile, App, IPBlacklist, UABlacklist
+from .models import User, Tag, UserActivity, AnonymousActivity, VisitProfile, UserProfile, App, IPBlacklist, UABlacklist
 from .sites import base_admin_site
 from django.utils.safestring import mark_safe
 
@@ -124,8 +124,36 @@ class UserCreationForm(UserCreationForm):
         model = User
         fields = UserCreationForm.Meta.fields
 
+class BaseActivityInline(TabularInline):
+    extra = 0
+    can_delete = False
+    show_change_link = False
+    per_page = 20
+    hide_title = True
+    tab=True
+    
+    readonly_fields = ["path", "method", "status_code", "timestamp"]
+
+    def has_add_permission(self, request, obj=None):
+        return False
+    
+    def has_change_permission(self, request, obj=None):
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+class UserActivityInline(BaseActivityInline):
+    model = UserActivity
+
+class AnonymousActivityInline(BaseActivityInline):
+    model = AnonymousActivity
+
+
 @admin.register(User, site=base_admin_site)
 class UserAdmin(BaseUserAdmin, ModelAdmin):
+
+    inlines = [UserActivityInline]
 
     grid_view= True
     grid_exclude_fields_list_display= ['display_created', 
@@ -337,8 +365,7 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
 class UserActivityAdmin(ModelAdmin):
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    ip_address = models.GenericIPAddressField(_("IP address"))
-    user_agent = models.TextField(_("User agent"))
+    profile = models.ForeignKey(VisitProfile, on_delete=models.SET_NULL, null=True, blank=True)
     path = models.CharField(_("Path"), max_length=255)
     method = models.CharField(_("Method"), max_length=10, choices=[("GET", "GET"), ("POST", "POST")])
     data = models.JSONField(_("Data"), null=True, blank=True)
@@ -352,7 +379,7 @@ class UserActivityAdmin(ModelAdmin):
 
     list_display = [
         "user",
-        "ip_address",
+        "profile",
         "path",
         "method",
         "status_code",
@@ -360,7 +387,7 @@ class UserActivityAdmin(ModelAdmin):
     ]
     search_fields = [
         "user__username",
-        "ip_address",
+        "profile__ip_address",
         "path",
     ]
     list_filter = [
@@ -375,8 +402,7 @@ class UserActivityAdmin(ModelAdmin):
             _("Client information"),
             {
                 "fields": (
-                    ("user", "ip_address",),
-                    "user_agent",
+                    ("user", "profile"),
                 ),
             },
         ),
@@ -397,16 +423,20 @@ class UserActivityAdmin(ModelAdmin):
         return False
     def has_change_permission(self, request, obj=None):
         return False
+    def has_delete_permission(self, request, obj=None):
+        return False
 
     @action(description=_("Block IP address"))
     def block_ip(self, request, queryset):
         blocked = []
         skipped = []
         for activity in queryset:
-            if not activity.ip_address:
+            ip = activity.profile.ip_address if activity.profile else None
+            if not ip:
+                skipped.append(activity)
                 continue
             obj, created = IPBlacklist.objects.get_or_create(
-                ip_address=activity.ip_address,
+                ip_address=ip,
                 defaults={
                     'reason': f'Blocked from UserActivity by {request.user}',
                     'created_by': request.user,
@@ -417,13 +447,102 @@ class UserActivityAdmin(ModelAdmin):
                 obj.is_active = True
                 obj.reason = f'Re-blocked from UserActivity by {request.user}'
                 obj.save()
-            blocked.append(activity.ip_address)
+            blocked.append(ip)
         if blocked:
             messages.success(request, _(f"Blocked {len(blocked)} IP(s): {', '.join(set(blocked))}"))
         if skipped:
             messages.warning(request, _(f"{len(skipped)} activity records had no IP address."))
 
     actions = ['block_ip']
+
+
+@admin.register(AnonymousActivity, site=base_admin_site)
+class AnonymousActivityAdmin(ModelAdmin):
+    compressed_fields = True
+    using_grid_view = False
+
+    list_display = [
+        "profile",
+        "path",
+        "method",
+        "status_code",
+        "timestamp",
+    ]
+    search_fields = [
+        "profile__ip_address",
+        "path",
+    ]
+    list_filter = [
+        "status_code",
+        "method",
+        "timestamp",
+    ]
+    date_hierarchy = "timestamp"
+
+    fieldsets = (
+        (
+            _("Client information"),
+            {
+                "fields": ("profile",),
+            },
+        ),
+        (
+            _("Request information"),
+            {
+                "fields": (
+                    "path",
+                    "method",
+                    "data",
+                    "status_code",
+                ),
+            },
+        ),
+        (
+            _("Meta"), {
+                "fields": ("timestamp", 
+                           "timelapse"),
+            },
+        )
+    )
+
+    def has_add_permission(self, request):
+        return False
+    def has_change_permission(self, request, obj=None):
+        return False
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+@admin.register(VisitProfile, site=base_admin_site)
+class VisitProfileAdmin(ModelAdmin):
+    compressed_fields = True
+    
+    list_display = ["ip_address", "user_agent_preview", "first_seen", "last_seen"]
+    search_fields = ["ip_address", "user_agent"]
+    list_filter = ["first_seen", "last_seen"]
+    date_hierarchy = "first_seen"
+    inlines = [UserActivityInline, AnonymousActivityInline]
+
+    fieldsets = (
+        (None, {
+            "fields": ("ip_address", "user_agent"),
+        }),
+        (_("Timestamps"), {
+            "fields": ("first_seen", "last_seen"),
+        }),
+    )
+
+    def user_agent_preview(self, obj):
+        return obj.user_agent[:50] + "..." if len(obj.user_agent) > 50 else obj.user_agent
+    user_agent_preview.short_description = _("User agent")
+
+    def has_add_permission(self, request):
+        return False
+    
+    def has_change_permission(self, request, obj=None):
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(IPBlacklist, site=base_admin_site)

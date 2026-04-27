@@ -219,8 +219,9 @@ def get_client_ip(request):
     return None, request.headers.get("User-Agent")
 
 
+from django.db import IntegrityError
 from django.utils import timezone
-from .models import UserActivity
+from .models import UserActivity, AnonymousActivity, VisitProfile
 class UserActivityMiddleware:
     """
     Ghi log hoạt động user và rate limit per-user cho authenticated requests.
@@ -299,12 +300,31 @@ class UserActivityMiddleware:
 
         timelapse = timezone.now() - request._request_time
 
+        ip, user_agent = get_client_ip(request)
+
+        if not ip:
+            return response
+
         if request.user.is_authenticated:
-            ip, user_agent = get_client_ip(request)
+            profile, created = self._get_or_create_visit_profile(ip, user_agent)
+            if not created:
+                VisitProfile.objects.filter(pk=profile.pk).update(last_seen=timezone.now())
             UserActivity.objects.create(
                 user=request.user,
-                ip_address=ip,
-                user_agent=user_agent,
+                profile=profile,
+                path=request.path,
+                method=request.method,
+                data=self._sanitize_post(request.POST.dict()),
+                status_code=response.status_code,
+                timestamp=timezone.now(),
+                timelapse=timelapse,
+            )
+        else:
+            profile, created = self._get_or_create_visit_profile(ip, user_agent)
+            if not created:
+                VisitProfile.objects.filter(pk=profile.pk).update(last_seen=timezone.now())
+            AnonymousActivity.objects.create(
+                profile=profile,
                 path=request.path,
                 method=request.method,
                 data=self._sanitize_post(request.POST.dict()),
@@ -314,17 +334,36 @@ class UserActivityMiddleware:
             )
         return response
 
+    def _get_or_create_visit_profile(self, ip_address: str, user_agent: str):
+        """Get or create a VisitProfile based on IP + UA. Returns (profile, created)."""
+        ua = user_agent[:500] if user_agent else ''
+        try:
+            return VisitProfile.objects.get(ip_address=ip_address, user_agent=ua), False
+        except VisitProfile.DoesNotExist:
+            try:
+                return VisitProfile.objects.create(ip_address=ip_address, user_agent=ua), True
+            except IntegrityError:
+                # Race condition: profile được tạo bởi request khác giữa 2 bước trên
+                profile, _ = VisitProfile.objects.get_or_create(
+                    ip_address=ip_address, user_agent=ua
+                )
+                return profile, False
+
     _SENSITIVE_FIELDS = frozenset({
         'password', 'password1', 'password2', 'old_password', 'new_password',
         'token', 'access_token', 'refresh_token', 'secret', 'api_key',
         'credit_card', 'card_number', 'cvv', 'csrfmiddlewaretoken',
     })
 
-    def _sanitize_post(self, data: dict) -> dict:
-        return {
-            k: '***' if k.lower() in self._SENSITIVE_FIELDS else v
-            for k, v in data.items()
-        }
+    def _sanitize_post(self, data) -> dict:
+        if isinstance(data, dict):
+            return {
+                k: '***' if k.lower() in self._SENSITIVE_FIELDS else self._sanitize_post(v)
+                for k, v in data.items()
+            }
+        if isinstance(data, list):
+            return [self._sanitize_post(item) for item in data]
+        return data
 
 
 from .thread_local import thread_local

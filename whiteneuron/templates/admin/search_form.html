@@ -41,7 +41,7 @@
         {% if cl.model_admin.using_page_size == True %}
         <form method="post" action="" class="">
             {% csrf_token %}
-            <select name="per_page" id="per_page" class="h-9 w-12 pl-2 pr-2 ui-select text-sm text-base-500 rounded-sm shadow-xs border border-base-200 bg-white dark:bg-base-900 dark:border-base-700 focus:outline-hidden flex items-center group-hover:text-primary-600 dark:group-hover:text-primary-500 cursor-pointer"
+            <select name="per_page" id="per_page" class="h-9 w-16 pl-2 pr-2 ui-select text-sm text-base-500 rounded-sm shadow-xs border border-base-200 bg-white dark:bg-base-900 dark:border-base-700 focus:outline-hidden flex items-center group-hover:text-primary-600 dark:group-hover:text-primary-500 cursor-pointer"
             onchange="this.form.submit()">
                 <option disabled >{{ _('Items per page') }}</option>
                 {% for size in cl.model_admin.page_sizes %}

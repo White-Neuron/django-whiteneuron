@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-15 13:32+0700\n"
+"POT-Creation-Date: 2026-04-27 17:13+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,64 +18,64 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: base/admin.py:151 base/admin.py:193 base/admin.py:448 base/admin.py:495
-#: base/models.py:884
+#: base/admin.py:178 base/admin.py:220 base/admin.py:568 base/admin.py:615
+#: base/models.py:917
 msgid "Active"
 msgstr "Hoạt động"
 
-#: base/admin.py:153 base/admin.py:193
+#: base/admin.py:180 base/admin.py:220
 msgid "Inactive"
 msgstr "Không hoạt động"
 
-#: base/admin.py:156 base/admin.py:171 base/admin.py:301
+#: base/admin.py:183 base/admin.py:198 base/admin.py:329
 msgid "Staff"
 msgstr "Nhân viên"
 
-#: base/admin.py:159
+#: base/admin.py:186
 msgid "Admin"
 msgstr "Trang quản trị"
 
-#: base/admin.py:164
+#: base/admin.py:191
 msgid "Unknown User"
 msgstr "Người dùng không xác định"
 
-#: base/admin.py:165
+#: base/admin.py:192
 msgid "No username"
 msgstr "Không có tên người dùng"
 
-#: base/admin.py:169 base/admin.py:305
+#: base/admin.py:196 base/admin.py:333
 msgid "Superuser"
 msgstr "Quản trị viên"
 
-#: base/admin.py:173
+#: base/admin.py:200
 msgid "Bot"
 msgstr "Máy"
 
-#: base/admin.py:227 base/admin.py:251 base/admin.py:534
+#: base/admin.py:255 base/admin.py:279 base/admin.py:654
 msgid "Personal info"
 msgstr "Thông tin cá nhân"
 
-#: base/admin.py:233 base/admin.py:258
+#: base/admin.py:261 base/admin.py:286
 msgid "Permissions"
 msgstr "Quyền"
 
-#: base/admin.py:272
+#: base/admin.py:300
 msgid "Important dates"
 msgstr "Ngày quan trọng"
 
-#: base/admin.py:293 feedbacks/models.py:15
+#: base/admin.py:321 dashboard/views.py:224 feedbacks/models.py:15
 msgid "User"
 msgstr "Người dùng"
 
-#: base/admin.py:297
+#: base/admin.py:325
 msgid "Avatar"
 msgstr "Ảnh đại diện"
 
-#: base/admin.py:309
+#: base/admin.py:337
 msgid "Created"
 msgstr "Đã tạo"
 
-#: base/admin.py:322
+#: base/admin.py:351
 msgid ""
 "Failed to send email notification! Please change the password so that the "
 "user can log in."
@@ -83,90 +83,98 @@ msgstr ""
 "Không thể gửi thông báo qua email! Vui lòng thay đổi mật khẩu để người dùng "
 "có thể đăng nhập."
 
-#: base/admin.py:325
+#: base/admin.py:354
 msgid "Email notification has been sent, please check your inbox!"
 msgstr ""
 "Thông báo qua email đã được gửi, vui lòng kiểm tra hộp thư đến của bạn!"
 
-#: base/admin.py:373
+#: base/admin.py:401 base/admin.py:483
 msgid "Client information"
 msgstr "Thông tin khách hàng"
 
-#: base/admin.py:382
+#: base/admin.py:409 base/admin.py:489
 msgid "Request information"
 msgstr "Thông tin yêu cầu"
 
-#: base/admin.py:399
+#: base/admin.py:428
 msgid "Block IP address"
 msgstr "Chặn địa chỉ IP"
 
-#: base/admin.py:420
+#: base/admin.py:451
 msgid ", "
 msgstr ", "
 
-#: base/admin.py:437 base/admin.py:484
-msgid "Target"
-msgstr "Mục tiêu"
-
-#: base/admin.py:440 base/admin.py:487
-msgid "Block settings"
-msgstr "Cài đặt chặn"
-
-#: base/admin.py:443 base/admin.py:490 base/modeladmin.py:361
+#: base/admin.py:500 base/admin.py:563 base/admin.py:610 base/modeladmin.py:361
 #: file_management/admin.py:71
 msgid "Meta"
 msgstr "Meta"
 
-#: base/admin.py:457
+#: base/admin.py:528
+msgid "Timestamps"
+msgstr "Dấu thời gian"
+
+#: base/admin.py:535 base/models.py:162
+msgid "User agent"
+msgstr "Trình duyệt người dùng"
+
+#: base/admin.py:557 base/admin.py:604
+msgid "Target"
+msgstr "Mục tiêu"
+
+#: base/admin.py:560 base/admin.py:607
+msgid "Block settings"
+msgstr "Cài đặt chặn"
+
+#: base/admin.py:577
 msgid "Activate selected IPs"
 msgstr "Kích hoạt các IP đã chọn"
 
-#: base/admin.py:462
+#: base/admin.py:582
 msgid "Selected IPs have been activated."
 msgstr "Các IP đã chọn đã được kích hoạt."
 
-#: base/admin.py:464
+#: base/admin.py:584
 msgid "Deactivate selected IPs"
 msgstr "Hủy kích hoạt các IP đã chọn"
 
-#: base/admin.py:469
+#: base/admin.py:589
 msgid "Selected IPs have been deactivated."
 msgstr "Các IP đã chọn đã được hủy kích hoạt."
 
-#: base/admin.py:504
+#: base/admin.py:624
 msgid "Activate selected patterns"
 msgstr "Kích hoạt các mẫu đã chọn"
 
-#: base/admin.py:509
+#: base/admin.py:629
 msgid "Selected UA patterns have been activated."
 msgstr "Các mẫu UA đã chọn đã được kích hoạt."
 
-#: base/admin.py:511
+#: base/admin.py:631
 msgid "Deactivate selected patterns"
 msgstr "Hủy kích hoạt các mẫu đã chọn"
 
-#: base/admin.py:516
+#: base/admin.py:636
 msgid "Selected UA patterns have been deactivated."
 msgstr "Các mẫu UA đã chọn đã được hủy kích hoạt."
 
-#: base/admin.py:566
+#: base/admin.py:686
 msgid "Configuration"
 msgstr "Cấu hình"
 
-#: base/admin.py:581
+#: base/admin.py:701
 msgid "Image info"
 msgstr "Thông tin hình ảnh"
 
-#: base/admin.py:608
+#: base/admin.py:728
 msgid "Mail info"
 msgstr "Thông tin thư"
 
-#: base/admin.py:624 base/models.py:821 notification/admin.py:150
+#: base/admin.py:744 base/models.py:854 notification/admin.py:150
 msgid "Content"
 msgstr "Nội dung"
 
-#: base/admin.py:691 base/settings.py:564 dashboard/apps.py:8
-#: dashboard/views.py:169 templates/admin/index.html:8
+#: base/admin.py:811 base/settings.py:564 dashboard/apps.py:8
+#: dashboard/views.py:192 templates/admin/index.html:8
 msgid "Dashboard"
 msgstr "Bảng điều khiển"
 
@@ -257,6 +265,10 @@ msgstr "Thẻ"
 msgid "tags"
 msgstr "Thẻ"
 
+#: base/models.py:87
+msgid "UUID"
+msgstr "UUID"
+
 #: base/models.py:89
 msgid "avatar"
 msgstr "ảnh đại diện"
@@ -265,7 +277,7 @@ msgstr "ảnh đại diện"
 msgid "biography"
 msgstr "tiểu sử"
 
-#: base/models.py:92 base/models.py:213 base/models.py:285
+#: base/models.py:92 base/models.py:244 base/models.py:316
 msgid "created at"
 msgstr "tạo lúc"
 
@@ -297,72 +309,93 @@ msgstr "người dùng"
 msgid "users"
 msgstr "người dùng"
 
-#: base/models.py:166
+#: base/models.py:154
 msgid "user profile"
 msgstr "hồ sơ người dùng"
 
-#: base/models.py:167
+#: base/models.py:155
 msgid "user profiles"
 msgstr "hồ sơ người dùng"
 
-#: base/models.py:174 base/models.py:200
+#: base/models.py:161 base/models.py:231
 msgid "IP address"
 msgstr "Địa chỉ IP"
 
-#: base/models.py:175
-msgid "User agent"
-msgstr "Trình duyệt người dùng"
+#: base/models.py:163
+msgid "First seen"
+msgstr "Lần đầu tiên thấy"
 
-#: base/models.py:176
+#: base/models.py:164
+msgid "Last seen"
+msgstr "Lần cuối thấy"
+
+#: base/models.py:168
+msgid "visit profile"
+msgstr "hồ sơ truy cập"
+
+#: base/models.py:169
+msgid "visit profiles"
+msgstr "hồ sơ truy cập"
+
+#: base/models.py:183 base/models.py:206
 msgid "Path"
 msgstr "Đường dẫn"
 
-#: base/models.py:177 file_management/models.py:42 file_management/models.py:72
+#: base/models.py:184 base/models.py:207 file_management/models.py:42
+#: file_management/models.py:72
 msgid "Method"
 msgstr "Phương thức"
 
-#: base/models.py:178
+#: base/models.py:185 base/models.py:208
 msgid "Data"
 msgstr "Dữ liệu"
 
-#: base/models.py:179
+#: base/models.py:186 base/models.py:209
 msgid "Status code"
 msgstr "Mã trạng thái"
 
-#: base/models.py:180 synchronization/models.py:20
+#: base/models.py:187 base/models.py:210 synchronization/models.py:20
 msgid "Timestamp"
 msgstr "Thời gian"
 
-#: base/models.py:181
+#: base/models.py:188 base/models.py:211
 msgid "Timelapse"
 msgstr "Khoảng thời gian"
 
-#: base/models.py:185
+#: base/models.py:192
 msgid "user activity"
 msgstr "hoạt động người dùng"
 
-#: base/models.py:186
+#: base/models.py:193
 msgid "user activities"
 msgstr "hoạt động người dùng"
 
-#: base/models.py:203
+#: base/models.py:216
+msgid "anonymous activity"
+msgstr "hoạt động ẩn danh"
+
+#: base/models.py:217
+msgid "anonymous activities"
+msgstr "hoạt động ẩn danh"
+
+#: base/models.py:234
 msgid "Single IPv4 or IPv6 address. Use IP_BLACKLIST in .env for CIDR ranges."
 msgstr ""
 "Địa chỉ IPv4 hoặc IPv6 đơn. Sử dụng IP_BLACKLIST trong .env cho các dải CIDR."
 
-#: base/models.py:205 base/models.py:283
+#: base/models.py:236 base/models.py:314
 msgid "reason"
 msgstr "lý do"
 
-#: base/models.py:206 base/models.py:284
+#: base/models.py:237 base/models.py:315
 msgid "active"
 msgstr "hoạt động"
 
-#: base/models.py:208
+#: base/models.py:239
 msgid "blocked until"
 msgstr "bị chặn cho đến"
 
-#: base/models.py:211
+#: base/models.py:242
 msgid ""
 "Leave empty for permanent block. Temporary blocks expire automatically via "
 "Redis TTL."
@@ -370,23 +403,23 @@ msgstr ""
 "Để trống để khóa vĩnh viễn. Các khóa tạm thời sẽ tự động hết hạn thông qua "
 "Redis TTL."
 
-#: base/models.py:220 base/models.py:292
+#: base/models.py:251 base/models.py:323
 msgid "created by"
 msgstr "tạo bởi"
 
-#: base/models.py:225
+#: base/models.py:256
 msgid "IP blacklist"
 msgstr "Danh sách đen IP"
 
-#: base/models.py:226
+#: base/models.py:257
 msgid "IP blacklists"
 msgstr "Danh sách đen IP"
 
-#: base/models.py:273
+#: base/models.py:304
 msgid "pattern"
 msgstr "mẫu"
 
-#: base/models.py:276
+#: base/models.py:307
 msgid ""
 "Substring or regex to match against the User-Agent header. E.g. 'GPTBot', "
 "'https://openai.com'."
@@ -394,11 +427,11 @@ msgstr ""
 "Chuỗi con hoặc regex để khớp với header User-Agent. Ví dụ: 'GPTBot', "
 "'https://openai.com'."
 
-#: base/models.py:279
+#: base/models.py:310
 msgid "is regex"
 msgstr "là regex"
 
-#: base/models.py:281
+#: base/models.py:312
 msgid ""
 "If checked, pattern is treated as a Python regex (re.search, case-"
 "insensitive); otherwise simple case-insensitive substring match."
@@ -407,185 +440,185 @@ msgstr ""
 "chữ hoa chữ thường); nếu không, khớp chuỗi con không phân biệt chữ hoa chữ "
 "thường đơn giản."
 
-#: base/models.py:297
+#: base/models.py:328
 msgid "UA blacklist"
 msgstr "Danh sách đen UA"
 
-#: base/models.py:298
+#: base/models.py:329
 msgid "UA blacklists"
 msgstr "Danh sách đen UA"
 
-#: base/models.py:330 templates/admin/grid_view_results.html:42
+#: base/models.py:361 templates/admin/grid_view_results.html:42
 msgid "Deleted"
 msgstr "Đã xóa"
 
-#: base/models.py:331
+#: base/models.py:362
 msgid "Deleted at"
 msgstr "Đã xóa lúc"
 
-#: base/models.py:357
+#: base/models.py:388
 msgid "Date created"
 msgstr "Ngày tạo"
 
-#: base/models.py:358
+#: base/models.py:389
 msgid "Created by"
 msgstr "Tạo bởi"
 
-#: base/models.py:360
+#: base/models.py:391
 msgid "Date updated"
 msgstr "Ngày cập nhật"
 
-#: base/models.py:361
+#: base/models.py:392
 msgid "Updated by"
 msgstr "Cập nhật bởi"
 
-#: base/models.py:363
+#: base/models.py:394
 msgid "Hidden"
 msgstr "Ẩn"
 
-#: base/models.py:403 base/models.py:443
+#: base/models.py:434 base/models.py:474
 msgid "New"
 msgstr "Mới"
 
-#: base/models.py:403 base/models.py:443
+#: base/models.py:434 base/models.py:474
 msgid "has been created by user"
 msgstr "Đã được tạo bởi người dùng"
 
-#: base/models.py:427 base/models.py:546
+#: base/models.py:458 base/models.py:579
 #: templates/admin/wn_history_panel.html:74
 msgid "Update"
 msgstr "Cập nhật"
 
-#: base/models.py:427 base/models.py:548
+#: base/models.py:458 base/models.py:581
 msgid "has been updated by user"
 msgstr "Đã được cập nhật bởi người dùng"
 
-#: base/models.py:446
+#: base/models.py:477
 msgid "You can view it at"
 msgstr "Bạn có thể xem tại"
 
-#: base/models.py:446
+#: base/models.py:477
 msgid "this link"
 msgstr "liên kết này"
 
-#: base/models.py:532
+#: base/models.py:565
 msgid "added"
 msgstr "đã thêm"
 
-#: base/models.py:537
+#: base/models.py:570
 msgid "removed"
 msgstr "đã xóa"
 
-#: base/models.py:541
+#: base/models.py:574
 msgid "cleared"
 msgstr "đã xóa sạch"
 
-#: base/models.py:656
+#: base/models.py:689
 msgid "Image"
 msgstr "Hình ảnh"
 
-#: base/models.py:657 base/models.py:733
+#: base/models.py:690 base/models.py:766
 msgid "Thumbnail"
 msgstr "Hình thu nhỏ"
 
-#: base/models.py:659 base/models.py:745
+#: base/models.py:692 base/models.py:778
 msgid "Preview"
 msgstr "Xem trước"
 
-#: base/models.py:661 file_management/models.py:35
+#: base/models.py:694 file_management/models.py:35
 msgid "Description"
 msgstr "Mô tả"
 
-#: base/models.py:665
+#: base/models.py:698
 msgid "System image"
 msgstr "Hình ảnh hệ thống"
 
-#: base/models.py:666
+#: base/models.py:699
 msgid "System images"
 msgstr "Hình ảnh hệ thống"
 
-#: base/models.py:730 base/models.py:739
+#: base/models.py:763 base/models.py:772
 msgid "Image not found"
 msgstr "Hình ảnh không tìm thấy"
 
-#: base/models.py:741
+#: base/models.py:774
 msgid "View original image size"
 msgstr "Xem kích thước hình ảnh gốc"
 
-#: base/models.py:820
+#: base/models.py:853
 msgid "Subject"
 msgstr "Chủ đề"
 
-#: base/models.py:822
+#: base/models.py:855
 msgid "Receiver"
 msgstr "Người nhận"
 
-#: base/models.py:823 file_management/models.py:36 file_management/models.py:48
+#: base/models.py:856 file_management/models.py:36 file_management/models.py:48
 msgid "Pending"
 msgstr "Đang chờ"
 
-#: base/models.py:824
+#: base/models.py:857
 msgid "Sent"
 msgstr "Gửi"
 
-#: base/models.py:825
+#: base/models.py:858
 msgid "Failed"
 msgstr "Thất bại"
 
-#: base/models.py:826 feedbacks/admin.py:36 file_management/models.py:39
+#: base/models.py:859 feedbacks/admin.py:36 file_management/models.py:39
 #: file_management/models.py:59 synchronization/models.py:19
 msgid "Status"
 msgstr "Trạng thái"
 
-#: base/models.py:827 feedbacks/admin.py:124 feedbacks/models.py:51
+#: base/models.py:860 feedbacks/admin.py:124 feedbacks/models.py:51
 msgid "Note"
 msgstr "Ghi chú"
 
-#: base/models.py:831
+#: base/models.py:864
 msgid "Email notification"
 msgstr "Thông báo qua email"
 
-#: base/models.py:832
+#: base/models.py:865
 msgid "Email notifications"
 msgstr "Thông báo qua email"
 
-#: base/models.py:883
+#: base/models.py:916
 msgid "App name"
 msgstr "Tên ứng dụng"
 
-#: base/models.py:885
+#: base/models.py:918
 msgid "Icon"
 msgstr "Icon"
 
-#: base/models.py:885
+#: base/models.py:918
 msgid "Icon name (Material Symbols Outlined) or URL"
 msgstr "Tên icon (Material Symbols Outlined) hoặc URL"
 
-#: base/models.py:886
+#: base/models.py:919
 msgid "URL"
 msgstr "URL"
 
-#: base/models.py:887
+#: base/models.py:920
 msgid "Category"
 msgstr "Danh mục"
 
-#: base/models.py:888
+#: base/models.py:921
 msgid "Permission"
 msgstr "Quyền"
 
-#: base/models.py:888
+#: base/models.py:921
 msgid "Permission required to access this app"
 msgstr "Quyền truy cập vào ứng dụng này"
 
-#: base/models.py:889
+#: base/models.py:922
 msgid "Thumbnail URL"
 msgstr "Hình thu nhỏ URL"
 
-#: base/models.py:892
+#: base/models.py:925
 msgid "App"
 msgstr "Ứng dụng"
 
-#: base/models.py:893
+#: base/models.py:926
 msgid "Apps"
 msgstr "Ứng dụng"
 
@@ -646,62 +679,71 @@ msgid "User activity"
 msgstr "Hoạt động người dùng"
 
 #: base/settings.py:625
+msgid "Anonymous activity"
+msgstr "Hoạt động ẩn danh"
+
+#: base/settings.py:632
+msgid "Visit profiles"
+msgstr "Hồ sơ truy cập"
+
+#: base/settings.py:639
 msgid "Groups"
 msgstr "Nhóm"
 
-#: base/settings.py:634
+#: base/settings.py:648 templates/unfold/helpers/theme_switch.html:23
 msgid "System"
 msgstr "Hệ thống"
 
-#: base/settings.py:638
+#: base/settings.py:652
 msgid "Images"
 msgstr "Hình ảnh"
 
-#: base/settings.py:644
+#: base/settings.py:658
 msgid "Emails"
 msgstr "Email"
 
-#: base/settings.py:650
+#: base/settings.py:664
 msgid "Notifications config"
 msgstr "Cấu hình thông báo"
 
-#: base/settings.py:656
+#: base/settings.py:670
 msgid "IP Blacklist"
 msgstr "Danh sách đen IP"
 
-#: base/settings.py:662
+#: base/settings.py:676
 msgid "UA Blacklist"
 msgstr "Danh sách đen UA"
 
-#: base/settings.py:670
+#: base/settings.py:684
 msgid "Celery Tasks"
 msgstr "Nhiệm vụ Celery"
 
-#: base/settings.py:674
+#: base/settings.py:688
 msgid "Clocked"
 msgstr "Khóa"
 
-#: base/settings.py:682
+#: base/settings.py:696
 msgid "Crontabs"
 msgstr "Crontabs"
 
-#: base/settings.py:690
+#: base/settings.py:704
 msgid "Intervals"
 msgstr "Khoảng thời gian"
 
-#: base/settings.py:698
+#: base/settings.py:712
 msgid "Periodic tasks"
 msgstr "Nhiệm vụ định kỳ"
 
-#: base/settings.py:706
+#: base/settings.py:720
 msgid "Solar events"
 msgstr "Sự kiện Solar"
 
-#: base/utils.py:179
+#: base/utils.py:192
+#, python-brace-format
 msgid "New announcement for {NAME} - version {VERSION}!"
 msgstr "Thông báo mới cho {NAME} - phiên bản {VERSION}!"
 
-#: base/utils.py:184
+#: base/utils.py:197
 msgid "NEW"
 msgstr "MỚI"
 
@@ -734,7 +776,7 @@ msgstr "Dịch thành công"
 msgid "today"
 msgstr "hôm nay"
 
-#: dashboard/views.py:29 dashboard/views.py:180
+#: dashboard/views.py:29 dashboard/views.py:203
 msgid "7 days"
 msgstr "7 ngày"
 
@@ -754,62 +796,73 @@ msgstr "năm"
 msgid "Invalid time"
 msgstr "Thời gian không hợp lệ"
 
-#: dashboard/views.py:151
+#: dashboard/views.py:172
 msgid "progress from last"
 msgstr "tiến trình từ lần cuối"
 
-#: dashboard/views.py:154
+#: dashboard/views.py:176
 msgid "in"
 msgstr "trong"
 
-#: dashboard/views.py:170
+#: dashboard/views.py:193
 msgid "Analytics"
 msgstr "Phân tích"
 
-#: dashboard/views.py:171
+#: dashboard/views.py:194
 msgid "Settings"
 msgstr "Cài đặt"
 
-#: dashboard/views.py:175
+#: dashboard/views.py:198
 msgid "Today"
 msgstr "Hôm nay"
 
-#: dashboard/views.py:185
+#: dashboard/views.py:208
 msgid "Week"
 msgstr "Tuần"
 
-#: dashboard/views.py:190
+#: dashboard/views.py:213
 msgid "Month"
 msgstr "Tháng"
 
-#: dashboard/views.py:195
+#: dashboard/views.py:218
 msgid "Year"
 msgstr "Năm"
 
-#: dashboard/views.py:201 dashboard/views.py:202
-msgid "Activity"
-msgstr "Hành động"
-
-#: dashboard/views.py:201
+#: dashboard/views.py:224
 msgid "Activities"
 msgstr "Hành động"
 
-#: dashboard/views.py:202
-msgid "Success activities"
-msgstr "Hoạt động thành công"
+#: dashboard/views.py:225
+msgid "Anonymous"
+msgstr "Ẩn danh"
 
-#: dashboard/views.py:250
-msgid "Average"
-msgstr "Trung bình"
+#: dashboard/views.py:225
+msgid "Visits"
+msgstr "Lượt truy cập"
 
-#: dashboard/views.py:257
-msgid "Success"
-msgstr "Thành công"
+#: dashboard/views.py:273
+msgid "User average"
+msgstr "Trung bình người dùng"
 
-#: dashboard/views.py:262 file_management/models.py:38
-#: file_management/models.py:54
-msgid "Error"
-msgstr "Lỗi"
+#: dashboard/views.py:280
+msgid "Anonymous average"
+msgstr "Trung bình ẩn danh"
+
+#: dashboard/views.py:287
+msgid "User success"
+msgstr "Thành công của người dùng"
+
+#: dashboard/views.py:292
+msgid "Anonymous success"
+msgstr "Thành công của ẩn danh"
+
+#: dashboard/views.py:297
+msgid "User error"
+msgstr "Lỗi của người dùng"
+
+#: dashboard/views.py:302
+msgid "Anonymous error"
+msgstr "Lỗi của ẩn danh"
 
 #: feedbacks/admin.py:32
 msgid "Feedback Data"
@@ -987,6 +1040,10 @@ msgstr "Tải xuống (đã xác thực)"
 #: file_management/models.py:37 file_management/models.py:51
 msgid "Done"
 msgstr "Hoàn thành"
+
+#: file_management/models.py:38 file_management/models.py:54
+msgid "Error"
+msgstr "Lỗi"
 
 #: file_management/models.py:40 file_management/models.py:64
 msgid "Upload"
@@ -1312,7 +1369,7 @@ msgstr ""
 msgid "Reset filters"
 msgstr "Đặt lại bộ lọc"
 
-#: templates/admin/header.html:26 templates/admin/index.html:49
+#: templates/admin/header.html:31 templates/admin/index.html:54
 msgid "Website performance in last 28 days"
 msgstr "Hiệu suất trang web trong 28 ngày qua"
 
@@ -1394,7 +1451,7 @@ msgstr "Tạo"
 msgid "Restore"
 msgstr "Khôi phục"
 
-#: templates/announcement.html:54
+#: templates/base/announcement.html:45
 msgid "Got it"
 msgstr "Đã hiểu"
 
@@ -1470,19 +1527,19 @@ msgstr "Bỏ liên kết"
 msgid "Choose file to upload"
 msgstr "Chọn file để tải lên"
 
-#: templates/unfold/helpers/account_links.html:69
+#: templates/unfold/helpers/account_links.html:13
 msgid "User profile"
 msgstr "Hồ sơ người dùng"
 
-#: templates/unfold/helpers/account_links.html:81
+#: templates/unfold/helpers/account_links.html:25
 msgid "View site"
 msgstr "Xem trang"
 
-#: templates/unfold/helpers/account_links.html:104
+#: templates/unfold/helpers/account_links.html:48
 msgid "Change password"
 msgstr "Đổi mật khẩu"
 
-#: templates/unfold/helpers/account_links.html:119
+#: templates/unfold/helpers/account_links.html:63
 msgid "Log out"
 msgstr "Đăng xuất"
 
@@ -1493,6 +1550,26 @@ msgstr "Trước"
 #: templates/unfold/helpers/pagination.html:11
 msgid "Next"
 msgstr "Tiếp theo"
+
+#: templates/unfold/helpers/theme_switch.html:9
+msgid "Light"
+msgstr "Sáng"
+
+#: templates/unfold/helpers/theme_switch.html:16
+msgid "Dark"
+msgstr "Tối"
+
+#~ msgid "Activity"
+#~ msgstr "Hành động"
+
+#~ msgid "Success activities"
+#~ msgstr "Hoạt động thành công"
+
+#~ msgid "Average"
+#~ msgstr "Trung bình"
+
+#~ msgid "Success"
+#~ msgstr "Thành công"
 
 #, python-brace-format
 #~ msgid "Welcome to the {NAME} - version {VERSION}! (Click for details)"
@@ -1513,9 +1590,6 @@ msgstr "Tiếp theo"
 
 #~ msgid "Xóa"
 #~ msgstr "Xóa"
-
-#~ msgid "Last week revenue"
-#~ msgstr "Giá trị doanh thu tuần trước"
 
 #~ msgid "Last week expenses"
 #~ msgstr "Giá trị chi phí tuần trước"
