@@ -1,5 +1,9 @@
 # Changelog
 
+### v0.3.2.1 (2026-04-27) — latest
+**Fix: UserActivityMiddleware now captures JSON request payloads in addition to form data**
+- **Fixed**: `UserActivityMiddleware._get_request_data()` — previously only captured `request.POST` (form-encoded), missing JSON bodies sent with `Content-Type: application/json`. Now parses `request.body` as JSON when POST is empty, with full sensitive-field sanitization applied.
+
 ### v0.3.2 (2026-04-27)
 **Feature: VisitProfile-based activity tracking for authenticated + anonymous users, dashboard analytics**
 - **Added**: `VisitProfile` model (`whiteneuron/base/models.py`) — deduplicates visits by `(ip_address, user_agent)` combo; tracks `first_seen`, `last_seen`; unique constraint on the pair.
@@ -18,7 +22,7 @@
 - **Fixed**: `BaseModel.notify_superuser()` — uses `values_list('id', flat=True)` + `user_id=` to avoid loading full User queryset into memory.
 - **Config**: `.gitignore` — added `.opencode`; `init_admin.py` — sets `_skip_new_user_email = True` to prevent duplicate welcome emails.
 
-### v0.3.1.8 (2026-04-24) — latest
+### v0.3.1.8 (2026-04-24)
 **Feature: Add UUID field to User model with admin display support**
 - **Added**: `whiteneuron/base/models.py` — new `uuid` field (`UUIDField`, unique, auto-generated via `uuid.uuid4`) on the custom `User` model.
 - **Added**: `whiteneuron/base/admin.py` — `uuid` displayed in User changelist list_display; shown as readonly field in User change form under "Personal info" section; excluded from grid view cards.

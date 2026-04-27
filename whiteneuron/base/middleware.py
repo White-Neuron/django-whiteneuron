@@ -3,6 +3,7 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 import ipaddress
+import json
 import re
 from django.core.cache import cache
 from django.http import HttpResponse, JsonResponse
@@ -314,7 +315,7 @@ class UserActivityMiddleware:
                 profile=profile,
                 path=request.path,
                 method=request.method,
-                data=self._sanitize_post(request.POST.dict()),
+                data=self._get_request_data(request),
                 status_code=response.status_code,
                 timestamp=timezone.now(),
                 timelapse=timelapse,
@@ -327,7 +328,7 @@ class UserActivityMiddleware:
                 profile=profile,
                 path=request.path,
                 method=request.method,
-                data=self._sanitize_post(request.POST.dict()),
+                data=self._get_request_data(request),
                 status_code=response.status_code,
                 timestamp=timezone.now(),
                 timelapse=timelapse,
@@ -348,6 +349,18 @@ class UserActivityMiddleware:
                     ip_address=ip_address, user_agent=ua
                 )
                 return profile, False
+
+    def _get_request_data(self, request):
+        if request.method == 'POST' and request.POST:
+            return self._sanitize_post(request.POST.dict())
+        if request.body:
+            try:
+                body = json.loads(request.body)
+                if isinstance(body, dict):
+                    return self._sanitize_post(body)
+            except (json.JSONDecodeError, ValueError):
+                pass
+        return {}
 
     _SENSITIVE_FIELDS = frozenset({
         'password', 'password1', 'password2', 'old_password', 'new_password',
