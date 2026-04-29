@@ -3,12 +3,11 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-27 17:13+0700\n"
+"POT-Creation-Date: 2026-04-29 10:24+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,64 +17,1089 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: base/admin.py:178 base/admin.py:220 base/admin.py:568 base/admin.py:615
+#: _unfold_src/admin.py:45 _unfold_src/templatetags/unfold_list.py:356
+msgid "Select record"
+msgstr "Chọn bản ghi"
+
+#: _unfold_src/admin.py:205
+msgid "Select action"
+msgstr "Chọn hành động"
+
+#: _unfold_src/contrib/constance/templates/admin/constance/change_list.html:44
+#: _unfold_src/contrib/guardian/templates/admin/guardian/model/obj_perms_manage_group.html:24
+#: _unfold_src/contrib/guardian/templates/admin/guardian/model/obj_perms_manage_user.html:25
+#: _unfold_src/templates/admin/pagination.html:19
+#: _unfold_src/templates/admin/submit_line.html:9
+msgid "Save"
+msgstr "Lưu"
+
+#: _unfold_src/contrib/constance/templates/admin/constance/includes/results_list.html:10
+msgid "Collapse"
+msgstr "Thu gọn"
+
+#: _unfold_src/contrib/constance/templates/admin/constance/includes/results_list.html:19
+msgid "Name"
+msgstr "Tên"
+
+#: _unfold_src/contrib/constance/templates/admin/constance/includes/results_list.html:20
+#: _unfold_src/contrib/filters/forms.py:178
+msgid "Value"
+msgstr "Giá trị"
+
+#: _unfold_src/contrib/constance/templates/admin/constance/includes/results_list.html:21
+msgid "Default"
+msgstr "Mặc định"
+
+#: _unfold_src/contrib/constance/templates/admin/constance/includes/results_list.html:22
+#: _unfold_src/contrib/forms/templates/unfold/forms/helpers/toolbar.html:59
+#: templates/base/forms/helpers/toolbar.html:59
+msgid "Code"
+msgstr "Mã"
+
+#: _unfold_src/contrib/constance/templates/admin/constance/includes/results_list.html:65
+msgid "Reset to default"
+msgstr "Đặt lại về mặc định"
+
+#: _unfold_src/contrib/filters/admin/choice_filters.py:22
+#: _unfold_src/contrib/filters/admin/choice_filters.py:72
+#: _unfold_src/contrib/filters/admin/choice_filters.py:85
+#: _unfold_src/contrib/filters/admin/dropdown_filters.py:23
+#: _unfold_src/contrib/filters/admin/mixins.py:47
+msgid "All"
+msgstr "Tất cả"
+
+#: _unfold_src/contrib/filters/admin/choice_filters.py:42
+#: _unfold_src/contrib/filters/admin/choice_filters.py:110
+#: _unfold_src/contrib/filters/admin/choice_filters.py:138
+#: _unfold_src/contrib/filters/admin/choice_filters.py:166
+#: _unfold_src/contrib/filters/admin/dropdown_filters.py:39
+#: _unfold_src/contrib/filters/admin/dropdown_filters.py:93
+#: _unfold_src/contrib/filters/admin/dropdown_filters.py:142
+#: _unfold_src/contrib/filters/admin/mixins.py:70
+#: _unfold_src/contrib/filters/admin/mixins.py:171
+#: _unfold_src/contrib/filters/admin/text_filters.py:28
+#: _unfold_src/contrib/filters/admin/text_filters.py:57
+#: _unfold_src/contrib/filters/templates/unfold/filters/filters_date_range.html:5
+#: _unfold_src/contrib/filters/templates/unfold/filters/filters_datetime_range.html:5
+#: _unfold_src/contrib/filters/templates/unfold/filters/filters_numeric_range.html:5
+#: _unfold_src/contrib/filters/templates/unfold/filters/filters_numeric_single.html:5
+#: _unfold_src/contrib/filters/templates/unfold/filters/filters_numeric_slider.html:7
+#: _unfold_src/templates/admin/filter.html:5
+#, python-format
+msgid " By %(filter_title)s "
+msgstr " Theo %(filter_title)s "
+
+#: _unfold_src/contrib/filters/admin/choice_filters.py:95
+#: _unfold_src/contrib/filters/admin/choice_filters.py:103
+msgid "Yes"
+msgstr "Có"
+
+#: _unfold_src/contrib/filters/admin/choice_filters.py:96
+#: _unfold_src/contrib/filters/admin/choice_filters.py:104
+msgid "No"
+msgstr "Không"
+
+#: _unfold_src/contrib/filters/forms.py:207
+#: _unfold_src/contrib/filters/forms.py:252
+msgid "From"
+msgstr "Từ"
+
+#: _unfold_src/contrib/filters/forms.py:218
+#: _unfold_src/contrib/filters/forms.py:262
+msgid "To"
+msgstr "Đến"
+
+#: _unfold_src/contrib/filters/forms.py:286
+msgid "Date from"
+msgstr "Ngày từ"
+
+#: _unfold_src/contrib/filters/forms.py:291
+#: _unfold_src/contrib/filters/forms.py:307 _unfold_src/widgets.py:590
+#: _unfold_src/widgets.py:635
+msgid "Time"
+msgstr "Thời gian"
+
+#: _unfold_src/contrib/filters/forms.py:302
+msgid "Date to"
+msgstr "Ngày đến"
+
+#: _unfold_src/contrib/filters/templates/unfold/filters/filters_numeric_slider.html:21
+msgid "Not enough data."
+msgstr "Không đủ dữ liệu."
+
+#: _unfold_src/contrib/forms/templates/unfold/forms/array.html:30
+msgid "Add new item"
+msgstr "Thêm mục mới"
+
+#: _unfold_src/contrib/forms/templates/unfold/forms/helpers/toolbar.html:7
+#: templates/base/forms/helpers/toolbar.html:7
+msgid "Paragraph"
+msgstr "Đoạn văn"
+
+#: _unfold_src/contrib/forms/templates/unfold/forms/helpers/toolbar.html:11
+#: templates/base/forms/helpers/toolbar.html:11
+msgid "Underlined"
+msgstr "Gạch chân"
+
+#: _unfold_src/contrib/forms/templates/unfold/forms/helpers/toolbar.html:15
+#: templates/base/forms/helpers/toolbar.html:15
+msgid "Bold"
+msgstr "Đậm"
+
+#: _unfold_src/contrib/forms/templates/unfold/forms/helpers/toolbar.html:19
+#: templates/base/forms/helpers/toolbar.html:19
+msgid "Italic"
+msgstr "Nghiêng"
+
+#: _unfold_src/contrib/forms/templates/unfold/forms/helpers/toolbar.html:23
+#: templates/base/forms/helpers/toolbar.html:23
+msgid "Strike"
+msgstr "Gạch ngang"
+
+#: _unfold_src/contrib/forms/templates/unfold/forms/helpers/toolbar.html:27
+#: _unfold_src/contrib/forms/templates/unfold/forms/helpers/toolbar.html:98
+#: templates/base/forms/helpers/toolbar.html:27
+#: templates/base/forms/helpers/toolbar.html:95
+msgid "Link"
+msgstr "Liên kết"
+
+#: _unfold_src/contrib/forms/templates/unfold/forms/helpers/toolbar.html:35
+#: _unfold_src/contrib/forms/templates/unfold/forms/helpers/toolbar.html:39
+#: _unfold_src/contrib/forms/templates/unfold/forms/helpers/toolbar.html:43
+#: _unfold_src/contrib/forms/templates/unfold/forms/helpers/toolbar.html:47
+#: templates/base/forms/helpers/toolbar.html:35
+#: templates/base/forms/helpers/toolbar.html:39
+#: templates/base/forms/helpers/toolbar.html:43
+#: templates/base/forms/helpers/toolbar.html:47
+msgid "Heading"
+msgstr "Tiêu đề"
+
+#: _unfold_src/contrib/forms/templates/unfold/forms/helpers/toolbar.html:55
+#: templates/base/forms/helpers/toolbar.html:55
+msgid "Quote"
+msgstr "Trích dẫn"
+
+#: _unfold_src/contrib/forms/templates/unfold/forms/helpers/toolbar.html:63
+#: templates/base/forms/helpers/toolbar.html:63
+msgid "Unordered list"
+msgstr "Danh sách không có thứ tự"
+
+#: _unfold_src/contrib/forms/templates/unfold/forms/helpers/toolbar.html:67
+#: templates/base/forms/helpers/toolbar.html:67
+msgid "Ordered list"
+msgstr "Danh sách có thứ tự"
+
+#: _unfold_src/contrib/forms/templates/unfold/forms/helpers/toolbar.html:71
+#: templates/base/forms/helpers/toolbar.html:71
+msgid "Indent increase"
+msgstr "Tăng lề"
+
+#: _unfold_src/contrib/forms/templates/unfold/forms/helpers/toolbar.html:75
+#: templates/base/forms/helpers/toolbar.html:75
+msgid "Indent decrease"
+msgstr "Giảm lề"
+
+#: _unfold_src/contrib/forms/templates/unfold/forms/helpers/toolbar.html:83
+msgid "Undo"
+msgstr "Hoàn tác"
+
+#: _unfold_src/contrib/forms/templates/unfold/forms/helpers/toolbar.html:87
+msgid "Redo"
+msgstr "Làm lại"
+
+#: _unfold_src/contrib/forms/templates/unfold/forms/helpers/toolbar.html:95
+#: templates/base/forms/helpers/toolbar.html:92
+msgid "Enter an URL"
+msgstr "Nhập một URL"
+
+#: _unfold_src/contrib/forms/templates/unfold/forms/helpers/toolbar.html:102
+#: templates/base/forms/helpers/toolbar.html:99
+msgid "Unlink"
+msgstr "Bỏ liên kết"
+
+#: _unfold_src/contrib/guardian/templates/admin/guardian/model/change_form.html:8
+msgid "Object permissions"
+msgstr "Quyền đối tượng"
+
+#: _unfold_src/contrib/guardian/templates/admin/guardian/model/obj_perms_manage_group.html:13
+#: _unfold_src/contrib/guardian/templates/admin/guardian/model/obj_perms_manage_user.html:14
+#: _unfold_src/contrib/simple_history/templates/simple_history/object_history_list.html:9
+#: _unfold_src/contrib/simple_history/templates/simple_history/object_history_list.html:43
+#: feedbacks/admin.py:123
+msgid "Object"
+msgstr "Đối tượng"
+
+#: _unfold_src/contrib/guardian/templates/admin/guardian/model/obj_perms_manage_group.html:16
+#: _unfold_src/contrib/guardian/templates/unfold/guardian/group_form.html:15
+msgid "Group"
+msgstr "Nhóm"
+
+#: _unfold_src/contrib/guardian/templates/admin/guardian/model/obj_perms_manage_user.html:17
+#: _unfold_src/contrib/guardian/templates/unfold/guardian/group_form.html:33
+#: _unfold_src/contrib/guardian/templates/unfold/guardian/user_form.html:15
+#: _unfold_src/contrib/guardian/templates/unfold/guardian/user_form.html:33
+#: _unfold_src/templates/admin/object_history.html:14
+#: _unfold_src/templates/admin/object_history.html:30 base/admin.py:322
+#: dashboard/views.py:224 feedbacks/models.py:15
+msgid "User"
+msgstr "Người dùng"
+
+#: _unfold_src/contrib/guardian/templates/unfold/guardian/group_form.html:7
+msgid "Group permissions"
+msgstr "Quyền nhóm"
+
+#: _unfold_src/contrib/guardian/templates/unfold/guardian/group_form.html:25
+#: _unfold_src/contrib/guardian/templates/unfold/guardian/group_form.html:49
+#: _unfold_src/contrib/guardian/templates/unfold/guardian/user_form.html:25
+#: _unfold_src/contrib/guardian/templates/unfold/guardian/user_form.html:49
+#: _unfold_src/templates/admin/object_history.html:18
+#: _unfold_src/templates/admin/object_history.html:34 notification/admin.py:154
+#: synchronization/models.py:14
+msgid "Action"
+msgstr "Hành động"
+
+#: _unfold_src/contrib/guardian/templates/unfold/guardian/group_form.html:51
+#: _unfold_src/contrib/guardian/templates/unfold/guardian/user_form.html:51
+#: base/modeladmin.py:383
+msgid "Edit"
+msgstr "Sửa"
+
+#: _unfold_src/contrib/guardian/templates/unfold/guardian/group_form.html:68
+msgid "Manage group"
+msgstr "Quản lý nhóm"
+
+#: _unfold_src/contrib/guardian/templates/unfold/guardian/user_form.html:7
+msgid "User permissions"
+msgstr "Quyền người dùng"
+
+#: _unfold_src/contrib/guardian/templates/unfold/guardian/user_form.html:68
+msgid "Manage user"
+msgstr "Quản lý người dùng"
+
+#: _unfold_src/contrib/import_export/templates/admin/import_export/change_form.html:9
+#: _unfold_src/contrib/import_export/templates/admin/import_export/change_list_export_item.html:4
+msgid "Export"
+msgstr "Xuất"
+
+#: _unfold_src/contrib/import_export/templates/admin/import_export/change_list_import_item.html:4
+msgid "Import"
+msgstr "Nhập"
+
+#: _unfold_src/contrib/import_export/templates/admin/import_export/export.html:18
+#, python-format
+msgid ""
+"\n"
+"                    Export %(len)s selected item.\n"
+"                "
+msgid_plural ""
+"\n"
+"                    Export %(len)s selected items.\n"
+"                "
+msgstr[0] ""
+"\n"
+"                    Xuất %(len)s mục đã chọn.\n"
+"                "
+
+#: _unfold_src/contrib/import_export/templates/admin/import_export/export.html:36
+msgid "This exporter will export the following fields"
+msgstr "Nhà xuất sẽ xuất các trường sau"
+
+#: _unfold_src/contrib/import_export/templates/admin/import_export/export.html:77
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_form.html:21
+msgid "Submit"
+msgstr "Gửi"
+
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_confirm.html:10
+msgid ""
+"Below is a preview of data to be imported. If you are satisfied with the "
+"results, click 'Confirm import'"
+msgstr ""
+"Dưới đây là bản xem trước của dữ liệu sẽ được nhập. Nếu bạn hài lòng với kết "
+"quả, hãy nhấp vào 'Xác nhận nhập'"
+
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_confirm.html:15
+msgid "Confirm import"
+msgstr "Xác nhận nhập"
+
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_errors.html:20
+msgid "Line number"
+msgstr "Số dòng"
+
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_preview.html:22
+#: base/models.py:434 base/models.py:474
+msgid "New"
+msgstr "Mới"
+
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_preview.html:24
+msgid "Skipped"
+msgstr "Đã bỏ qua"
+
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_preview.html:26
+#: _unfold_src/templates/admin/submit_line.html:62 base/modeladmin.py:391
+#: templates/admin/wn_history_panel.html:74
+msgid "Delete"
+msgstr "Xóa"
+
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_preview.html:28
+#: base/models.py:458 base/models.py:579
+#: templates/admin/wn_history_panel.html:74
+msgid "Update"
+msgstr "Cập nhật"
+
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_validation.html:6
+msgid "Some rows failed to validate"
+msgstr "Một số hàng không hợp lệ"
+
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_validation.html:10
+msgid ""
+"Please correct these errors in your data where possible, then reupload it "
+"using the form above."
+msgstr ""
+"Hãy sửa các lỗi này trong dữ liệu của bạn càng tốt, sau đó tải lại lên dùng "
+"biểu mẫu ở trên."
+
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_validation.html:22
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_validation.html:40
+msgid "Row"
+msgstr "Hàng"
+
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_validation.html:26
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_validation.html:44
+msgid "Errors"
+msgstr "Lỗi"
+
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_validation.html:70
+msgid "Non field specific"
+msgstr "Không cụ thể theo trường"
+
+#: _unfold_src/contrib/import_export/templates/admin/import_export/resource_fields_list.html:6
+msgid "This exporter will export the following fields: "
+msgstr "Nhà xuất sẽ xuất các trường sau: "
+
+#: _unfold_src/contrib/import_export/templates/admin/import_export/resource_fields_list.html:8
+msgid "This importer will import the following fields: "
+msgstr "Máy nhập sẽ nhập các trường sau: "
+
+#. Translators: Model verbose name and instance representation,
+#. suitable to be an item in a list.
+#: _unfold_src/contrib/inlines/admin.py:102
+#, python-format
+msgid "%(class_name)s %(instance)s"
+msgstr "%(class_name)s %(instance)s"
+
+#: _unfold_src/contrib/inlines/admin.py:111
+msgid "and"
+msgstr "và"
+
+#: _unfold_src/contrib/inlines/admin.py:114
+#, python-format
+msgid ""
+"Deleting %(class_name)s %(instance)s would require deleting the following "
+"protected related objects: %(related_objects)s"
+msgstr ""
+"Xóa %(class_name)s %(instance)s sẽ yêu cầu xóa các đối tượng liên quan được "
+"bảo vệ sau: %(related_objects)s"
+
+#: _unfold_src/contrib/simple_history/templates/simple_history/object_history.html:7
+msgid ""
+"Choose a date from the list below to revert to a previous version of this "
+"object"
+msgstr ""
+"Hãy chọn một ngày từ danh sách bên dưới để quay lại phiên bản trước đó của "
+"đối tượng này"
+
+#: _unfold_src/contrib/simple_history/templates/simple_history/object_history.html:27
+#: _unfold_src/templates/admin/object_history.html:57
+msgid "entry"
+msgid_plural "entries"
+msgstr[0] "Mục ghi"
+
+#: _unfold_src/contrib/simple_history/templates/simple_history/object_history.html:30
+msgid "This object doesn't have a change history."
+msgstr "Đối tượng này không có lịch sử thay đổi."
+
+#: _unfold_src/contrib/simple_history/templates/simple_history/object_history_form.html:16
+msgid ""
+"Press the 'Revert' button below to revert to this version of the object."
+msgstr "Nhấn nút 'Quay lại' bên dưới để quay lại phiên bản này của đối tượng."
+
+#: _unfold_src/contrib/simple_history/templates/simple_history/object_history_form.html:20
+msgid "Press the 'Change History' button below to edit the history."
+msgstr "Nhấn nút 'Lịch sử thay đổi' bên dưới để chỉnh sửa lịch sử."
+
+#: _unfold_src/contrib/simple_history/templates/simple_history/object_history_list.html:19
+#: _unfold_src/contrib/simple_history/templates/simple_history/object_history_list.html:55
+#: _unfold_src/templates/admin/object_history.html:10
+#: _unfold_src/templates/admin/object_history.html:26
+msgid "Date/time"
+msgstr "Ngày/giờ"
+
+#: _unfold_src/contrib/simple_history/templates/simple_history/object_history_list.html:23
+#: _unfold_src/contrib/simple_history/templates/simple_history/object_history_list.html:59
+msgid "Comment"
+msgstr "Bình luận"
+
+#: _unfold_src/contrib/simple_history/templates/simple_history/object_history_list.html:27
+#: _unfold_src/contrib/simple_history/templates/simple_history/object_history_list.html:63
+msgid "Changed by"
+msgstr "Thay đổi bởi"
+
+#: _unfold_src/contrib/simple_history/templates/simple_history/object_history_list.html:31
+#: _unfold_src/contrib/simple_history/templates/simple_history/object_history_list.html:77
+msgid "Change reason"
+msgstr "Lý do thay đổi"
+
+#: _unfold_src/contrib/simple_history/templates/simple_history/object_history_list.html:35
+#: _unfold_src/contrib/simple_history/templates/simple_history/object_history_list.html:81
+msgid "Changes"
+msgstr "Thay đổi"
+
+#: _unfold_src/contrib/simple_history/templates/simple_history/object_history_list.html:73
+msgid "None"
+msgstr "Không có"
+
+#: _unfold_src/contrib/simple_history/templates/simple_history/submit_line.html:8
+msgid "Revert"
+msgstr "Quay lại"
+
+#: _unfold_src/contrib/simple_history/templates/simple_history/submit_line.html:14
+msgid "Change History"
+msgstr "Lịch sử thay đổi"
+
+#: _unfold_src/contrib/simple_history/templates/simple_history/submit_line.html:19
+#: _unfold_src/templates/admin/submit_line.html:53
+msgid "Close"
+msgstr "Đóng"
+
+#: _unfold_src/forms.py:72
+msgid "Select action to run"
+msgstr "Chọn hành động để thực hiện"
+
+#: _unfold_src/forms.py:133
+#, python-brace-format
+msgid ""
+"Raw passwords are not stored, so there is no way to see this user’s "
+"password, but you can change the password using <a href=\"{}\" class=\"text-"
+"primary-600 dark:text-primary-500\">this form</a>."
+msgstr ""
+"Mật khẩu dạng văn bản không được lưu, vì vậy không có cách nào để xem mật "
+"khẩu của người dùng này, nhưng bạn có thể thay đổi mật khẩu bằng <a href=\"{}"
+"\" class=\"text-primary-600 dark:text-primary-500\">biểu mẫu này</a>."
+
+#: _unfold_src/mixins/base_model_admin.py:57
+#: _unfold_src/mixins/base_model_admin.py:78
+msgid "Select value"
+msgstr "Chọn giá trị"
+
+#: _unfold_src/mixins/dataset_model_admin.py:53
+msgid ""
+"Items must be selected in order to perform actions on them. No items have "
+"been changed."
+msgstr ""
+"Các mục phải được chọn để thực hiện hành động trên chúng. Không có mục nào "
+"được thay đổi."
+
+#: _unfold_src/mixins/dataset_model_admin.py:66
+msgid "Dataset not found. No action performed."
+msgstr "Không tìm thấy tập dữ liệu. Không có hành động nào được thực hiện."
+
+#: _unfold_src/mixins/nested_inlines_model_admin.py:31
+msgid "You can not create nested object without parent"
+msgstr "Bạn không thể tạo đối tượng lồng nhau mà không có đối tượng cha"
+
+#: _unfold_src/templates/admin/actions.html:23
+#: _unfold_src/templates/admin/dataset_actions.html:46
+msgid "Run the selected action"
+msgstr "Thực hiện hành động đã chọn"
+
+#: _unfold_src/templates/admin/actions.html:24
+#: _unfold_src/templates/admin/dataset_actions.html:49
+msgid "Run"
+msgstr "Thực hiện"
+
+#: _unfold_src/templates/admin/actions.html:44
+#: _unfold_src/templates/admin/dataset_actions.html:17
+msgid "Click here to select the objects across all pages"
+msgstr "Nhấn vào đây để chọn các đối tượng trên tất cả các trang"
+
+#: _unfold_src/templates/admin/actions.html:45
+#: _unfold_src/templates/admin/dataset_actions.html:18
+#, python-format
+msgid "Select all %(total_count)s %(module_name)s"
+msgstr "Chọn tất cả %(total_count)s %(module_name)s"
+
+#: _unfold_src/templates/admin/actions.html:51
+#: _unfold_src/templates/admin/dataset_actions.html:24
+msgid "Clear selection"
+msgstr "Xóa lựa chọn"
+
+#: _unfold_src/templates/admin/app_index.html:5
+#: _unfold_src/templates/admin/base_site.html:3
+#: _unfold_src/templates/admin/index.html:5
+#: _unfold_src/templates/admin/login.html:15
+#: _unfold_src/templates/unfold/layouts/base.html:7
+#: templates/admin/index.html:8 templates/admin/login.html:5
+msgid "Django site admin"
+msgstr "Quản trị trang Django"
+
+#: _unfold_src/templates/admin/app_list.html:12
+#: _unfold_src/templates/unfold/helpers/app_list_default.html:9
+#, python-format
+msgid "Models in the %(name)s application"
+msgstr "Các mô hình trong ứng dụng %(name)s"
+
+#: _unfold_src/templates/admin/app_list.html:48
+#: _unfold_src/templates/unfold/helpers/app_list.html:91
+#: _unfold_src/templates/unfold/helpers/app_list_default.html:59
+msgid "You don’t have permission to view or edit anything."
+msgstr "Bạn không có quyền xem hoặc chỉnh sửa bất kỳ thứ gì."
+
+#: _unfold_src/templates/admin/auth/user/add_form.html:5
+msgid "After you've created a user, you’ll be able to edit more user options."
+msgstr ""
+"Sau khi bạn đã tạo người dùng, bạn sẽ có thể chỉnh sửa nhiều tùy chọn người "
+"dùng hơn."
+
+#: _unfold_src/templates/admin/auth/user/change_password.html:20
+#, python-format
+msgid "Enter a new password for the user <strong>%(username)s</strong>."
+msgstr "Nhập mật khẩu mới cho người dùng <strong>%(username)s</strong>."
+
+#: _unfold_src/templates/admin/auth/user/change_password.html:30
+#: _unfold_src/templates/registration/password_change_form.html:32
+#: _unfold_src/templates/unfold/helpers/account_links.html:18
+#: templates/unfold/helpers/account_links.html:48
+msgid "Change password"
+msgstr "Đổi mật khẩu"
+
+#: _unfold_src/templates/admin/change_form_object_tools.html:6
+#: templates/admin/wn_history_panel.html:11
+msgid "History"
+msgstr "Lịch sử"
+
+#: _unfold_src/templates/admin/change_form_object_tools.html:12
+msgid "View on site"
+msgstr "Xem trên trang"
+
+#: _unfold_src/templates/admin/change_list.html:65
+msgid "Filters"
+msgstr "Bộ lọc"
+
+#: _unfold_src/templates/admin/change_list_results.html:35
+msgid "Expand row"
+msgstr "Mở rộng hàng"
+
+#: _unfold_src/templates/admin/delete_confirmation.html:16
+#, python-format
+msgid ""
+"Deleting the %(object_name)s '%(escaped_object)s' would result in deleting "
+"related objects, but your account doesn't have permission to delete the "
+"following types of objects:"
+msgstr ""
+"Xóa %(object_name)s '%(escaped_object)s' sẽ dẫn đến xóa các đối tượng liên "
+"quan, nhưng tài khoản của bạn không có quyền xóa các loại đối tượng sau:"
+
+#: _unfold_src/templates/admin/delete_confirmation.html:32
+#, python-format
+msgid ""
+"Deleting the %(object_name)s '%(escaped_object)s' would require deleting the "
+"following protected related objects:"
+msgstr ""
+"Xóa %(object_name)s '%(escaped_object)s' sẽ yêu cầu xóa các đối tượng liên "
+"quan được bảo vệ sau:"
+
+#: _unfold_src/templates/admin/delete_confirmation.html:48
+#, python-format
+msgid ""
+"Are you sure you want to delete the %(object_name)s \"%(escaped_object)s\"? "
+"All of the following related items will be deleted:"
+msgstr ""
+"Bạn có chắc chắn muốn xóa %(object_name)s \"%(escaped_object)s\" không? Tất "
+"cả các mục liên quan sau sẽ bị xóa:"
+
+#: _unfold_src/templates/admin/delete_confirmation.html:55
+#: _unfold_src/templates/admin/delete_selected_confirmation.html:49
+msgid "Objects"
+msgstr "Đối tượng"
+
+#: _unfold_src/templates/admin/delete_selected_confirmation.html:15
+#, python-format
+msgid ""
+"Deleting the selected %(objects_name)s would result in deleting related "
+"objects, but your account doesn't have permission to delete the following "
+"types of objects:"
+msgstr ""
+"Xóa %(objects_name)s đã chọn sẽ dẫn đến xóa các đối tượng liên quan, nhưng "
+"tài khoản của bạn không có quyền xóa các loại đối tượng sau:"
+
+#: _unfold_src/templates/admin/delete_selected_confirmation.html:28
+#, python-format
+msgid ""
+"Deleting the selected %(objects_name)s would require deleting the following "
+"protected related objects:"
+msgstr ""
+"Xóa %(objects_name)s đã chọn sẽ yêu cầu xóa các đối tượng liên quan được bảo "
+"vệ sau:"
+
+#: _unfold_src/templates/admin/delete_selected_confirmation.html:42
+#, python-format
+msgid ""
+"Are you sure you want to delete the selected %(objects_name)s? All of the "
+"following objects and their related items will be deleted:"
+msgstr ""
+"Bạn có chắc chắn muốn xóa %(objects_name)s đã chọn không? Tất cả các đối "
+"tượng sau và các mục liên quan của chúng sẽ bị xóa:"
+
+#: _unfold_src/templates/admin/includes/object_delete_summary.html:5
+msgid "Summary"
+msgstr "Tóm tắt"
+
+#: _unfold_src/templates/admin/login.html:15 templates/admin/login.html:5
+msgid "Welcome back to"
+msgstr "Chào mừng trở lại với"
+
+#: _unfold_src/templates/admin/login.html:26 templates/admin/login.html:16
+#, python-format
+msgid ""
+"You are authenticated as %(username)s, but are not authorized to access this "
+"page. Would you like to login to a different account?"
+msgstr ""
+"Bạn đã xác thực với tư cách %(username)s, nhưng không được phép truy cập "
+"trang này. Bạn có muốn đăng nhập vào tài khoản khác không?"
+
+#: _unfold_src/templates/admin/login.html:47 templates/admin/login.html:38
+msgid "Log in"
+msgstr "Đăng nhập"
+
+#: _unfold_src/templates/admin/login.html:55 templates/admin/login.html:46
+msgid "Forgotten your password or username?"
+msgstr "Quên mật khẩu hoặc tên người dùng?"
+
+#: _unfold_src/templates/admin/object_history.html:60
+msgid ""
+"This object doesn’t have a change history. It probably wasn’t added via this "
+"admin site."
+msgstr ""
+"Đối tượng này không có lịch sử thay đổi. Có lẽ nó đã không được thêm vào "
+"thông qua trang quản trị này."
+
+#: _unfold_src/templates/admin/pagination.html:12
+#: _unfold_src/templates/unfold/helpers/welcomemsg.html:25
+msgid "Show all"
+msgstr "Hiển thị tất cả"
+
+#: _unfold_src/templates/admin/search_form.html:18
+#: _unfold_src/templates/unfold/helpers/command.html:24
+#: templates/admin/search_form.html:9
+msgid "Type to search"
+msgstr "Gõ để tìm kiếm"
+
+#: _unfold_src/templates/admin/submit_line.html:28
+msgid "Save and continue editing"
+msgstr "Lưu và tiếp tục chỉnh sửa"
+
+#: _unfold_src/templates/admin/submit_line.html:30
+msgid "Save and view"
+msgstr "Lưu và xem"
+
+#: _unfold_src/templates/admin/submit_line.html:37
+msgid "Save and add another"
+msgstr "Lưu và thêm cái khác"
+
+#: _unfold_src/templates/admin/submit_line.html:43
+msgid "Save as new"
+msgstr "Lưu dưới dạng mới"
+
+#: _unfold_src/templates/registration/logged_out.html:14
+msgid "You have been successfully logged out from the administration"
+msgstr "Bạn đã đăng xuất thành công khỏi phần quản trị"
+
+#: _unfold_src/templates/registration/logged_out.html:18
+msgid "Thanks for spending some quality time with the web site today."
+msgstr "Cảm ơn bạn đã dành thời gian chất lượng cho trang web ngày hôm nay."
+
+#: _unfold_src/templates/registration/logged_out.html:23
+msgid "Log in again"
+msgstr "Đăng nhập lại"
+
+#: _unfold_src/templates/registration/password_change_done.html:8
+msgid "Your password was changed."
+msgstr "Mật khẩu của bạn đã được thay đổi."
+
+#: _unfold_src/templates/registration/password_change_form.html:19
+msgid ""
+"Please enter your old password, for security’s sake, and then enter your new "
+"password twice so we can verify you typed it in correctly."
+msgstr ""
+"Hãy nhập mật khẩu cũ của bạn, vì lý do bảo mật, sau đó nhập mật khẩu mới hai "
+"lần để chúng tôi có thể xác nhận bạn đã nhập đúng."
+
+#: _unfold_src/templates/unfold/components/table.html:93
+msgid "No data"
+msgstr "Không có dữ liệu"
+
+#: _unfold_src/templates/unfold/helpers/account_links.html:5
+#: templates/unfold/helpers/account_links.html:25
+msgid "View site"
+msgstr "Xem trang"
+
+#: _unfold_src/templates/unfold/helpers/account_links.html:28
+#: templates/unfold/helpers/account_links.html:63
+msgid "Log out"
+msgstr "Đăng xuất"
+
+#: _unfold_src/templates/unfold/helpers/actions_row.html:4
+msgid "More actions"
+msgstr "Chọn hành động"
+
+#: _unfold_src/templates/unfold/helpers/add_link.html:5
+#: _unfold_src/templates/unfold/helpers/add_link.html:8
+#: _unfold_src/templates/unfold/helpers/empty_results.html:4
+#: templates/admin/grid_view_results.html:83
+#, python-format
+msgid "Add %(name)s"
+msgstr "Thêm %(name)s"
+
+#: _unfold_src/templates/unfold/helpers/app_list.html:60
+msgid "All applications"
+msgstr "Tất cả ứng dụng"
+
+#: _unfold_src/templates/unfold/helpers/app_list_default.html:31
+msgid "Add"
+msgstr "Thêm hàng"
+
+#: _unfold_src/templates/unfold/helpers/app_list_default.html:38
+#: _unfold_src/templates/unfold/helpers/edit_inline/inline_links.html:17
+#: base/modeladmin.py:386
+msgid "View"
+msgstr "Xem"
+
+#: _unfold_src/templates/unfold/helpers/app_list_default.html:42
+#: _unfold_src/templates/unfold/helpers/edit_inline/inline_links.html:7
+msgid "Change"
+msgstr "Thay đổi"
+
+#: _unfold_src/templates/unfold/helpers/boolean.html:4
+msgid "Unknown"
+msgstr "Người dùng không xác định"
+
+#: _unfold_src/templates/unfold/helpers/boolean.html:4
+msgid "True"
+msgstr "Đúng"
+
+#: _unfold_src/templates/unfold/helpers/boolean.html:4
+msgid "False"
+msgstr "Sai"
+
+#: _unfold_src/templates/unfold/helpers/change_list_filter_actions.html:7
+msgid "Apply Filters"
+msgstr "Bộ lọc"
+
+#: _unfold_src/templates/unfold/helpers/change_list_filter_actions.html:16
+msgid "Hide counts"
+msgstr "Ẩn số lượng"
+
+#: _unfold_src/templates/unfold/helpers/change_list_filter_actions.html:20
+msgid "Show counts"
+msgstr "Hiện số lượng"
+
+#: _unfold_src/templates/unfold/helpers/change_list_filter_actions.html:27
+msgid "Clear all filters"
+msgstr "Đặt lại bộ lọc"
+
+#: _unfold_src/templates/unfold/helpers/change_list_headers.html:27
+msgid "Select all rows"
+msgstr "Chọn giá trị"
+
+#: _unfold_src/templates/unfold/helpers/change_list_headers.html:41
+msgid "Toggle sorting"
+msgstr "Bật/tắt sắp xếp"
+
+#: _unfold_src/templates/unfold/helpers/change_list_headers.html:49
+msgid "Remove from sorting"
+msgstr "Xóa khỏi sắp xếp"
+
+#: _unfold_src/templates/unfold/helpers/change_list_headers.html:55
+#, python-format
+msgid "Sorting priority: %(priority_number)s"
+msgstr "Ưu tiên sắp xếp: %(priority_number)s"
+
+#: _unfold_src/templates/unfold/helpers/command_history.html:7
+msgid "Recent searches"
+msgstr "Gõ để tìm kiếm"
+
+#: _unfold_src/templates/unfold/helpers/command_history.html:49
+msgid "No recent searches"
+msgstr "Không có tìm kiếm gần đây"
+
+#: _unfold_src/templates/unfold/helpers/command_results.html:44
+msgid "No results matching your query"
+msgstr "Không có kết quả nào phù hợp với truy vấn của bạn"
+
+#: _unfold_src/templates/unfold/helpers/command_results.html:57
+msgid "Loading more results..."
+msgstr "Đang tải thêm kết quả..."
+
+#: _unfold_src/templates/unfold/helpers/command_results.html:62
+msgid ""
+"\n"
+"                Found %(counter)s result in %(time)s seconds\n"
+"            "
+msgid_plural ""
+"\n"
+"                Found %(counter)s results in %(time)s seconds\n"
+"            "
+msgstr[0] ""
+"\n"
+"                   Tìm thấy %(counter)s kết quả trong %(time)s giây\n"
+"                "
+
+#: _unfold_src/templates/unfold/helpers/delete_submit_line.html:5
+msgid "No, take me back"
+msgstr "Không, đưa tôi trở lại"
+
+#: _unfold_src/templates/unfold/helpers/delete_submit_line.html:9
+msgid "Yes, I’m sure"
+msgstr "Có, tôi chắc chắn"
+
+#: _unfold_src/templates/unfold/helpers/display_header.html:10
+msgid "Record picture"
+msgstr "Ảnh hồ sơ"
+
+#: _unfold_src/templates/unfold/helpers/edit_inline/inline_delete_undo.html:5
+msgid "This item will be deleted."
+msgstr "Mục này sẽ bị xóa."
+
+#: _unfold_src/templates/unfold/helpers/edit_inline/inline_delete_undo.html:8
+msgid "Click to cancel"
+msgstr "Nhấp để hủy bỏ"
+
+#: _unfold_src/templates/unfold/helpers/edit_inline/tabular_delete.html:4
+msgid "Remove"
+msgstr "đã xóa"
+
+#: _unfold_src/templates/unfold/helpers/empty_results.html:14
+#: templates/admin/grid_view_results.html:91
+msgid "No results found"
+msgstr "Không tìm thấy kết quả"
+
+#: _unfold_src/templates/unfold/helpers/empty_results.html:18
+#: templates/admin/grid_view_results.html:95
+msgid ""
+"This page yielded into no results. Create a new item or reset your filters."
+msgstr ""
+"Trang này không có kết quả nào. Tạo một mục mới hoặc đặt lại bộ lọc của bạn."
+
+#: _unfold_src/templates/unfold/helpers/empty_results.html:32
+#: templates/admin/grid_view_results.html:108
+msgid "Reset filters"
+msgstr "Đặt lại bộ lọc"
+
+#: _unfold_src/templates/unfold/helpers/field_readonly_value_file.html:8
+#: _unfold_src/templates/unfold/widgets/clearable_file_input.html:6
+msgid "Image preview"
+msgstr "Xem trước hình ảnh"
+
+#: _unfold_src/templates/unfold/helpers/field_readonly_value_file.html:13
+msgid "Click to download"
+msgstr "Nhấp để tải xuống"
+
+#: _unfold_src/templates/unfold/helpers/header_back_button.html:7
+#: _unfold_src/templates/unfold/helpers/header_back_button.html:15
+msgid "Go back"
+msgstr "Quay lại"
+
+#: _unfold_src/templates/unfold/helpers/history.html:9
+msgid "Recent actions"
+msgstr "Chọn hành động"
+
+#: _unfold_src/templates/unfold/helpers/history.html:28
+msgid "Unknown content"
+msgstr "Người dùng không xác định"
+
+#: _unfold_src/templates/unfold/helpers/messages/errornote.html:5
+msgid "Please correct the error below."
+msgid_plural "Please correct the errors below."
+msgstr[0] ""
+
+#: _unfold_src/templates/unfold/helpers/pagination_infinite.html:5
+#: templates/unfold/helpers/pagination.html:7
+msgid "Previous"
+msgstr "Trước"
+
+#: _unfold_src/templates/unfold/helpers/pagination_infinite.html:9
+#: templates/unfold/helpers/pagination.html:11
+msgid "Next"
+msgstr "Tiếp theo"
+
+#: _unfold_src/templates/unfold/helpers/search.html:10
+#: _unfold_src/templates/unfold/helpers/search.html:40
+msgid "Search apps and models..."
+msgstr "Tìm kiếm ứng dụng và mô hình..."
+
+#: _unfold_src/templates/unfold/helpers/search.html:41
+msgid "Filter navigation items"
+msgstr "Bộ lọc mục điều hướng"
+
+#: _unfold_src/templates/unfold/helpers/site_branding.html:3
+#: _unfold_src/templates/unfold/helpers/site_branding.html:6
+msgid "Django administration"
+msgstr "Quản trị Django"
+
+#: _unfold_src/templates/unfold/helpers/site_icon.html:7
+#: _unfold_src/templates/unfold/helpers/site_icon.html:9
+#: _unfold_src/templates/unfold/helpers/site_icon.html:11
+#: _unfold_src/templates/unfold/helpers/site_logo.html:5
+#: _unfold_src/templates/unfold/helpers/site_logo.html:7
+#: _unfold_src/templates/unfold/helpers/site_logo.html:9
+msgid "Home"
+msgstr "Trang chủ"
+
+#: _unfold_src/templates/unfold/helpers/tab_items.html:16
+msgid "General"
+msgstr "Chung"
+
+#: _unfold_src/templates/unfold/helpers/theme_switch.html:9
+#: _unfold_src/templates/unfold/helpers/theme_switch_dropdown.html:16
+#: templates/unfold/helpers/theme_switch.html:9
+msgid "Light"
+msgstr "Sáng"
+
+#: _unfold_src/templates/unfold/helpers/theme_switch.html:16
+#: _unfold_src/templates/unfold/helpers/theme_switch_dropdown.html:23
+#: templates/unfold/helpers/theme_switch.html:16
+msgid "Dark"
+msgstr "Tối"
+
+#: _unfold_src/templates/unfold/helpers/theme_switch.html:23
+#: _unfold_src/templates/unfold/helpers/theme_switch_dropdown.html:30
+#: base/settings.py:648 templates/unfold/helpers/theme_switch.html:23
+msgid "System"
+msgstr "Hệ thống"
+
+#: _unfold_src/templates/unfold/helpers/unauthenticated_header.html:6
+msgid "Return to site"
+msgstr "Trở lại trang"
+
+#: _unfold_src/templates/unfold/helpers/welcomemsg.html:25
+#, python-format
+msgid "%(counter)s result"
+msgid_plural "%(counter)s results"
+msgstr[0] ""
+
+#: _unfold_src/templates/unfold/helpers/welcomemsg.html:25
+#, python-format
+msgid "%(full_result_count)s total"
+msgstr "%(full_result_count)s tổng cộng"
+
+#: _unfold_src/templates/unfold/widgets/clearable_file_input.html:25
+#: _unfold_src/templates/unfold/widgets/clearable_file_input_small.html:18
+#: templates/file_management/widgets/clearable_file_input_no_download.html:6
+msgid "Choose file to upload"
+msgstr "Chọn tệp để tải lên"
+
+#: _unfold_src/templates/unfold/widgets/password_toggle.html:5
+msgid "Toggle password visibility"
+msgstr "Bật/tắt hiển thị mật khẩu"
+
+#: _unfold_src/templates/unfold/widgets/related_widget_wrapper.html:28
+#: _unfold_src/templates/unfold/widgets/related_widget_wrapper.html:29
+#, python-format
+msgid "Change selected %(model)s"
+msgstr "Thay đổi %(model)s đã chọn"
+
+#: _unfold_src/templates/unfold/widgets/related_widget_wrapper.html:34
+#: _unfold_src/templates/unfold/widgets/related_widget_wrapper.html:35
+#, python-format
+msgid "Add another %(model)s"
+msgstr "Thêm %(model)s khác"
+
+#: _unfold_src/templates/unfold/widgets/related_widget_wrapper.html:40
+#: _unfold_src/templates/unfold/widgets/related_widget_wrapper.html:41
+#, python-format
+msgid "View selected %(model)s"
+msgstr "Xem %(model)s đã chọn"
+
+#: _unfold_src/templates/unfold/widgets/related_widget_wrapper.html:46
+#: _unfold_src/templates/unfold/widgets/related_widget_wrapper.html:47
+#, python-format
+msgid "Delete selected %(model)s"
+msgstr "Xóa %(model)s đã chọn"
+
+#: _unfold_src/templates/unfold_crispy/layout/table_inline_formset.html:65
+msgid "Add row"
+msgstr "Thêm hàng"
+
+#: _unfold_src/templatetags/unfold.py:796
+msgid "Welcome"
+msgstr "Chào mừng"
+
+#: _unfold_src/templatetags/unfold_list.py:128
+msgid "Select all objects on this page for an action"
+msgstr "Chọn tất cả các đối tượng trên trang này để thực hiện hành động"
+
+#: _unfold_src/widgets.py:589 _unfold_src/widgets.py:630
+msgid "Date"
+msgstr "Ngày"
+
+#: _unfold_src/widgets.py:990
+msgid "Select currency"
+msgstr "Chọn loại tiền tệ"
+
+#: base/admin.py:179 base/admin.py:221 base/admin.py:569 base/admin.py:616
 #: base/models.py:917
 msgid "Active"
 msgstr "Hoạt động"
 
-#: base/admin.py:180 base/admin.py:220
+#: base/admin.py:181 base/admin.py:221
 msgid "Inactive"
 msgstr "Không hoạt động"
 
-#: base/admin.py:183 base/admin.py:198 base/admin.py:329
+#: base/admin.py:184 base/admin.py:199 base/admin.py:330
 msgid "Staff"
 msgstr "Nhân viên"
 
-#: base/admin.py:186
+#: base/admin.py:187
 msgid "Admin"
 msgstr "Trang quản trị"
 
-#: base/admin.py:191
+#: base/admin.py:192
 msgid "Unknown User"
 msgstr "Người dùng không xác định"
 
-#: base/admin.py:192
+#: base/admin.py:193
 msgid "No username"
 msgstr "Không có tên người dùng"
 
-#: base/admin.py:196 base/admin.py:333
+#: base/admin.py:197 base/admin.py:334
 msgid "Superuser"
 msgstr "Quản trị viên"
 
-#: base/admin.py:200
+#: base/admin.py:201
 msgid "Bot"
 msgstr "Máy"
 
-#: base/admin.py:255 base/admin.py:279 base/admin.py:654
+#: base/admin.py:256 base/admin.py:280 base/admin.py:655
 msgid "Personal info"
 msgstr "Thông tin cá nhân"
 
-#: base/admin.py:261 base/admin.py:286
+#: base/admin.py:262 base/admin.py:287
 msgid "Permissions"
 msgstr "Quyền"
 
-#: base/admin.py:300
+#: base/admin.py:301
 msgid "Important dates"
 msgstr "Ngày quan trọng"
 
-#: base/admin.py:321 dashboard/views.py:224 feedbacks/models.py:15
-msgid "User"
-msgstr "Người dùng"
-
-#: base/admin.py:325
+#: base/admin.py:326
 msgid "Avatar"
 msgstr "Ảnh đại diện"
 
-#: base/admin.py:337
+#: base/admin.py:338
 msgid "Created"
 msgstr "Đã tạo"
 
-#: base/admin.py:351
+#: base/admin.py:352
 msgid ""
 "Failed to send email notification! Please change the password so that the "
 "user can log in."
@@ -83,97 +1107,97 @@ msgstr ""
 "Không thể gửi thông báo qua email! Vui lòng thay đổi mật khẩu để người dùng "
 "có thể đăng nhập."
 
-#: base/admin.py:354
+#: base/admin.py:355
 msgid "Email notification has been sent, please check your inbox!"
 msgstr ""
 "Thông báo qua email đã được gửi, vui lòng kiểm tra hộp thư đến của bạn!"
 
-#: base/admin.py:401 base/admin.py:483
+#: base/admin.py:402 base/admin.py:484
 msgid "Client information"
 msgstr "Thông tin khách hàng"
 
-#: base/admin.py:409 base/admin.py:489
+#: base/admin.py:410 base/admin.py:490
 msgid "Request information"
 msgstr "Thông tin yêu cầu"
 
-#: base/admin.py:428
+#: base/admin.py:429
 msgid "Block IP address"
 msgstr "Chặn địa chỉ IP"
 
-#: base/admin.py:451
+#: base/admin.py:452
 msgid ", "
 msgstr ", "
 
-#: base/admin.py:500 base/admin.py:563 base/admin.py:610 base/modeladmin.py:361
+#: base/admin.py:501 base/admin.py:564 base/admin.py:611 base/modeladmin.py:363
 #: file_management/admin.py:71
 msgid "Meta"
 msgstr "Meta"
 
-#: base/admin.py:528
+#: base/admin.py:529
 msgid "Timestamps"
 msgstr "Dấu thời gian"
 
-#: base/admin.py:535 base/models.py:162
+#: base/admin.py:536 base/models.py:162
 msgid "User agent"
 msgstr "Trình duyệt người dùng"
 
-#: base/admin.py:557 base/admin.py:604
+#: base/admin.py:558 base/admin.py:605
 msgid "Target"
 msgstr "Mục tiêu"
 
-#: base/admin.py:560 base/admin.py:607
+#: base/admin.py:561 base/admin.py:608
 msgid "Block settings"
 msgstr "Cài đặt chặn"
 
-#: base/admin.py:577
+#: base/admin.py:578
 msgid "Activate selected IPs"
 msgstr "Kích hoạt các IP đã chọn"
 
-#: base/admin.py:582
+#: base/admin.py:583
 msgid "Selected IPs have been activated."
 msgstr "Các IP đã chọn đã được kích hoạt."
 
-#: base/admin.py:584
+#: base/admin.py:585
 msgid "Deactivate selected IPs"
 msgstr "Hủy kích hoạt các IP đã chọn"
 
-#: base/admin.py:589
+#: base/admin.py:590
 msgid "Selected IPs have been deactivated."
 msgstr "Các IP đã chọn đã được hủy kích hoạt."
 
-#: base/admin.py:624
+#: base/admin.py:625
 msgid "Activate selected patterns"
 msgstr "Kích hoạt các mẫu đã chọn"
 
-#: base/admin.py:629
+#: base/admin.py:630
 msgid "Selected UA patterns have been activated."
 msgstr "Các mẫu UA đã chọn đã được kích hoạt."
 
-#: base/admin.py:631
+#: base/admin.py:632
 msgid "Deactivate selected patterns"
 msgstr "Hủy kích hoạt các mẫu đã chọn"
 
-#: base/admin.py:636
+#: base/admin.py:637
 msgid "Selected UA patterns have been deactivated."
 msgstr "Các mẫu UA đã chọn đã được hủy kích hoạt."
 
-#: base/admin.py:686
+#: base/admin.py:687
 msgid "Configuration"
 msgstr "Cấu hình"
 
-#: base/admin.py:701
+#: base/admin.py:702
 msgid "Image info"
 msgstr "Thông tin hình ảnh"
 
-#: base/admin.py:728
+#: base/admin.py:729
 msgid "Mail info"
 msgstr "Thông tin thư"
 
-#: base/admin.py:744 base/models.py:854 notification/admin.py:150
+#: base/admin.py:745 base/models.py:854 notification/admin.py:150
 msgid "Content"
 msgstr "Nội dung"
 
-#: base/admin.py:811 base/settings.py:564 dashboard/apps.py:8
+#: base/admin.py:812 base/settings.py:564 dashboard/apps.py:8
 #: dashboard/views.py:192 templates/admin/index.html:8
 msgid "Dashboard"
 msgstr "Bảng điều khiển"
@@ -190,56 +1214,48 @@ msgstr "Trường hiển thị"
 msgid "Default fields"
 msgstr "Trường mặc định"
 
-#: base/middleware.py:170
+#: base/middleware.py:171
 msgid "Database is operating in readonly mode. Not possible to save any data."
 msgstr ""
 "Cơ sở dữ liệu đang hoạt động ở chế độ chỉ đọc. Không thể lưu bất kỳ dữ liệu "
 "nào."
 
-#: base/modeladmin.py:99
+#: base/modeladmin.py:101
 #, python-brace-format
 msgid "Search by {fields}"
 msgstr "Tìm kiếm theo {fields}"
 
-#: base/modeladmin.py:160 base/modeladmin.py:161 base/modeladmin.py:210
-#: base/modeladmin.py:211
+#: base/modeladmin.py:162 base/modeladmin.py:163 base/modeladmin.py:212
+#: base/modeladmin.py:213
 #, python-format
 msgid "%(name)s \"%(obj)s\" has been soft-deleted by user \"%(user)s\""
 msgstr "%(name)s \"%(obj)s\" đã được xóa mềm bởi người dùng \"%(user)s\""
 
-#: base/modeladmin.py:170
+#: base/modeladmin.py:172
 msgid "Delete selected records"
 msgstr "Xóa các bản ghi đã chọn"
 
-#: base/modeladmin.py:174 base/modeladmin.py:175
+#: base/modeladmin.py:176 base/modeladmin.py:177
 #, python-format
 msgid "%(name)s \"%(obj)s\" has been hard-deleted by user \"%(user)s\""
 msgstr "%(name)s \"%(obj)s\" đã được xóa cứng bởi người dùng \"%(user)s\""
 
-#: base/modeladmin.py:187
+#: base/modeladmin.py:189
 msgid "Hard delete selected records"
 msgstr "Xóa cứng các bản ghi đã chọn"
 
-#: base/modeladmin.py:191 base/modeladmin.py:192
+#: base/modeladmin.py:193 base/modeladmin.py:194
 #, python-format
 msgid "%(name)s \"%(obj)s\" has been restored by user \"%(user)s\""
 msgstr "%(name)s \"%(obj)s\" đã được khôi phục bởi người dùng \"%(user)s\""
 
-#: base/modeladmin.py:201
+#: base/modeladmin.py:203
 msgid "Restore selected records"
 msgstr "Khôi phục các bản ghi đã chọn"
 
-#: base/modeladmin.py:381
-msgid "Edit"
-msgstr "Sửa"
-
-#: base/modeladmin.py:384
-msgid "View"
-msgstr "Xem"
-
-#: base/modeladmin.py:389 templates/admin/wn_history_panel.html:74
-msgid "Delete"
-msgstr "Xóa"
+#: base/modeladmin.py:519
+msgid "Duplicate selected objects"
+msgstr "Nhân bản các đối tượng đã chọn"
 
 #: base/models.py:67
 msgid "title"
@@ -477,17 +1493,8 @@ msgid "Hidden"
 msgstr "Ẩn"
 
 #: base/models.py:434 base/models.py:474
-msgid "New"
-msgstr "Mới"
-
-#: base/models.py:434 base/models.py:474
 msgid "has been created by user"
 msgstr "Đã được tạo bởi người dùng"
-
-#: base/models.py:458 base/models.py:579
-#: templates/admin/wn_history_panel.html:74
-msgid "Update"
-msgstr "Cập nhật"
 
 #: base/models.py:458 base/models.py:581
 msgid "has been updated by user"
@@ -689,10 +1696,6 @@ msgstr "Hồ sơ truy cập"
 #: base/settings.py:639
 msgid "Groups"
 msgstr "Nhóm"
-
-#: base/settings.py:648 templates/unfold/helpers/theme_switch.html:23
-msgid "System"
-msgstr "Hệ thống"
 
 #: base/settings.py:652
 msgid "Images"
@@ -906,10 +1909,6 @@ msgstr "Phản hồi đã được giải quyết"
 msgid "Your feedback has been resolved."
 msgstr "Phản hồi của bạn đã được giải quyết."
 
-#: feedbacks/admin.py:123
-msgid "Object"
-msgstr "Đối tượng"
-
 #: feedbacks/models.py:21
 msgid "Content Type"
 msgstr "Loại nội dung"
@@ -1092,10 +2091,6 @@ msgstr "Xem đối tượng được liên kết"
 #: notification/admin.py:101
 msgid "No object link available for this notification."
 msgstr "Không có liên kết đối tượng nào có sẵn cho thông báo này."
-
-#: notification/admin.py:154 synchronization/models.py:14
-msgid "Action"
-msgstr "Hành động"
 
 #: notification/admin.py:158
 msgid "Flag"
@@ -1350,61 +2345,13 @@ msgstr "Lỗi mạng. Vui lòng kiểm tra kết nối của bạn."
 msgid "Unexpected error (HTTP {status})."
 msgstr "Lỗi không mong muốn (HTTP {status})."
 
-#: templates/admin/grid_view_results.html:83
-#, python-format
-msgid "Add %(name)s"
-msgstr "Thêm %(name)s"
-
-#: templates/admin/grid_view_results.html:91
-msgid "No results found"
-msgstr "Không tìm thấy kết quả"
-
-#: templates/admin/grid_view_results.html:95
-msgid ""
-"This page yielded into no results. Create a new item or reset your filters."
-msgstr ""
-"Trang này không có kết quả nào. Tạo một mục mới hoặc đặt lại bộ lọc của bạn."
-
-#: templates/admin/grid_view_results.html:108
-msgid "Reset filters"
-msgstr "Đặt lại bộ lọc"
-
 #: templates/admin/header.html:31 templates/admin/index.html:54
 msgid "Website performance in last 28 days"
 msgstr "Hiệu suất trang web trong 28 ngày qua"
 
-#: templates/admin/index.html:8 templates/admin/login.html:5
-msgid "Django site admin"
-msgstr "Quản trị trang Django"
-
-#: templates/admin/login.html:5
-msgid "Welcome back to"
-msgstr "Chào mừng trở lại với"
-
-#: templates/admin/login.html:16
-#, python-format
-msgid ""
-"You are authenticated as %(username)s, but are not authorized to access this "
-"page. Would you like to login to a different account?"
-msgstr ""
-"Bạn đã xác thực với tư cách %(username)s, nhưng không được phép truy cập "
-"trang này. Bạn có muốn đăng nhập vào tài khoản khác không?"
-
-#: templates/admin/login.html:38
-msgid "Log in"
-msgstr "Đăng nhập"
-
-#: templates/admin/login.html:46
-msgid "Forgotten your password or username?"
-msgstr "Quên mật khẩu hoặc tên người dùng?"
-
 #: templates/admin/login_after.html:10
 msgid "Log in as guest"
 msgstr "Đăng nhập với tư cách khách"
-
-#: templates/admin/search_form.html:9
-msgid "Type to search"
-msgstr "Gõ để tìm kiếm"
 
 #: templates/admin/search_form.html:46
 msgid "Items per page"
@@ -1431,10 +2378,6 @@ msgstr "Phản hồi đã được lưu thành công."
 msgid "Failed to save feedback."
 msgstr "Không thể lưu phản hồi."
 
-#: templates/admin/wn_history_panel.html:11
-msgid "History"
-msgstr "Lịch sử"
-
 #: templates/admin/wn_history_panel.html:25
 msgid "Change history"
 msgstr "Lịch sử thay đổi"
@@ -1455,109 +2398,31 @@ msgstr "Khôi phục"
 msgid "Got it"
 msgstr "Đã hiểu"
 
-#: templates/base/forms/helpers/toolbar.html:7
-msgid "Paragraph"
-msgstr "Đoạn văn"
-
-#: templates/base/forms/helpers/toolbar.html:11
-msgid "Underlined"
-msgstr "Gạch chân"
-
-#: templates/base/forms/helpers/toolbar.html:15
-msgid "Bold"
-msgstr "Bold"
-
-#: templates/base/forms/helpers/toolbar.html:19
-msgid "Italic"
-msgstr "Italic"
-
-#: templates/base/forms/helpers/toolbar.html:23
-msgid "Strike"
-msgstr "Strike"
-
-#: templates/base/forms/helpers/toolbar.html:27
-#: templates/base/forms/helpers/toolbar.html:95
-msgid "Link"
-msgstr "Liên kết"
-
-#: templates/base/forms/helpers/toolbar.html:35
-#: templates/base/forms/helpers/toolbar.html:39
-#: templates/base/forms/helpers/toolbar.html:43
-#: templates/base/forms/helpers/toolbar.html:47
-msgid "Heading"
-msgstr "Tiêu đề"
-
-#: templates/base/forms/helpers/toolbar.html:55
-msgid "Quote"
-msgstr "Trích dẫn"
-
-#: templates/base/forms/helpers/toolbar.html:59
-msgid "Code"
-msgstr "Mã nguồn"
-
-#: templates/base/forms/helpers/toolbar.html:63
-msgid "Unordered list"
-msgstr "Danh sách không có thứ tự"
-
-#: templates/base/forms/helpers/toolbar.html:67
-msgid "Ordered list"
-msgstr "Danh sách có thứ tự"
-
-#: templates/base/forms/helpers/toolbar.html:71
-msgid "Indent increase"
-msgstr "Tăng lề"
-
-#: templates/base/forms/helpers/toolbar.html:75
-msgid "Indent decrease"
-msgstr "Giảm lề"
-
 #: templates/base/forms/helpers/toolbar.html:83
 msgid "HTML Editor"
 msgstr "Biên soạn HTML"
-
-#: templates/base/forms/helpers/toolbar.html:92
-msgid "Enter an URL"
-msgstr "Nhập một URL"
-
-#: templates/base/forms/helpers/toolbar.html:99
-msgid "Unlink"
-msgstr "Bỏ liên kết"
-
-#: templates/file_management/widgets/clearable_file_input_no_download.html:6
-msgid "Choose file to upload"
-msgstr "Chọn file để tải lên"
 
 #: templates/unfold/helpers/account_links.html:13
 msgid "User profile"
 msgstr "Hồ sơ người dùng"
 
-#: templates/unfold/helpers/account_links.html:25
-msgid "View site"
-msgstr "Xem trang"
+#, python-brace-format
+#~ msgid ""
+#~ "Raw passwords are not stored, so there is no way to see this user's "
+#~ "password, but you can change the password using <a href=\"{}\" "
+#~ "class=\"text-primary-600 dark:text-primary-500\">this form</a>."
+#~ msgstr ""
+#~ "Mật khẩu dạng văn bản không được lưu, vì vậy không có cách nào để xem mật "
+#~ "khẩu của người dùng này, nhưng bạn có thể thay đổi mật khẩu bằng <a "
+#~ "href=\"{}\" class=\"text-primary-600 dark:text-primary-500\">biểu mẫu "
+#~ "này</a>."
 
-#: templates/unfold/helpers/account_links.html:48
-msgid "Change password"
-msgstr "Đổi mật khẩu"
-
-#: templates/unfold/helpers/account_links.html:63
-msgid "Log out"
-msgstr "Đăng xuất"
-
-#: templates/unfold/helpers/pagination.html:7
-msgid "Previous"
-msgstr "Trước"
-
-#: templates/unfold/helpers/pagination.html:11
-msgid "Next"
-msgstr "Tiếp theo"
-
-#: templates/unfold/helpers/theme_switch.html:9
-msgid "Light"
-msgstr "Sáng"
-
-#: templates/unfold/helpers/theme_switch.html:16
-msgid "Dark"
-msgstr "Tối"
+#~ msgid ""
+#~ "This object doesn't have a change history. It probably wasn't added via "
+#~ "this admin site."
+#~ msgstr ""
+#~ "Đối tượng này không có lịch sử thay đổi. Có lẽ nó không được thêm qua "
+#~ "trang quản trị này."
 
 #~ msgid "Activity"
 #~ msgstr "Hành động"
@@ -1582,9 +2447,6 @@ msgstr "Tối"
 #~ msgid "This app is not active."
 #~ msgstr "Ứng dụng này không hoạt động."
 
-#~ msgid "You do not have permission to access this app."
-#~ msgstr "Bạn không có quyền truy cập ứng dụng này."
-
 #~ msgid "Failed to mark feedback as resolved."
 #~ msgstr "Không thể đánh dấu phản hồi là đã giải quyết."
 
@@ -1593,6 +2455,3 @@ msgstr "Tối"
 
 #~ msgid "Last week expenses"
 #~ msgstr "Giá trị chi phí tuần trước"
-
-#~ msgid "Return to site"
-#~ msgstr "Trở lại trang"

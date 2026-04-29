@@ -11,7 +11,7 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Current Version
 
-- 0.3.2.1
+- 0.3.2.2
 
 ## Compatibility
 
@@ -24,9 +24,12 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
-### Latest: v0.3.2.1 (2026-04-27)
-**Fix: UserActivityMiddleware now captures JSON request payloads in addition to form data.**
-- **Fixed**: `UserActivityMiddleware` — added `_get_request_data()` helper that parses JSON bodies (`application/json`) when `request.POST` is empty, with full sensitive-field sanitization. Previously only captured form-encoded POST data.
+### Latest: v0.3.2.2 (2026-04-29)
+**Improvement: Superuser-only soft-delete; duplicate action; expanded i18n coverage from django-unfold.**
+- **Fixed**: Soft-delete action now restricted to superusers only in `ModelAdmin.get_actions()`.
+- **Added**: `duplicate_objects` bulk action auto-injected for superusers across all `ModelAdmin` subclasses.
+- **Added**: `makemessages.sh` extracts translatable strings from `django-unfold` via temporary symlink.
+- **Improved**: Vietnamese translation expanded to cover unfold core UI strings.
 
 ## Installation
 

@@ -1,6 +1,14 @@
 # Changelog
 
-### v0.3.2.1 (2026-04-27) — latest
+### v0.3.2.2 (2026-04-29) — latest
+**Improvement: Superuser-only soft-delete; duplicate action; expanded i18n coverage from django-unfold**
+- **Fixed**: `ModelAdmin.get_actions()` — soft-delete (`delete_selected`) is now restricted to superusers only; regular staff no longer see a delete action that could silently soft-delete records they didn't expect to change.
+- **Added**: `duplicate_objects` bulk action automatically injected into all `ModelAdmin` subclasses for superusers — creates a copy of selected objects with ` (Copy)` appended to `name`; requires `add` permission.
+- **Fixed**: `get_actions()` logic restructured to guard all destructive/restore actions inside the `is_superuser` block, preventing accidental exposure to non-superuser staff.
+- **Added**: `scripts/makemessages.sh` — now creates a temporary symlink `_unfold_src → .venv/.../unfold` and runs `makemessages --symlinks` so that translatable strings from the upstream `django-unfold` package are extracted into the project's locale.
+- **Improved**: Vietnamese translation (`locale/vi/LC_MESSAGES/django.po`) expanded significantly — now covers unfold core UI strings (filters, actions, submit line, object history, import/export, guardian, simple_history, widgets) in addition to all project-specific strings.
+
+### v0.3.2.1 (2026-04-27)
 **Fix: UserActivityMiddleware now captures JSON request payloads in addition to form data**
 - **Fixed**: `UserActivityMiddleware._get_request_data()` — previously only captured `request.POST` (form-encoded), missing JSON bodies sent with `Content-Type: application/json`. Now parses `request.body` as JSON when POST is empty, with full sensitive-field sanitization applied.
 

@@ -28,6 +28,8 @@ from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
 from django.utils.text import format_lazy
 
+from django.contrib import admin
+
 from unfold.contrib.filters.admin import (
     AutocompleteSelectFilter,
     AutocompleteSelectMultipleFilter,
@@ -147,12 +149,19 @@ class ModelAdmin(UnfoldAdmin):
     # Soft delete
     def get_actions(self, request: HttpRequest) -> OrderedDict[Any, Any]:
         actions = super().get_actions(request)
-        if 'delete_selected' in actions:
-            actions['delete_selected'] = (self.soft_delete, 'delete_selected', self.soft_delete.short_description)
         if request.user.is_superuser:
-            # hard delete and restore
+            
+            if 'delete_selected' in actions:
+                actions['delete_selected'] = (self.soft_delete, 'delete_selected', self.soft_delete.short_description)
+            
+            # hard delete and restore actions only for superuser
             actions['hard_delete'] = (self.hard_delete, 'hard_delete', self.hard_delete.short_description)
             actions['restore'] = (self.restore, 'restore', self.restore.short_description)
+
+            # Add the duplicate action to all ModelAdmins that inherit from this base class
+            if 'duplicate_objects' not in actions:
+                actions['duplicate_objects'] = self.get_action('duplicate_objects')
+        
         return actions
 
     def soft_delete(self, cl, request, queryset):
@@ -512,3 +521,14 @@ class ModelAdmin(UnfoldAdmin):
         # TODO: implement this method to return the header of the grid item
         return mark_safe(f'<div class="grid-item-header">{obj}</div>')
     grid_item_header.short_description = 'Header'
+
+    # action make a copy of the current object
+    @admin.action(description=_('Duplicate selected objects'), permissions=['add'])
+    def duplicate_objects(self, request, queryset):
+        for obj in queryset:
+            obj.pk = None  # This will create a new object when saved
+            obj.name = f"{obj.name} (Copy)"
+            obj.save()
+
+        message = _(f'{queryset.count()} object(s) duplicated successfully.')
+        self.message_user(request, message)
