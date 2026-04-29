@@ -6,7 +6,7 @@ from django.urls import include, re_path
 from django.views.static import serve
 
 from .sites import base_admin_site
-from .views import HomeView, GuestLoginView, get_announcement_content
+from .views import HomeView, GuestLoginView, get_announcement_content, MarkdownPreviewView
 
 urlpatterns = []
 
@@ -25,4 +25,5 @@ urlpatterns += [
     path("ckeditor5/", include('django_ckeditor_5.urls')),
     path("file-management/", include('whiteneuron.file_management.urls')),
     path("announcement/", get_announcement_content, name="announcement"),
+    path("md-preview/", MarkdownPreviewView.as_view(), name="md_preview"),
 ]

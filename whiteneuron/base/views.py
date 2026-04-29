@@ -3,7 +3,7 @@ import random
 
 from django.contrib import messages
 from django.contrib.auth import login
-from django.http import HttpResponseNotAllowed
+from django.http import HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -12,6 +12,9 @@ from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import RedirectView, TemplateView
 from unfold.views import UnfoldModelAdminViewMixin
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 class HomeView(RedirectView):
@@ -39,11 +42,38 @@ class GuestLoginView(View):
             return redirect(next_url)
         return redirect('admin:index')
     
-from django.http import HttpResponse
 def get_announcement_content(request):
     from django.conf import settings
     content_file= getattr(settings, 'ANNOUNCEMENT_CONTENT_HTML_FILE', None)
     if not content_file:
         return None
     content = render_to_string(content_file, request=request)
+    from django.http import HttpResponse
     return HttpResponse(content)
+
+
+class MarkdownPreviewView(View):
+    """Convert markdown to HTML using md2html-tailwind4."""
+
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return JsonResponse({'success': False, 'error': 'Authentication required'}, status=401)
+        
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            markdown_text = data.get('markdown', '')
+            
+            from md2html_tailwind4 import Converter
+            converter = Converter(font_size='base')
+            html_output = converter.convert_md_to_html(markdown_text)
+            
+            return JsonResponse({
+                'success': True,
+                'html': html_output
+            })
+        except Exception as e:
+            logger.error('[mdeditor] Preview failed', exc_info=True)
+            return JsonResponse({
+                'success': False,
+                'error': 'Failed to render preview'
+            }, status=500)

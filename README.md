@@ -11,7 +11,7 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Current Version
 
-- 0.3.2.2
+- 0.3.3
 
 ## Compatibility
 
@@ -24,12 +24,17 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
-### Latest: v0.3.2.2 (2026-04-29)
-**Improvement: Superuser-only soft-delete; duplicate action; expanded i18n coverage from django-unfold.**
-- **Fixed**: Soft-delete action now restricted to superusers only in `ModelAdmin.get_actions()`.
-- **Added**: `duplicate_objects` bulk action auto-injected for superusers across all `ModelAdmin` subclasses.
-- **Added**: `makemessages.sh` extracts translatable strings from `django-unfold` via temporary symlink.
-- **Improved**: Vietnamese translation expanded to cover unfold core UI strings.
+### Latest: v0.3.3 (2026-04-29)
+**Feature: Markdown Editor for Admin, File Permissions, and API Preview**
+- **Added**: Markdown editor widget for Django Admin (`MarkdownEditorWidget`), with live preview modal and Tailwind-styled HTML rendering using `md2html-tailwind4`.
+- **Added**: `/md-preview/` API endpoint for secure, authenticated Markdown-to-HTML preview in admin forms.
+- **Added**: JavaScript and template assets for Markdown editing and preview, including modal UX and 1MB content limit.
+- **Improved**: File management admin now restricts file visibility—users only see files they created; superusers see all files.
+- **Changed**: `BaseFile.delete()` renamed to `hard_delete()` for clarity and safety in file removal logic.
+- **Compatibility**: No breaking changes for existing data/models; new widget is opt-in via `text_field_widget = 'mdeditor'`.
+- **Validation**: Full build, migrations, and manual admin UI/UX validation performed. Markdown preview tested for XSS safety and large input handling.
+- **Upgrade Guidance**: No manual migration required. To enable Markdown editing, set `text_field_widget = 'mdeditor'` in your `ModelAdmin`.
+- **Rollback**: Safe to revert to v0.3.2.2; no schema changes introduced.
 
 ## Installation
 
@@ -178,17 +183,20 @@ python manage.py runserver
 
 Access the admin at: http://127.0.0.1:8000/admin/
 
-## Building the Package
+## Building and Releasing the Package
 
-```bash
-uv build
-```
-
-Or use the all-in-one build script:
+To build the package (including Tailwind assets, migrations, and Python wheel):
 
 ```bash
 bash scripts/build.sh
 ```
+
+This script will:
+- Build Tailwind CSS assets
+- Run Django migrations
+- Build the Python package using `uv build`
+
+For a full release (with version bump, git tag, and release notes), follow the interactive prompts in `scripts/build.sh` or use the skill-driven workflow.
 
 ## Rate Limiting
 

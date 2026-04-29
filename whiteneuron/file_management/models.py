@@ -101,9 +101,9 @@ class BaseFile(BaseModel):
     class Meta:
         abstract = True
 
-    def delete(self, *args, **kwargs):
+    def hard_delete(self, *args, **kwargs):
         self.file.delete(save=False)
-        super().delete(*args, **kwargs)
+        super().hard_delete(*args, **kwargs)
 
 class ExcelFile(BaseFile):
     file = models.FileField(upload_to='excels')

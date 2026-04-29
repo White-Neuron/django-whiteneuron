@@ -150,6 +150,14 @@ class BaseFileAdmin(ModelAdmin):
         )
     verified_download.short_description = _('Verified Download')
 
+    # file nào do ai tạo thì mới thấy, admin xem tất
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(created_by=request.user)
+
+@admin.register(ExcelFile, site=base_admin_site)
 
 @admin.register(ExcelFile, site=base_admin_site)
 class ExcelFileAdmin(BaseFileAdmin):

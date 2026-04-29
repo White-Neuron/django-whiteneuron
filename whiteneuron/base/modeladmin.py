@@ -13,7 +13,7 @@ import ast
 from django.urls import reverse, reverse_lazy
 
 from unfold.contrib.forms.widgets import WysiwygWidget as UnfoldWysiwygWidget
-from whiteneuron.base.widgets import WysiwygWidget, CKEditor5Widget
+from whiteneuron.base.widgets import WysiwygWidget, CKEditor5Widget, MarkdownEditorWidget
 from unfold.widgets import UnfoldAdminSplitDateTimeWidget
 from django.db import models
 
@@ -85,7 +85,7 @@ class ModelAdmin(UnfoldAdmin):
         },
     }
 
-    text_field_widget= 'wysiwyg' # options: 'wysiwyg', 'ckeditor', ''
+    text_field_widget= 'wysiwyg' # options: 'wysiwyg', 'ckeditor', 'mdeditor', ''
 
     enable_field_selection_filter = True
     list_filter_submit = True
@@ -106,6 +106,8 @@ class ModelAdmin(UnfoldAdmin):
         if self.text_field_widget == 'ckeditor':
             self.formfield_overrides[models.TextField]["widget"]= CKEditor5Widget(
                     attrs={"class": "django_ckeditor_5"})
+        elif self.text_field_widget == 'mdeditor':
+            self.formfield_overrides[models.TextField]["widget"]= MarkdownEditorWidget()
         elif self.text_field_widget == '':
             self.formfield_overrides[models.TextField] = {}
 

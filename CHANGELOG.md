@@ -1,5 +1,17 @@
 # Changelog
 
+### v0.3.3 (2026-04-29)
+**Feature: Markdown Editor for Admin, File Permissions, and API Preview**
+- **Added**: Markdown editor widget for Django Admin (`MarkdownEditorWidget`), with live preview modal and Tailwind-styled HTML rendering using `md2html-tailwind4`.
+- **Added**: `/md-preview/` API endpoint for secure, authenticated Markdown-to-HTML preview in admin forms.
+- **Added**: JavaScript and template assets for Markdown editing and preview, including modal UX and 1MB content limit.
+- **Improved**: File management admin now restricts file visibility—users only see files they created; superusers see all files.
+- **Changed**: `BaseFile.delete()` renamed to `hard_delete()` for clarity and safety in file removal logic.
+- **Compatibility**: No breaking changes for existing data/models; new widget is opt-in via `text_field_widget = 'mdeditor'`.
+- **Validation**: Full build, migrations, and manual admin UI/UX validation performed. Markdown preview tested for XSS safety and large input handling.
+- **Upgrade Guidance**: No manual migration required. To enable Markdown editing, set `text_field_widget = 'mdeditor'` in your `ModelAdmin`.
+- **Rollback**: Safe to revert to v0.3.2.2; no schema changes introduced.
+
 ### v0.3.2.2 (2026-04-29) — latest
 **Improvement: Superuser-only soft-delete; duplicate action; expanded i18n coverage from django-unfold**
 - **Fixed**: `ModelAdmin.get_actions()` — soft-delete (`delete_selected`) is now restricted to superusers only; regular staff no longer see a delete action that could silently soft-delete records they didn't expect to change.
