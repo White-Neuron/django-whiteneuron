@@ -157,7 +157,6 @@ class BaseFileAdmin(ModelAdmin):
             return qs
         return qs.filter(created_by=request.user)
 
-@admin.register(ExcelFile, site=base_admin_site)
 
 @admin.register(ExcelFile, site=base_admin_site)
 class ExcelFileAdmin(BaseFileAdmin):
