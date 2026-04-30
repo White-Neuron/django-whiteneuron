@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-29 10:24+0700\n"
+"POT-Creation-Date: 2026-04-30 11:34+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,11 +17,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: _unfold_src/admin.py:45 _unfold_src/templatetags/unfold_list.py:356
+#: _unfold_src/admin.py:44 _unfold_src/templatetags/unfold_list.py:357
 msgid "Select record"
 msgstr "Chọn bản ghi"
 
-#: _unfold_src/admin.py:205
+#: _unfold_src/admin.py:204
 msgid "Select action"
 msgstr "Chọn hành động"
 
@@ -56,7 +56,13 @@ msgstr "Mặc định"
 msgid "Code"
 msgstr "Mã"
 
-#: _unfold_src/contrib/constance/templates/admin/constance/includes/results_list.html:65
+#: _unfold_src/contrib/constance/templates/admin/constance/includes/results_list.html:40
+#, fuzzy
+#| msgid "Current hash (live)"
+msgid "Current file"
+msgstr "Hash hiện tại (thực tế)"
+
+#: _unfold_src/contrib/constance/templates/admin/constance/includes/results_list.html:71
 msgid "Reset to default"
 msgstr "Đặt lại về mặc định"
 
@@ -260,7 +266,7 @@ msgstr "Hành động"
 
 #: _unfold_src/contrib/guardian/templates/unfold/guardian/group_form.html:51
 #: _unfold_src/contrib/guardian/templates/unfold/guardian/user_form.html:51
-#: base/modeladmin.py:383
+#: base/modeladmin.py:392
 msgid "Edit"
 msgstr "Sửa"
 
@@ -275,6 +281,10 @@ msgstr "Quyền người dùng"
 #: _unfold_src/contrib/guardian/templates/unfold/guardian/user_form.html:68
 msgid "Manage user"
 msgstr "Quản lý người dùng"
+
+#: _unfold_src/contrib/import_export/forms.py:30
+msgid "Select format"
+msgstr "Chọn định dạng"
 
 #: _unfold_src/contrib/import_export/templates/admin/import_export/change_form.html:9
 #: _unfold_src/contrib/import_export/templates/admin/import_export/change_list_export_item.html:4
@@ -300,12 +310,13 @@ msgstr[0] ""
 "                    Xuất %(len)s mục đã chọn.\n"
 "                "
 
-#: _unfold_src/contrib/import_export/templates/admin/import_export/export.html:36
+#: _unfold_src/contrib/import_export/templates/admin/import_export/export.html:52
 msgid "This exporter will export the following fields"
 msgstr "Nhà xuất sẽ xuất các trường sau"
 
-#: _unfold_src/contrib/import_export/templates/admin/import_export/export.html:77
-#: _unfold_src/contrib/import_export/templates/admin/import_export/import_form.html:21
+#: _unfold_src/contrib/import_export/templates/admin/import_export/export.html:83
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_form.html:24
+#: _unfold_src/templates/unfold/helpers/dialog.html:52
 msgid "Submit"
 msgstr "Gửi"
 
@@ -317,40 +328,44 @@ msgstr ""
 "Dưới đây là bản xem trước của dữ liệu sẽ được nhập. Nếu bạn hài lòng với kết "
 "quả, hãy nhấp vào 'Xác nhận nhập'"
 
-#: _unfold_src/contrib/import_export/templates/admin/import_export/import_confirm.html:15
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_confirm.html:12
 msgid "Confirm import"
 msgstr "Xác nhận nhập"
 
-#: _unfold_src/contrib/import_export/templates/admin/import_export/import_errors.html:20
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_errors.html:21
 msgid "Line number"
 msgstr "Số dòng"
+
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_errors.html:26
+msgid "View traceback"
+msgstr "Xem traceback"
 
 #: _unfold_src/contrib/import_export/templates/admin/import_export/import_preview.html:22
 #: base/models.py:434 base/models.py:474
 msgid "New"
 msgstr "Mới"
 
-#: _unfold_src/contrib/import_export/templates/admin/import_export/import_preview.html:24
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_preview.html:25
 msgid "Skipped"
 msgstr "Đã bỏ qua"
 
-#: _unfold_src/contrib/import_export/templates/admin/import_export/import_preview.html:26
-#: _unfold_src/templates/admin/submit_line.html:62 base/modeladmin.py:391
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_preview.html:28
+#: _unfold_src/templates/admin/submit_line.html:62 base/modeladmin.py:400
 #: templates/admin/wn_history_panel.html:74
 msgid "Delete"
 msgstr "Xóa"
 
-#: _unfold_src/contrib/import_export/templates/admin/import_export/import_preview.html:28
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_preview.html:31
 #: base/models.py:458 base/models.py:579
 #: templates/admin/wn_history_panel.html:74
 msgid "Update"
 msgstr "Cập nhật"
 
-#: _unfold_src/contrib/import_export/templates/admin/import_export/import_validation.html:6
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_validation.html:5
 msgid "Some rows failed to validate"
 msgstr "Một số hàng không hợp lệ"
 
-#: _unfold_src/contrib/import_export/templates/admin/import_export/import_validation.html:10
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_validation.html:5
 msgid ""
 "Please correct these errors in your data where possible, then reupload it "
 "using the form above."
@@ -358,17 +373,12 @@ msgstr ""
 "Hãy sửa các lỗi này trong dữ liệu của bạn càng tốt, sau đó tải lại lên dùng "
 "biểu mẫu ở trên."
 
-#: _unfold_src/contrib/import_export/templates/admin/import_export/import_validation.html:22
-#: _unfold_src/contrib/import_export/templates/admin/import_export/import_validation.html:40
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_validation.html:16
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_validation.html:69
 msgid "Row"
 msgstr "Hàng"
 
-#: _unfold_src/contrib/import_export/templates/admin/import_export/import_validation.html:26
-#: _unfold_src/contrib/import_export/templates/admin/import_export/import_validation.html:44
-msgid "Errors"
-msgstr "Lỗi"
-
-#: _unfold_src/contrib/import_export/templates/admin/import_export/import_validation.html:70
+#: _unfold_src/contrib/import_export/templates/admin/import_export/import_validation.html:53
 msgid "Non field specific"
 msgstr "Không cụ thể theo trường"
 
@@ -471,11 +481,11 @@ msgstr "Lịch sử thay đổi"
 msgid "Close"
 msgstr "Đóng"
 
-#: _unfold_src/forms.py:72
+#: _unfold_src/forms.py:73
 msgid "Select action to run"
 msgstr "Chọn hành động để thực hiện"
 
-#: _unfold_src/forms.py:133
+#: _unfold_src/forms.py:134
 #, python-brace-format
 msgid ""
 "Raw passwords are not stored, so there is no way to see this user’s "
@@ -549,7 +559,7 @@ msgid "Models in the %(name)s application"
 msgstr "Các mô hình trong ứng dụng %(name)s"
 
 #: _unfold_src/templates/admin/app_list.html:48
-#: _unfold_src/templates/unfold/helpers/app_list.html:91
+#: _unfold_src/templates/unfold/helpers/app_list.html:55
 #: _unfold_src/templates/unfold/helpers/app_list_default.html:59
 msgid "You don’t have permission to view or edit anything."
 msgstr "Bạn không có quyền xem hoặc chỉnh sửa bất kỳ thứ gì."
@@ -760,7 +770,7 @@ msgstr "Chọn hành động"
 msgid "Add %(name)s"
 msgstr "Thêm %(name)s"
 
-#: _unfold_src/templates/unfold/helpers/app_list.html:60
+#: _unfold_src/templates/unfold/helpers/app_list_all.html:11
 msgid "All applications"
 msgstr "Tất cả ứng dụng"
 
@@ -770,7 +780,7 @@ msgstr "Thêm hàng"
 
 #: _unfold_src/templates/unfold/helpers/app_list_default.html:38
 #: _unfold_src/templates/unfold/helpers/edit_inline/inline_links.html:17
-#: base/modeladmin.py:386
+#: base/modeladmin.py:395
 msgid "View"
 msgstr "Xem"
 
@@ -841,6 +851,7 @@ msgid "Loading more results..."
 msgstr "Đang tải thêm kết quả..."
 
 #: _unfold_src/templates/unfold/helpers/command_results.html:62
+#, python-format
 msgid ""
 "\n"
 "                Found %(counter)s result in %(time)s seconds\n"
@@ -861,6 +872,12 @@ msgstr "Không, đưa tôi trở lại"
 #: _unfold_src/templates/unfold/helpers/delete_submit_line.html:9
 msgid "Yes, I’m sure"
 msgstr "Có, tôi chắc chắn"
+
+#: _unfold_src/templates/unfold/helpers/dialog.html:41
+#: templates/admin/feedbacks/feedback_change_form.html:19
+#: templates/admin/submit_line.html:22
+msgid "Cancel"
+msgstr "Hủy bỏ"
 
 #: _unfold_src/templates/unfold/helpers/display_header.html:10
 msgid "Record picture"
@@ -1030,11 +1047,11 @@ msgstr "Xóa %(model)s đã chọn"
 msgid "Add row"
 msgstr "Thêm hàng"
 
-#: _unfold_src/templatetags/unfold.py:796
+#: _unfold_src/templatetags/unfold.py:797
 msgid "Welcome"
 msgstr "Chào mừng"
 
-#: _unfold_src/templatetags/unfold_list.py:128
+#: _unfold_src/templatetags/unfold_list.py:129
 msgid "Select all objects on this page for an action"
 msgstr "Chọn tất cả các đối tượng trên trang này để thực hiện hành động"
 
@@ -1128,8 +1145,8 @@ msgstr "Chặn địa chỉ IP"
 msgid ", "
 msgstr ", "
 
-#: base/admin.py:501 base/admin.py:564 base/admin.py:611 base/modeladmin.py:363
-#: file_management/admin.py:71
+#: base/admin.py:501 base/admin.py:564 base/admin.py:611 base/modeladmin.py:372
+#: file_management/admin.py:72
 msgid "Meta"
 msgstr "Meta"
 
@@ -1225,35 +1242,35 @@ msgstr ""
 msgid "Search by {fields}"
 msgstr "Tìm kiếm theo {fields}"
 
-#: base/modeladmin.py:162 base/modeladmin.py:163 base/modeladmin.py:212
-#: base/modeladmin.py:213
+#: base/modeladmin.py:171 base/modeladmin.py:172 base/modeladmin.py:221
+#: base/modeladmin.py:222
 #, python-format
 msgid "%(name)s \"%(obj)s\" has been soft-deleted by user \"%(user)s\""
 msgstr "%(name)s \"%(obj)s\" đã được xóa mềm bởi người dùng \"%(user)s\""
 
-#: base/modeladmin.py:172
+#: base/modeladmin.py:181
 msgid "Delete selected records"
 msgstr "Xóa các bản ghi đã chọn"
 
-#: base/modeladmin.py:176 base/modeladmin.py:177
+#: base/modeladmin.py:185 base/modeladmin.py:186
 #, python-format
 msgid "%(name)s \"%(obj)s\" has been hard-deleted by user \"%(user)s\""
 msgstr "%(name)s \"%(obj)s\" đã được xóa cứng bởi người dùng \"%(user)s\""
 
-#: base/modeladmin.py:189
+#: base/modeladmin.py:198
 msgid "Hard delete selected records"
 msgstr "Xóa cứng các bản ghi đã chọn"
 
-#: base/modeladmin.py:193 base/modeladmin.py:194
+#: base/modeladmin.py:202 base/modeladmin.py:203
 #, python-format
 msgid "%(name)s \"%(obj)s\" has been restored by user \"%(user)s\""
 msgstr "%(name)s \"%(obj)s\" đã được khôi phục bởi người dùng \"%(user)s\""
 
-#: base/modeladmin.py:203
+#: base/modeladmin.py:212
 msgid "Restore selected records"
 msgstr "Khôi phục các bản ghi đã chọn"
 
-#: base/modeladmin.py:519
+#: base/modeladmin.py:528
 msgid "Duplicate selected objects"
 msgstr "Nhân bản các đối tượng đã chọn"
 
@@ -1979,40 +1996,40 @@ msgstr "Định dạng JSON không hợp lệ"
 msgid "An unexpected error occurred. Please try again."
 msgstr "Đã xảy ra lỗi không mong muốn. Vui lòng thử lại."
 
-#: file_management/admin.py:64
+#: file_management/admin.py:65
 msgid "General Information"
 msgstr "Thông tin chung"
 
-#: file_management/admin.py:81
+#: file_management/admin.py:82
 msgid "Cannot read file"
 msgstr "Không đọc được file"
 
-#: file_management/admin.py:84
+#: file_management/admin.py:85
 msgid "File has been modified"
 msgstr "File bị thay đổi"
 
-#: file_management/admin.py:85
+#: file_management/admin.py:86
 msgid "Integrity"
 msgstr "Toàn vẹn"
 
-#: file_management/admin.py:94
+#: file_management/admin.py:95
 msgid "Stored hash"
 msgstr "Hash lưu trữ"
 
-#: file_management/admin.py:101
+#: file_management/admin.py:102
 msgid "Cannot read file from storage"
 msgstr "Không đọc được file từ storage"
 
-#: file_management/admin.py:107
+#: file_management/admin.py:108
 msgid "Current hash (live)"
 msgstr "Hash hiện tại (thực tế)"
 
-#: file_management/admin.py:114
+#: file_management/admin.py:115
 msgid "Cannot read the file from storage. It may have been deleted externally."
 msgstr ""
 "Không đọc được file từ storage. File có thể đã bị xóa bên ngoài hệ thống."
 
-#: file_management/admin.py:118
+#: file_management/admin.py:119
 msgid ""
 "File integrity check failed: the file on storage does not match its stored "
 "hash. It may have been tampered with or corrupted."
@@ -2020,21 +2037,25 @@ msgstr ""
 "Kiểm tra toàn vẹn thất bại: file trên storage không khớp với hash đã lưu. "
 "File có thể đã bị thay đổi hoặc bị hỏng."
 
-#: file_management/admin.py:134
+#: file_management/admin.py:135
 msgid "File missing"
 msgstr "File không tồn tại"
 
-#: file_management/admin.py:142
+#: file_management/admin.py:143
 msgid "Tampered — download blocked"
 msgstr "File bị thay đổi — không thể tải"
 
-#: file_management/admin.py:149
+#: file_management/admin.py:150
 msgid "Download (Verified)"
 msgstr "Tải xuống (đã xác thực)"
 
-#: file_management/admin.py:151
+#: file_management/admin.py:152
 msgid "Verified Download"
 msgstr "Tải xuống (đã xác thực)"
+
+#: file_management/models.py:34 notification/admin.py:248
+msgid "Title"
+msgstr "Tiêu đề"
 
 #: file_management/models.py:37 file_management/models.py:51
 msgid "Done"
@@ -2056,11 +2077,11 @@ msgstr "Tự động"
 msgid "Hash"
 msgstr "Hash"
 
-#: file_management/models.py:113
+#: file_management/models.py:109 file_management/models.py:113
 msgid "Excel File"
 msgstr "Tệp Excel"
 
-#: file_management/models.py:120
+#: file_management/models.py:117 file_management/models.py:120
 msgid "PDF File"
 msgstr "Tệp PDF"
 
@@ -2099,10 +2120,6 @@ msgstr "Cờ"
 #: notification/admin.py:236
 msgid "by"
 msgstr "bởi"
-
-#: notification/admin.py:248
-msgid "Title"
-msgstr "Tiêu đề"
 
 #: notification/admin.py:291
 msgid "No changes"
@@ -2310,11 +2327,6 @@ msgstr "Nhập một ghi chú tùy chọn cho việc giải quyết này:"
 msgid "Note (optional)"
 msgstr "Ghi chú (tùy chọn)"
 
-#: templates/admin/feedbacks/feedback_change_form.html:19
-#: templates/admin/submit_line.html:22
-msgid "Cancel"
-msgstr "Hủy bỏ"
-
 #: templates/admin/feedbacks/feedback_change_form.html:20
 msgid "Confirm"
 msgstr "Xác nhận"
@@ -2405,6 +2417,9 @@ msgstr "Biên soạn HTML"
 #: templates/unfold/helpers/account_links.html:13
 msgid "User profile"
 msgstr "Hồ sơ người dùng"
+
+#~ msgid "Errors"
+#~ msgstr "Lỗi"
 
 #, python-brace-format
 #~ msgid ""

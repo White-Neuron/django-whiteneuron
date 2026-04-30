@@ -529,8 +529,12 @@ class ModelAdmin(UnfoldAdmin):
     def duplicate_objects(self, request, queryset):
         for obj in queryset:
             obj.pk = None  # This will create a new object when saved
-            obj.name = f"{obj.name} (Copy)"
-            obj.save()
+            # obj.name = f"{obj.name} (Copy)"
+            try:
+                obj.save()
+            except Exception as e:
+                self.message_user(request, _(f'Error duplicating object: {e}'), level='error')
+                continue
 
         message = _(f'{queryset.count()} object(s) duplicated successfully.')
         self.message_user(request, message)

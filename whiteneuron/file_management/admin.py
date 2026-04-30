@@ -2,6 +2,7 @@ from whiteneuron.base.admin import base_admin_site, ModelAdmin
 from django.contrib import admin, messages
 from django.urls import reverse
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from unfold.widgets import UnfoldAdminFileFieldWidget
 
@@ -75,18 +76,18 @@ class BaseFileAdmin(ModelAdmin):
 
     def integrity_status(self, obj):
         if not obj.pk or not obj.hash:
-            return format_html('<span style="color: #aaa;">—</span>')
+            return mark_safe('<span style="color: #aaa;">—</span>')
         current = self._get_current_hash(obj)
         if current is None:
             return format_html('<span style="color: #dd4b39;">⚠ {}</span>', _('Cannot read file'))
         if current == obj.hash:
-            return format_html('<span style="color: #00a65a; font-weight: bold;">✓ OK</span>')
+            return mark_safe('<span style="color: #00a65a; font-weight: bold;">✓ OK</span>')
         return format_html('<span style="color: #dd4b39; font-weight: bold;">✗ {}</span>', _('File has been modified'))
     integrity_status.short_description = _('Integrity')
 
     def hash_display(self, obj):
         if not obj.pk or not obj.hash:
-            return format_html('<span style="color: #aaa;">—</span>')
+            return mark_safe('<span style="color: #aaa;">—</span>')
         return format_html(
             '<code style="font-family: monospace; font-size: 0.85em; word-break: break-all;">{}</code>',
             obj.hash
@@ -95,7 +96,7 @@ class BaseFileAdmin(ModelAdmin):
 
     def current_hash_display(self, obj):
         if not obj.pk or not obj.file or not obj.file.name:
-            return format_html('<span style="color: #aaa;">—</span>')
+            return mark_safe('<span style="color: #aaa;">—</span>')
         current = self._get_current_hash(obj)
         if current is None:
             return format_html('<span style="color: #dd4b39;">⚠ {}</span>', _('Cannot read file from storage'))
@@ -122,7 +123,7 @@ class BaseFileAdmin(ModelAdmin):
 
     def verified_download(self, obj):
         if not obj.pk or not self.file_type:
-            return format_html('<span style="color: #aaa;">—</span>')
+            return mark_safe('<span style="color: #aaa;">—</span>')
         url = reverse('file_management_download', kwargs={'file_type': self.file_type, 'pk': obj.pk})
         current = self._get_current_hash(obj)
         if current is None:

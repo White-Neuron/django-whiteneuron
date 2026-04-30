@@ -31,7 +31,7 @@ def compute_file_hash(file_field):
     return sha256.hexdigest()
 
 class BaseFile(BaseModel):
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, verbose_name=_('Title'))
     description = models.TextField(blank=True, null=True, verbose_name=_('Description'))
     status = models.CharField(max_length=25, choices=(('pending', _('Pending')),
                                                       ('done', _('Done')),
@@ -106,7 +106,7 @@ class BaseFile(BaseModel):
         super().hard_delete(*args, **kwargs)
 
 class ExcelFile(BaseFile):
-    file = models.FileField(upload_to='excels')
+    file = models.FileField(upload_to='excels', verbose_name=_('Excel File'))
 
 
     class Meta:
@@ -114,7 +114,7 @@ class ExcelFile(BaseFile):
         verbose_name_plural = _('Excel Files')
 
 class PDFFile(BaseFile):
-    file = models.FileField(upload_to='pdfs')
+    file = models.FileField(upload_to='pdfs', verbose_name=_('PDF File'))
 
     class Meta:
         verbose_name = _('PDF File')

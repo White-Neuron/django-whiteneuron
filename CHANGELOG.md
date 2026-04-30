@@ -1,5 +1,14 @@
 # Changelog
 
+### v0.3.3.3 (2026-04-30)
+**Patch release: Minor bugfixes and improvements after v0.3.3 series**
+- **Fixed**: Minor bugs and regressions reported after v0.3.3.1
+- **Improved**: Code quality, admin UX, and file management reliability
+- **Validation**: Build, migrations, and manual admin UI/UX validation performed
+- **Compatibility**: No breaking changes; safe for all v0.3.3.x users
+- **Upgrade Guidance**: No manual migration required; upgrade recommended for all users on v0.3.3.x
+- **Rollback**: Safe to revert to v0.3.3.1 or v0.3.3; no schema changes introduced
+
 ### v0.3.3 (2026-04-29)
 **Feature: Markdown Editor for Admin, File Permissions, and API Preview**
 - **Added**: Markdown editor widget for Django Admin (`MarkdownEditorWidget`), with live preview modal and Tailwind-styled HTML rendering using `md2html-tailwind4`.
