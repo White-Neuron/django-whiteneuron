@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-30 11:34+0700\n"
+"POT-Creation-Date: 2026-04-30 12:41+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -260,7 +260,6 @@ msgstr "Quyền nhóm"
 #: _unfold_src/contrib/guardian/templates/unfold/guardian/user_form.html:49
 #: _unfold_src/templates/admin/object_history.html:18
 #: _unfold_src/templates/admin/object_history.html:34 notification/admin.py:154
-#: synchronization/models.py:14
 msgid "Action"
 msgstr "Hành động"
 
@@ -1387,7 +1386,7 @@ msgstr "Dữ liệu"
 msgid "Status code"
 msgstr "Mã trạng thái"
 
-#: base/models.py:187 base/models.py:210 synchronization/models.py:20
+#: base/models.py:187 base/models.py:210
 msgid "Timestamp"
 msgstr "Thời gian"
 
@@ -1590,7 +1589,7 @@ msgid "Failed"
 msgstr "Thất bại"
 
 #: base/models.py:859 feedbacks/admin.py:36 file_management/models.py:39
-#: file_management/models.py:59 synchronization/models.py:19
+#: file_management/models.py:59
 msgid "Status"
 msgstr "Trạng thái"
 
@@ -2260,34 +2259,6 @@ msgstr "thông báo"
 msgid "notifications"
 msgstr "thông báo"
 
-#: synchronization/models.py:14
-msgid "The synchronization action performed"
-msgstr "Hành động đồng bộ hóa"
-
-#: synchronization/models.py:19
-msgid "The status of the synchronization action"
-msgstr "Trạng thái hành động đồng bộ hóa"
-
-#: synchronization/models.py:20
-msgid "The time when the action was performed"
-msgstr "Thời gian hành động được thực hiện"
-
-#: synchronization/models.py:21
-msgid "Details"
-msgstr "Chi tiết"
-
-#: synchronization/models.py:21
-msgid "Additional details about the synchronization action"
-msgstr "Chi tiết hành động đồng bộ hóa"
-
-#: synchronization/models.py:27
-msgid "Synchronization Log"
-msgstr "Log đồng bộ hóa"
-
-#: synchronization/models.py:28
-msgid "Synchronization Logs"
-msgstr "Log đồng bộ hóa"
-
 #: templates/admin/base/app_change_list.html:25
 msgid "Category view"
 msgstr "Chế độ xem theo danh mục"
@@ -2417,6 +2388,27 @@ msgstr "Biên soạn HTML"
 #: templates/unfold/helpers/account_links.html:13
 msgid "User profile"
 msgstr "Hồ sơ người dùng"
+
+#~ msgid "The synchronization action performed"
+#~ msgstr "Hành động đồng bộ hóa"
+
+#~ msgid "The status of the synchronization action"
+#~ msgstr "Trạng thái hành động đồng bộ hóa"
+
+#~ msgid "The time when the action was performed"
+#~ msgstr "Thời gian hành động được thực hiện"
+
+#~ msgid "Details"
+#~ msgstr "Chi tiết"
+
+#~ msgid "Additional details about the synchronization action"
+#~ msgstr "Chi tiết hành động đồng bộ hóa"
+
+#~ msgid "Synchronization Log"
+#~ msgstr "Log đồng bộ hóa"
+
+#~ msgid "Synchronization Logs"
+#~ msgstr "Log đồng bộ hóa"
 
 #~ msgid "Errors"
 #~ msgstr "Lỗi"

@@ -1,5 +1,15 @@
 # Changelog
 
+### v0.3.3.4 (2026-04-30) — latest
+**Patch release: Remove synchronization module, add language switcher template, update Vietnamese i18n**
+- **Removed**: `synchronization/` module — cleaned up unused sync models, admin, views, tests, and migrations
+- **Added**: Language switcher template for Unfold admin (`language_switch.html`) with multi-language support via `show_languages` context variable
+- **Improved**: Vietnamese translations updated — removed stale synchronization references, added new entries for user profile and HTML editor
+- **Validation**: Build, migrations (no changes), and manual admin UI/UX validation performed
+- **Compatibility**: No breaking changes; safe for all v0.3.3.x users
+- **Upgrade Guidance**: No manual migration required; upgrade recommended for all users on v0.3.3.x
+- **Rollback**: Safe to revert to v0.3.3.3; no schema changes introduced
+
 ### v0.3.3.3 (2026-04-30)
 **Patch release: Minor bugfixes and improvements after v0.3.3 series**
 - **Fixed**: Minor bugs and regressions reported after v0.3.3.1
@@ -21,7 +31,7 @@
 - **Upgrade Guidance**: No manual migration required. To enable Markdown editing, set `text_field_widget = 'mdeditor'` in your `ModelAdmin`.
 - **Rollback**: Safe to revert to v0.3.2.2; no schema changes introduced.
 
-### v0.3.2.2 (2026-04-29) — latest
+### v0.3.2.2 (2026-04-29)
 **Improvement: Superuser-only soft-delete; duplicate action; expanded i18n coverage from django-unfold**
 - **Fixed**: `ModelAdmin.get_actions()` — soft-delete (`delete_selected`) is now restricted to superusers only; regular staff no longer see a delete action that could silently soft-delete records they didn't expect to change.
 - **Added**: `duplicate_objects` bulk action automatically injected into all `ModelAdmin` subclasses for superusers — creates a copy of selected objects with ` (Copy)` appended to `name`; requires `add` permission.

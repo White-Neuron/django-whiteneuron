@@ -11,7 +11,7 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 ## Current Version
 
-- 0.3.3
+- 0.3.3.4
 
 ## Compatibility
 
@@ -24,17 +24,15 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
-### Latest: v0.3.3 (2026-04-29)
-**Feature: Markdown Editor for Admin, File Permissions, and API Preview**
-- **Added**: Markdown editor widget for Django Admin (`MarkdownEditorWidget`), with live preview modal and Tailwind-styled HTML rendering using `md2html-tailwind4`.
-- **Added**: `/md-preview/` API endpoint for secure, authenticated Markdown-to-HTML preview in admin forms.
-- **Added**: JavaScript and template assets for Markdown editing and preview, including modal UX and 1MB content limit.
-- **Improved**: File management admin now restricts file visibility—users only see files they created; superusers see all files.
-- **Changed**: `BaseFile.delete()` renamed to `hard_delete()` for clarity and safety in file removal logic.
-- **Compatibility**: No breaking changes for existing data/models; new widget is opt-in via `text_field_widget = 'mdeditor'`.
-- **Validation**: Full build, migrations, and manual admin UI/UX validation performed. Markdown preview tested for XSS safety and large input handling.
-- **Upgrade Guidance**: No manual migration required. To enable Markdown editing, set `text_field_widget = 'mdeditor'` in your `ModelAdmin`.
-- **Rollback**: Safe to revert to v0.3.2.2; no schema changes introduced.
+### Latest: v0.3.3.4 (2026-04-30)
+**Patch release: Remove synchronization module, add language switcher template, update Vietnamese i18n**
+- **Removed**: `synchronization/` module — cleaned up unused sync models, admin, views, tests, and migrations
+- **Added**: Language switcher template for Unfold admin (`language_switch.html`) with multi-language support via `show_languages` context variable
+- **Improved**: Vietnamese translations updated — removed stale synchronization references, added new entries for user profile and HTML editor
+- **Compatibility**: No breaking changes; safe for all v0.3.3.x users
+- **Validation**: Build, migrations (no changes), and manual admin UI/UX validation performed
+- **Upgrade Guidance**: No manual migration required; upgrade recommended for all users on v0.3.3.x
+- **Rollback**: Safe to revert to v0.3.3.3; no schema changes introduced
 
 ## Installation
 
