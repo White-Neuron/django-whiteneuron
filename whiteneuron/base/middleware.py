@@ -247,6 +247,7 @@ class UserActivityMiddleware:
         from django.conf import settings
         self.user_rate = getattr(settings, 'USER_RATE_LIMIT_REQUESTS', 200)
         self.user_window = getattr(settings, 'USER_RATE_LIMIT_WINDOW', 60)
+        self._MAX_BODY_SIZE = 1024 * 1024  # 1MB
 
     def do_not_track(self, request):
         for path, condition in self.exclude_paths:
@@ -294,7 +295,25 @@ class UserActivityMiddleware:
                 response['Retry-After'] = str(self.user_window)
                 return response
 
+        # Đọc body sớm cho JSON requests (trước khi DRF consume)
+        if request.method in ('POST', 'PATCH', 'PUT', 'DELETE') and 'application/json' in request.META.get('CONTENT_TYPE', ''):
+            try:
+                raw_body = request.body
+                if len(raw_body) <= self._MAX_BODY_SIZE:
+                    request._raw_body = raw_body.decode('utf-8')
+            except Exception:
+                pass
+
         response = self._get_response(request)
+
+        # Parse cached body thành dict cho logging (sau khi DRF đã consume request stream)
+        if hasattr(request, '_raw_body'):
+            try:
+                body_data = json.loads(request._raw_body)
+                if isinstance(body_data, dict):
+                    request._visit_data = self._sanitize_post(body_data)
+            except (json.JSONDecodeError, ValueError):
+                pass
 
         if skip:
             return response
@@ -306,6 +325,11 @@ class UserActivityMiddleware:
         if not ip:
             return response
 
+        # Lấy data đã parse từ body (nếu có), fallback về _get_request_data
+        log_data = getattr(request, '_visit_data', None)
+        if log_data is None:
+            log_data = self._get_request_data(request)
+
         if request.user.is_authenticated:
             profile, created = self._get_or_create_visit_profile(ip, user_agent)
             if not created:
@@ -315,7 +339,7 @@ class UserActivityMiddleware:
                 profile=profile,
                 path=request.path,
                 method=request.method,
-                data=self._get_request_data(request),
+                data=log_data,
                 status_code=response.status_code,
                 timestamp=timezone.now(),
                 timelapse=timelapse,
@@ -328,7 +352,7 @@ class UserActivityMiddleware:
                 profile=profile,
                 path=request.path,
                 method=request.method,
-                data=self._get_request_data(request),
+                data=log_data,
                 status_code=response.status_code,
                 timestamp=timezone.now(),
                 timelapse=timelapse,
@@ -353,13 +377,15 @@ class UserActivityMiddleware:
     def _get_request_data(self, request):
         if request.method == 'POST' and request.POST:
             return self._sanitize_post(request.POST.dict())
-        if request.body:
-            try:
-                body = json.loads(request.body)
+        # JSON body đã được cache trong __call__, chỉ fallback khi cần
+        try:
+            raw = getattr(request, '_raw_body', None) or (request.body.decode('utf-8') if request.body else None)
+            if raw:
+                body = json.loads(raw)
                 if isinstance(body, dict):
                     return self._sanitize_post(body)
-            except (json.JSONDecodeError, ValueError):
-                pass
+        except Exception:
+            pass
         return {}
 
     _SENSITIVE_FIELDS = frozenset({

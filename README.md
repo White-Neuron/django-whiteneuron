@@ -10,17 +10,16 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-
-- 0.3.3.4
-
-## Compatibility
-
-- Python >= 3.11
-- Django >= 5.2.13
-- django-unfold >= 0.89.0
-- Tailwind CSS 4.x + daisyUI 5.x (for the bundled frontend styles)
+v0.3.4
 
 ## Changelog
+### Latest: v0.3.4 (2026-05-01)
+- **Improved**: `UserActivityMiddleware` now captures JSON request payloads (POST/PATCH/PUT/DELETE) with full sensitive-field sanitization, resolving issues where API activity was not being logged.
+- **Improved**: Added a 1MB body size limit for JSON requests in middleware to prevent DoS via large payloads.
+- **Improved**: `UserActivity` and `AnonymousActivity` now support all standard HTTP methods (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS) instead of just GET/POST.
+- **Added**: `FEEDBACK_COOLDOWN_SECONDS` setting to allow configurable anti-spam cooldown for the feedback system.
+- **Improved**: Admin badge callbacks (`useractivity`, `anonymousactivity`, `visitprofile`) now return `0` instead of an empty string when no activity is found, ensuring consistent UI rendering.
+- **Fixed**: Feedback cooldown logic now respects the new `FEEDBACK_COOLDOWN_SECONDS` setting from Django settings.
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 

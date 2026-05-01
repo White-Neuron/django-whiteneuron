@@ -65,20 +65,20 @@ def user_badge_callback(request):
 def useractivity_badge_callback(request):
     c= UserActivity.objects.filter(timestamp__gte= timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)).count()
     if c==0:
-        return ''
+        return 0
     return f"{c}"
 
 def anonymousactivity_badge_callback(request):
     c= AnonymousActivity.objects.filter(timestamp__gte= timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)).count()
     if c==0:
-        return ''
+        return 0
     return f"{c}"
 
 def visitprofile_badge_callback(request):
     from .models import VisitProfile
     c = VisitProfile.objects.count()
     if c == 0:
-        return ''
+        return 0
     return f"{c}"
 
 def user_badge_callback(request):

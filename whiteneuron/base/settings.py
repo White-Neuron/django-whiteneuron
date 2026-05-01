@@ -11,6 +11,7 @@ load_dotenv()
 
 import sentry_sdk
 
+FEEDBACK_COOLDOWN_SECONDS= int(environ.get("FEEDBACK_COOLDOWN_SECONDS", 60))
 DATA_UPLOAD_MAX_NUMBER_FILES = environ.get("DATA_UPLOAD_MAX_NUMBER_FILES", 1000)
 
 PROJECT_NAME = environ.get("PROJECT_NAME", "base")

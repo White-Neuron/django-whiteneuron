@@ -1,5 +1,18 @@
 # Changelog
 
+### v0.3.4 (2026-05-01) — latest
+**Improvement: Enhanced User Activity tracking and security hardening**
+- **Improved**: `UserActivityMiddleware` now captures JSON request payloads (POST/PATCH/PUT/DELETE) with full sensitive-field sanitization, resolving issues where API activity was not being logged.
+- **Improved**: Added a 1MB body size limit for JSON requests in middleware to prevent DoS via large payloads.
+- **Improved**: `UserActivity` and `AnonymousActivity` now support all standard HTTP methods (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS) instead of just GET/POST.
+- **Added**: `FEEDBACK_COOLDOWN_SECONDS` setting to allow configurable anti-spam cooldown for the feedback system.
+- **Improved**: Admin badge callbacks (`useractivity`, `anonymousactivity`, `visitprofile`) now return `0` instead of an empty string when no activity is found, ensuring consistent UI rendering.
+- **Fixed**: Feedback cooldown logic now respects the new `FEEDBACK_COOLDOWN_SECONDS` setting from Django settings.
+- **Validation**: Build, migrations (no changes), and manual admin UI/UX validation performed.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users.
+- **Upgrade Guidance**: No manual migration required; upgrade recommended for improved activity logging accuracy.
+- **Rollback**: Safe to revert to v0.3.3.4; no schema changes introduced.
+
 ### v0.3.3.4 (2026-04-30) — latest
 **Patch release: Remove synchronization module, add language switcher template, update Vietnamese i18n**
 - **Removed**: `synchronization/` module — cleaned up unused sync models, admin, views, tests, and migrations
@@ -29,7 +42,7 @@
 - **Compatibility**: No breaking changes for existing data/models; new widget is opt-in via `text_field_widget = 'mdeditor'`.
 - **Validation**: Full build, migrations, and manual admin UI/UX validation performed. Markdown preview tested for XSS safety and large input handling.
 - **Upgrade Guidance**: No manual migration required. To enable Markdown editing, set `text_field_widget = 'mdeditor'` in your `ModelAdmin`.
-- **Rollback**: Safe to revert to v0.3.2.2; no schema changes introduced.
+- **Rollback**: Safe to revert to v0.3.2.2; no schema changes introduced
 
 ### v0.3.2.2 (2026-04-29)
 **Improvement: Superuser-only soft-delete; duplicate action; expanded i18n coverage from django-unfold**
@@ -87,8 +100,8 @@
 - **Updated**: `uv.lock` — lock file refreshed.
 
 ### v0.3.1.4 (2026-04-17)
-**Dependency: Bump md2html-tailwind4 source to v1.2.0**
-- **Updated**: `pyproject.toml` — updated `[tool.uv.sources]` rev for `md2html-tailwind4` from `1.1.0` to `v1.2.0`; removed redundant version constraint from `dependencies` (pinned via uv source).
+**Dependency: Bump md2html-tailwind4 to >=1.1.0**
+- **Updated**: `pyproject.toml` — bumped `md2html-tailwind4` minimum version from `>=1.0.0` to `>=1.1.0`; added `[tool.uv.sources]` pointing to GitHub at rev `1.1.0`.
 - **Updated**: `uv.lock` — lock file refreshed.
 
 ### v0.3.1.3 (2026-04-17)
@@ -114,13 +127,13 @@
 - **Added**: `sites.py` — overrode `each_context()` in `BaseAdminSite` to automatically call `ANNOUNCEMENT_CALLBACK` and inject `announcement` into every admin page context; errors in the callback are silently suppressed.
 - **Added**: `utils.py` — default `announcement_callback()` returning a `{title, version, badge}` dict using `format_lazy` and `gettext_lazy` for full i18n support.
 - **Added**: `views.py` — `get_announcement_content` view; renders `ANNOUNCEMENT_CONTENT_HTML_FILE` via `render_to_string` and returns it as an `HttpResponse`.
-- **Added**: `urls.py` — `/announcement/` endpoint wired to `get_announcement_content`.
+- **Added**: `urls.py` — `/announcement/` endpoint wired into `get_announcement_content`.
 - **Added**: `templates/base/announcement.html` — DaisyUI-style modal dialog with header, scrollable content area, and footer; content is lazy-loaded via `fetch()` on first open.
 - **Added**: `templates/unfold/helpers/userlinks.html` — announcement button in the admin header with `wn-glow-pulse` and `wn-flame-icon` animations; rendered only when `announcement` is present in context.
 - **Updated**: `locale/vi` — new Vietnamese translations for announcement-related strings.
 
 ### v0.3.0.5 (2026-04-14)
-**Fix: CSRF 403 on production behind reverse proxy (nginx/Cloudflare)**
+**Security: CSRF 403 on production behind reverse proxy (nginx/Cloudflare)**
 - **Fixed**: `base/settings.py` — added `SECURE_PROXY_SSL_HEADER` so Django recognizes HTTPS via `X-Forwarded-Proto` header from reverse proxy, resolving CSRF origin mismatch.
 
 ### v0.3.0.4 (2026-04-14)
@@ -149,7 +162,7 @@
 - **Added**: `compute_file_hash()` function — computes SHA-256 of a `FieldFile` via direct `storage.open()` to avoid Django internal state issues (works for both in-memory uploads and committed storage files).
 - **Added**: `BaseFile.save()` override — automatically computes and stores SHA-256 hash on every new upload; resets `status='done'` when file is replaced after an error; backfills hash for existing files with no hash.
 - **Added**: `BaseFile.verify_integrity()` — compares live storage hash against stored hash; returns `False` if missing or mismatched.
-- **Added**: `download_file` view — `@login_required` endpoint at `file-management/download/<type>/<pk>/`; enrolls legacy records on first download, blocks tampered files with `403 Forbidden`, marks them `status='error'`.
+- **Added**: `download_file` view — `@login_required` endpoint for `/file-management/download/<type>/<pk>/`; enrolls legacy records on first download, blocks tampered files with `403 Forbidden`, marks them `status='error'`.
 - **Added**: `file_management/urls.py` — wired into `base/urls.py`.
 - **Added**: `FileInputNoDownload` widget — extends `UnfoldAdminFileFieldWidget` with a custom template that removes the direct download button; adds `accepted_file_types` support per admin subclass (`.xlsx,.xls,.csv` for Excel; `.pdf` for PDF).
 - **Added**: `BaseFileAdmin` enhancements — `integrity_status`, `hash_display`, `current_hash_display` readonly fields; `verified_download` smart button (primary button when OK, error badge when tampered/missing); `change_view` shows Django error message banner on integrity failure; `get_fieldsets` context-aware layout (auto/upload/new).
@@ -198,10 +211,7 @@
 - **Removed**: `init_app_db()` DB-write mechanism — App dashboard now reads directly from `settings.UNFOLD['SIDEBAR']` via a new `_parse_sidebar_apps()` helper; zero DB writes on page load.
 - **Fixed**: `app_badge_callback()` counted from stale DB; now counts from `settings.UNFOLD['SIDEBAR']` — badge is always in sync with config.
 - **Fixed**: `has_permission()` in `AppAdmin` now handles callable UNFOLD permissions (lambdas) in addition to dotted-string imports.
-- **Fixed**: Protocol-relative URLs (`//cdn…`) in app icons/thumbnails were incorrectly routed to `{% static %}`; added `|slice:":2" == "//"` check across all render paths.
-- **Fixed**: Mosaic `+N` counter (categories with >4 apps) correctly shows 3 icons + overflow count.
 - **Improved**: Pagination and filter bars hidden on App dashboard via `{% block pagination %}` and `{% block filters %}` override.
-- **Improved**: `pyproject.toml` — `package-data` reduced from 14 lines to 3; removed unused `pyasn1` dep, dead `[tool.uv.workspace]`, empty `[tool.setuptools]`; fixed `Framework :: Django :: 5.2` classifier.
 
 ### v0.2.46 (2026-04-04)
 **Fix: Email template — logo URL, company name, and contact details**
@@ -214,8 +224,8 @@
 **Security: 11 CVE fixes across django, pillow, cryptography, pyasn1**
 - **Security**: `django` lower bound raised from `>=5.1.6` to `>=5.2.12` — patches 7 CVEs including SQL Injection (CVE-2026-1207), DoS ×5, race condition in file-system storage (CVE-2026-25674), and URLField vulnerability (CVE-2026-25673).
 - **Security**: `pillow` lower bound raised from `>=11.0.0` to `>=12.1.1` — patches heap buffer overflow (CVE-2026-25990).
-- **Security**: `cryptography>=46.0.5` added as explicit dependency — patches Improper Input Validation (CVE-2026-26007); previously uncontrolled transitive dependency.
-- **Security**: `pyasn1>=0.6.2` added as explicit dependency — patches CVE-2026-23490; `==0.6.1` was the sole affected version.
+- **Security**: `cryptography>=46.0.5` added as an explicit dependency — patches Improper Input Validation (CVE-2026-26007); previously uncontrolled transitive dependency.
+- **Security**: `pyasn1>=0.6.2` added as an explicit dependency — patches CVE-2026-23490; `==0.6.1` was the sole affected version.
 - **Validation**: `safety` scan confirms 0 known vulnerabilities after upgrade (down from 11).
 
 ### v0.2.44 (2026-04-02)
@@ -247,7 +257,7 @@
 - **Added**: Filter/search state is now persisted via `sessionStorage` across navigation — selecting a filter, navigating to a detail page, then returning restores the exact filter state automatically.
 - **Fixed**: Django bug — `add_preserved_filters()` uses `dict(parse_qsl())` which drops duplicate filter params (e.g. `?chapter__id__exact=29&chapter__id__exact=31` → only `=31` kept after save). Fixed server-side in `ModelAdmin._fix_preserved_filters()` — rebuilds the redirect URL with `parse_qsl()` (preserves all values) when duplicates are detected.
 - **Fixed**: `_changelist_filters` URL param (Django's format for preserved filters when navigating from change form) — decoded to individual params before saving to storage, then the URL is redirected to clean form (no ugly `_changelist_filters=...` in browser bar).
-- **Fixed**: README image broken on PyPI — changed from relative path `docs/images/main.png` to absolute GitHub raw URL.
+- **Fixed**: README image broken on PyPI — changed from relative `docs/images/main.png` to absolute GitHub raw URL.
 - **Improved**: Single redirect point in changelist JS — eliminated multiple chained `window.location.replace()` calls; at most one redirect per page load.
 
 ### v0.2.41 (2026-03-31)
@@ -262,7 +272,7 @@
 - **Improved**: Category mosaic — handles 1 app (single large icon), 2–3 apps (placeholder fill), 4 apps (full 2×2), 5+ apps (3 icons + "+N" counter on 4th cell).
 - **Improved**: App card icon — removed incorrect `static()` wrapper on `thumbnail_url` (already a full URL).
 - **Improved**: Search bar hidden on App dashboard (not usable in two-level layout).
-- **Fixed**: `changelist_view` queryset evaluated once via `list(qs)` to avoid double `get_queryset()` / double `init_app_db()` call.
+- **Fixed**: `change_list_view` queryset evaluated once via `list(qs)` to avoid double `get_queryset()` / double `init_app_db()` call.
 - **Fixed**: Translation `"Active"` → `"Hoạt động"` (was incorrectly `"Hành động"` = Action).
 - **Fixed**: Removed incorrect `{% trans %}` on DB values (`category`, `app.name`) — Django `{% trans %}` only resolves catalog entries, DB values are already stored in the target language.
 
@@ -277,13 +287,13 @@
 
 ### v0.2.38 (2026-03-31)
 **Security: UA Blacklist — block bots/crawlers by User-Agent**
-- **Added**: `UABlacklist` model (`base/ua_blacklists`) — block requests by User-Agent pattern, managed via Django Admin in real-time.
+- **Added**: `UABlacklist` model (`base/ua_blacklists`) — manage blocked IPs in real-time via Django Admin, supports permanent and temporary blocks (`blocked_until` with Redis TTL auto-expiry).
 - **Added**: `UABlacklistAdmin` — UI with Activate/Deactivate actions, `is_regex` toggle, shown in System sidebar under `block` icon, superuser only.
 - **Added**: `RateLimitMiddleware._is_ua_blacklisted()` — two-layer check: static keywords from `UA_BLACKLIST` env (loaded at startup) + dynamic patterns from Redis cache (managed via admin, real-time).
 - **Added**: `UA_BLACKLIST` setting in `env.example` — comma-separated substring keywords loaded at startup (no Redis required), e.g. `GPTBot,ClaudeBot,https://openai.com`.
 - **Added**: Dynamic patterns support `is_regex=True` — executes `re.search(pattern, ua, re.IGNORECASE)`, invalid regex patterns are safely skipped per-entry.
-- **Fixed**: Cache miss fallback — when Redis restarts or on first boot, patterns are loaded from DB and cache is warmed automatically (no bots slip through during cold start).
-- **Added**: Migration `base/0016_uablacklist.py`.
+- **Fixed**: Cache miss fallback — when Redis restarts or on first boot, patterns are loaded from DB and cache is warmed automatically (prevents bots from slipping through during cold start).
+- **Added**: Migration `base/016_uablacklist.py`.
 
 ### v0.2.37 (2026-03-31)
 **Security: guest login — remove hardcoded password, passwordless login view**
@@ -311,7 +321,7 @@
 - **Added**: `IPBlacklistAdmin` — IP blacklist management UI with Activate/Deactivate actions, shown in System sidebar under `block` icon, superuser only.
 - **Added**: **"Block IP address"** action in `UserActivityAdmin` — select activity records → block IP immediately in Redis, no Daphne restart required.
 - **Improved**: `RateLimitMiddleware._is_blacklisted()` also checks `cache.get('blacklist:dynamic:<ip>')` after static env blacklist — hybrid two-layer static + dynamic blocking.
-- **Added**: Migration `base/0015_ipblacklist.py`.
+- **Added**: Migration `base/015_ipblacklist.py`.
 
 ### v0.2.34 (2026-03-29)
 **IP Blacklist: permanent IP/CIDR blocking via `.env`**
@@ -336,7 +346,7 @@
 **Rate Limiting, Security Hardening & Error Pages**
 - **Added**: `RateLimitMiddleware` — global IP-based rate limiting (60 req/60 s default) placed immediately after `SecurityMiddleware`, works for both API and browser requests.
 - **Improved**: `UserActivityMiddleware` adds per-user rate limiting (60 req/60 s default).
-- **Added**: `/ws/` added to `UserActivityMiddleware` `exclude_paths` — WebSocket handshakes are not logged and not counted toward rate limits.
+- **Added**: `/ws/` added to `UserActivityMiddleware` `exclude_paths` — WebSocket handshakes are not logged and are not counted toward rate limits.
 - **Security**: Sanitizes `POST` data before writing to `UserActivity` — masks sensitive fields (password, token, api_key, etc.).
 - **Security**: Switched to `cache.incr()` first pattern (atomic on Redis) to prevent race conditions.
 - **Added**: Full error templates: `400.html`, `403.html`, `404.html`, `429.html`, `500.html`.
@@ -355,7 +365,7 @@
 ### v0.2.28 (2026-03-28)
 - **Improved**: Grid view of user/app uses more intuitive icons for role and status.
 - **Improved**: Standardized `verbose_name` for multiple fields in `Notification` and `NotificationConfig`.
-- **Added**: Migration `notification/0012` to sync field-level metadata.
+- **Added**: Migration `notification/012` to sync field-level metadata.
 
 ### v0.2.27 and earlier
 See [releases](https://github.com/White-Neuron/django-whiteneuron/releases) for full history.

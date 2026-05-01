@@ -177,11 +177,22 @@ class VisitProfile(models.Model):
         return f"P{self.id} - {self.ip_address} - {truncatechars(self.user_agent, 20)}"
 
 
+HTTP_METHOD_CHOICES = [
+    ("GET", "GET"),
+    ("POST", "POST"),
+    ("PUT", "PUT"),
+    ("PATCH", "PATCH"),
+    ("DELETE", "DELETE"),
+    ("HEAD", "HEAD"),
+    ("OPTIONS", "OPTIONS"),
+]
+
+
 class UserActivity(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     profile = models.ForeignKey(VisitProfile, on_delete=models.SET_NULL, null=True, blank=True, related_name='useractivities')
     path = models.CharField(_("Path"), max_length=255, null=True, blank=True)
-    method = models.CharField(_("Method"), max_length=10, choices=[("GET", "GET"), ("POST", "POST")], null=True, blank=True)
+    method = models.CharField(_("Method"), max_length=10, choices=HTTP_METHOD_CHOICES, null=True, blank=True)
     data = models.JSONField(_("Data"), null=True, blank=True)
     status_code = models.IntegerField(_("Status code"), null=True, blank=True)
     timestamp = models.DateTimeField(_("Timestamp"), auto_now_add=True)
@@ -204,7 +215,7 @@ class UserActivity(models.Model):
 class AnonymousActivity(models.Model):
     profile = models.ForeignKey(VisitProfile, on_delete=models.SET_NULL, null=True, blank=True, related_name='anonymousactivities')
     path = models.CharField(_("Path"), max_length=255, null=True, blank=True)
-    method = models.CharField(_("Method"), max_length=10, choices=[("GET", "GET"), ("POST", "POST")], null=True, blank=True)
+    method = models.CharField(_("Method"), max_length=10, choices=HTTP_METHOD_CHOICES, null=True, blank=True)
     data = models.JSONField(_("Data"), null=True, blank=True)
     status_code = models.IntegerField(_("Status code"), null=True, blank=True)
     timestamp = models.DateTimeField(_("Timestamp"), auto_now_add=True)

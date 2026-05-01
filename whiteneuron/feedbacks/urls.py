@@ -9,7 +9,8 @@ from django.utils.translation import gettext as _
 from datetime import timedelta
 from whiteneuron.feedbacks.models import FeedbackData
 
-FEEDBACK_COOLDOWN_SECONDS = 60
+from django.conf import settings
+FEEDBACK_COOLDOWN_SECONDS = settings.FEEDBACK_COOLDOWN_SECONDS if hasattr(settings, 'FEEDBACK_COOLDOWN_SECONDS') else 60
 
 logger = logging.getLogger(__name__)
 
