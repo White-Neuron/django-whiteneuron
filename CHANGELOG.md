@@ -1,5 +1,14 @@
 # Changelog
 
+### v0.3.4.1 (2026-05-02) — latest
+**Security Enhancement: Improved request payload sanitization and VisitProfile management utility**
+- **Improved**: `_sanitize_post()` in `UserActivityMiddleware` now detects and redacts sensitive values via pattern matching (JWT tokens, API keys, session IDs, base64/hex strings), not just field names.
+- **Added**: Management command `update_visit_profiles` — updates `first_seen`/`last_seen` for VisitProfile based on timestamps from UserActivity and AnonymousActivity; supports `--dry-run`.
+- **Validation**: Build, migrations (no changes), and manual validation performed.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users.
+- **Upgrade Guidance**: No manual migration required; upgrade recommended for improved security in activity logging.
+- **Rollback**: Safe to revert to v0.3.4; no schema changes introduced.
+
 ### v0.3.4 (2026-05-01) — latest
 **Improvement: Enhanced User Activity tracking and security hardening**
 - **Improved**: `UserActivityMiddleware` now captures JSON request payloads (POST/PATCH/PUT/DELETE) with full sensitive-field sanitization, resolving issues where API activity was not being logged.

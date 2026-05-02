@@ -394,12 +394,50 @@ class UserActivityMiddleware:
         'credit_card', 'card_number', 'cvv', 'csrfmiddlewaretoken',
     })
 
+    _SENSITIVE_VALUE_PATTERNS = frozenset({
+        'authorization', 'bearer', 'apikey', 'api-key', 'x-api-key',
+        'x-apikey', 'x-access-token', 'jwt', 'sessionid', 'session_id',
+        'sid', 'auth', 'credential', 'credentials', 'passwd', 'passphrase',
+    })
+
+    def _is_sensitive_value(self, value) -> bool:
+        if not isinstance(value, str):
+            return False
+        low = value.lower()
+        for pattern in self._SENSITIVE_VALUE_PATTERNS:
+            if pattern in low:
+                return True
+        # JWT token: three base64url segments separated by dots (min ~50 chars)
+        parts = value.split('.')
+        if len(parts) == 3 and all(
+            len(p) >= 10 and all(
+                c in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_' for c in p
+            ) for p in parts
+        ):
+            return True
+        # Long base64 string (no dots, min 40 chars)
+        if len(value) >= 40 and all(
+            c in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/' for c in value
+        ):
+            return True
+        # Long hex string (min 32 chars)
+        if len(value) >= 32 and all(c in '0123456789abcdef' for c in low):
+            return True
+        return False
+
     def _sanitize_post(self, data) -> dict:
         if isinstance(data, dict):
-            return {
-                k: '***' if k.lower() in self._SENSITIVE_FIELDS else self._sanitize_post(v)
-                for k, v in data.items()
-            }
+            result = {}
+            for k, v in data.items():
+                if k.lower() in self._SENSITIVE_FIELDS:
+                    result[k] = '***'
+                elif isinstance(v, (dict, list)):
+                    result[k] = self._sanitize_post(v)
+                elif self._is_sensitive_value(v):
+                    result[k] = '***'
+                else:
+                    result[k] = v
+            return result
         if isinstance(data, list):
             return [self._sanitize_post(item) for item in data]
         return data

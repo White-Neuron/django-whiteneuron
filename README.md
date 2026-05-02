@@ -10,16 +10,13 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.3.4
+v0.3.4.1
 
 ## Changelog
-### Latest: v0.3.4 (2026-05-01)
-- **Improved**: `UserActivityMiddleware` now captures JSON request payloads (POST/PATCH/PUT/DELETE) with full sensitive-field sanitization, resolving issues where API activity was not being logged.
-- **Improved**: Added a 1MB body size limit for JSON requests in middleware to prevent DoS via large payloads.
-- **Improved**: `UserActivity` and `AnonymousActivity` now support all standard HTTP methods (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS) instead of just GET/POST.
-- **Added**: `FEEDBACK_COOLDOWN_SECONDS` setting to allow configurable anti-spam cooldown for the feedback system.
-- **Improved**: Admin badge callbacks (`useractivity`, `anonymousactivity`, `visitprofile`) now return `0` instead of an empty string when no activity is found, ensuring consistent UI rendering.
-- **Fixed**: Feedback cooldown logic now respects the new `FEEDBACK_COOLDOWN_SECONDS` setting from Django settings.
+### Latest: v0.3.4.1 (2026-05-02)
+**Security Enhancement: Improved request payload sanitization and VisitProfile management utility**
+- **Improved**: `_sanitize_post()` in `UserActivityMiddleware` now detects and redacts sensitive values via pattern matching (JWT tokens, API keys, session IDs, base64/hex strings), not just field names.
+- **Added**: Management command `update_visit_profiles` — updates `first_seen`/`last_seen` for VisitProfile based on timestamps from UserActivity and AnonymousActivity; supports `--dry-run`.
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
