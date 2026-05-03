@@ -10,12 +10,16 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.3.4.2
+v0.3.4.3
 
 ## Changelog
-### Latest: v0.3.4.2 (2026-05-03)
-**Bugfix: `duplicate_objects` action now supports models with `title` field in addition to `name`**
-- **Fixed**: `ModelAdmin.duplicate_objects()` — previously only copied objects with a `name` field; now also handles objects with a `title` field (e.g. `App.title`). Objects without either field are still duplicated but without renaming.
+### Latest: v0.3.4.3 (2026-05-03)
+**Improvement: Configurable meta fieldset collapse behavior in ModelAdmin**
+- **Improved**: `ModelAdmin.meta_class_in_fieldsets` — added configurable attribute to control whether Meta fieldset is collapsed or always shown; previously hardcoded to `"collapse"`. Now supports `'collapse'` (default) or `'t'` (always show).
+- **Validation**: Build, migrations (no changes), and manual validation performed.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users.
+- **Upgrade Guidance**: No manual migration required; upgrade recommended if you want to customize meta fieldset display behavior.
+- **Rollback**: Safe to revert to v0.3.4.2; no schema changes introduced.
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 

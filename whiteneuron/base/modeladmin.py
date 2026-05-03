@@ -95,6 +95,8 @@ class ModelAdmin(UnfoldAdmin):
 
     default_toggle_sidebar= True
 
+    meta_class_in_fieldsets = 'collapse' # options: 'collapse', 't' (for always show)
+
     @property
     def search_help_text(self):
         fields = ', '.join([str(get_verbose_name_field(self.model, f)) for f in self.search_fields])
@@ -369,7 +371,7 @@ class ModelAdmin(UnfoldAdmin):
                 meta_fields.remove('updated_at')
                 meta_fields.remove('updated_by')
                 meta_fields.append(('updated_at', 'updated_by'))
-            fieldsets.append((_('Meta'), {'fields': meta_fields, 'classes': ["collapse"]}))
+            fieldsets.append((_('Meta'), {'fields': meta_fields, 'classes': [self.meta_class_in_fieldsets]}))
         return fieldsets
     
     def buttons(self, obj):
