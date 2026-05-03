@@ -10,13 +10,12 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.3.4.1
+v0.3.4.2
 
 ## Changelog
-### Latest: v0.3.4.1 (2026-05-02)
-**Security Enhancement: Improved request payload sanitization and VisitProfile management utility**
-- **Improved**: `_sanitize_post()` in `UserActivityMiddleware` now detects and redacts sensitive values via pattern matching (JWT tokens, API keys, session IDs, base64/hex strings), not just field names.
-- **Added**: Management command `update_visit_profiles` — updates `first_seen`/`last_seen` for VisitProfile based on timestamps from UserActivity and AnonymousActivity; supports `--dry-run`.
+### Latest: v0.3.4.2 (2026-05-03)
+**Bugfix: `duplicate_objects` action now supports models with `title` field in addition to `name`**
+- **Fixed**: `ModelAdmin.duplicate_objects()` — previously only copied objects with a `name` field; now also handles objects with a `title` field (e.g. `App.title`). Objects without either field are still duplicated but without renaming.
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 

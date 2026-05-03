@@ -529,7 +529,13 @@ class ModelAdmin(UnfoldAdmin):
     def duplicate_objects(self, request, queryset):
         for obj in queryset:
             obj.pk = None  # This will create a new object when saved
-            # obj.name = f"{obj.name} (Copy)"
+            if hasattr(obj, 'name'):
+                obj.name = f"{obj.name} (Copy)"
+            elif hasattr(obj, 'title'):
+                obj.title = f"{obj.title} (Copy)"
+            else:
+                # If the object has neither 'name' nor 'title', we can try to set a generic field or skip renaming
+                pass
             try:
                 obj.save()
             except Exception as e:
