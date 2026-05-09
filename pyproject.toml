@@ -1,6 +1,6 @@
 [project]
 name = "django-whiteneuron"
-version = "0.3.4.3"
+version = "0.3.4.4"
 description = "A modern Django Admin extension with enhanced UI/UX, dashboard, feedback, file management, rate limiting, IP blacklisting, and advanced admin integrations built on django-unfold."
 authors = [
     {name = "White Neuron", email = "anhnt@whiteneuron.ai"}
@@ -36,6 +36,7 @@ dependencies = [
     "channels-redis>=4.2.1",
     "uvicorn>=0.34.3",
     "daphne>=4.2.0",
+    "twisted[tls]>=26.4.0rc2",
     "django-ckeditor-5>=0.2.18",
     'django-cors-headers>=4.3.0',
     "django-unfold>=0.89.0",

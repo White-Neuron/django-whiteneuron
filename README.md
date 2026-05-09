@@ -10,16 +10,16 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.3.4.3
+v0.3.4.4
 
 ## Changelog
-### Latest: v0.3.4.3 (2026-05-03)
-**Improvement: Configurable meta fieldset collapse behavior in ModelAdmin**
-- **Improved**: `ModelAdmin.meta_class_in_fieldsets` — added configurable attribute to control whether Meta fieldset is collapsed or always shown; previously hardcoded to `"collapse"`. Now supports `'collapse'` (default) or `'t'` (always show).
-- **Validation**: Build, migrations (no changes), and manual validation performed.
-- **Compatibility**: No breaking changes; safe for all v0.3.x users.
-- **Upgrade Guidance**: No manual migration required; upgrade recommended if you want to customize meta fieldset display behavior.
-- **Rollback**: Safe to revert to v0.3.4.2; no schema changes introduced.
+### Latest: v0.3.4.4 (2026-05-09)
+**Security patch: Upgrade Twisted to 26.4.0rc2 (CVE CVSS 7.5)**
+- **Fixed**: Upgraded `twisted` from 25.5.0 to 26.4.0rc2, resolving CVE with CVSS score 7.5 (High) affecting the transitive dependency chain via daphne→twisted.
+- **Validation**: Build successful, no migrations required, smoke test passed.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users. Note: 26.4.0rc2 is a release candidate — stable 26.x expected soon.
+- **Upgrade Guidance**: No manual migration required; upgrade recommended to address security vulnerability.
+- **Rollback**: Safe to revert to v0.3.4.3; no schema changes introduced.
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
