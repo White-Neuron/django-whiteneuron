@@ -1,6 +1,6 @@
 [project]
 name = "django-whiteneuron"
-version = "0.3.4.3"
+version = "0.3.4.4"
 description = "A modern Django Admin extension with enhanced UI/UX, dashboard, feedback, file management, rate limiting, IP blacklisting, and advanced admin integrations built on django-unfold."
 authors = [
     {name = "White Neuron", email = "anhnt@whiteneuron.ai"}
