@@ -76,13 +76,11 @@ def anonymousactivity_badge_callback(request):
 
 def visitprofile_badge_callback(request):
     from .models import VisitProfile
-    c = VisitProfile.objects.count()
+    c = VisitProfile.objects.filter(last_seen__gte= timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)).count()
     if c == 0:
         return 0
     return f"{c}"
 
-def user_badge_callback(request):
-    return base_badge_callback(request, User)
 
 def group_badge_callback(request):
     return 0

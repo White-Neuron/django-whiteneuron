@@ -1,6 +1,17 @@
 # Changelog
 
-### v0.3.4.4 (2026-05-09) — latest
+### v0.3.4.5 (2026-05-10) — latest
+**Bugfix: Visit tracking accuracy and dashboard badge improvement**
+- **Fixed**: `UserActivityMiddleware` now only tracks visits for non-redirect responses (status codes other than 301, 302), preventing false visit counts from HTTP redirects.
+- **Improved**: `visitprofile_badge_callback` now shows today's active visitors count instead of total all-time count, providing more meaningful real-time analytics in the admin sidebar.
+- **Removed**: Unused `user_badge_callback` function from `utils.py`.
+- **Migration**: New migration `0027` alters `method` fields on `AnonymousActivity` and `UserActivity`; file management models updated with field constraints.
+- **Validation**: Build successful (Tailwind + migrations), smoke test passed.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users. Minor schema change via migration — no data loss expected.
+- **Upgrade Guidance**: Run `python manage.py migrate` after upgrade to apply schema changes.
+- **Rollback**: Safe to revert to v0.3.4.4; run `python manage.py migrate` to rollback migrations if needed.
+
+### v0.3.4.4 (2026-05-09)
 **Security patch: Upgrade Twisted to 26.4.0rc2 (CVE CVSS 7.5)**
 - **Fixed**: Upgraded `twisted` from 25.5.0 to 26.4.0rc2, resolving CVE with CVSS score 7.5 (High) affecting the transitive dependency chain via daphne→twisted.
 - **Validation**: Build successful, no migrations required, smoke test passed.

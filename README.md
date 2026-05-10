@@ -10,16 +10,18 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.3.4.4
+v0.3.4.5
 
 ## Changelog
-### Latest: v0.3.4.4 (2026-05-09)
-**Security patch: Upgrade Twisted to 26.4.0rc2 (CVE CVSS 7.5)**
-- **Fixed**: Upgraded `twisted` from 25.5.0 to 26.4.0rc2, resolving CVE with CVSS score 7.5 (High) affecting the transitive dependency chain via daphne→twisted.
-- **Validation**: Build successful, no migrations required, smoke test passed.
-- **Compatibility**: No breaking changes; safe for all v0.3.x users. Note: 26.4.0rc2 is a release candidate — stable 26.x expected soon.
-- **Upgrade Guidance**: No manual migration required; upgrade recommended to address security vulnerability.
-- **Rollback**: Safe to revert to v0.3.4.3; no schema changes introduced.
+### Latest: v0.3.4.5 (2026-05-10)
+**Bugfix: Visit tracking accuracy and dashboard badge improvement**
+- **Fixed**: `UserActivityMiddleware` now only tracks visits for non-redirect responses (status codes other than 301, 302), preventing false visit counts from HTTP redirects.
+- **Improved**: `visitprofile_badge_callback` now shows today's active visitors count instead of total all-time count.
+- **Removed**: Unused `user_badge_callback` function.
+- **Migration**: New migration alters `method` fields on activity models; file management field constraints updated.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users.
+- **Upgrade Guidance**: Run `python manage.py migrate` after upgrade.
+- **Rollback**: Safe to revert to v0.3.4.4.
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 

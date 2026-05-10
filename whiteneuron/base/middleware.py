@@ -344,7 +344,7 @@ class UserActivityMiddleware:
                 timestamp=timezone.now(),
                 timelapse=timelapse,
             )
-        else:
+        elif getattr(response, 'status_code', None) not in (301, 302):
             profile, created = self._get_or_create_visit_profile(ip, user_agent)
             if not created:
                 VisitProfile.objects.filter(pk=profile.pk).update(last_seen=timezone.now())
