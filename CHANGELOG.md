@@ -1,6 +1,15 @@
 # Changelog
 
-### v0.3.4.6 (2026-05-11) — latest
+### v0.3.4.6.1 (2026-05-11) — latest
+**Dependency: Bump django-unfold to >=0.92.0, requires Python 3.12+**
+- **Updated**: `django-unfold` minimum version bumped from `>=0.89.0` to `>=0.92.0` — incorporates improvements from 0.90.0–0.92.0 including compressed fields by default, removal of unbound template blocks, inline before/after templates, and UI component enhancements.
+- **Updated**: `requires-python` raised from `>=3.11` to `>=3.12` — aligns with django-unfold 0.92+ requirements and modern Python support.
+- **Validation**: Build successful (Tailwind + migrations), smoke test passed.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users on Python 3.12+. Note: Python 3.11 is no longer supported starting from this version.
+- **Upgrade Guidance**: Ensure your environment uses Python 3.12 or later before upgrading. Run `pip install --upgrade django-whiteneuron` to apply changes.
+- **Rollback**: Safe to revert to v0.3.4.6; downgrade requires Python 3.11 compatibility.
+
+### v0.3.4.6 (2026-05-11)
 **Bugfixes: Dashboard crash, notification scope, middleware typo, password flow**
 - **Fixed**: `dashboard/views.py` month arithmetic crash on December/January — replaced `start.replace(month=start.month+1)` with `(start + timedelta(days=32)).replace(day=1)` idiom.
 - **Fixed**: `mark_as_read_all()` / `mark_as_unread_all()` now scoped to user via `cls.objects.filter(user=user).update(...)` instead of updating all notifications globally.

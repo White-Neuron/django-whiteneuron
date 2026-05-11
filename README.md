@@ -10,20 +10,16 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.3.4.6
+v0.3.4.6.1
 
 ## Changelog
-### Latest: v0.3.4.6 (2026-05-11)
-**Bugfixes: Dashboard crash, notification scope, middleware typo, password flow**
-- **Fixed**: `dashboard/views.py` month arithmetic crash on December/January — replaced `start.replace(month=start.month+1)` with `(start + timedelta(days=32)).replace(day=1)` idiom.
-- **Fixed**: `mark_as_read_all()` / `mark_as_unread_all()` now scoped to user via `cls.objects.filter(user=user).update(...)` instead of updating all notifications globally.
-- **Fixed**: `UserActivityMiddleware` WebSocket exclusion typo — `'startwith'` → `'startswith'`, restoring `/ws/` path exclusion from activity logging and rate limiting.
-- **Fixed**: `ModelAdmin.get_list_filter()` mutation across requests — added guard to prevent `FieldSelectionFilter` accumulation on repeated calls.
-- **Fixed**: User admin password flow — refactored with `is_new` flag so `set_password()` is called after `super().save_model()` without relying on stale `obj.pk`.
-- **Fixed**: `NotificationAdmin.view_obj_link()` redirect now uses `reverse()` instead of malformed string URL.
-- **Improved**: Badge callback return types unified — always returns string (`f"{c}"`), removed redundant zero checks.
-- **Improved**: HTML typo fix — `action_buttoms` → `action_buttons` in action buttons template (ID + CSS class).
-- **Improved**: Replaced bare `except:` with `except Exception:` across 6 files (`models.py`, `modeladmin.py`, `notification/admin.py`, `filters.py`).
+### Latest: v0.3.4.6.1 (2026-05-11)
+**Dependency: Bump django-unfold to >=0.92.0, requires Python 3.12+**
+- **Updated**: `django-unfold` minimum version bumped from `>=0.89.0` to `>=0.92.0` — incorporates improvements from 0.90.0–0.92.0 including compressed fields by default, removal of unbound template blocks, inline before/after templates, and UI component enhancements.
+- **Updated**: `requires-python` raised from `>=3.11` to `>=3.12` — aligns with django-unfold 0.92+ requirements and modern Python support.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users on Python 3.12+. Note: Python 3.11 is no longer supported starting from this version.
+- **Upgrade Guidance**: Ensure your environment uses Python 3.12 or later before upgrading. Run `pip install --upgrade django-whiteneuron` to apply changes.
+- **Rollback**: Safe to revert to v0.3.4.6; downgrade requires Python 3.11 compatibility.
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
