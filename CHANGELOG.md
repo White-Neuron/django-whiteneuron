@@ -1,6 +1,18 @@
 # Changelog
 
-### v0.3.4.5 (2026-05-10) — latest
+### v0.3.4.6 (2026-05-11) — latest
+**Bugfixes: Dashboard crash, notification scope, middleware typo, password flow**
+- **Fixed**: `dashboard/views.py` month arithmetic crash on December/January — replaced `start.replace(month=start.month+1)` with `(start + timedelta(days=32)).replace(day=1)` idiom.
+- **Fixed**: `mark_as_read_all()` / `mark_as_unread_all()` now scoped to user via `cls.objects.filter(user=user).update(...)` instead of updating all notifications globally.
+- **Fixed**: `UserActivityMiddleware` WebSocket exclusion typo — `'startwith'` → `'startswith'`, restoring `/ws/` path exclusion from activity logging and rate limiting.
+- **Fixed**: `ModelAdmin.get_list_filter()` mutation across requests — added guard to prevent `FieldSelectionFilter` accumulation on repeated calls.
+- **Fixed**: User admin password flow — refactored with `is_new` flag so `set_password()` is called after `super().save_model()` without relying on stale `obj.pk`.
+- **Fixed**: `NotificationAdmin.view_obj_link()` redirect now uses `reverse()` instead of malformed string URL.
+- **Improved**: Badge callback return types unified — always returns string (`f"{c}"`), removed redundant zero checks.
+- **Improved**: HTML typo fix — `action_buttoms` → `action_buttons` in action buttons template (ID + CSS class).
+- **Improved**: Replaced bare `except:` with `except Exception:` across 6 files (`models.py`, `modeladmin.py`, `notification/admin.py`, `filters.py`).
+
+### v0.3.4.5 (2026-05-10)
 **Bugfix: Visit tracking accuracy and dashboard badge improvement**
 - **Fixed**: `UserActivityMiddleware` now only tracks visits for non-redirect responses (status codes other than 301, 302), preventing false visit counts from HTTP redirects.
 - **Improved**: `visitprofile_badge_callback` now shows today's active visitors count instead of total all-time count, providing more meaningful real-time analytics in the admin sidebar.

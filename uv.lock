@@ -820,7 +820,7 @@ wheels = [
 
 [[package]]
 name = "django-whiteneuron"
-version = "0.3.4.4"
+version = "0.3.4.6"
 source = { editable = "." }
 dependencies = [
     { name = "channels" },
@@ -897,7 +897,7 @@ requires-dist = [
     { name = "gunicorn", specifier = ">=23.0.0" },
     { name = "hiredis", specifier = ">=3.1.0" },
     { name = "markdown", specifier = ">=3.7" },
-    { name = "md2html-tailwind4", git = "https://github.com/White-Neuron/md2html-tailwind4?rev=v1.5.0" },
+    { name = "md2html-tailwind4", git = "https://github.com/White-Neuron/md2html-tailwind4?rev=v1.5.1" },
     { name = "openai", specifier = ">=1.58.1" },
     { name = "openpyxl", specifier = ">=3.1.5" },
     { name = "pandas", specifier = ">=2.2.3" },
@@ -1102,11 +1102,11 @@ wheels = [
 
 [[package]]
 name = "idna"
-version = "3.13"
+version = "3.14"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/ce/cc/762dfb036166873f0059f3b7de4565e1b5bc3d6f28a414c13da27e442f99/idna-3.13.tar.gz", hash = "sha256:585ea8fe5d69b9181ec1afba340451fba6ba764af97026f92a91d4eef164a242", size = 194210 }
+sdist = { url = "https://files.pythonhosted.org/packages/05/b1/efac073e0c297ecf2fb33c346989a529d4e19164f1759102dee5953ee17e/idna-3.14.tar.gz", hash = "sha256:466d810d7a2cc1022bea9b037c39728d51ae7dad40d480fc9b7d7ecf98ba8ee3", size = 198272 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5d/13/ad7d7ca3808a898b4612b6fe93cde56b53f3034dcde235acb1f0e1df24c6/idna-3.13-py3-none-any.whl", hash = "sha256:892ea0cde124a99ce773decba204c5552b69c3c67ffd5f232eb7696135bc8bb3", size = 68629 },
+    { url = "https://files.pythonhosted.org/packages/6c/3c/3f62dee257eb3d6b2c1ef2a09d36d9793c7111156a73b5654d2c2305e5ce/idna-3.14-py3-none-any.whl", hash = "sha256:e677eaf072e290f7b725f9acf0b3a2bd55f9fd6f7c70abe5f0e34823d0accf69", size = 72184 },
 ]
 
 [[package]]
@@ -1255,8 +1255,8 @@ wheels = [
 
 [[package]]
 name = "md2html-tailwind4"
-version = "1.5.0"
-source = { git = "https://github.com/White-Neuron/md2html-tailwind4?rev=v1.5.0#d1271f79f1976943969784b4677524234140129f" }
+version = "1.5.1"
+source = { git = "https://github.com/White-Neuron/md2html-tailwind4?rev=v1.5.1#2ae93f9aef8394ef3ac2507c233c930511a0c506" }
 dependencies = [
     { name = "beautifulsoup4" },
     { name = "markdown" },

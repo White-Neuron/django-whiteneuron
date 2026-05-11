@@ -235,9 +235,8 @@ class ModelAdmin(UnfoldAdmin):
 
     show_meta_filter = True
     def get_list_filter(self, request: HttpRequest) -> Sequence[str]:
-        if self.enable_field_selection_filter:
-            if FieldSelectionFilter not in self.list_filter:
-                self.list_filter =  tuple(self.list_filter) + (FieldSelectionFilter,)
+        if self.enable_field_selection_filter and FieldSelectionFilter not in self.list_filter:
+            self.list_filter = tuple(self.list_filter) + (FieldSelectionFilter,)
         
         list_filter = super().get_list_filter(request)
 
@@ -283,7 +282,7 @@ class ModelAdmin(UnfoldAdmin):
         if self.action_buttons_top:
             try:
                 fields.remove('buttons')
-            except:
+            except Exception:
                 pass
         if len(fields) == 0:
             if list_display[0] != 'buttons':
@@ -306,10 +305,10 @@ class ModelAdmin(UnfoldAdmin):
             list_display = list(list_display)
         else:
             list_display = filtered_list_display
-        try:
-            list_display.remove('default')
-        except:
-            pass
+            try:
+                list_display.remove('buttons')
+            except Exception:
+                pass
         # check nếu model có trường sau thì mới thêm vào list_display
         # fields_extra = ['updated_at', 'updated_by']
         fields_extra = []
@@ -337,7 +336,7 @@ class ModelAdmin(UnfoldAdmin):
                 for field in self.grid_exclude_fields_list_display:
                     try:
                         list_display.remove(field)
-                    except:
+                    except Exception:
                         pass
         return list_display
     
@@ -402,8 +401,8 @@ class ModelAdmin(UnfoldAdmin):
             button_delete = f'<a class="btn-delete btn-danger col-span-1" href="{path_delete}"> <img src="{svg_url_delete}" alt="{_("Delete")}" style="width: {width}px; height: {height}px;"></a>'
 
         return mark_safe(f'''
-                         <div id="action_buttoms_{obj.pk}" class="action_buttoms grid gap-1 grid-cols-{c}" style="width: {33*c}px;">{button_view} {button_edit} {button_delete} </div> 
-                         ''')
+                         <div id="action_buttons_{obj.pk}" class="action_buttons grid gap-1 grid-cols-{c}" style="width: {33*c}px;">{button_view} {button_edit} {button_delete} </div> 
+                          ''')
 
     buttons.short_description = ''
 

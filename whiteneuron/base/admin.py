@@ -341,24 +341,19 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
     
     # tự tạo mật khẩu mặc định cho user mới và gửi email thông báo
     def save_model(self, request: HttpRequest, obj, form, change: bool) -> None:
-        if not obj.pk:
+        is_new = not obj.pk
+        if is_new:
             obj._skip_new_user_email = True  # signal sẽ bỏ qua, admin form tự xử lý
-            # random password
             password = make_random_password()
-            # send email
             s= send_email_login(obj.username, password, obj.email)
-            if s == False: 
-                # messages.error(request, 'Gửi email thông báo mật khẩu thất bại! Hãy đổi mật khẩu để người dùng có thể đăng nhập.')
+            if not s: 
                 messages.error(request, _("Failed to send email notification! Please change the password so that the user can log in."))
             else:
-                # messages.success(request, f'Đã gửi email thông báo mật khẩu, vui lòng kiểm tra hộp thư đến {obj.email}!')
                 messages.success(request, _("Email notification has been sent, please check your inbox!"))
-            super().save_model(request, obj, form, change)
-            obj.set_password(password) # để sau super().save_model
+        super().save_model(request, obj, form, change)
+        if is_new:
+            obj.set_password(password)
             obj.save()
-
-        else:
-            super().save_model(request, obj, form, change) 
 
 
 @admin.register(UserActivity, site=base_admin_site)

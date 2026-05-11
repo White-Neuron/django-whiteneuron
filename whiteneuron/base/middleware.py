@@ -239,7 +239,7 @@ class UserActivityMiddleware:
         ('/__debug__/', 'contains'),
         ('/jsi18n/', 'contains'),
         ('/.well-known/', 'contains'),
-        ('/ws/', 'startwith'),  # WebSocket handshake — không log, không rate-limit per-user
+        ('/ws/', 'startswith'),  # WebSocket handshake — không log, không rate-limit per-user
     ]
 
     def __init__(self, get_response):

@@ -10,6 +10,7 @@ from whiteneuron.base.admin import ModelAdmin
 from .models import NotificationConfig, Notification
 from django.utils.translation import gettext_lazy as _
 from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
 from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 from django.utils.html import format_html
@@ -99,7 +100,7 @@ class NotificationAdmin(ModelAdmin):
         if obj.obj_link:
             return redirect(obj.obj_link)
         self.message_user(request, _("No object link available for this notification."))
-        return redirect(request.META.get('HTTP_REFERER', 'admin:notification_notification_changeform', args=[object_id]))
+        return redirect(reverse('admin:notification_notification_changeform', args=[object_id]))
     
     def has_view_obj_link_permission(self, request, object_id: int):
         if object_id is not None:
@@ -137,7 +138,7 @@ class NotificationAdmin(ModelAdmin):
             if not obj.is_read and obj.user == request.user:
                 obj.is_read = True
                 obj.save()
-        except:
+        except Exception:
             pass
         return super().changeform_view(request, object_id=object_id, form_url=form_url, extra_context=extra_context)
     

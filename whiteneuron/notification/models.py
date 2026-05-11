@@ -101,11 +101,13 @@ class Notification(models.Model):
         self.is_read = False
         self.save()
 
-    def mark_as_read_all(self):
-        self.objects.update(is_read=True)
+    @classmethod
+    def mark_as_read_all(cls, user):
+        cls.objects.filter(user=user).update(is_read=True)
 
-    def mark_as_unread_all(self):
-        self.objects.update(is_read=False)
+    @classmethod
+    def mark_as_unread_all(cls, user):
+        cls.objects.filter(user=user).update(is_read=False)
 
     # def get_changed_data(self):
         

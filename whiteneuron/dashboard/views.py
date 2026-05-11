@@ -59,17 +59,23 @@ def dashboard_callback(request, context):
         start_last= start - datetime.timedelta(days=7)
         end_last= end - datetime.timedelta(days=7)
     elif time == "month":
-        start= datetime.date.today().replace(day=1)
-        end= start.replace(month=start.month+1)
-        start_last= start.replace(month=start.month-1)
-        end_last= end.replace(month=end.month-1)
+        today = datetime.date.today()
+        start= today.replace(day=1)
+        end= (start + datetime.timedelta(days=32)).replace(day=1)
+        start_last= (start - datetime.timedelta(days=1)).replace(day=1)
+        end_last= (end - datetime.timedelta(days=1)).replace(day=1)
     elif time == "year":
-        start= datetime.date.today().replace(month=1, day=1)
+        today = datetime.date.today()
+        start= today.replace(month=1, day=1)
         end= start.replace(year=start.year+1)
         start_last= start.replace(year=start.year-1)
         end_last= end.replace(year=end.year-1)
     else:
-        ValueError(_("Invalid time"))
+        time = "week"
+        start= datetime.date.today() - datetime.timedelta(days=datetime.date.today().weekday())
+        end= start + datetime.timedelta(days=7)
+        start_last= start - datetime.timedelta(days=7)
+        end_last= end - datetime.timedelta(days=7)
 
     
     

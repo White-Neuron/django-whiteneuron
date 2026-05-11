@@ -9,7 +9,7 @@ class FieldSelectionFilter(MultipleDropdownFilter):
         for field_name in model_admin.get_fields(request):
             try:
                 r.append((field_name, model_admin.model._meta.get_field(field_name).verbose_name))
-            except:
+            except Exception:
                 pass
         return r
 

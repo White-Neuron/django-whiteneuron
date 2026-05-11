@@ -40,12 +40,12 @@ class ImageModel(models.Model):
         try:
             if os.path.isfile(self.image.path):
                 os.remove(self.image.path)
-        except:
+        except Exception:
             pass
         try:
             if os.path.isfile(self.thumbnail.path):
                 os.remove(self.thumbnail.path)
-        except:
+        except Exception:
             pass
 
     def listen(self, image_field: models.ImageField):
