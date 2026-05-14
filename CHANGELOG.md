@@ -1,6 +1,15 @@
 # Changelog
 
-### v0.3.4.6.1 (2026-05-11) — latest
+### v0.3.4.6.2 (2026-05-14) — latest
+**Improvement: Configurable rate-limit exempt paths and user activity exclude paths**
+- **Improved**: `RateLimitMiddleware` now reads `RATE_LIMIT_EXEMPT_PATHS` from Django settings — comma-separated list of additional path prefixes to exclude from rate limiting, loaded dynamically at middleware initialization.
+- **Improved**: `UserActivityMiddleware` now reads `USER_ACTIVITY_EXCLUDE_PATHS` from Django settings — semicolon-separated list of `path,condition` pairs (conditions: `startwith`, `contains`, `exact`) for excluding paths from activity tracking and rate limiting, parsed at initialization.
+- **Validation**: Build successful (Tailwind + migrations), smoke test passed.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users. New settings are optional — existing deployments work without any configuration changes.
+- **Upgrade Guidance**: Set `RATE_LIMIT_EXEMPT_PATHS` and/or `USER_ACTIVITY_EXCLUDE_PATHS` in Django settings to customize path exclusions. Run `pip install --upgrade django-whiteneuron` to apply changes.
+- **Rollback**: Safe to revert to v0.3.4.6.1; no schema changes introduced.
+
+### v0.3.4.6.1 (2026-05-11)
 **Dependency: Bump django-unfold to >=0.92.0, requires Python 3.12+**
 - **Updated**: `django-unfold` minimum version bumped from `>=0.89.0` to `>=0.92.0` — incorporates improvements from 0.90.0–0.92.0 including compressed fields by default, removal of unbound template blocks, inline before/after templates, and UI component enhancements.
 - **Updated**: `requires-python` raised from `>=3.11` to `>=3.12` — aligns with django-unfold 0.92+ requirements and modern Python support.

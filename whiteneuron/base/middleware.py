@@ -27,6 +27,16 @@ class RateLimitMiddleware:
     )
 
     def __init__(self, get_response):
+
+        # read env for extra exempt paths (comma-separated)
+        from django.conf import settings
+        extra_paths = getattr(settings, 'RATE_LIMIT_EXEMPT_PATHS', '')
+        for p in extra_paths.split(','):
+            p = p.strip()
+            if p and p not in self.EXEMPT_PATHS:
+                self.EXEMPT_PATHS += (p,)
+
+
         self.get_response = get_response
         from django.conf import settings
         self.rate = getattr(settings, 'RATE_LIMIT_REQUESTS', 300)
@@ -240,9 +250,28 @@ class UserActivityMiddleware:
         ('/jsi18n/', 'contains'),
         ('/.well-known/', 'contains'),
         ('/ws/', 'startswith'),  # WebSocket handshake — không log, không rate-limit per-user
+        ('/health/', 'startswith'),  # Health check endpoint — không log, không rate-limit per-user
     ]
 
     def __init__(self, get_response):
+
+        # read env for extra exclude paths (comma-separated, format: "path,condition;path,condition;...")
+        from django.conf import settings
+        extra = getattr(settings, 'USER_ACTIVITY_EXCLUDE_PATHS', '')
+        for item in extra.split(';'):
+            item = item.strip()
+            if not item:
+                continue
+            try:
+                path, condition = item.split(',')
+                condition = condition.strip().lower()
+                if condition not in ('startwith', 'contains', 'exact'):
+                    continue
+                self.exclude_paths.append((path.strip(), condition))
+            except ValueError:
+                continue
+
+
         self._get_response = get_response
         from django.conf import settings
         self.user_rate = getattr(settings, 'USER_RATE_LIMIT_REQUESTS', 200)

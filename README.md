@@ -10,16 +10,14 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.3.4.6.1
+v0.3.4.6.2
 
 ## Changelog
-### Latest: v0.3.4.6.1 (2026-05-11)
-**Dependency: Bump django-unfold to >=0.92.0, requires Python 3.12+**
-- **Updated**: `django-unfold` minimum version bumped from `>=0.89.0` to `>=0.92.0` — incorporates improvements from 0.90.0–0.92.0 including compressed fields by default, removal of unbound template blocks, inline before/after templates, and UI component enhancements.
-- **Updated**: `requires-python` raised from `>=3.11` to `>=3.12` — aligns with django-unfold 0.92+ requirements and modern Python support.
-- **Compatibility**: No breaking changes; safe for all v0.3.x users on Python 3.12+. Note: Python 3.11 is no longer supported starting from this version.
-- **Upgrade Guidance**: Ensure your environment uses Python 3.12 or later before upgrading. Run `pip install --upgrade django-whiteneuron` to apply changes.
-- **Rollback**: Safe to revert to v0.3.4.6; downgrade requires Python 3.11 compatibility.
+### Latest: v0.3.4.6.2 (2026-05-14)
+**Improvement: Configurable rate-limit exempt paths and user activity exclude paths**
+- **Improved**: `RateLimitMiddleware` now reads `RATE_LIMIT_EXEMPT_PATHS` from Django settings — comma-separated list of additional path prefixes to exclude from rate limiting.
+- **Improved**: `UserActivityMiddleware` now reads `USER_ACTIVITY_EXCLUDE_PATHS` from Django settings — semicolon-separated list of `path,condition` pairs for excluding paths from activity tracking and rate limiting.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users. New settings are optional.
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
