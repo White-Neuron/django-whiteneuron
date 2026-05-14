@@ -115,7 +115,7 @@
 
 <script>
 
-    const actionsButtons = document.querySelectorAll('.action_buttoms');
+    const actionsButtons = document.querySelectorAll('.action_buttons');
     actionsButtons.forEach(button => {
         button.classList.add('hidden');
     });
@@ -124,14 +124,14 @@
     gridObjects.forEach(object => {
         object.addEventListener('mouseover', () => {
             const pk = object.id.split('_')[1];
-            const actionsButton = document.querySelector(`#action_buttoms_${pk}`);
+            const actionsButton = document.querySelector(`#action_buttons_${pk}`);
             if (actionsButton)
                 actionsButton.classList.remove('hidden');
         });
 
         object.addEventListener('mouseout', () => {
             const pk = object.id.split('_')[1];
-            const actionsButton = document.querySelector(`#action_buttoms_${pk}`);
+            const actionsButton = document.querySelector(`#action_buttons_${pk}`);
             if (actionsButton)
                 actionsButton.classList.add('hidden');
         });

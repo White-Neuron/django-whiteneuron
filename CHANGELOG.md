@@ -1,6 +1,14 @@
 # Changelog
 
-### v0.3.4.6.2 (2026-05-14) — latest
+### v0.3.4.6.3 (2026-05-14) — latest
+**Bugfix: HTML typo `action_buttoms` → `action_buttons` in grid view templates**
+- **Fixed**: CSS class and JS selector `action_buttoms` corrected to `action_buttons` across 2 template files (`change_list.html`, `grid_view_results.html`) — restores proper hover-reveal action buttons on grid view object cards.
+- **Validation**: Build successful (Tailwind + migrations), no schema changes.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users.
+- **Upgrade Guidance**: Run `pip install --upgrade django-whiteneuron` to apply changes.
+- **Rollback**: Safe to revert to v0.3.4.6.2; no schema changes introduced.
+
+### v0.3.4.6.2 (2026-05-14)
 **Improvement: Configurable rate-limit exempt paths and user activity exclude paths**
 - **Improved**: `RateLimitMiddleware` now reads `RATE_LIMIT_EXEMPT_PATHS` from Django settings — comma-separated list of additional path prefixes to exclude from rate limiting, loaded dynamically at middleware initialization.
 - **Improved**: `UserActivityMiddleware` now reads `USER_ACTIVITY_EXCLUDE_PATHS` from Django settings — semicolon-separated list of `path,condition` pairs (conditions: `startwith`, `contains`, `exact`) for excluding paths from activity tracking and rate limiting, parsed at initialization.

@@ -10,9 +10,16 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.3.4.6.2
+v0.3.4.6.3
 
 ## Changelog
+### Latest: v0.3.4.6.3 (2026-05-14)
+**Bugfix: HTML typo `action_buttoms` → `action_buttons` in grid view templates**
+- **Fixed**: CSS class and JS selector corrected to `action_buttons` — restores proper hover-reveal action buttons on grid view object cards.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users.
+
+See [CHANGELOG.md](CHANGELOG.md) for the full version history.
+
 ### Latest: v0.3.4.6.2 (2026-05-14)
 **Improvement: Configurable rate-limit exempt paths and user activity exclude paths**
 - **Improved**: `RateLimitMiddleware` now reads `RATE_LIMIT_EXEMPT_PATHS` from Django settings — comma-separated list of additional path prefixes to exclude from rate limiting.
