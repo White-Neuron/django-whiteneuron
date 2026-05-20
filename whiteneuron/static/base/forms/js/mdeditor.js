@@ -29,14 +29,14 @@
 
         // Modal box container
         var modalBox = document.createElement('div');
-        modalBox.className = 'ui-modal-box w-full max-w-4xl max-h-[85vh] flex flex-col p-0 overflow-hidden';
+        modalBox.className = 'ui-modal-box w-full max-w-4xl max-h-[85vh] flex flex-col p-0 overflow-hidden bg-base-100 text-base-content';
 
         // Header
         var headerDiv = document.createElement('div');
         headerDiv.className = 'flex items-center justify-between px-6 py-4 border-b border-base-200 dark:border-base-700';
 
         var titleH3 = document.createElement('h3');
-        titleH3.className = 'text-lg font-semibold text-base-900 dark:text-base-100';
+        titleH3.className = 'text-lg font-semibold text-base-content';
         titleH3.textContent = 'Markdown Preview';
 
         // Close button — use modal.close() directly to avoid loading.js interception
@@ -57,7 +57,7 @@
 
         // Backdrop — plain div with click handler, no form to intercept
         var backdropDiv = document.createElement('div');
-        backdropDiv.className = 'ui-modal-backdrop';
+        backdropDiv.className = 'ui-modal-backdrop bg-black/50 dark:bg-black/70';
         backdropDiv.addEventListener('click', function(e) {
             if (e.target === backdropDiv) { modal.close(); }
         });

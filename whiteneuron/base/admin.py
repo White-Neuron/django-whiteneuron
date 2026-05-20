@@ -51,7 +51,6 @@ from unfold.forms import AdminPasswordChangeForm, UserChangeForm
 from django.contrib.auth.forms import UserCreationForm
 
 from unfold.widgets import (
-    UnfoldAdminCheckboxSelectMultiple,
     UnfoldAdminColorInputWidget,
     UnfoldAdminSelectWidget,
     UnfoldAdminSplitDateTimeWidget,

@@ -10,13 +10,14 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.3.4.6.3
+v0.3.4.7
 
 ## Changelog
-### Latest: v0.3.4.6.3 (2026-05-14)
-**Bugfix: HTML typo `action_buttoms` → `action_buttons` in grid view templates**
-- **Fixed**: CSS class and JS selector corrected to `action_buttons` — restores proper hover-reveal action buttons on grid view object cards.
-- **Compatibility**: No breaking changes; safe for all v0.3.x users.
+### Latest: v0.3.4.7 (2026-05-20)
+**Improvement: Markdown editor modal theming fix and Python 3.13 requirement**
+- **Improved**: `requires-python` raised to `>=3.13` — aligns with modern Python support requirements.
+- **Fixed**: Markdown editor preview modal uses explicit DaisyUI semantic tokens for reliable theme-aware rendering in light/dark modes.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users on Python 3.13+. Note: Python 3.12 is no longer supported starting from this version.
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 

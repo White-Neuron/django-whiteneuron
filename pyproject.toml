@@ -1,6 +1,6 @@
 [project]
 name = "django-whiteneuron"
-version = "0.3.4.6.3"
+version = "0.3.4.7"
 description = "A modern Django Admin extension with enhanced UI/UX, dashboard, feedback, file management, rate limiting, IP blacklisting, and advanced admin integrations built on django-unfold."
 authors = [
     {name = "White Neuron", email = "anhnt@whiteneuron.ai"}
@@ -45,7 +45,7 @@ dependencies = [
     "pyopenssl==26.0.0",
     "md2html-tailwind4==1.5.1"
 ]
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -53,8 +53,7 @@ classifiers = [
     "Framework :: Django",
     "Framework :: Django :: 5.2",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent"
 ]

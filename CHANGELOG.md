@@ -1,6 +1,17 @@
 # Changelog
 
-### v0.3.4.6.3 (2026-05-14) — latest
+### v0.3.4.7 (2026-05-20) — latest
+**Improvement: Markdown editor modal theming fix and Python 3.13 requirement**
+- **Improved**: `requires-python` raised from `>=3.12` to `>=3.13` — aligns with modern Python support requirements.
+- **Fixed**: Markdown editor preview modal now uses explicit DaisyUI semantic tokens (`bg-base-100`, `text-base-content`) for reliable theme-aware rendering in both light and dark modes.
+- **Improved**: Modal backdrop overlay updated with explicit opacity classes (`bg-black/50` / `dark:bg-black/70`) for consistent appearance across contexts.
+- **Fixed**: Removed unused import `UnfoldAdminCheckboxSelectMultiple` from `whiteneuron/base/admin.py`.
+- **Validation**: Build successful (Tailwind + migrations), no schema changes.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users on Python 3.13+. Note: Python 3.12 is no longer supported starting from this version.
+- **Upgrade Guidance**: Ensure your environment uses Python 3.13 or later before upgrading. Run `pip install --upgrade django-whiteneuron` to apply changes.
+- **Rollback**: Safe to revert to v0.3.4.6.3; downgrade requires Python 3.12 compatibility.
+
+### v0.3.4.6.3 (2026-05-14)
 **Bugfix: HTML typo `action_buttoms` → `action_buttons` in grid view templates**
 - **Fixed**: CSS class and JS selector `action_buttoms` corrected to `action_buttons` across 2 template files (`change_list.html`, `grid_view_results.html`) — restores proper hover-reveal action buttons on grid view object cards.
 - **Validation**: Build successful (Tailwind + migrations), no schema changes.
