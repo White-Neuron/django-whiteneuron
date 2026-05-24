@@ -3,6 +3,7 @@ from .models import User, UserActivity, AnonymousActivity
 from django.contrib.auth.models import Group
 from django.utils.translation import gettext_lazy as _
 from django.utils.text import format_lazy
+from django.core.cache import caches
 
 # count time run function
 def timeit(func):
@@ -14,48 +15,41 @@ def timeit(func):
         return result
     return wrapper
 
-from django.utils import timezone
 from django.core.exceptions import FieldDoesNotExist
 
+_BADGE_CACHE_TIMEOUT = 60
+
+def _make_cache_key(*parts):
+    return ":".join(str(p) for p in parts)
+
+def _cacheable_filter_kwargs(filter_kwargs):
+    if filter_kwargs is None:
+        return "all"
+    try:
+        return str(sorted(filter_kwargs.items()))
+    except TypeError:
+        return str(filter_kwargs)
+
 def base_badge_callback(request, model, filter_kwargs=None):
+    cache_key = _make_cache_key("badge", model.__name__, _cacheable_filter_kwargs(filter_kwargs))
+    cached = caches["default"].get(cache_key)
+    if cached is not None:
+        return cached
+
     today = timezone.localtime().replace(hour=0, minute=0, second=0, microsecond=0)
-
-    # try:
-    #     model._meta.get_field("is_deleted")
-    #     model._meta.get_field("deleted_at")
-    #     has_soft_delete = True
-    # except FieldDoesNotExist:
-    #     has_soft_delete = False
-
-    # if has_soft_delete:
-    #     number_update = model.objects.filter(
-    #         is_deleted=False,
-    #         updated_at__gte=today,
-    #     ).count()
-        
-    #     number_delete= getattr(model, 'objects_all', model.objects).filter(is_deleted=True,deleted_at__gte= timezone.localtime().replace(hour=0, minute=0, second=0, microsecond=0)).count()
-    #     print("model:",model.__name__,"number_delete:",number_delete)
-
-    #     c = number_update - number_delete
-    # else:
-    #     c = model.objects.filter(
-    #         updated_at__gte=today,
-    #     ).count()
 
     c = getattr(model, 'objects_all', model.objects)
     if hasattr(model, 'updated_at'):
-        c = c.filter(
-          updated_at__gte=today,
-        )
+        c = c.filter(updated_at__gte=today)
     elif hasattr(model, 'created_at'):
-        c = c.filter(
-          created_at__gte=today,
-        )
-        
+        c = c.filter(created_at__gte=today)
+
     if filter_kwargs:
         c = c.filter(**filter_kwargs).count()
-    else:        
+    else:
         c = c.count()
+
+    caches["default"].set(cache_key, c, timeout=_BADGE_CACHE_TIMEOUT)
     return c
 
 
@@ -63,17 +57,35 @@ def user_badge_callback(request):
     return base_badge_callback(request, User)
 
 def useractivity_badge_callback(request):
-    c= UserActivity.objects.filter(timestamp__gte= timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)).count()
-    return f"{c}"
+    cache_key = _make_cache_key("badge", "UserActivity")
+    cached = caches["default"].get(cache_key)
+    if cached is not None:
+        return cached
+
+    c = UserActivity.objects.filter(timestamp__gte=timezone.localtime().replace(hour=0, minute=0, second=0, microsecond=0)).count()
+    caches["default"].set(cache_key, c, timeout=_BADGE_CACHE_TIMEOUT)
+    return c
 
 def anonymousactivity_badge_callback(request):
-    c= AnonymousActivity.objects.filter(timestamp__gte= timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)).count()
-    return f"{c}"
+    cache_key = _make_cache_key("badge", "AnonymousActivity")
+    cached = caches["default"].get(cache_key)
+    if cached is not None:
+        return cached
+
+    c = AnonymousActivity.objects.filter(timestamp__gte=timezone.localtime().replace(hour=0, minute=0, second=0, microsecond=0)).count()
+    caches["default"].set(cache_key, c, timeout=_BADGE_CACHE_TIMEOUT)
+    return c
 
 def visitprofile_badge_callback(request):
     from .models import VisitProfile
-    c = VisitProfile.objects.filter(last_seen__gte= timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)).count()
-    return f"{c}"
+    cache_key = _make_cache_key("badge", "VisitProfile")
+    cached = caches["default"].get(cache_key)
+    if cached is not None:
+        return cached
+
+    c = VisitProfile.objects.filter(last_seen__gte=timezone.localtime().replace(hour=0, minute=0, second=0, microsecond=0)).count()
+    caches["default"].set(cache_key, c, timeout=_BADGE_CACHE_TIMEOUT)
+    return c
 
 
 def group_badge_callback(request):

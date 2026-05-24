@@ -10,14 +10,15 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.3.4.7
+v0.3.4.8
 
 ## Changelog
-### Latest: v0.3.4.7 (2026-05-20)
-**Improvement: Markdown editor modal theming fix and Python 3.13 requirement**
-- **Improved**: `requires-python` raised to `>=3.13` — aligns with modern Python support requirements.
-- **Fixed**: Markdown editor preview modal uses explicit DaisyUI semantic tokens for reliable theme-aware rendering in light/dark modes.
-- **Compatibility**: No breaking changes; safe for all v0.3.x users on Python 3.13+. Note: Python 3.12 is no longer supported starting from this version.
+### Latest: v0.3.4.8 (2026-05-24)
+**Feature: Badge callback caching layer for dashboard performance optimization**
+- **Added**: Django cache-backed badge callbacks for dashboard model badges with 60s TTL to reduce database queries.
+- **Added**: Per-user cached notification badge with 60s TTL and unauthenticated user guard.
+- **Improved**: Replaced `timezone.now()` with `timezone.localtime()` across all badge queries.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users. Requires Django cache backend configured.
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 

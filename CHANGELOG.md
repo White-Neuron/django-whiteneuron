@@ -1,6 +1,16 @@
 # Changelog
 
-### v0.3.4.7 (2026-05-20) — latest
+### v0.3.4.8 (2026-05-24) — latest
+**Feature: Badge callback caching layer for dashboard performance optimization**
+- **Added**: Django cache-backed badge callbacks for dashboard model badges (User, UserActivity, AnonymousActivity, VisitProfile) with 60s TTL to reduce database queries.
+- **Added**: Per-user cached notification badge with 60s TTL and unauthenticated user guard returning 0.
+- **Improved**: Replaced `timezone.now()` with `timezone.localtime()` across all badge queries for accurate timezone-aware counting.
+- **Validation**: Build successful (Tailwind + migrations), no schema changes.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users. Requires Django cache backend configured (default or Redis recommended).
+- **Upgrade Guidance**: Ensure your cache backend is properly configured before upgrading. Run `pip install --upgrade django-whiteneuron` to apply changes.
+- **Rollback**: Safe to revert to v0.3.4.7; no schema changes introduced.
+
+### v0.3.4.7 (2026-05-20)
 **Improvement: Markdown editor modal theming fix and Python 3.13 requirement**
 - **Improved**: `requires-python` raised from `>=3.12` to `>=3.13` — aligns with modern Python support requirements.
 - **Fixed**: Markdown editor preview modal now uses explicit DaisyUI semantic tokens (`bg-base-100`, `text-base-content`) for reliable theme-aware rendering in both light and dark modes.
