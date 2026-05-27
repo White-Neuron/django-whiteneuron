@@ -1,6 +1,15 @@
 # Changelog
 
-### v0.3.4.8 (2026-05-24) — latest
+### v0.3.4.9 (2026-05-27) — latest
+**Bugfix: `startswith` typo in UserActivityMiddleware broke path exclusion**
+- **Fixed**: Typo `'startwith'` → `'startswith'` in two places within `UserActivityMiddleware` (`__init__` validation at line 268, `do_not_track` check at line 283) — restores proper `/health/`, `/ws/` and custom `USER_ACTIVITY_EXCLUDE_PATHS` path exclusion from activity tracking and rate limiting.
+- **Fixed**: Documentation updated to use correct condition name `startswith` instead of typo `startwith`.
+- **Validation**: Build successful (Tailwind + migrations), no schema changes.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users.
+- **Upgrade Guidance**: Run `pip install --upgrade django-whiteneuron` to apply changes.
+- **Rollback**: Safe to revert to v0.3.4.8; no schema changes introduced.
+
+### v0.3.4.8 (2026-05-24)
 **Feature: Badge callback caching layer for dashboard performance optimization**
 - **Added**: Django cache-backed badge callbacks for dashboard model badges (User, UserActivity, AnonymousActivity, VisitProfile) with 60s TTL to reduce database queries.
 - **Added**: Per-user cached notification badge with 60s TTL and unauthenticated user guard returning 0.

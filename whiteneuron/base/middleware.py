@@ -265,7 +265,7 @@ class UserActivityMiddleware:
             try:
                 path, condition = item.split(',')
                 condition = condition.strip().lower()
-                if condition not in ('startwith', 'contains', 'exact'):
+                if condition not in ('startswith', 'contains', 'exact'):
                     continue
                 self.exclude_paths.append((path.strip(), condition))
             except ValueError:
@@ -280,7 +280,7 @@ class UserActivityMiddleware:
 
     def do_not_track(self, request):
         for path, condition in self.exclude_paths:
-            if condition == 'startwith' and request.path.startswith(path):
+            if condition == 'startswith' and request.path.startswith(path):
                 return True
             if condition == 'contains' and path in request.path:
                 return True

@@ -10,9 +10,16 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.3.4.8
+v0.3.4.9
 
 ## Changelog
+### Latest: v0.3.4.9 (2026-05-27)
+**Bugfix: `startswith` typo in UserActivityMiddleware broke path exclusion**
+- **Fixed**: Typo `'startwith'` → `'startswith'` in two places within `UserActivityMiddleware` — restores proper `/health/`, `/ws/` and custom `USER_ACTIVITY_EXCLUDE_PATHS` path exclusion from activity tracking and rate limiting.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users.
+
+See [CHANGELOG.md](CHANGELOG.md) for the full version history.
+
 ### Latest: v0.3.4.8 (2026-05-24)
 **Feature: Badge callback caching layer for dashboard performance optimization**
 - **Added**: Django cache-backed badge callbacks for dashboard model badges with 60s TTL to reduce database queries.
