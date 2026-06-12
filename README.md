@@ -10,13 +10,13 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.3.4.9
+v0.3.4.10
 
 ## Changelog
-### Latest: v0.3.4.9 (2026-05-27)
-**Bugfix: `startswith` typo in UserActivityMiddleware broke path exclusion**
-- **Fixed**: Typo `'startwith'` → `'startswith'` in two places within `UserActivityMiddleware` — restores proper `/health/`, `/ws/` and custom `USER_ACTIVITY_EXCLUDE_PATHS` path exclusion from activity tracking and rate limiting.
-- **Compatibility**: No breaking changes; safe for all v0.3.x users.
+### Latest: v0.3.4.10 (2026-06-12)
+**Security patch: Upgrade Django to 6.0.6+ (CVE-2026-8404, CVE-2026-48587, CVE-2026-6873)**
+- **Fixed**: Upgraded `django` lower bound from `>=6.0.6` to `>=6.0.6,<7.0.0` — patches 5 security vulnerabilities: CVE-2026-8404 (CVSS 5.3), CVE-2026-48587 (CVSS 5.3), CVE-2026-6873 (CVSS 4.3), CVE-2026-7666 (CVSS 2.3), CVE-2026-35193 (CVSS 2.3).
+- **Compatibility**: No breaking changes; safe for all v0.3.x users. Django 6.0.x only — pinned upper bound `<7.0.0`.
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 

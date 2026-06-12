@@ -1,6 +1,14 @@
 # Changelog
 
-### v0.3.4.9 (2026-05-27) — latest
+### v0.3.4.10 (2026-06-12) — latest
+**Security patch: Upgrade Django to 6.0.6+ (CVE-2026-8404, CVE-2026-48587, CVE-2026-6873)**
+- **Fixed**: Upgraded `django` lower bound from `>=6.0.6` to `>=6.0.6,<7.0.0` — patches 5 security vulnerabilities: CVE-2026-8404 (CVSS 5.3 Medium), CVE-2026-48587 (CVSS 5.3 Medium), CVE-2026-6873 (CVSS 4.3 Medium), CVE-2026-7666 (CVSS 2.3 Low), CVE-2026-35193 (CVSS 2.3 Low).
+- **Validation**: Build successful (Tailwind + migrations), no schema changes.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users. Django 6.0.x only — pinned upper bound `<7.0.0` to prevent unexpected major upgrades.
+- **Upgrade Guidance**: Run `pip install --upgrade django-whiteneuron` to apply security patches.
+- **Rollback**: Safe to revert to v0.3.4.9; no schema changes introduced.
+
+### v0.3.4.9 (2026-05-27)
 **Bugfix: `startswith` typo in UserActivityMiddleware broke path exclusion**
 - **Fixed**: Typo `'startwith'` → `'startswith'` in two places within `UserActivityMiddleware` (`__init__` validation at line 268, `do_not_track` check at line 283) — restores proper `/health/`, `/ws/` and custom `USER_ACTIVITY_EXCLUDE_PATHS` path exclusion from activity tracking and rate limiting.
 - **Fixed**: Documentation updated to use correct condition name `startswith` instead of typo `startwith`.
