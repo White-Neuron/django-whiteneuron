@@ -10,9 +10,17 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.3.4.10
+v0.3.4.11
 
 ## Changelog
+### Latest: v0.3.4.11 (2026-06-18)
+**Security: Upgrade cryptography ≥48.0.1, pyopenssl ≥26.2.0**
+- **Updated**: `cryptography` minimum version bumped from `>=46.0.7` to `>=48.0.1` — resolves CVE with CVSS 7.5 (affects versions >=0.5.0,<48.0.1). Resolved to cryptography==49.0.0 by uv lock.
+- **Updated**: `pyopenssl` pinned version changed from `==26.0.0` to `>=26.2.0` — required for compatibility with cryptography ≥48.0.1 (pyopenssl 26.3.0 resolved).
+- **Compatibility**: No breaking changes; safe for all v0.3.x users. pyopenssl constraint relaxed from exact pin to minimum version.
+
+See [CHANGELOG.md](CHANGELOG.md) for the full version history.
+
 ### Latest: v0.3.4.10 (2026-06-12)
 **Security patch: Upgrade Django to 6.0.6+ (CVE-2026-8404, CVE-2026-48587, CVE-2026-6873)**
 - **Fixed**: Upgraded `django` lower bound from `>=6.0.6` to `>=6.0.6,<7.0.0` — patches 5 security vulnerabilities: CVE-2026-8404 (CVSS 5.3), CVE-2026-48587 (CVSS 5.3), CVE-2026-6873 (CVSS 4.3), CVE-2026-7666 (CVSS 2.3), CVE-2026-35193 (CVSS 2.3).

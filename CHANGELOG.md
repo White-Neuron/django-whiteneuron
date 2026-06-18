@@ -1,5 +1,14 @@
 # Changelog
 
+### v0.3.4.11 (2026-06-18) — latest
+**Security: Upgrade cryptography ≥48.0.1, pyopenssl ≥26.2.0**
+- **Updated**: `cryptography` minimum version bumped from `>=46.0.7` to `>=48.0.1` — resolves CVE with CVSS 7.5 (affects versions >=0.5.0,<48.0.1). Resolved to cryptography==49.0.0 by uv lock.
+- **Updated**: `pyopenssl` pinned version changed from `==26.0.0` to `>=26.2.0` — required for compatibility with cryptography ≥48.0.1 (pyopenssl 26.3.0 resolved).
+- **Validation**: Build successful (Tailwind + migrations), no schema changes. All 92 packages scanned via OSV.dev API — zero known CVEs remaining.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users. pyopenssl constraint relaxed from exact pin to minimum version.
+- **Upgrade Guidance**: Run `pip install --upgrade django-whiteneuron` to apply security patches.
+- **Rollback**: Safe to revert to v0.3.4.10; no schema changes introduced.
+
 ### v0.3.4.10 (2026-06-12) — latest
 **Security patch: Upgrade Django to 6.0.6+ (CVE-2026-8404, CVE-2026-48587, CVE-2026-6873)**
 - **Fixed**: Upgraded `django` lower bound from `>=6.0.6` to `>=6.0.6,<7.0.0` — patches 5 security vulnerabilities: CVE-2026-8404 (CVSS 5.3 Medium), CVE-2026-48587 (CVSS 5.3 Medium), CVE-2026-6873 (CVSS 4.3 Medium), CVE-2026-7666 (CVSS 2.3 Low), CVE-2026-35193 (CVSS 2.3 Low).
