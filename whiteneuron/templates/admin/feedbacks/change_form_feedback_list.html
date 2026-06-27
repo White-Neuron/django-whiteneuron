@@ -1,0 +1,70 @@
+{% load i18n %}
+
+{% if feedback_list %}
+<div class="mt-6">
+    <div class="flex items-center gap-3 mb-4 px-1">
+        <span class="material-symbols-outlined text-base-content/50" style="font-size:1.2rem">feedback</span>
+        <h3 class="flex-1 font-semibold text-sm uppercase tracking-widest text-base-content/50">
+            {% trans "Feedbacks" %}
+        </h3>
+        <span class="text-xs text-base-content/30">{{ feedback_list|length }}&nbsp;{% trans "entries" %}</span>
+    </div>
+
+    <div class="space-y-2">
+        {% for fb in feedback_list %}
+        <div class="flex gap-3 p-4 rounded-xl
+                    bg-base-100 dark:bg-base-800
+                    border border-base-200 dark:border-base-700
+                    {% if fb.is_resolved %}border-l-4 border-l-success{% else %}border-l-4 border-l-warning{% endif %}">
+
+            {# Avatar #}
+            <div class="shrink-0 mt-0.5">
+                {% if fb.user.avatar %}
+                    <img src="{{ fb.user.avatar.url }}" class="w-7 h-7 rounded-full object-cover"/>
+                {% else %}
+                    <span class="material-symbols-outlined text-base-content/30" style="font-size:1.75rem;line-height:1">person</span>
+                {% endif %}
+            </div>
+
+            {# Content #}
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap mb-1.5">
+                    {# Status badge #}
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold
+                        {% if fb.is_resolved %}bg-success/15 text-success{% else %}bg-warning/15 text-warning{% endif %}">
+                        <span class="material-symbols-outlined" style="font-size:0.85rem;line-height:1">
+                            {% if fb.is_resolved %}check_circle{% else %}schedule{% endif %}
+                        </span>
+                        {% if fb.is_resolved %}{% trans "Resolved" %}{% else %}{% trans "Pending" %}{% endif %}
+                    </span>
+
+                    {# Author #}
+                    <span class="text-xs font-medium text-base-content/70">{{ fb.user }}</span>
+
+                    {# Timestamp #}
+                    <span class="text-xs text-base-content/35 ml-auto">{{ fb.created_at|date:"d/m/Y H:i" }}</span>
+                </div>
+
+                {# Message #}
+                <p class="text-sm text-base-content/80 leading-relaxed break-words">{{ fb.message }}</p>
+
+                {# Field hint #}
+                {% if fb.field %}
+                <p class="text-xs text-base-content/40 mt-1">
+                    {% blocktrans with field_name=fb.field %}Field: {{ field_name }}{% endblocktrans %}
+                </p>
+                {% endif %}
+
+                {# Admin note #}
+                {% if fb.note %}
+                <div class="mt-2 p-3 rounded-lg bg-success/5 border border-success/20">
+                    <p class="text-xs font-medium text-success mb-0.5">{% trans "Admin note" %}</p>
+                    <p class="text-sm text-base-content/70">{{ fb.note }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}

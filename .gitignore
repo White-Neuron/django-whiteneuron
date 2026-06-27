@@ -189,3 +189,4 @@ whiteneuron/templates/admin/signature_ceo.html
 .github/hooks/
 scripts/hooks/
 .opencode
+*/.DS_Store
