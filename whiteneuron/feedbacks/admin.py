@@ -135,7 +135,20 @@ class FeedbackDataAdmin(ModelAdmin):
 # FeedBack base admin
 # Cho phép các model khác kế thừa để gọi
 class FeedbackBaseAdmin(ModelAdmin):
+    change_form_outer_after_template = "admin/feedbacks/change_form_feedback_list.html"
+
     def render_change_form(self, request, context, *args, **kwargs):
         context['show_feedback'] = True
         context['feedback_cooldown_ms'] = FEEDBACK_COOLDOWN_SECONDS * 1000
+
+        original = context.get('original')
+        if original is not None:
+            from django.contrib.contenttypes.models import ContentType
+            ct = ContentType.objects.get_for_model(original)
+            feedbacks = FeedbackData.objects.filter(
+                content_type=ct,
+                object_id=str(original.pk),
+            ).select_related('user')
+            context['feedback_list'] = feedbacks
+
         return super().render_change_form(request, context, *args, **kwargs)
