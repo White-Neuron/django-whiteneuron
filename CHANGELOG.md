@@ -1,5 +1,16 @@
 # Changelog
 
+### v0.3.4.12 (2026-06-27) — latest
+**Cleanup: Remove .DS_Store from tracking, feedback list in admin, remove md2html-tailwind4 uv source**
+- **Removed**: 7 `.DS_Store` files removed from git tracking across the repository — added `*/.DS_Store` to `.gitignore` for future prevention.
+- **Added**: `FeedbackBaseAdmin.render_change_form()` now loads and passes `feedback_list` context variable — displays all feedback entries for the current model instance in the admin change form via `change_form_outer_after_template`.
+- **Removed**: `[tool.uv.sources]` block for `md2html-tailwind4` from `pyproject.toml` — no longer needed (dependency resolved via PyPI).
+- **Updated**: Tailwind CSS regenerated with v4.1.16.
+- **Validation**: Build successful (Tailwind + migrations), no schema changes.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users.
+- **Upgrade Guidance**: Run `pip install --upgrade django-whiteneuron` to apply changes.
+- **Rollback**: Safe to revert to v0.3.4.11; no schema changes introduced.
+
 ### v0.3.4.11 (2026-06-18) — latest
 **Security: Upgrade cryptography ≥48.0.1, pyopenssl ≥26.2.0**
 - **Updated**: `cryptography` minimum version bumped from `>=46.0.7` to `>=48.0.1` — resolves CVE with CVSS 7.5 (affects versions >=0.5.0,<48.0.1). Resolved to cryptography==49.0.0 by uv lock.

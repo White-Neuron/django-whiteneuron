@@ -10,14 +10,16 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.3.4.11
+v0.3.4.12
 
 ## Changelog
-### Latest: v0.3.4.11 (2026-06-18)
-**Security: Upgrade cryptography ≥48.0.1, pyopenssl ≥26.2.0**
-- **Updated**: `cryptography` minimum version bumped from `>=46.0.7` to `>=48.0.1` — resolves CVE with CVSS 7.5 (affects versions >=0.5.0,<48.0.1). Resolved to cryptography==49.0.0 by uv lock.
-- **Updated**: `pyopenssl` pinned version changed from `==26.0.0` to `>=26.2.0` — required for compatibility with cryptography ≥48.0.1 (pyopenssl 26.3.0 resolved).
-- **Compatibility**: No breaking changes; safe for all v0.3.x users. pyopenssl constraint relaxed from exact pin to minimum version.
+### Latest: v0.3.4.12 (2026-06-27)
+**Cleanup: Remove .DS_Store from tracking, feedback list in admin, remove md2html-tailwind4 uv source**
+- **Removed**: 7 `.DS_Store` files removed from git tracking — added `*/.DS_Store` to `.gitignore`.
+- **Added**: `FeedbackBaseAdmin.render_change_form()` loads and passes `feedback_list` context for displaying feedback entries per model instance in admin change form.
+- **Removed**: `[tool.uv.sources]` block for `md2html-tailwind4` from `pyproject.toml`.
+- **Updated**: Tailwind CSS regenerated with v4.1.16.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users.
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
