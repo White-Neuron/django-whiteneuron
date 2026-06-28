@@ -13,6 +13,7 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 v0.3.4.12
 
 ## Changelog
+
 ### Latest: v0.3.4.12 (2026-06-27)
 **Cleanup: Remove .DS_Store from tracking, feedback list in admin, remove md2html-tailwind4 uv source**
 - **Removed**: 7 `.DS_Store` files removed from git tracking — added `*/.DS_Store` to `.gitignore`.
@@ -57,6 +58,49 @@ See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 - **Upgrade Guidance**: No manual migration required; upgrade recommended for all users on v0.3.3.x
 - **Rollback**: Safe to revert to v0.3.3.3; no schema changes introduced
 
+See [CHANGELOG.md](CHANGELOG.md) for the full version history.
+
+## Table of Contents
+
+- [Changelog](#changelog)
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Configuration](#configuration)
+- [Modules](#modules)
+- [Middleware & Security](#middleware--security)
+- [Frontend](#frontend)
+- [Environment Variables](#environment-variables)
+- [Management Commands](#management-commands)
+- [Building & Releasing](#building--releasing)
+- [Documentation](#documentation)
+- [Contact](#contact)
+
+## Giới thiệu
+
+Xem [docs/INTRODUCTION.md](docs/INTRODUCTION.md) để tìm hiểu chi tiết về django-whiteneuron — tại sao nên dùng, tính năng nổi bật và ai phù hợp.
+
+## Features
+
+| Category | Feature | Description |
+|---|---|---|
+| **Core** | Custom User Model | UUID-based user model with bot support, avatar, biography |
+| **Core** | Soft Delete System | `BaseModel` with soft delete, restore, and audit trail (`created_by`, `updated_by`) |
+| **Core** | Auto Notifications | Real-time WebSocket notifications on CRUD operations via `BaseModel.save()` |
+| **Dashboard** | Admin Dashboard | Custom dashboard callback with badge system, cache-backed for performance |
+| **Security** | Rate Limiting | IP-based and user-based rate limiting with Redis backend (429 responses) |
+| **Security** | IP Blacklist | Static (`.env` CIDR) + dynamic (admin-managed, Redis TTL) blocking |
+| **Security** | UA Blacklist | User-Agent substring/regex matching via admin panel or `.env` |
+| **Tracking** | Activity Logs | `UserActivity`, `AnonymousActivity`, `VisitProfile` — full request audit trail |
+| **Files** | File Management | Excel/PDF upload with SHA-256 integrity verification |
+| **Feedback** | Feedback System | Per-model feedback collection, viewable in admin change forms |
+| **Admin** | Grid View | Card-based user listing with avatar, badges, and role indicators |
+| **Admin** | Import/Export | `django-import-export` integration for data portability |
+| **Admin** | Simple History | `django-simple-history` tracking on all models |
+| **Admin** | Guardian Integration | Object-level permissions via `django-guardian` |
+| **Editor** | CKEditor 5 | Rich text editing with Tailwind-styled output |
+| **Email** | Login Notifications | Auto-generate password + send login email on user creation |
+
 ## Installation
 
 ### From PyPI (recommended)
@@ -74,13 +118,13 @@ uv add django-whiteneuron
 ### Specific version from PyPI
 
 ```bash
-uv add "django-whiteneuron==0.2.37"
+uv add "django-whiteneuron==0.3.4.12"
 ```
 
 ### From GitHub tag
 
 ```bash
-uv add "git+https://github.com/White-Neuron/django-whiteneuron.git@v0.2.37"
+uv add "git+https://github.com/White-Neuron/django-whiteneuron.git@v0.3.4.12"
 ```
 
 ### From local source
@@ -89,11 +133,11 @@ uv add "git+https://github.com/White-Neuron/django-whiteneuron.git@v0.2.37"
 uv pip install -e .
 ```
 
-## Django Configuration
+## Quick Start
 
-Add the apps at the top of `INSTALLED_APPS`:
-
-```python
+```bash
+# 1. Add to INSTALLED_APPS (top of list)
+# settings.py
 INSTALLED_APPS = [
     "whiteneuron",
     "whiteneuron.base",
@@ -103,11 +147,11 @@ INSTALLED_APPS = [
     "whiteneuron.dashboard",
     # ... your other apps
 ]
-```
 
-Add the required middleware **(order matters)**:
+# 2. Set custom user model
+AUTH_USER_MODEL = "base.User"
 
-```python
+# 3. Add middleware (order matters)
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whiteneuron.base.middleware.RateLimitMiddleware",   # ← immediately after SecurityMiddleware
@@ -122,15 +166,20 @@ MIDDLEWARE = [
     "whiteneuron.base.middleware.UserActivityMiddleware",  # ← after AuthenticationMiddleware
     "whiteneuron.base.middleware.ThreadLocalMiddleware",
 ]
+
+# 4. Run migrations
+python manage.py migrate
+
+# 5. Create superuser and start
+python manage.py createsuperuser
+python manage.py runserver
 ```
 
-Set the custom user model:
+Access the admin at: `http://127.0.0.1:8000/admin/`
 
-```python
-AUTH_USER_MODEL = "base.User"
-```
+## Configuration
 
-## UNFOLD Configuration Example
+### UNFOLD Settings Example
 
 ```python
 from django.templatetags.static import static
@@ -140,7 +189,6 @@ UNFOLD = {
     "SITE_HEADER": _("White Neuron"),
     "SITE_TITLE": _("White Neuron Admin"),
     "SITE_SUBHEADER": _("Admin panel"),
-    # Use SITE_ICON instead of SITE_LOGO to keep SITE_TITLE rendering correctly
     "SITE_ICON": {
         "light": lambda request: static("base/images/logo/WhiteNeuron.png"),
         "dark": lambda request: static("base/images/logo/WhiteNeuron.png"),
@@ -174,116 +222,116 @@ UNFOLD = {
 }
 ```
 
-## Frontend (Tailwind 4 + daisyUI 5)
+## Modules
 
-Install frontend dependencies:
+| Module | Description | Key Models |
+|---|---|---|
+| `whiteneuron.base` | Core models, admin, middleware, utilities | `User`, `BaseModel`, `Image`, `Mail`, `App`, `IPBlacklist`, `UABlacklist` |
+| `whiteneuron.dashboard` | Dashboard callback and badge system | — |
+| `whiteneuron.notification` | WebSocket real-time notifications | `Notification`, `NotificationConfig` |
+| `whiteneuron.file_management` | File upload with integrity verification | `ExcelFile`, `PDFFile` |
+| `whiteneuron.feedbacks` | Per-model feedback collection | — |
+
+## Middleware & Security
+
+### Rate Limiting
+
+```python
+RATE_LIMIT_REQUESTS = 60   # max requests per window (by IP)
+RATE_LIMIT_WINDOW     = 60  # in seconds
+USER_RATE_LIMIT_REQUESTS = 60  # by authenticated user
+USER_RATE_LIMIT_WINDOW   = 60
+```
+
+When limit exceeded:
+- API (`/api/` or `Accept: application/json`) → JSON `{"detail": "Too many requests."}` (429)
+- Browser → renders `429.html` with `Retry-After` header
+
+### IP Blacklist
+
+**Static** — `.env` (CIDR ranges, loaded at startup):
+```env
+IP_BLACKLIST=185.220.101.5,194.165.16.0/22,2001:db8::/32
+```
+
+**Dynamic** — Admin panel + Redis (real-time):
+- Permanent block: leave `blocked_until` empty
+- Temporary block: set `blocked_until` → Redis TTL auto-expires
+
+### UA Blacklist
+
+Static via `.env`:
+```env
+UA_BLACKLIST=GPTBot,ClaudeBot,https://openai.com
+```
+
+Dynamic via admin — supports regex patterns with real-time cache rebuild.
+
+## Frontend (Tailwind 4 + daisyUI 5)
 
 ```bash
 npm install -D @tailwindcss/cli@next daisyui@latest
-```
-
-Build CSS using the provided script:
-
-```bash
 bash scripts/tailwind.sh
 ```
 
-Or run directly:
-
+Or directly:
 ```bash
 npx @tailwindcss/cli -i styles.css -o whiteneuron/static/base/css/styles.css --minify
 ```
 
-## Running the Local Example
+## Environment Variables
 
-```bash
-cd whiteneuron
-python manage.py migrate
-python manage.py runserver
-```
+Copy `env.example` to `.env` and configure. Key variables:
 
-Access the admin at: http://127.0.0.1:8000/admin/
+| Variable | Description | Default |
+|---|---|---|
+| `SECRET_KEY` | Django secret key | — |
+| `DEBUG` | Debug mode | `True` |
+| `DATABASE` | Database type (`sqlite`/`postgres`) | `sqlite` |
+| `REDIS` / `CACHE_REDIS_LOCATION` | Redis connection | `redis://127.0.0.1:6379` |
+| `CELERY_BROKER_URL` | Celery broker URL | `redis://localhost:6379/0` |
+| `RATE_LIMIT_REQUESTS` | IP rate limit count | `60` |
+| `IP_BLACKLIST` | Static IP blocks (CIDR) | — |
+| `UA_BLACKLIST` | Static UA blocks | — |
 
-## Building and Releasing the Package
+See `env.example` for the full list.
 
-To build the package (including Tailwind assets, migrations, and Python wheel):
+## Management Commands
+
+| Command | Description |
+|---|---|
+| `init_admin` | Create initial admin user |
+| `init_guest` | Create guest user account |
+| `init_groupuser` | Initialize group users |
+| `cleanup_old_activities` | Remove old activity records |
+| `update_visit_profiles` | Update visit profile data |
+
+## Building & Releasing
 
 ```bash
 bash scripts/build.sh
 ```
 
-This script will:
-- Build Tailwind CSS assets
-- Run Django migrations
-- Build the Python package using `uv build`
-
-For a full release (with version bump, git tag, and release notes), follow the interactive prompts in `scripts/build.sh` or use the skill-driven workflow.
-
-## Rate Limiting
-
-`RateLimitMiddleware` limits by IP; `UserActivityMiddleware` limits by authenticated user. Redis is required for accuracy in multi-worker environments.
-
-```python
-# settings.py (hoặc env)
-RATE_LIMIT_REQUESTS = 60   # số request tối đa / window (theo IP)
-RATE_LIMIT_WINDOW    = 60   # tính bằng giây
-
-USER_RATE_LIMIT_REQUESTS = 60  # theo user đã đăng nhập
-USER_RATE_LIMIT_WINDOW   = 60
-```
-
-Corresponding env vars: `RATE_LIMIT_REQUESTS`, `RATE_LIMIT_WINDOW`, `USER_RATE_LIMIT_REQUESTS`, `USER_RATE_LIMIT_WINDOW`.
-
-When the limit is exceeded:
-- API requests (`/api/` or `Accept: application/json`) → JSON `{"detail": "Too many requests."}` with status 429.
-- Browser requests → renders `429.html` template with `Retry-After` header.
-
-## IP Blacklist
-
-Two protection layers operate in parallel. Both are checked before rate limiting and return 403 immediately.
-
-### Static — `.env` (CIDR ranges, infrastructure bans)
-
-Loaded at startup, supports IPv4/IPv6 and CIDR:
-
-```env
-# .env
-IP_BLACKLIST=185.220.101.5,194.165.16.0/22,2001:db8::/32
-```
-
-Requires a **Daphne/Gunicorn restart** to apply new entries.
-
-### Dynamic — Django Admin + Redis (real-time)
-
-Managed via **System → IP Blacklist** in the admin panel (superuser only):
-
-- **Permanent block**: leave `blocked_until` empty
-- **Temporary block**: set `blocked_until` → Redis TTL auto-expires, no cron needed
-- **Quick block from logs**: *User Activity* → select records → **Block IP address** action → Redis key set immediately, no restart needed
-
-```
-Request → check static env blacklist (O(1))
-        → check cache.get('blacklist:dynamic:<ip>') (1 Redis GET)
-        → 403 nếu match, không tốn rate limit check
-```
+This builds Tailwind CSS assets, runs migrations, and creates the Python package via `uv build`.
 
 ## Error Pages
 
-Error templates live in `whiteneuron/templates/` and are used automatically by Django when `DEBUG=False`:
+Templates in `whiteneuron/templates/` are used automatically when `DEBUG=False`:
 
-| Template | Error | Notes |
-|---|---|---|
-| `400.html` | Bad Request | |
-| `403.html` | Forbidden | |
-| `404.html` | Not Found | |
-| `429.html` | Too Many Requests | Rendered manually by middleware, passes `{{ retry_after }}` |
-| `500.html` | Server Error | |
+| Template | Error |
+|---|---|
+| `400.html` | Bad Request |
+| `403.html` | Forbidden |
+| `404.html` | Not Found |
+| `429.html` | Too Many Requests |
+| `500.html` | Server Error |
 
-No need to register `handler400/403/404/500` — Django resolves templates automatically via `APP_DIRS=True`.
+## Documentation
 
-## Environment Configuration
-
-Copy `env.example` to your environment file and update variables such as `DATABASE`, `REDIS`, `EMAIL`, and `ALLOWED_HOSTS`.
+- **Giới thiệu**: Xem [docs/INTRODUCTION.md](docs/INTRODUCTION.md) — tài liệu giới thiệu dự án, tính năng nổi bật và ai nên dùng.
+- **Hướng dẫn chi tiết**: Xem [docs/GUIDE.md](docs/GUIDE.md) cho tài liệu module, model, middleware và cấu hình đầy đủ.
+- **Changelog**: See [CHANGELOG.md](CHANGELOG.md) for full version history.
+- **CKEditor 5 Customization**: See [docs/CKEDITOR5_CUSTOMIZATION.md](docs/CKEDITOR5_CUSTOMIZATION.md).
 
 ## Contact
 
