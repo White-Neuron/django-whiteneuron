@@ -1,5 +1,14 @@
 # Changelog
 
+### v0.3.4.12.1 (2026-07-01) — latest
+**Bugfix: UserAdmin grid view field exclusions and list_display ordering**
+- **Fixed**: `UserAdmin.grid_exclude_fields_list_display` — added `is_bot`, `is_active`, `is_staff`, `is_superuser`, `date_joined` to grid view exclusion list, preventing unnecessary fields from appearing in card layout.
+- **Fixed**: `UserAdmin.list_display` — reordered fields and removed `display_created`, `display_staff`, `display_superuser`, `uuid`; added `is_bot`, `is_staff`, `is_superuser`, `date_joined` for cleaner admin listing.
+- **Validation**: Build successful (Tailwind + migrations), no schema changes.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users.
+- **Upgrade Guidance**: Run `pip install --upgrade django-whiteneuron` to apply changes.
+- **Rollback**: Safe to revert to v0.3.4.12; no schema changes introduced.
+
 ### v0.3.4.12 (2026-06-27) — latest
 **Cleanup: Remove .DS_Store from tracking, feedback list in admin, remove md2html-tailwind4 uv source**
 - **Removed**: 7 `.DS_Store` files removed from git tracking across the repository — added `*/.DS_Store` to `.gitignore` for future prevention.

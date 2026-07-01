@@ -155,10 +155,14 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
     inlines = [UserActivityInline]
 
     grid_view= True
-    grid_exclude_fields_list_display= ['display_created', 
+    grid_exclude_fields_list_display= ["is_bot",
+                                       "is_active",
+                                       "is_staff",
+                                       "is_superuser",
+                                       "date_joined",
                                        "first_name",
-                                       "last_name", 'is_active', 
-                                       'display_staff', 'display_superuser', 'display_header', 'uuid']
+                                       "last_name", 
+                                       'display_header']
 
     def grid_item_header(self, obj):
         if obj.is_bot:
@@ -235,11 +239,11 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
         "display_header",
         "first_name",
         "last_name",
+        "is_bot",
         "is_active",
-        "display_staff",
-        "display_superuser",
-        "uuid",
-        "display_created",
+        "is_staff",
+        "is_superuser",
+        "date_joined",
     ]
 
     add_fieldsets = (

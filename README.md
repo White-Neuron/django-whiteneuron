@@ -10,9 +10,17 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.3.4.12
+v0.3.4.12.1
 
 ## Changelog
+
+### Latest: v0.3.4.12.1 (2026-07-01)
+**Bugfix: UserAdmin grid view field exclusions and list_display ordering**
+- **Fixed**: `UserAdmin.grid_exclude_fields_list_display` — added `is_bot`, `is_active`, `is_staff`, `is_superuser`, `date_joined` to grid view exclusion list.
+- **Fixed**: `UserAdmin.list_display` — reordered fields, removed `display_created`, `display_staff`, `display_superuser`, `uuid`; added `is_bot`, `is_staff`, `is_superuser`, `date_joined`.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users.
+
+See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
 ### Latest: v0.3.4.12 (2026-06-27)
 **Cleanup: Remove .DS_Store from tracking, feedback list in admin, remove md2html-tailwind4 uv source**
