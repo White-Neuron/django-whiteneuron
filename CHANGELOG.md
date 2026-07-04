@@ -1,5 +1,13 @@
 # Changelog
 
+### v0.3.4.13 (2026-07-04) — latest
+**Dependency: Migrate md2html-tailwind4 from git to PyPI registry**
+- **Updated**: `md2html-tailwind4` dependency changed from git-based `==1.5.1` (`https://github.com/White-Neuron/md2html-tailwind4?rev=v1.5.1`) to PyPI registry `>=1.5.2` — resolves via standard package index with verified hashes.
+- **Validation**: Build successful (Tailwind + migrations), no schema changes.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users.
+- **Upgrade Guidance**: Run `pip install --upgrade django-whiteneuron` to apply changes.
+- **Rollback**: Safe to revert to v0.3.4.12; no schema changes introduced.
+
 ### v0.3.4.12.1 (2026-07-01) — latest
 **Bugfix: UserAdmin grid view field exclusions and list_display ordering**
 - **Fixed**: `UserAdmin.grid_exclude_fields_list_display` — added `is_bot`, `is_active`, `is_staff`, `is_superuser`, `date_joined` to grid view exclusion list, preventing unnecessary fields from appearing in card layout.
