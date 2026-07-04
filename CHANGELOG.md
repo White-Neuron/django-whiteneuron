@@ -8,7 +8,7 @@
 - **Upgrade Guidance**: Run `pip install --upgrade django-whiteneuron` to apply changes.
 - **Rollback**: Safe to revert to v0.3.4.12; no schema changes introduced.
 
-### v0.3.4.12.1 (2026-07-01) — latest
+### v0.3.4.12.1 (2026-07-01)
 **Bugfix: UserAdmin grid view field exclusions and list_display ordering**
 - **Fixed**: `UserAdmin.grid_exclude_fields_list_display` — added `is_bot`, `is_active`, `is_staff`, `is_superuser`, `date_joined` to grid view exclusion list, preventing unnecessary fields from appearing in card layout.
 - **Fixed**: `UserAdmin.list_display` — reordered fields and removed `display_created`, `display_staff`, `display_superuser`, `uuid`; added `is_bot`, `is_staff`, `is_superuser`, `date_joined` for cleaner admin listing.
