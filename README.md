@@ -10,13 +10,14 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.3.4.13
+v0.3.4.14
 
 ## Changelog
 
-### Latest: v0.3.4.13 (2026-07-04)
-**Dependency: Migrate md2html-tailwind4 from git to PyPI registry**
-- **Updated**: `md2html-tailwind4` dependency changed from git-based `==1.5.1` to PyPI registry `>=1.5.2`.
+### Latest: v0.3.4.14 (2026-07-07)
+**Localization: Update Vietnamese translations, fix makemessages.sh Python path for 3.13**
+- **Updated**: `scripts/makemessages.sh` — changed symlink target from Python 3.11 to Python 3.13 site-packages path.
+- **Updated**: Vietnamese translations refreshed via `makemessages -l vi`.
 - **Compatibility**: No breaking changes; safe for all v0.3.x users.
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.

@@ -1,6 +1,15 @@
 # Changelog
 
-### v0.3.4.13 (2026-07-04) — latest
+### v0.3.4.14 (2026-07-07) — latest
+**Localization: Update Vietnamese translations, fix makemessages.sh Python path for 3.13**
+- **Updated**: `scripts/makemessages.sh` — changed symlink target from Python 3.11 to Python 3.13 site-packages path — ensures correct locale extraction with modern Python runtime.
+- **Updated**: Vietnamese translations refreshed via `makemessages -l vi` — new entries added for current codebase strings.
+- **Validation**: Build successful (Tailwind + migrations), no schema changes.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users.
+- **Upgrade Guidance**: Run `pip install --upgrade django-whiteneuron` to apply changes.
+- **Rollback**: Safe to revert to v0.3.4.13; no schema changes introduced.
+
+### v0.3.4.13 (2026-07-04)
 **Dependency: Migrate md2html-tailwind4 from git to PyPI registry**
 - **Updated**: `md2html-tailwind4` dependency changed from git-based `==1.5.1` (`https://github.com/White-Neuron/md2html-tailwind4?rev=v1.5.1`) to PyPI registry `>=1.5.2` — resolves via standard package index with verified hashes.
 - **Validation**: Build successful (Tailwind + migrations), no schema changes.

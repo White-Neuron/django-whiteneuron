@@ -2,7 +2,7 @@ cd whiteneuron
 mkdir -p locale
 
 # Tạo symlink tạm trỏ vào package cần lấy chuỗi dịch từ .venv
-ln -sfn ../.venv/lib/python3.11/site-packages/unfold _unfold_src
+ln -sfn ../.venv/lib/python3.13/site-packages/unfold _unfold_src
 
 django-admin makemessages -l vi \
   --symlinks \
