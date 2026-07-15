@@ -10,14 +10,16 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.3.4.14
+v0.3.5
 
 ## Changelog
 
-### Latest: v0.3.4.14 (2026-07-07)
-**Localization: Update Vietnamese translations, fix makemessages.sh Python path for 3.13**
-- **Updated**: `scripts/makemessages.sh` — changed symlink target from Python 3.11 to Python 3.13 site-packages path.
-- **Updated**: Vietnamese translations refreshed via `makemessages -l vi`.
+### Latest: v0.3.5 (2026-07-15)
+**Feature: Public/private file access control and HTML file support**
+- **Added**: `is_public`, `allowed_users`, `allowed_groups` fields to `BaseFile` model — files can now be marked public or restricted to specific users/groups.
+- **Added**: `_check_access()` permission logic in download/preview views — enforces access control before serving files.
+- **Added**: `HTMLFile` model with inline preview support.
+- **Improved**: Admin UI — public/private badge column, conditional Access Control fieldset for private files.
 - **Compatibility**: No breaking changes; safe for all v0.3.x users.
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.

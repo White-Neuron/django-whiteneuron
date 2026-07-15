@@ -1,5 +1,19 @@
 # Changelog
 
+### v0.3.5 (2026-07-15) — latest
+**Feature: Public/private file access control and HTML file support**
+- **Added**: `is_public`, `allowed_users`, `allowed_groups` fields to `BaseFile` model — files can now be marked public or restricted to specific users/groups.
+- **Added**: `_check_access()` permission logic in download/preview views — enforces access control before serving files; redirects unauthenticated users to login, returns 403 for unauthorized access.
+- **Added**: `preview_file` view for inline HTML file preview in browser after permission check.
+- **Added**: `HTMLFile` model with migration — new file type support alongside Excel and PDF.
+- **Improved**: Admin UI — public/private badge column (`is_public_badge`) on all file changelists; conditional Access Control fieldset shown only for private files.
+- **Improved**: UNFOLD admin sidebar — File Management section reordered to bottom, HTML Files link added with `code` icon and badge callback.
+- **Migration**: 3 new migrations — `0006` (is_public on Excel/PDF), `0007` (HTMLFile model), `0008` (allowed_users/allowed_groups M2M fields).
+- **Validation**: Build successful (Tailwind + migrations), no unexpected schema noise.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users. New fields default to public (`is_public=True`) and empty user/group lists.
+- **Upgrade Guidance**: Run `pip install --upgrade django-whiteneuron` then `python manage.py migrate` to apply schema changes.
+- **Rollback**: Safe to revert to v0.3.4.14; run `python manage.py migrate` to rollback migrations if needed.
+
 ### v0.3.4.14 (2026-07-07) — latest
 **Localization: Update Vietnamese translations, fix makemessages.sh Python path for 3.13**
 - **Updated**: `scripts/makemessages.sh` — changed symlink target from Python 3.11 to Python 3.13 site-packages path — ensures correct locale extraction with modern Python runtime.
