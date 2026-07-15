@@ -23,7 +23,7 @@ urlpatterns += [
     path("", HomeView.as_view(), name="home"),
     path("base/guest-login/", GuestLoginView.as_view(), name="guest_login"),
     path("ckeditor5/", include('django_ckeditor_5.urls')),
-    path("file-management/", include('whiteneuron.file_management.urls')),
+    # path("file-management/", include('whiteneuron.file_management.urls')), # Để ứng dụng tự nhúng URLs khi cần tránh /admin/
     path("announcement/", get_announcement_content, name="announcement"),
     path("md-preview/", MarkdownPreviewView.as_view(), name="md_preview"),
 ]

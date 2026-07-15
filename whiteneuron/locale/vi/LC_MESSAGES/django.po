@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-07 16:31+0700\n"
+"POT-Creation-Date: 2026-07-15 13:53+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -441,8 +441,6 @@ msgstr ""
 
 #: _unfold_src/contrib/simple_history/templates/simple_history/object_history.html:27
 #: _unfold_src/templates/admin/object_history.html:57
-#| msgid "entry"
-#| msgid_plural "entries"
 msgid "entry"
 msgid_plural "entries"
 msgstr[0] "Mục ghi"
@@ -539,7 +537,8 @@ msgid ""
 "autocomplete field. Please add it to the `autocomplete_fields` list."
 msgstr ""
 "Trường <strong class=\"font-semibold\">{field_name}</strong> không phải là "
-"trường tự động hoàn thành. Vui lòng thêm nó vào danh sách `autocomplete_fields`."
+"trường tự động hoàn thành. Vui lòng thêm nó vào danh sách "
+"`autocomplete_fields`."
 
 #: _unfold_src/mixins/nested_inlines_model_admin.py:31
 msgid "You can not create nested object without parent"
@@ -884,6 +883,7 @@ msgid "Nothing matched your search"
 msgstr "Không có kết quả nào khớp với tìm kiếm của bạn"
 
 #: _unfold_src/templates/unfold/helpers/command_results.html:54
+#, python-format
 msgid ""
 "\n"
 "            Found <span class=\"font-medium text-important\">%(counter)s</"
@@ -1019,7 +1019,7 @@ msgstr "Tối"
 
 #: _unfold_src/templates/unfold/helpers/theme_switch.html:23
 #: _unfold_src/templates/unfold/helpers/theme_switch_dropdown.html:30
-#: base/settings.py:649 templates/unfold/helpers/theme_switch.html:23
+#: base/settings.py:657 templates/unfold/helpers/theme_switch.html:23
 msgid "System"
 msgstr "Hệ thống"
 
@@ -1175,7 +1175,7 @@ msgid ", "
 msgstr ", "
 
 #: base/admin.py:499 base/admin.py:562 base/admin.py:609 base/modeladmin.py:373
-#: file_management/admin.py:72
+#: file_management/admin.py:94
 msgid "Meta"
 msgstr "Meta"
 
@@ -1403,8 +1403,8 @@ msgstr "hồ sơ truy cập"
 msgid "Path"
 msgstr "Đường dẫn"
 
-#: base/models.py:195 base/models.py:218 file_management/models.py:42
-#: file_management/models.py:72
+#: base/models.py:195 base/models.py:218 file_management/models.py:46
+#: file_management/models.py:79
 msgid "Method"
 msgstr "Phương thức"
 
@@ -1574,11 +1574,11 @@ msgstr "Hình ảnh"
 msgid "Thumbnail"
 msgstr "Hình thu nhỏ"
 
-#: base/models.py:703 base/models.py:789
+#: base/models.py:703 base/models.py:789 file_management/admin.py:215
 msgid "Preview"
 msgstr "Xem trước"
 
-#: base/models.py:705 file_management/models.py:35
+#: base/models.py:705 file_management/models.py:39
 msgid "Description"
 msgstr "Mô tả"
 
@@ -1606,7 +1606,7 @@ msgstr "Chủ đề"
 msgid "Receiver"
 msgstr "Người nhận"
 
-#: base/models.py:867 file_management/models.py:36 file_management/models.py:48
+#: base/models.py:867 file_management/models.py:40 file_management/models.py:55
 #: templates/admin/feedbacks/change_form_feedback_list.html:38
 msgid "Pending"
 msgstr "Đang chờ"
@@ -1619,8 +1619,8 @@ msgstr "Gửi"
 msgid "Failed"
 msgstr "Thất bại"
 
-#: base/models.py:870 feedbacks/admin.py:36 file_management/models.py:39
-#: file_management/models.py:59
+#: base/models.py:870 feedbacks/admin.py:36 file_management/models.py:43
+#: file_management/models.py:66
 msgid "Status"
 msgstr "Trạng thái"
 
@@ -1709,83 +1709,87 @@ msgstr "Thông báo"
 msgid "Feedbacks"
 msgstr "Phản hồi"
 
-#: base/settings.py:588 file_management/apps.py:7
-msgid "File Management"
-msgstr "Quản lý tệp"
-
-#: base/settings.py:592 file_management/models.py:114
-msgid "Excel Files"
-msgstr "Tệp Excel"
-
-#: base/settings.py:599 file_management/models.py:121
-msgid "PDF Files"
-msgstr "Tệp PDF"
-
-#: base/settings.py:608
+#: base/settings.py:589
 msgid "Users & Groups"
 msgstr "Người dùng & Nhóm"
 
-#: base/settings.py:612 notification/models.py:59
+#: base/settings.py:593 notification/models.py:59
 msgid "Users"
 msgstr "Người dùng"
 
-#: base/settings.py:619
+#: base/settings.py:600
 msgid "User activity"
 msgstr "Hoạt động người dùng"
 
-#: base/settings.py:626
+#: base/settings.py:607
 msgid "Anonymous activity"
 msgstr "Hoạt động ẩn danh"
 
-#: base/settings.py:633
+#: base/settings.py:614
 msgid "Visit profiles"
 msgstr "Hồ sơ truy cập"
 
-#: base/settings.py:640
+#: base/settings.py:621
 msgid "Groups"
 msgstr "Nhóm"
 
-#: base/settings.py:653
+#: base/settings.py:630 file_management/apps.py:7
+msgid "File Management"
+msgstr "Quản lý tệp"
+
+#: base/settings.py:634 file_management/models.py:121
+msgid "Excel Files"
+msgstr "Tệp Excel"
+
+#: base/settings.py:641 file_management/models.py:128
+msgid "PDF Files"
+msgstr "Tệp PDF"
+
+#: base/settings.py:648 file_management/models.py:136
+msgid "HTML Files"
+msgstr "Tệp HTML"
+
+#: base/settings.py:661
 msgid "Images"
 msgstr "Hình ảnh"
 
-#: base/settings.py:659
+#: base/settings.py:667
 msgid "Emails"
 msgstr "Email"
 
-#: base/settings.py:665
+#: base/settings.py:673
 msgid "Notifications config"
 msgstr "Cấu hình thông báo"
 
-#: base/settings.py:671
+#: base/settings.py:679
 msgid "IP Blacklist"
 msgstr "Danh sách đen IP"
 
-#: base/settings.py:677
+#: base/settings.py:685
 msgid "UA Blacklist"
 msgstr "Danh sách đen UA"
 
-#: base/settings.py:685
+#: base/settings.py:693
 msgid "Celery Tasks"
 msgstr "Nhiệm vụ Celery"
 
-#: base/settings.py:689
+#: base/settings.py:697
 msgid "Clocked"
 msgstr "Khóa"
 
-#: base/settings.py:697
+#: base/settings.py:705
 msgid "Crontabs"
 msgstr "Crontabs"
 
-#: base/settings.py:705
+#: base/settings.py:713
 msgid "Intervals"
 msgstr "Khoảng thời gian"
 
-#: base/settings.py:713
+#: base/settings.py:721
 msgid "Periodic tasks"
 msgstr "Nhiệm vụ định kỳ"
 
-#: base/settings.py:721
+#: base/settings.py:729
 msgid "Solar events"
 msgstr "Sự kiện Solar"
 
@@ -2023,40 +2027,48 @@ msgstr "Định dạng JSON không hợp lệ"
 msgid "An unexpected error occurred. Please try again."
 msgstr "Đã xảy ra lỗi không mong muốn. Vui lòng thử lại."
 
-#: file_management/admin.py:65
+#: file_management/admin.py:39
+msgid "Access"
+msgstr "Truy cập"
+
+#: file_management/admin.py:86
 msgid "General Information"
 msgstr "Thông tin chung"
 
-#: file_management/admin.py:82
+#: file_management/admin.py:102
+msgid "Access Control"
+msgstr "Kiểm soát truy cập"
+
+#: file_management/admin.py:115
 msgid "Cannot read file"
 msgstr "Không đọc được file"
 
-#: file_management/admin.py:85
+#: file_management/admin.py:118
 msgid "File has been modified"
 msgstr "File bị thay đổi"
 
-#: file_management/admin.py:86
+#: file_management/admin.py:119
 msgid "Integrity"
 msgstr "Toàn vẹn"
 
-#: file_management/admin.py:95
+#: file_management/admin.py:128
 msgid "Stored hash"
 msgstr "Hash lưu trữ"
 
-#: file_management/admin.py:102
+#: file_management/admin.py:135
 msgid "Cannot read file from storage"
 msgstr "Không đọc được file từ storage"
 
-#: file_management/admin.py:108
+#: file_management/admin.py:141
 msgid "Current hash (live)"
 msgstr "Hash hiện tại (thực tế)"
 
-#: file_management/admin.py:115
+#: file_management/admin.py:148
 msgid "Cannot read the file from storage. It may have been deleted externally."
 msgstr ""
 "Không đọc được file từ storage. File có thể đã bị xóa bên ngoài hệ thống."
 
-#: file_management/admin.py:119
+#: file_management/admin.py:152
 msgid ""
 "File integrity check failed: the file on storage does not match its stored "
 "hash. It may have been tampered with or corrupted."
@@ -2064,65 +2076,91 @@ msgstr ""
 "Kiểm tra toàn vẹn thất bại: file trên storage không khớp với hash đã lưu. "
 "File có thể đã bị thay đổi hoặc bị hỏng."
 
-#: file_management/admin.py:135
+#: file_management/admin.py:168
 msgid "File missing"
 msgstr "File không tồn tại"
 
-#: file_management/admin.py:143
+#: file_management/admin.py:176
 msgid "Tampered — download blocked"
 msgstr "File bị thay đổi — không thể tải"
 
-#: file_management/admin.py:150
+#: file_management/admin.py:183
 msgid "Download (Verified)"
 msgstr "Tải xuống (đã xác thực)"
 
-#: file_management/admin.py:152
+#: file_management/admin.py:185
 msgid "Verified Download"
 msgstr "Tải xuống (đã xác thực)"
 
-#: file_management/models.py:34 notification/admin.py:249
+#: file_management/models.py:38 notification/admin.py:249
 msgid "Title"
 msgstr "Tiêu đề"
 
-#: file_management/models.py:37 file_management/models.py:51
+#: file_management/models.py:41 file_management/models.py:58
 msgid "Done"
 msgstr "Hoàn thành"
 
-#: file_management/models.py:38 file_management/models.py:54
+#: file_management/models.py:42 file_management/models.py:61
 msgid "Error"
 msgstr "Lỗi"
 
-#: file_management/models.py:40 file_management/models.py:64
+#: file_management/models.py:44 file_management/models.py:71
 msgid "Upload"
 msgstr "Tải lên"
 
-#: file_management/models.py:41 file_management/models.py:67
+#: file_management/models.py:45 file_management/models.py:74
 msgid "Auto"
 msgstr "Tự động"
 
-#: file_management/models.py:43
+#: file_management/models.py:47
 msgid "Hash"
 msgstr "Hash"
 
-#: file_management/models.py:109 file_management/models.py:113
+#: file_management/models.py:48
+msgid "Public"
+msgstr "Công khai"
+
+#: file_management/models.py:48
+msgid "If unchecked, only authorized users/groups can access this file."
+msgstr ""
+"Nếu bỏ chọn, chỉ người dùng/nhóm được ủy quyền mới có thể truy cập tệp này."
+
+#: file_management/models.py:49
+msgid "Allowed Users"
+msgstr "Người dùng được phép"
+
+#: file_management/models.py:50
+msgid "Allowed Groups"
+msgstr "Nhóm được phép"
+
+#: file_management/models.py:116 file_management/models.py:120
 msgid "Excel File"
 msgstr "Tệp Excel"
 
-#: file_management/models.py:117 file_management/models.py:120
+#: file_management/models.py:124 file_management/models.py:127
 msgid "PDF File"
 msgstr "Tệp PDF"
 
-#: file_management/views.py:31 file_management/views.py:38
+#: file_management/models.py:132 file_management/models.py:135
+msgid "HTML File"
+msgstr "Tệp HTML"
+
+#: file_management/views.py:55 file_management/views.py:62
+#: file_management/views.py:96 file_management/views.py:104
 msgid "Cannot read file from storage. The file may be missing."
 msgstr "Không đọc được file từ storage. File có thể đã bị xóa."
 
-#: file_management/views.py:46
+#: file_management/views.py:70
 msgid ""
 "File integrity check failed. This file may have been tampered with and "
 "cannot be downloaded."
 msgstr ""
 "Kiểm tra toàn vẹn thất bại. File có thể đã bị thay đổi và không thể tải "
 "xuống."
+
+#: file_management/views.py:108
+msgid "File is empty."
+msgstr "File trống."
 
 #: notification/admin.py:37
 msgid "Notification Recipients"
@@ -2322,6 +2360,7 @@ msgid "Resolved"
 msgstr "Đã giải quyết"
 
 #: templates/admin/feedbacks/change_form_feedback_list.html:54
+#, python-format
 msgid "Field: %(field_name)s"
 msgstr "Trường: %(field_name)s"
 

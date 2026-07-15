@@ -1,9 +1,13 @@
 import hashlib
 
 from whiteneuron.base.models import BaseModel
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.db import models
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
+
+User = get_user_model()
 
 
 def compute_file_hash(file_field):
@@ -41,6 +45,9 @@ class BaseFile(BaseModel):
                                                      ('auto', _('Auto'))),
                                                      default='upload', verbose_name=_('Method'))
     hash = models.CharField(max_length=64, blank=True, null=True, verbose_name=_('Hash'))
+    is_public = models.BooleanField(default=True, verbose_name=_('Public'), help_text=_('If unchecked, only authorized users/groups can access this file.'))
+    allowed_users = models.ManyToManyField(User, blank=True, related_name='%(class)s_allowed_users', verbose_name=_('Allowed Users'))
+    allowed_groups = models.ManyToManyField(Group, blank=True, related_name='%(class)s_allowed_groups', verbose_name=_('Allowed Groups'))
 
     def status_view(self):
         if self.status == 'pending':
@@ -119,3 +126,11 @@ class PDFFile(BaseFile):
     class Meta:
         verbose_name = _('PDF File')
         verbose_name_plural = _('PDF Files')
+
+
+class HTMLFile(BaseFile):
+    file = models.FileField(upload_to='htmls', verbose_name=_('HTML File'))
+
+    class Meta:
+        verbose_name = _('HTML File')
+        verbose_name_plural = _('HTML Files')

@@ -1,12 +1,14 @@
 from whiteneuron.base.admin import base_admin_site, ModelAdmin
 from django.contrib import admin, messages
+from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from unfold.widgets import UnfoldAdminFileFieldWidget
+from unfold.decorators import action
 
-from .models import ExcelFile, PDFFile, compute_file_hash
+from .models import ExcelFile, PDFFile, HTMLFile, compute_file_hash
 
 
 class FileInputNoDownload(UnfoldAdminFileFieldWidget):
@@ -17,7 +19,24 @@ class BaseFileAdmin(ModelAdmin):
     file_type = None  # Set in subclasses: 'excel' | 'pdf'
     accepted_file_types = None  # e.g. '.xlsx,.xls' — passed as HTML accept attribute
 
-    list_display = ("title", "method_view", "status_view", "created_at", "created_by")
+    list_display = ("title", "is_public_badge", "method_view", "status_view", "created_at", "created_by")
+    autocomplete_fields= ["allowed_users", "allowed_groups"] 
+
+    def is_public_badge(self, obj):
+        if obj.is_public:
+            return mark_safe(
+                '<span class="ui-badge ui-badge-success gap-1">'
+                '<span class="material-symbols-outlined" style="font-size: 14px;">public</span>'
+                'Public'
+                '</span>'
+            )
+        return mark_safe(
+            '<span class="ui-badge ui-badge-error gap-1">'
+            '<span class="material-symbols-outlined" style="font-size: 14px;">lock</span>'
+            'Private'
+            '</span>'
+        )
+    is_public_badge.short_description = _('Access')
     search_fields = ("title", "description")
     filter_horizontal = ()
     list_filter = ("status", "method")
@@ -60,12 +79,15 @@ class BaseFileAdmin(ModelAdmin):
             file_fields = ('file', 'verified_download')
         else:
             file_fields = ('file',)
+        
         integrity_fields = ('integrity_status', 'hash_display', 'current_hash_display') if (obj and obj.pk) else ()
-        return (
+        
+        fieldsets = (
             (_('General Information'), {
                 'fields': ('title', 'description',
                            'status_view',
                            'method_view',
+                           'is_public',
                            *file_fields,
                            *integrity_fields),
             }),
@@ -73,6 +95,17 @@ class BaseFileAdmin(ModelAdmin):
                 'fields': ('created_at', 'created_by', 'updated_at', 'updated_by')
             }),
         )
+        
+        if obj and not obj.is_public:
+            fieldsets = (
+                *fieldsets,
+                (_("Access Control"), {
+                    'fields': ('allowed_users', 'allowed_groups'),
+                    'classes': ('tabular',),
+                }),
+            )
+        
+        return fieldsets
 
     def integrity_status(self, obj):
         if not obj.pk or not obj.hash:
@@ -169,3 +202,26 @@ class ExcelFileAdmin(BaseFileAdmin):
 class PDFFileAdmin(BaseFileAdmin):
     file_type = 'pdf'
     accepted_file_types = '.pdf'
+
+
+@admin.register(HTMLFile, site=base_admin_site)
+class HTMLFileAdmin(BaseFileAdmin):
+    file_type = 'html'
+    accepted_file_types = '.html,.htm'
+
+    actions_detail = ["preview_action"]
+
+    @action(
+        description=_("Preview"),
+        url_path="preview",
+        attrs={"target": "_blank"},
+        permissions=["preview_action"]
+    )
+    def preview_action(self, request, object_id):
+        return redirect(reverse('file_management_preview', kwargs={'file_type': 'html', 'pk': object_id}))
+
+    def has_preview_action_permission(self, request, object_id):
+        obj = self.get_object(request, object_id)
+        if not obj:
+            return False
+        return True
