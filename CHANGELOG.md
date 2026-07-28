@@ -1,5 +1,13 @@
 # Changelog
 
+### v0.3.5.1 (2026-07-28) — latest
+**Fix: Sandbox email preview in iframe, remove debug print and duplicate import**
+- **Fixed**: `MailAdmin.preview_email` now renders email content inside a sandboxed `<iframe>` using base64-encoded data URI instead of inline HTML — prevents CSS conflicts between email content styles and Django admin theme.
+- **Fixed**: Removed duplicate `static` import from `django.templatetags.static`.
+- **Fixed**: Removed debug `print(fieldsets)` statement from `UserProfileAdmin.get_fieldsets()`.
+- **Validation**: Build successful (Tailwind + migrations), no schema changes.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users.
+
 ### v0.3.5 (2026-07-15) — latest
 **Feature: Public/private file access control and HTML file support**
 - **Added**: `is_public`, `allowed_users`, `allowed_groups` fields to `BaseFile` model — files can now be marked public or restricted to specific users/groups.
