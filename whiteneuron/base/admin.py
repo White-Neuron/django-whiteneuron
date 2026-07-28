@@ -1,3 +1,4 @@
+import base64
 import types as _types
 from typing import Sequence
 from django import forms
@@ -60,8 +61,6 @@ from unfold.widgets import (
 from .models import User, Tag, UserActivity, AnonymousActivity, VisitProfile, UserProfile, App, IPBlacklist, UABlacklist
 from .sites import base_admin_site
 from django.utils.safestring import mark_safe
-
-from django.templatetags.static import static
 
 from .modeladmin import ModelAdmin
 
@@ -681,7 +680,6 @@ class UserProfileAdmin(ModelAdmin):
             #     'fields': ('show_softdelete',)
             # })
             fieldsets = list(fieldsets)  # Convert to list to modify
-            print(fieldsets)
             fieldsets.insert(1, (_('Configuration'),
                 {
                     'fields': ('show_softdelete',)
@@ -739,7 +737,12 @@ class MailAdmin(ModelAdmin):
         return False
     
     def preview_email(self, obj):
-        return mark_safe(obj.content)
+        content = obj.content if obj.content else ''
+        encoded = base64.b64encode(content.encode('utf-8')).decode('utf-8')
+        return format_html(
+            '<iframe src="data:text/html;charset=utf-8;base64,{}" style="width: 100%; border: none; min-height: 600px;" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" frameborder="0"></iframe>',
+            encoded,
+        )
     preview_email.short_description = _('Content')
 
 
