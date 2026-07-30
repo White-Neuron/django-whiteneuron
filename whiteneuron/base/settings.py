@@ -664,6 +664,12 @@ UNFOLD = {
                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
                     },
                     {
+                        "title": _("Email Templates"),
+                        "icon": "description",
+                        "link": reverse_lazy("admin:base_emailtemplate_changelist"),
+                        "permission": "whiteneuron.base.utils.permission_superuser_callback",
+                    },
+                    {
                         "title": _("Emails"),
                         "icon": "email",
                         "link": reverse_lazy("admin:base_mail_changelist"),

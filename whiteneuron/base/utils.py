@@ -166,7 +166,19 @@ Trân trọng,
 """
 
 from django.conf import settings
-from .models import Mail
+from .models import Mail, EmailTemplate
+import hashlib
+
+def _get_or_create_template(subject, content):
+    key = f"{subject}|||{content}"[:500]
+    slug = hashlib.md5(key.encode()).hexdigest()[:8]
+    name = f"{subject[:60]} ({slug})"
+    template, created = EmailTemplate.objects.get_or_create(
+        name=name,
+        defaults={'subject': subject, 'content': content}
+    )
+    return template
+
 def send_email_login(username, password, receiver, is_reset=False):
     global TEMPLATE
     SUBJECT = "Đặt lại mật khẩu hệ thống" if is_reset else "Thông tin đăng nhập hệ thống"
@@ -176,7 +188,8 @@ def send_email_login(username, password, receiver, is_reset=False):
     template= TEMPLATE
     system_name= SYSTEM_NAME
     context= template.format(username= username, password= password, url= URL, system_name= system_name, signature= _load_signature())
-    mail= Mail.objects.create(subject= subject, content= context, receiver= receiver)
+    email_template = _get_or_create_template(subject, context)
+    mail= Mail.objects.create(template=email_template, receiver=receiver)
     mail.send()
     return mail.is_sent()
 

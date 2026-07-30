@@ -712,20 +712,68 @@ class ImageAdmin(ModelAdmin):
             extra_context['copy_code'] = self.copy_code(obj)
         return super(ImageAdmin, self).changeform_view(request, object_id, form_url, extra_context)
 
-from .models import Mail
+from .models import Mail, EmailTemplate
 from django.utils.html import format_html
+
+@admin.register(EmailTemplate, site=base_admin_site)
+class EmailTemplateAdmin(ModelAdmin):
+    list_display = ['name', 'subject_short', 'mail_count_display', 'created_at']
+    search_fields = ['name', 'subject', 'content']
+    readonly_fields = ['preview_email', 'created_at', 'updated_at']
+    
+    fieldsets = (
+        (_('Template info'), {
+            'fields': ('name', 'subject')
+        }),
+        (_('Content'), {
+            'fields': ('content',),
+            'classes': ('collapse',)
+        }),
+        (_('Preview'), {
+            'fields': ('preview_email',),
+            'classes': ('collapse',)
+        }),
+        (_('Meta'), {
+            'fields': ('mail_count_display', 'created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
+    
+    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+    
+    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+    
+    def subject_short(self, obj):
+        return (obj.subject[:80] + '...') if len(obj.subject) > 80 else obj.subject
+    subject_short.short_description = _('Subject')
+    
+    @admin.display(description=_('Mails sent'))
+    def mail_count_display(self, obj):
+        count = Mail.objects.filter(template=obj).count()
+        return format_html('<span style="color: #666; font-weight:bold;">{} emails</span>', count)
+    
+    def preview_email(self, obj):
+        content = obj.content if obj.content else ''
+        encoded = base64.b64encode(content.encode('utf-8')).decode('utf-8')
+        return format_html(
+            '<iframe src="data:text/html;charset=utf-8;base64,{}" style="width: 100%; border: none; min-height: 600px;" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" frameborder="0"></iframe>',
+            encoded,
+        )
+    preview_email.short_description = _('Email Preview')
+
 
 @admin.register(Mail, site=base_admin_site)
 class MailAdmin(ModelAdmin):
-    list_display = ['subject', 'receiver', 'status', 'created_at']
-    search_fields = ['subject', 'receiver', 'status']
-    readonly_fields = ['content', 'status', 'created_at', 'updated_at', 'preview_email']
-    list_filter = ['status']
-    fieldsets = (
-        (_('Mail info'), {
-            'fields': ('subject', 'preview_email', 'receiver', 'status', 'note')
-        }),
-    )
+    list_display = ['receiver', 'template_subject', 'status_badge', 'created_at']
+    list_filter = ['status', 'template__name', 'created_at']
+    search_fields = ['receiver', 'template__subject', 'template__content']
+    readonly_fields = ['template_link', 'preview_email', 'status', 'created_at', 'updated_at']
+    fields = ('template_link', 'receiver', 'preview_email', 'status', 'note', 'created_at', 'updated_at')
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
@@ -736,6 +784,21 @@ class MailAdmin(ModelAdmin):
     def has_change_permission(self, request: HttpRequest, obj= None) -> bool:
         return False
     
+    @admin.display(description=_('Template'))
+    def template_link(self, obj):
+        from django.utils.html import format_html
+        return format_html(
+            '<a href="/admin/base/emailtemplate/{}/change/" target="_blank" style="font-weight:bold;">{}</a><br/>'
+            '<span style="color:#666;font-size:12px;">Subject: {}</span>',
+            obj.template_id,
+            obj.template.name,
+            (obj.template.subject[:100] + '...') if len(obj.template.subject) > 100 else obj.template.subject,
+        )
+    
+    @admin.display(description=_('Subject'))
+    def template_subject(self, obj):
+        return (obj.template.subject[:60] + '...') if len(obj.template.subject) > 60 else obj.template.subject
+    
     def preview_email(self, obj):
         content = obj.content if obj.content else ''
         encoded = base64.b64encode(content.encode('utf-8')).decode('utf-8')
@@ -743,7 +806,18 @@ class MailAdmin(ModelAdmin):
             '<iframe src="data:text/html;charset=utf-8;base64,{}" style="width: 100%; border: none; min-height: 600px;" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" frameborder="0"></iframe>',
             encoded,
         )
-    preview_email.short_description = _('Content')
+    preview_email.short_description = _('Email Preview')
+    
+    @admin.display(boolean=True, description=_('Status'))
+    def status_badge(self, obj):
+        colors = {'sent': '#22c55e', 'failed': '#ef4444', 'pending': '#f59e0b'}
+        color = colors.get(obj.status, '#6b7280')
+        return format_html(
+            '<span style="display:inline-block;padding:2px 8px;border-radius:4px;background:{};color:white;font-size:11px;">{}</span>',
+            color,
+            obj.get_status_display(),
+        )
+    status_badge.short_description = _('Status')
 
 
 from django.conf import settings

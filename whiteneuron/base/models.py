@@ -860,15 +860,28 @@ from django.core.mail import BadHeaderError
 import smtplib
 import ssl
 
+class EmailTemplate(BaseModel):
+    name = models.CharField(max_length=255, verbose_name=_('Name'))
+    subject = models.TextField(verbose_name=_('Subject'))
+    content = models.TextField(verbose_name=_('Content'))
+
+    class Meta:
+        db_table = 'email_template'
+        verbose_name = _('Email template')
+        verbose_name_plural = _('Email templates')
+
+    def __str__(self):
+        return self.name
+
+
 class Mail(BaseModel):
-    subject = models.CharField(max_length=255, verbose_name= _('Subject'))
-    content = models.TextField(verbose_name= _('Content'))
-    receiver = models.EmailField(verbose_name= _('Receiver'))
-    status = models.CharField(max_length=25, choices= [('pending', _('Pending')),
+    template = models.ForeignKey(EmailTemplate, on_delete=models.CASCADE, verbose_name=_('Template'))
+    receiver = models.EmailField(verbose_name=_('Receiver'))
+    status = models.CharField(max_length=25, choices=[('pending', _('Pending')),
                                                        ('sent', _('Sent')),
                                                        ('failed', _('Failed'))], 
-                                                       default='pending', verbose_name= _('Status'))
-    note = models.TextField(blank=True, null=True, verbose_name= _('Note'))
+                                                       default='pending', verbose_name=_('Status'))
+    note = models.TextField(blank=True, null=True, verbose_name=_('Note'))
 
     class Meta:
         db_table = 'mail'
@@ -876,7 +889,15 @@ class Mail(BaseModel):
         verbose_name_plural = _('Email notifications')
 
     def __str__(self):
-        return self.subject
+        return f"{self.template.subject[:50]} → {self.receiver}"
+
+    @property
+    def subject(self):
+        return self.template.subject
+
+    @property
+    def content(self):
+        return self.template.content
     
     def save(self, *args, **kwargs):
         super(Mail, self).save(*args, **kwargs)
@@ -894,7 +915,7 @@ class Mail(BaseModel):
             context = ssl._create_unverified_context()
             with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as server:
                 send_mail(
-                    self.subject,
+                    self.template.subject,
                     self.content,
                     settings.EMAIL_HOST_USER,
                     [self.receiver],
