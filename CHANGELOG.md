@@ -1,6 +1,15 @@
 # Changelog
 
-### v0.3.5.1 (2026-07-28) — latest
+### v0.3.5.2 (2026-07-31) — latest
+**Improvement: EMAIL_ALIAS_USER support, email signature redesign, user creation hardening**
+- **Added**: `EMAIL_ALIAS_USER` setting in `.env` and `settings.py` — allows configuring an alias name for the email sender displayed to end users.
+- **Improved**: Email signature template (`templates/admin/signature.html`) completely rewritten — removed 230+ lines of inline CSS, simplified structure using DaisyUI utility classes.
+- **Added**: New PNG logo file (`static/base/images/logo/LOGO.jpg` → `LOGO.jpg` in PNG format) for email signatures with rounded corners styling.
+- **Fixed**: `UserCreationForm.save_model()` — duplicate email validation added; password set after `super().save_model()` to prevent race condition; email sending wrapped in try/except for graceful degradation.
+- **Validation**: Build successful (Tailwind + migrations), no schema changes.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users.
+
+### v0.3.5.1 (2026-07-28)
 **Fix: Sandbox email preview in iframe, remove debug print and duplicate import**
 - **Fixed**: `MailAdmin.preview_email` now renders email content inside a sandboxed `<iframe>` using base64-encoded data URI instead of inline HTML — prevents CSS conflicts between email content styles and Django admin theme.
 - **Fixed**: Removed duplicate `static` import from `django.templatetags.static`.

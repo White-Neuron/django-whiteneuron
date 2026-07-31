@@ -10,15 +10,15 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.3.5.1
+v0.3.5.2
 
 ## Changelog
 
-### Latest: v0.3.5.1 (2026-07-28)
-**Fix: Sandbox email preview in iframe, remove debug print and duplicate import**
-- **Fixed**: `MailAdmin.preview_email` now renders email content inside a sandboxed `<iframe>` using base64-encoded data URI instead of inline HTML — prevents CSS conflicts between email content styles and Django admin theme.
-- **Fixed**: Removed duplicate `static` import from `django.templatetags.static`.
-- **Fixed**: Removed debug `print(fieldsets)` statement from `UserProfileAdmin.get_fieldsets()`.
+### Latest: v0.3.5.2 (2026-07-31)
+**Improvement: EMAIL_ALIAS_USER support, email signature redesign, user creation hardening**
+- **Added**: `EMAIL_ALIAS_USER` setting for configuring the email sender alias name displayed to end users.
+- **Improved**: Email signature template rewritten — removed 230+ lines of inline CSS, simplified with DaisyUI utilities.
+- **Fixed**: User creation flow — duplicate email validation, password set order fix, graceful email error handling.
 - **Compatibility**: No breaking changes; safe for all v0.3.x users.
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
