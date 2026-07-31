@@ -896,7 +896,7 @@ class Mail(BaseModel):
                 send_mail(
                     self.subject,
                     self.content,
-                    settings.EMAIL_HOST_USER,
+                    settings.EMAIL_ALIAS_USER,
                     [self.receiver],
                     html_message= self.content,
                     fail_silently=False,
