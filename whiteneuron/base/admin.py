@@ -116,7 +116,15 @@ class UserCreationForm(UserCreationForm):
         super().__init__(*args, **kwargs)
         self.fields['password1'].required = False
         self.fields['password2'].required = False
-        self.fields['email'].required = True
+        if 'email' in self.fields:
+            self.fields['email'].required = True
+
+    def clean_email(self):
+        """Validate that the email is not already in use."""
+        email = self.cleaned_data.get('email')
+        if email and User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError(_('A user with this email already exists.'))
+        return email
 
     class Meta(UserCreationForm.Meta):
         model = User
@@ -344,18 +352,22 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
     # tự tạo mật khẩu mặc định cho user mới và gửi email thông báo
     def save_model(self, request: HttpRequest, obj, form, change: bool) -> None:
         is_new = not obj.pk
+        password = None
         if is_new:
             obj._skip_new_user_email = True  # signal sẽ bỏ qua, admin form tự xử lý
             password = make_random_password()
-            s= send_email_login(obj.username, password, obj.email)
-            if not s: 
-                messages.error(request, _("Failed to send email notification! Please change the password so that the user can log in."))
-            else:
-                messages.success(request, _("Email notification has been sent, please check your inbox!"))
         super().save_model(request, obj, form, change)
-        if is_new:
+        if is_new and password:
             obj.set_password(password)
-            obj.save()
+            obj.save(update_fields=['password'])
+            try:
+                s = send_email_login(obj.username, password, obj.email)
+                if not s:
+                    messages.error(request, _("Failed to send email notification! Please change the password so that the user can log in."))
+                else:
+                    messages.success(request, _("Email notification has been sent, please check your inbox!"))
+            except Exception:
+                messages.error(request, _("Failed to send email notification. The user was created but could not receive login credentials."))
 
 
 @admin.register(UserActivity, site=base_admin_site)
