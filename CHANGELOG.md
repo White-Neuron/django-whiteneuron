@@ -1,6 +1,14 @@
 # Changelog
 
-### v0.3.5.2 (2026-07-31) — latest
+### v0.3.5.3 (2026-08-02) — latest
+**Security: Upgrade Django to 6.0.7+ (CVE-2026-53877, CVE-2026-48588, CVE-2026-53878)**
+- **Fixed**: Upgraded `django` lower bound from `>=6.0.6` to `>=6.0.7,<7.0.0` — patches 3 security vulnerabilities: CVE-2026-53877 (CVSS 6.3 Medium), CVE-2026-48588 (CVSS 5.3 Medium), CVE-2026-53878 (CVSS 5.3 Medium).
+- **Validation**: Build successful, no migrations required.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users. Django 6.0.x only — pinned upper bound `<7.0.0`.
+- **Upgrade Guidance**: Run `pip install --upgrade django-whiteneuron` to apply security patches.
+- **Rollback**: Safe to revert to v0.3.5.2; no schema changes introduced.
+
+### v0.3.5.2 (2026-07-31)
 **Improvement: EMAIL_ALIAS_USER support, email signature redesign, user creation hardening**
 - **Added**: `EMAIL_ALIAS_USER` setting in `.env` and `settings.py` — allows configuring an alias name for the email sender displayed to end users.
 - **Improved**: Email signature template (`templates/admin/signature.html`) completely rewritten — removed 230+ lines of inline CSS, simplified structure using DaisyUI utility classes.

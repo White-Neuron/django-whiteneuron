@@ -10,16 +10,14 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.3.5.2
+v0.3.5.3
 
 ## Changelog
 
-### Latest: v0.3.5.2 (2026-07-31)
-**Improvement: EMAIL_ALIAS_USER support, email signature redesign, user creation hardening**
-- **Added**: `EMAIL_ALIAS_USER` setting for configuring the email sender alias name displayed to end users.
-- **Improved**: Email signature template rewritten — removed 230+ lines of inline CSS, simplified with DaisyUI utilities.
-- **Fixed**: User creation flow — duplicate email validation, password set order fix, graceful email error handling.
-- **Compatibility**: No breaking changes; safe for all v0.3.x users.
+### Latest: v0.3.5.3 (2026-08-02)
+**Security: Upgrade Django to 6.0.7+ (CVE-2026-53877, CVE-2026-48588, CVE-2026-53878)**
+- **Fixed**: Upgraded `django` lower bound from `>=6.0.6` to `>=6.0.7,<7.0.0` — patches 3 security vulnerabilities: CVE-2026-53877 (CVSS 6.3), CVE-2026-48588 (CVSS 5.3), CVE-2026-53878 (CVSS 5.3).
+- **Compatibility**: No breaking changes; safe for all v0.3.x users. Django 6.0.x only — pinned upper bound `<7.0.0`.
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
