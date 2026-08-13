@@ -1,6 +1,14 @@
 # Changelog
 
-### v0.3.5.3 (2026-08-02) — latest
+### v0.3.6.0 (2026-08-13) — latest
+**Bugfix: UUID regeneration in duplicate_objects to avoid unique constraint violation**
+- **Fixed**: `ModelAdmin.duplicate_objects()` — regenerated UUID field on duplicated objects via `uuid4()` before setting `pk=None` — prevents `IntegrityError` when the User model's unique `uuid` constraint is violated during object duplication.
+- **Validation**: Build successful (Tailwind + migrations), no schema changes.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users.
+- **Upgrade Guidance**: Run `pip install --upgrade django-whiteneuron` to apply changes.
+- **Rollback**: Safe to revert to v0.3.5.3; no schema changes introduced.
+
+### v0.3.5.3 (2026-08-02)
 **Security: Upgrade Django to 6.0.7+ (CVE-2026-53877, CVE-2026-48588, CVE-2026-53878)**
 - **Fixed**: Upgraded `django` lower bound from `>=6.0.6` to `>=6.0.7,<7.0.0` — patches 3 security vulnerabilities: CVE-2026-53877 (CVSS 6.3 Medium), CVE-2026-48588 (CVSS 5.3 Medium), CVE-2026-53878 (CVSS 5.3 Medium).
 - **Validation**: Build successful, no migrations required.

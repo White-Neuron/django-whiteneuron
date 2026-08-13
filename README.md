@@ -10,14 +10,14 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.3.5.3
+v0.3.6.0
 
 ## Changelog
 
-### Latest: v0.3.5.3 (2026-08-02)
-**Security: Upgrade Django to 6.0.7+ (CVE-2026-53877, CVE-2026-48588, CVE-2026-53878)**
-- **Fixed**: Upgraded `django` lower bound from `>=6.0.6` to `>=6.0.7,<7.0.0` — patches 3 security vulnerabilities: CVE-2026-53877 (CVSS 6.3), CVE-2026-48588 (CVSS 5.3), CVE-2026-53878 (CVSS 5.3).
-- **Compatibility**: No breaking changes; safe for all v0.3.x users. Django 6.0.x only — pinned upper bound `<7.0.0`.
+### Latest: v0.3.6.0 (2026-08-13)
+**Bugfix: UUID regeneration in duplicate_objects to avoid unique constraint violation**
+- **Fixed**: `ModelAdmin.duplicate_objects()` — regenerated UUID field on duplicated objects via `uuid4()` before setting `pk=None` — prevents `IntegrityError` when the User model's unique `uuid` constraint is violated during object duplication.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users.
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
