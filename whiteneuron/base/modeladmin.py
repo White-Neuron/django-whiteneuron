@@ -530,6 +530,11 @@ class ModelAdmin(UnfoldAdmin):
     def duplicate_objects(self, request, queryset):
         for obj in queryset:
             obj.pk = None  # This will create a new object when saved
+            # Regenerate UUID to avoid unique constraint violation
+            uuid_field = next((f for f in obj._meta.fields if f.name == 'uuid' and isinstance(f, models.UUIDField)), None)
+            if uuid_field:
+                from uuid import uuid4
+                setattr(obj, 'uuid', uuid4())
             if hasattr(obj, 'name'):
                 obj.name = f"{obj.name} (Copy)"
             elif hasattr(obj, 'title'):
