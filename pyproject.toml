@@ -10,7 +10,7 @@ readme = "README.md"
 keywords = ["django", "plugin", "admin", "dashboard", "whiteneuron"]
 dependencies = [
     "django-debug-toolbar>=5.0.1",
-    "django>=6.0.7,<7.0.0",
+    "django>=6.0.8,<7.0.0",
     "django-celery-beat>=2.7.0",
     "django-guardian>=2.4.0",
     "django-imagekit>=5.0.0",
@@ -41,9 +41,8 @@ dependencies = [
     'django-cors-headers>=4.3.0',
     "django-unfold>=0.92.0",
     "djangoql>=0.18.1",
-    "cryptography>=48.0.1",
-    "pyopenssl>=26.2.0",
-    "md2html-tailwind4==1.5.3"
+    "pyopenssl>=26.4.0",
+    "md2html-tailwind4==1.5.3",
 ]
 requires-python = ">=3.13"
 
@@ -85,5 +84,5 @@ include = ["whiteneuron*"]
 dev = ["pytest", "black", "flake8", "pre-commit"]
 
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools>=75.1.0", "wheel"]
 build-backend = "setuptools.build_meta"
