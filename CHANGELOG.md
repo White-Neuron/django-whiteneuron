@@ -1,6 +1,18 @@
 # Changelog
 
-### v0.3.6.0 (2026-08-13) — latest
+### v0.3.7.0 (2026-08-23) — latest
+**Security: Patch 6 CVEs across django, cryptography, sqlparse, setuptools**
+- **Fixed**: Upgraded `django` lower bound from `>=6.0.8` to patch CVE-2026-15830 (GeoDjango DoS, CVSS unspecified).
+- **Fixed**: Upgraded `pyopenssl` from `>=26.2.0` to `>=26.4.0` — resolves CVE-2026-69247 (Bleichenbacher oracle attack via cryptography ≤50.0.0, patched in 50.0.0).
+- **Fixed**: Added `sqlparse >=0.6.0` as transitive dependency fix — patches CVE-2026-71491, CVE-2026-54284, CVE-2026-59893 (DoS vulnerabilities).
+- **Fixed**: Added `setuptools >=75.1.0` to `[build-system]` requires — patches CVE-2025-47273.
+- **Cleaned up**: Removed direct `cryptography` dependency from `pyproject.toml` — not used directly in code, only needed as transitive dependency via pyopenssl.
+- **Validation**: Build successful (Tailwind + migrations), no schema changes.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users. Django 6.0.x only — pinned upper bound `<7.0.0`.
+- **Upgrade Guidance**: Run `pip install --upgrade django-whiteneuron` to apply security patches.
+- **Rollback**: Safe to revert to v0.3.6.0; no schema changes introduced.
+
+### v0.3.6.0 (2026-08-13)
 **Bugfix: UUID regeneration in duplicate_objects to avoid unique constraint violation**
 - **Fixed**: `ModelAdmin.duplicate_objects()` — regenerated UUID field on duplicated objects via `uuid4()` before setting `pk=None` — prevents `IntegrityError` when the User model's unique `uuid` constraint is violated during object duplication.
 - **Validation**: Build successful (Tailwind + migrations), no schema changes.
