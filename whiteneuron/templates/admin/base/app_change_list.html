@@ -72,7 +72,7 @@
             {% if apps|length > 4 %}
               {% for a in apps|slice:":3" %}
               <div class="flex items-center justify-center rounded-sm bg-base-100 dark:bg-base-800 overflow-hidden w-full h-full">
-                {% if a.thumbnail_url %}<img src="{{ a.thumbnail_url }}" class="w-full h-full object-contain" loading="lazy"/>
+                {% if a.thumbnail_url %}{% if a.thumbnail_url|slice:":2" == "//" or a.thumbnail_url|slice:":4" == "http" %}<img src="{{ a.thumbnail_url }}" class="w-full h-full object-contain" loading="lazy"/>{% else %}<img src="{% static a.thumbnail_url %}" class="w-full h-full object-contain" loading="lazy"/>{% endif %}
                 {% elif a.icon|slice:":2" == "//" or a.icon|slice:":4" == "http" %}<img src="{{ a.icon }}" class="w-full h-full object-contain" loading="lazy"/>
                 {% elif a.icon %}<span class="material-symbols-outlined text-primary" style="font-size:0.85rem">{{ a.icon }}</span>
                 {% else %}<span class="material-symbols-outlined text-base-content/20" style="font-size:0.85rem">apps</span>{% endif %}
@@ -84,7 +84,7 @@
             {% else %}
               {% for a in apps|slice:":4" %}
               <div class="flex items-center justify-center rounded-sm bg-base-100 dark:bg-base-800 overflow-hidden w-full h-full">
-                {% if a.thumbnail_url %}<img src="{{ a.thumbnail_url }}" class="w-full h-full object-contain" loading="lazy"/>
+                {% if a.thumbnail_url %}{% if a.thumbnail_url|slice:":2" == "//" or a.thumbnail_url|slice:":4" == "http" %}<img src="{{ a.thumbnail_url }}" class="w-full h-full object-contain" loading="lazy"/>{% else %}<img src="{% static a.thumbnail_url %}" class="w-full h-full object-contain" loading="lazy"/>{% endif %}
                 {% elif a.icon|slice:":2" == "//" or a.icon|slice:":4" == "http" %}<img src="{{ a.icon }}" class="w-full h-full object-contain" loading="lazy"/>
                 {% elif a.icon %}<span class="material-symbols-outlined text-primary" style="font-size:0.85rem">{{ a.icon }}</span>
                 {% else %}<span class="material-symbols-outlined text-base-content/20" style="font-size:0.85rem">apps</span>{% endif %}
