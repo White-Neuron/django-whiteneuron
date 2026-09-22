@@ -190,3 +190,5 @@ whiteneuron/templates/admin/signature_ceo.html
 scripts/hooks/
 .opencode
 */.DS_Store
+
+AGENTS.md
