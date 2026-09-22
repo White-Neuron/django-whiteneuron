@@ -772,7 +772,7 @@ class Image(BaseModel):
         r= self.getImgThumbnailUrl()
         if r is None or self.image is None:
             mes= _('Image not found')
-            return format_html(f'<p>{mes}</p>')
+            return format_html('<p>{}</p>', mes)
         return format_html('<img src="{}" width="100" height="100" style="width: 100px; height: 100px; object-fit: cover;"/>', r)
     imgThumbnail.short_description = _('Thumbnail')
 
@@ -781,11 +781,9 @@ class Image(BaseModel):
         img_url= self.image.url
         if r is None or self.image is None:
             mes= _('Image not found')
-            return format_html(f'<p>{mes}</p>')
+            return format_html('<p>{}</p>', mes)
         mes= _('View original image size')
-        return format_html(f"""<a href="{img_url}" target="_blank"><img src="{r}" width="512"/>
-                            <br><small>{mes}</small>
-                           </a>""")
+        return format_html('<a href="{}" target="_blank"><img src="{}" width="512"/><br><small>{}</small></a>', img_url, r, mes)
     imgPreview.short_description = _('Preview')
 
     def url(self):
