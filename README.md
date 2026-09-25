@@ -10,9 +10,18 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.3.7.0
+v0.3.8.0
 
 ## Changelog
+
+### Latest: v0.3.8.0 (2026-09-25)
+**Bugfixes: Django 6 format_html crash in Image previews, app mosaic thumbnail URLs, SHOW_FILE_MANAGEMENT sidebar flag**
+- **Fixed**: `Image.imgThumbnail()` and `Image.imgPreview()` admin methods — replaced f-string interpolation inside `format_html()` with the proper template + args pattern; resolves the rendering crash on Django 6 and ensures interpolated values are HTML-escaped.
+- **Fixed**: App changelist mosaic thumbnails (`templates/admin/base/app_change_list.html`) — relative `thumbnail_url` paths are now wrapped in `{% static %}` while absolute/protocol-relative URLs pass through unchanged, fixing broken thumbnail images.
+- **Fixed**: `SHOW_FILE_MANAGEMENT=False` is no longer silently ignored — the Unfold sidebar is built conditionally at definition time instead of post-processing by title match; when disabled, File Management items merge into the System section before Notifications config.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users. Django 6.0.x only.
+
+See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
 ### Latest: v0.3.7.0 (2026-08-23)
 **Security: Patch 6 CVEs across django, cryptography, sqlparse, setuptools**
@@ -21,8 +30,6 @@ v0.3.7.0
 - **Fixed**: Added `sqlparse >=0.6.0` via transitive deps — patches 3 DoS CVEs (CVE-2026-71491, CVE-2026-54284, CVE-2026-59893).
 - **Fixed**: Added `setuptools >=75.1.0` to build-system — patches CVE-2025-47273.
 - **Compatibility**: No breaking changes; safe for all v0.3.x users. Django 6.0.x only.
-
-See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
 ### Latest: v0.3.5 (2026-07-15)
 **Feature: Public/private file access control and HTML file support**

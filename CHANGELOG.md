@@ -1,6 +1,16 @@
 # Changelog
 
-### v0.3.7.0 (2026-08-23) — latest
+### v0.3.8.0 (2026-09-25) — latest
+**Bugfixes: Django 6 format_html crash in Image previews, app mosaic thumbnail URLs, SHOW_FILE_MANAGEMENT sidebar flag**
+- **Fixed**: `Image.imgThumbnail()` and `Image.imgPreview()` admin methods — replaced f-string interpolation inside `format_html()` with the proper template + args pattern; resolves the rendering crash on Django 6 and ensures interpolated values are HTML-escaped.
+- **Fixed**: App changelist mosaic thumbnails (`templates/admin/base/app_change_list.html`) — relative `thumbnail_url` paths are now wrapped in `{% static %}` while absolute/protocol-relative URLs pass through unchanged, fixing broken thumbnail images.
+- **Fixed**: `SHOW_FILE_MANAGEMENT=False` is no longer silently ignored — the Unfold sidebar is built conditionally at definition time instead of post-processing by title match (which failed because titles are gettext-lazy proxies); when disabled, File Management items merge into the System section before Notifications config.
+- **Validation**: Tailwind build successful, `makemigrations` reports no changes, `uv build` produced wheel + sdist.
+- **Compatibility**: No breaking changes; safe for all v0.3.x users. Django 6.0.x only — pinned upper bound `<7.0.0`.
+- **Upgrade Guidance**: Run `pip install --upgrade django-whiteneuron` to apply fixes.
+- **Rollback**: Safe to revert to v0.3.7.0; no schema changes introduced.
+
+### v0.3.7.0 (2026-08-23)
 **Security: Patch 6 CVEs across django, cryptography, sqlparse, setuptools**
 - **Fixed**: Upgraded `django` lower bound from `>=6.0.8` to patch CVE-2026-15830 (GeoDjango DoS, CVSS unspecified).
 - **Fixed**: Upgraded `pyopenssl` from `>=26.2.0` to `>=26.4.0` — resolves CVE-2026-69247 (Bleichenbacher oracle attack via cryptography ≤50.0.0, patched in 50.0.0).
