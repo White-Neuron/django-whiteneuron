@@ -445,6 +445,35 @@ if DEBUG:
     STORAGES["staticfiles"]["BACKEND"] = "django.contrib.staticfiles.storage.StaticFilesStorage"
 
 ######################################################################
+# Feature flags (defined before UNFOLD so the sidebar can be built conditionally)
+######################################################################
+SHOW_FILE_MANAGEMENT = environ.get("SHOW_FILE_MANAGEMENT", "True") == "True"
+
+FILE_MANAGEMENT_ITEMS = [
+    {
+        "title": _("Excel Files"),
+        "icon": "table",
+        "link": reverse_lazy("admin:file_management_excelfile_changelist"),
+        "badge": "whiteneuron.file_management.utils.excelfile_badge_callback",
+        "permission": "whiteneuron.base.utils.permission_non_guest_callback",
+    },
+    {
+        "title": _("PDF Files"),
+        "icon": "picture_as_pdf",
+        "link": reverse_lazy("admin:file_management_pdffile_changelist"),
+        "badge": "whiteneuron.file_management.utils.pdffile_badge_callback",
+        "permission": "whiteneuron.base.utils.permission_non_guest_callback",
+    },
+    {
+        "title": _("HTML Files"),
+        "icon": "code",
+        "link": reverse_lazy("admin:file_management_htmlfile_changelist"),
+        "badge": "whiteneuron.file_management.utils.htmlfile_badge_callback",
+        "permission": "whiteneuron.base.utils.permission_non_guest_callback",
+    },
+]
+
+######################################################################
 # Unfold
 ######################################################################
 UNFOLD = {
@@ -627,33 +656,17 @@ UNFOLD = {
                     },
                 ],
             },
-            {
-                "title": _("File Management"),
-                "collapsible": True,
-                "items": [
+            *(
+                [
                     {
-                        "title": _("Excel Files"),
-                        "icon": "table",
-                        "link": reverse_lazy("admin:file_management_excelfile_changelist"),
-                        "badge": "whiteneuron.file_management.utils.excelfile_badge_callback",
-                        "permission": "whiteneuron.base.utils.permission_non_guest_callback",
-                    },
-                    {
-                        "title": _("PDF Files"),
-                        "icon": "picture_as_pdf",
-                        "link": reverse_lazy("admin:file_management_pdffile_changelist"),
-                        "badge": "whiteneuron.file_management.utils.pdffile_badge_callback",
-                        "permission": "whiteneuron.base.utils.permission_non_guest_callback",
-                    },
-                    {
-                        "title": _("HTML Files"),
-                        "icon": "code",
-                        "link": reverse_lazy("admin:file_management_htmlfile_changelist"),
-                        "badge": "whiteneuron.file_management.utils.htmlfile_badge_callback",
-                        "permission": "whiteneuron.base.utils.permission_non_guest_callback",
-                    },
-                ],
-            },
+                        "title": _("File Management"),
+                        "collapsible": True,
+                        "items": FILE_MANAGEMENT_ITEMS,
+                    }
+                ]
+                if SHOW_FILE_MANAGEMENT
+                else []
+            ),
             {
                 "title": _("System"),
                 "collapsible": True,
@@ -670,6 +683,7 @@ UNFOLD = {
                         "link": reverse_lazy("admin:base_mail_changelist"),
                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
                     },
+                    *(FILE_MANAGEMENT_ITEMS if not SHOW_FILE_MANAGEMENT else []),
                     {
                         "title": _("Notifications config"),
                         "icon": "notification_important",
@@ -741,32 +755,7 @@ UNFOLD = {
 }
 
 SHOW_CELERY_TASKS = environ.get("SHOW_CELERY_TASKS", "True") == "True"
-SHOW_FILE_MANAGEMENT = environ.get("SHOW_FILE_MANAGEMENT", "True") == "True"
 SHOW_FEEDBACKS = environ.get("SHOW_FEEDBACKS", "True") == "True"
-
-if not SHOW_FILE_MANAGEMENT:
-    # Remove File Management section and merge its items into System
-    nav = UNFOLD["SIDEBAR"]["navigation"]
-    file_mgmt_idx = None
-    system_idx = None
-    for i, item in enumerate(nav):
-        title = item.get("title", "")
-        if isinstance(title, str) and title == "File Management":
-            file_mgmt_idx = i
-        if isinstance(title, str) and title == "System":
-            system_idx = i
-
-    if file_mgmt_idx is not None and system_idx is not None:
-        # Insert File Management items before Notifications config in System section
-        system_items = nav[system_idx]["items"]
-        notif_idx = next(
-            (i for i, item in enumerate(system_items)
-             if isinstance(item.get("title", ""), str) and "Notifications" in item["title"]),
-            len(system_items)
-        )
-        system_items[notif_idx:notif_idx] = nav[file_mgmt_idx]["items"]
-        # Remove File Management section
-        del nav[file_mgmt_idx]
 
 if not SHOW_CELERY_TASKS:
     UNFOLD["SIDEBAR"]["navigation"]= UNFOLD["SIDEBAR"]["navigation"][:-1]
