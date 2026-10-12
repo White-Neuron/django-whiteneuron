@@ -8,12 +8,27 @@ document.addEventListener('DOMContentLoaded', function () {
     const RESPONSE_DONE_COOKIE = 'wn_loading_done';
     let downloadPollTimer = null;
 
+    // Only show the overlay when navigation is actually slow, so fast pages
+    // don't flash a full-screen backdrop on every click.
+    const SHOW_DELAY_MS = 250;
+    let showTimer = null;
+
     const hideOverlay = function () {
+        if (showTimer) {
+            window.clearTimeout(showTimer);
+            showTimer = null;
+        }
         loadingOverlay.style.display = 'none';
     };
 
     const showOverlay = function () {
-        loadingOverlay.style.display = 'flex';
+        if (showTimer) {
+            return;
+        }
+        showTimer = window.setTimeout(function () {
+            showTimer = null;
+            loadingOverlay.style.display = 'flex';
+        }, SHOW_DELAY_MS);
     };
 
     const setCookie = function (name, value, maxAgeSeconds) {
@@ -161,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     window.addEventListener('focus', function () {
-        if (!downloadPollTimer) {
+        if (!downloadPollTimer && !showTimer) {
             hideOverlay();
         }
     });

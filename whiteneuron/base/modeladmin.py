@@ -259,7 +259,8 @@ class ModelAdmin(UnfoldAdmin):
         return list_filter
 
     def get_readonly_fields(self, request: HttpRequest, obj: Any | None = ...) -> list[str] | tuple[Any, ...]:
-        readonly_fields = super().get_readonly_fields(request, obj)
+        # copy: super() may return the class-level list, which `+=` would grow on every request
+        readonly_fields = tuple(super().get_readonly_fields(request, obj))
         # check nếu model có trường sau thì mới thêm vào readonly_fields
         for field in ['id', 'created_at', 'created_by', 'updated_at', 'updated_by']:
             if field in [f.name for f in self.model._meta.fields]:
@@ -304,11 +305,13 @@ class ModelAdmin(UnfoldAdmin):
             # default list_display
             list_display = list(list_display)
         else:
-            list_display = filtered_list_display
-            try:
-                list_display.remove('buttons')
-            except Exception:
-                pass
+            # Only accept known columns: Django calls any non-field name on each row,
+            # so an arbitrary ?display_fields=delete would run obj.delete() on a GET.
+            allowed = {field for field, _ in FieldSelectionFilter.lookups(None, request, self)}
+            allowed.update(f for f in list_display if isinstance(f, str))
+            list_display = [f for f in filtered_list_display if f in allowed and f != 'buttons']
+            if not list_display:
+                list_display = list(super().get_list_display(request))
         # check nếu model có trường sau thì mới thêm vào list_display
         # fields_extra = ['updated_at', 'updated_by']
         fields_extra = []

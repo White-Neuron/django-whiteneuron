@@ -1,26 +1,62 @@
-{% load i18n %}
+{% load i18n wn_theme %}
 
 {% if not theme %}
-    <div class="border-b border-base-200 flex flex-row gap-1 mb-1 pb-1 px-1 dark:border-base-700">
-        <a class="cursor-pointer flex flex-row grow px-2 py-1.5 rounded-default hover:bg-base-100 hover:text-base-700 dark:hover:bg-base-700 dark:hover:text-base-200"
-           x-on:click="switchTheme('light')"
-           x-bind:class="adminTheme == 'light'  && 'text-primary-600 dark:text-primary-500 dark:hover:text-primary-500! hover:text-primary-600!'">
-            <span class="material-symbols-outlined mr-2">light_mode</span>
-            <span class="leading-none self-center">{% trans "Light" %}</span>
-        </a>
+    {% wn_admin_themes as wn_themes %}
+    <div class="border-b border-base-200 mb-1 pb-1 px-1 dark:border-base-700" x-data="wnThemePicker()">
+        <div class="flex flex-row gap-1">
+            <button type="button" class="cursor-pointer flex flex-row grow px-2 py-1.5 rounded-default hover:bg-base-100 hover:text-base-700 dark:hover:bg-base-700 dark:hover:text-base-200"
+               x-on:click="setMode('light')"
+               x-bind:aria-pressed="!wnTheme && adminTheme == 'light'"
+               x-bind:class="!wnTheme && adminTheme == 'light' && 'text-primary-600 dark:text-primary-500 dark:hover:text-primary-500! hover:text-primary-600!'">
+                <span class="material-symbols-outlined mr-2">light_mode</span>
+                <span class="leading-none self-center">{% trans "Light" %}</span>
+            </button>
 
-        <a class="cursor-pointer flex flex-row grow leading-none -ml-1 px-2 py-1.5 rounded-default hover:bg-base-100 hover:text-base-700 dark:hover:bg-base-700 dark:hover:text-base-200"
-           x-on:click="switchTheme('dark')"
-           x-bind:class="adminTheme == 'dark' && 'text-primary-600 dark:text-primary-500 dark:hover:text-primary-500! hover:text-primary-600!'">
-            <span class="material-symbols-outlined mr-2">dark_mode</span>
-            <span class="leading-none self-center">{% trans "Dark" %}</span>
-        </a>
+            <button type="button" class="cursor-pointer flex flex-row grow leading-none -ml-1 px-2 py-1.5 rounded-default hover:bg-base-100 hover:text-base-700 dark:hover:bg-base-700 dark:hover:text-base-200"
+               x-on:click="setMode('dark')"
+               x-bind:aria-pressed="!wnTheme && adminTheme == 'dark'"
+               x-bind:class="!wnTheme && adminTheme == 'dark' && 'text-primary-600 dark:text-primary-500 dark:hover:text-primary-500! hover:text-primary-600!'">
+                <span class="material-symbols-outlined mr-2">dark_mode</span>
+                <span class="leading-none self-center">{% trans "Dark" %}</span>
+            </button>
 
-        <a class="cursor-pointer flex flex-row grow -mr-1 px-2 py-1.5 rounded-default hover:bg-base-100 hover:text-base-700 dark:hover:bg-base-700 dark:hover:text-base-200"
-           x-on:click="switchTheme('auto')"
-           x-bind:class="adminTheme == 'auto' && 'text-primary-600 dark:text-primary-500 dark:hover:text-primary-500! hover:text-primary-600!'">
-            <span class="material-symbols-outlined mr-2">computer</span>
-            <span class="leading-none self-center">{% trans "System" %}</span>
-        </a>
+            <button type="button" class="cursor-pointer flex flex-row grow -mr-1 px-2 py-1.5 rounded-default hover:bg-base-100 hover:text-base-700 dark:hover:bg-base-700 dark:hover:text-base-200"
+               x-on:click="setMode('auto')"
+               x-bind:aria-pressed="!wnTheme && adminTheme == 'auto'"
+               x-bind:class="!wnTheme && adminTheme == 'auto' && 'text-primary-600 dark:text-primary-500 dark:hover:text-primary-500! hover:text-primary-600!'">
+                <span class="material-symbols-outlined mr-2">computer</span>
+                <span class="leading-none self-center">{% trans "System" %}</span>
+            </button>
+        </div>
+
+        {% if wn_themes %}
+            <button type="button" class="cursor-pointer flex flex-row items-center w-full mt-1 px-2 py-1.5 rounded-default hover:bg-base-100 dark:hover:bg-base-700"
+                    x-on:click="showThemes = !showThemes"
+                    x-bind:aria-expanded="showThemes"
+                    x-bind:class="wnTheme && 'text-primary-600 dark:text-primary-500'">
+                <span class="material-symbols-outlined mr-2">palette</span>
+                <span class="leading-none self-center">{% trans "Themes" %}</span>
+                <span class="ml-auto text-xs text-font-subtle-light dark:text-font-subtle-dark capitalize" x-text="wnTheme"></span>
+                <span class="material-symbols-outlined ml-1 transition-transform" x-bind:class="showThemes && 'rotate-180'">expand_more</span>
+            </button>
+
+            <div class="grid grid-cols-2 gap-1 max-h-64 overflow-y-auto mt-1 p-0.5" x-show="showThemes" x-cloak x-transition.opacity>
+                {% for item in wn_themes %}
+                    <button type="button"
+                            data-theme="{{ item.name }}"
+                            title="{{ item.label }}"
+                            class="wn-theme-option cursor-pointer flex items-center gap-2 px-2 py-1.5 rounded-default text-xs font-medium"
+                            x-on:click="setTheme('{{ item.name|escapejs }}', '{{ item.scheme }}')"
+                            x-bind:aria-pressed="wnTheme == '{{ item.name|escapejs }}'">
+                        <span class="flex gap-0.5 shrink-0" aria-hidden="true">
+                            <span class="wn-theme-dot" style="background: var(--color-primary)"></span>
+                            <span class="wn-theme-dot" style="background: var(--color-secondary)"></span>
+                            <span class="wn-theme-dot" style="background: var(--color-accent)"></span>
+                        </span>
+                        <span class="truncate">{{ item.label }}</span>
+                    </button>
+                {% endfor %}
+            </div>
+        {% endif %}
     </div>
 {% endif %}

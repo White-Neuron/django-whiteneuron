@@ -249,6 +249,17 @@ UNFOLD = {
 }
 ```
 
+### Admin themes (daisyUI)
+
+All 35 daisyUI themes are compiled into `base/css/styles.css` and selectable from the user menu (**Themes**). The selected theme also re-colors Unfold (primary/base palettes), and its light/dark scheme drives Unfold's dark mode. The choice is stored per browser.
+
+```python
+# Optional: limit the themes offered in the picker (Light/Dark/System are always available)
+WN_ADMIN_THEMES = ["corporate", "nord", "dracula", "forest"]
+```
+
+To ship a smaller CSS bundle, compile only some themes: `WN_THEMES="nord,dracula" bash scripts/tailwind.sh`.
+
 ## Modules
 
 | Module | Description | Key Models |

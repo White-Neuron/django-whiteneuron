@@ -4,12 +4,12 @@
 
 {% block base %}
     <!-- Overlay loading -->
-    <div id="loading-overlay">
+    <div id="loading-overlay" role="status" aria-live="polite">
         <img src="{% static 'base/images/loading.gif' %}" alt="Loading...">
     </div>
 
     <!-- toast -->
-    <div class="ui-toast ui-toast-top ui-toast-end z-50" id="toast-container">
+    <div class="ui-toast ui-toast-top ui-toast-end z-50" id="toast-container" aria-live="polite">
     </div>
     {{ block.super }}
 {% endblock %}
