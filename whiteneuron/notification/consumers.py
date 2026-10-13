@@ -13,6 +13,9 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         user = self.scope.get("user")
         if not user or not user.is_authenticated or not user.is_staff:
+            # accept first: closing during the handshake reaches the browser as 1006
+            # (a generic failure it retries); 4401 tells the client to stop
+            await self.accept()
             await self.close(code=4401)
             return
         # each user only receives notifications addressed to them

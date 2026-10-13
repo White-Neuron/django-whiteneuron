@@ -129,6 +129,48 @@
     });
 })();
 
+// Chart.js (bundled by unfold) can't parse CSS Color 4 values such as oklch(), which
+// daisyUI themes produce; hover colors derived from them come out undefined. Convert
+// dataset colors to rgb() through the canvas before each chart initialises/updates.
+(function () {
+    if (!window.Chart || !window.Chart.register) {
+        return;
+    }
+    var probe = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
+    var cache = {};
+
+    function toRGB(color) {
+        if (typeof color !== "string" || !/^(oklch|oklab|lab|lch|color)\(/i.test(color.trim())) {
+            return color;
+        }
+        if (!cache[color]) {
+            probe.clearRect(0, 0, 1, 1);
+            probe.fillStyle = "#000";
+            probe.fillStyle = color;
+            probe.fillRect(0, 0, 1, 1);
+            var d = probe.getImageData(0, 0, 1, 1).data;
+            cache[color] = "rgba(" + d[0] + ", " + d[1] + ", " + d[2] + ", " + (d[3] / 255).toFixed(3) + ")";
+        }
+        return cache[color];
+    }
+
+    var props = ["backgroundColor", "borderColor", "hoverBackgroundColor", "hoverBorderColor", "pointBackgroundColor", "pointBorderColor"];
+
+    function convert(chart) {
+        (chart.data.datasets || []).forEach(function (ds) {
+            props.forEach(function (prop) {
+                if (Array.isArray(ds[prop])) {
+                    ds[prop] = ds[prop].map(toRGB);
+                } else if (ds[prop] !== undefined) {
+                    ds[prop] = toRGB(ds[prop]);
+                }
+            });
+        });
+    }
+
+    window.Chart.register({ id: "wnColor4", beforeInit: convert, beforeUpdate: convert });
+})();
+
 var TOAST_CLASSES = {
     info: "ui-alert-info",
     danger: "ui-alert-error",
@@ -180,13 +222,16 @@ document.addEventListener("DOMContentLoaded", function () {
     let ws = null;
     let retries = 0;
     let closedByPage = false;
+    let retryTimer = null;
 
     const connect = function () {
-        ws = new WebSocket(url);
-        ws.onopen = function () {
+        clearTimeout(retryTimer);
+        const socket = new WebSocket(url);
+        ws = socket;
+        socket.onopen = function () {
             retries = 0;
         };
-        ws.onmessage = function (event) {
+        socket.onmessage = function (event) {
             try {
                 const data = JSON.parse(event.data);
                 toast_(data.content, data.type, data.title);
@@ -194,14 +239,18 @@ document.addEventListener("DOMContentLoaded", function () {
                 // ignore malformed messages
             }
         };
-        ws.onclose = function (event) {
+        socket.onclose = function (event) {
+            // a late close of a replaced socket (e.g. after bfcache restore) must not reconnect
+            if (socket !== ws) {
+                return;
+            }
             // 4xxx = rejected by the server (e.g. not authenticated): don't hammer it.
             if (closedByPage || (event.code >= 4000 && event.code < 5000) || retries >= 8) {
                 return;
             }
             const delay = Math.min(30000, 1000 * 2 ** retries) + Math.random() * 1000;
             retries += 1;
-            setTimeout(connect, delay);
+            retryTimer = setTimeout(connect, delay);
         };
     };
 
@@ -210,6 +259,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Close cleanly so the page stays eligible for the back/forward cache.
     window.addEventListener("pagehide", function () {
         closedByPage = true;
+        clearTimeout(retryTimer);
         if (ws) {
             ws.close();
         }

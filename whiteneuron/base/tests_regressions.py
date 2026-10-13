@@ -4,12 +4,11 @@ from unittest import mock
 
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth import get_user_model
-from django.contrib.contenttypes.models import ContentType
-from django.core.cache import cache
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
 from whiteneuron.base.middleware import get_client_ip
+from whiteneuron.base.testing import package_test_settings
 from whiteneuron.base.modeladmin import ModelAdmin
 from whiteneuron.base.models import App
 from whiteneuron.notification.models import Notification
@@ -74,6 +73,7 @@ class ReadonlyFieldsTests(TestCase):
         self.assertEqual(first.count("id"), 1)
 
 
+@package_test_settings()
 class SoftDeleteHistoryTests(TestCase):
     def test_bulk_soft_delete_is_in_object_history(self):
         root = User.objects.create_superuser("root", "r@example.com", "pw")
@@ -110,12 +110,11 @@ class NotificationRoutingTests(TestCase):
         self.assertEqual(asyncio.run(groups_for(root)), [user_group(root.pk), ADMIN_GROUP])
 
 
-@override_settings(ROOT_URLCONF="whiteneuron.base.urls_testing")
+@package_test_settings()
 class FeedbackPermissionTests(TestCase):
     def test_change_permission_is_enough(self):
         from django.contrib.auth.models import Permission
 
-        cache.clear()
         user = User.objects.create_user("editor", password="pw", is_staff=True)
         user.user_permissions.add(Permission.objects.get(codename="change_app"))
         app = App.objects.create(name="x")
@@ -145,6 +144,7 @@ class ExportChunkTests(TestCase):
         excel.file.delete(save=False)
 
 
+@package_test_settings()
 class FieldSelectionRestrictionTests(TestCase):
     """The column picker must only offer fields the admin itself exposes."""
 
@@ -187,6 +187,24 @@ class FieldSelectionRestrictionTests(TestCase):
         self.assertEqual({"name", "icon", "category"} & set(shown), {"name", "icon", "category"})
         self.assertNotIn("url", shown)
 
+    def test_user_admin_uses_change_form_not_add_form(self):
+        from whiteneuron.base.sites import base_admin_site
+
+        from whiteneuron.base.filters import FieldSelectionFilter
+
+        offered = {k for k, _ in FieldSelectionFilter.lookups(None, self.request, base_admin_site._registry[User])}
+        self.assertTrue({"date_joined", "last_login", "uuid"} <= offered)  # change form only, not add_fieldsets
+
+    def test_admin_whose_fieldsets_need_an_object_falls_back(self):
+        class Fragile(ModelAdmin):
+            action_buttons = False
+            list_display = ["name"]
+
+            def get_fieldsets(self, request, obj=None):
+                raise AttributeError("needs a saved object")
+
+        self.assertEqual(self.columns(Fragile(App, AdminSite()), "All"), ["name"])
+
     def test_password_never_offered(self):
         from whiteneuron.base.sites import base_admin_site
 
@@ -204,7 +222,87 @@ class FieldSelectionRestrictionTests(TestCase):
             if not hasattr(model_admin, "enable_field_selection_filter"):
                 continue
             with self.subTest(admin=type(model_admin).__name__):
-                form_fields = set(flatten_fieldsets(model_admin.get_fieldsets(self.request, None)))
+                # the change form of an (unsaved) object: what an editor sees for a row
+                form_fields = set(flatten_fieldsets(model_admin.get_fieldsets(self.request, model())))
                 offered = {k for k, _ in FieldSelectionFilter.lookups(None, self.request, model_admin)} - {"default"}
                 self.assertLessEqual(offered, form_fields)
                 self.assertNotIn("password", offered)
+
+
+@package_test_settings()
+class SecondReviewRegressionTests(TestCase):
+    def setUp(self):
+        from django.contrib.sessions.backends.signed_cookies import SessionStore
+
+        self.root = User.objects.create_superuser("rev2", "rev2@example.com", "pw")
+        self.request = RequestFactory().get("/")
+        self.request.session = SessionStore()
+        self.request.user = self.root
+
+    def test_buttons_escape_primary_key(self):
+        from whiteneuron.base.modeladmin import _current_request
+
+        admin = ModelAdmin(App, AdminSite())
+        app = App(pk=1, name="x")
+        app.pk = '1"><img src=x onerror=alert(1)>'
+        _current_request.set(self.request)
+        with mock.patch("whiteneuron.base.modeladmin.reverse", return_value="/admin/x/"):
+            html = str(admin.buttons(app))
+        self.assertNotIn("<img src=x", html)
+        self.assertIn("&quot;&gt;&lt;img", html)
+
+    def test_list_display_links_none(self):
+        class NoLinks(ModelAdmin):
+            list_display_links = None
+
+        admin = NoLinks(App, AdminSite())
+        self.assertIsNone(admin.get_list_display_links(self.request, ["name", "buttons"]))
+
+    def test_request_property_backward_compatible(self):
+        admin = ModelAdmin(App, AdminSite())
+        admin.get_changelist(self.request)
+        self.assertIs(admin.request, self.request)
+
+    def test_translation_without_api_key_is_a_failure(self):
+        from whiteneuron.contrib.wn_modeltranslation import utils
+
+        with mock.patch.object(utils, "client", None):
+            result = utils.translate_object(App(pk=1, name="x"))
+        self.assertFalse(result["success"])
+
+    def test_safe_href_rejects_whitespace_tricks(self):
+        from whiteneuron.base.html_sanitize import is_safe_href, sanitize_html
+
+        for href in ("/\t/evil.com", "/\n/evil.com", "//evil.com", "/\\evil.com", "javascript:alert(1)"):
+            self.assertFalse(is_safe_href(href), repr(href))
+        self.assertTrue(is_safe_href("/admin/base/app/1/change/"))
+        self.assertNotIn("evil", sanitize_html('<a href="/&#9;/evil.com">x</a>'))
+
+    @override_settings(WN_ADMIN_THEMES=[])
+    def test_empty_theme_list_disables_picker(self):
+        from whiteneuron.base.templatetags.wn_theme import wn_admin_themes
+
+        self.assertEqual(wn_admin_themes(), [])
+
+    def test_collector_survives_cache_outage(self):
+        from whiteneuron.monitoring import collector
+        from whiteneuron.monitoring.models import MetricSample
+
+        data = collector.snapshot()
+        with mock.patch.object(collector.cache, "set", side_effect=ConnectionError), \
+                mock.patch.object(collector.cache, "add", side_effect=ConnectionError):
+            self.assertIsNotNone(collector.record(data, force=True))
+            collector.beat()  # must not raise
+        self.assertEqual(MetricSample.objects.count(), 1)
+
+    def test_websocket_rejection_uses_4401(self):
+        from whiteneuron.notification.consumers import NotificationConsumer
+        from django.contrib.auth.models import AnonymousUser
+
+        consumer = NotificationConsumer()
+        consumer.scope = {"user": AnonymousUser()}
+        consumer.accept = mock.AsyncMock()
+        consumer.close = mock.AsyncMock()
+        asyncio.run(consumer.connect())
+        consumer.accept.assert_awaited_once()
+        consumer.close.assert_awaited_once_with(code=4401)

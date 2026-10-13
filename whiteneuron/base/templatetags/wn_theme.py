@@ -14,7 +14,9 @@ def wn_admin_themes():
     compiled into base/css/styles.css is offered. "light"/"dark" are handled by
     the Light/Dark/System switch and are not listed.
     """
-    names = getattr(settings, "WN_ADMIN_THEMES", None) or DAISYUI_THEMES.keys()
+    names = getattr(settings, "WN_ADMIN_THEMES", None)
+    if names is None:  # [] means "no daisyUI themes in the picker"
+        names = DAISYUI_THEMES.keys()
     return [
         {"name": name, "label": name.capitalize(), "scheme": DAISYUI_THEMES[name]}
         for name in names

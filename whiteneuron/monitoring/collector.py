@@ -109,23 +109,31 @@ def snapshot(cpu_interval=None):
     }
 
 
-def record(data=None, force=False):
-    """Store a sample, at most once per INTERVAL per host (atomic cache lock).
+def _cache_call(fn, *args, default=None, **kwargs):
+    """Cache operations must never stop metrics collection (Redis down = keep sampling)."""
+    try:
+        return fn(*args, **kwargs)
+    except Exception:
+        return default
 
-    Returns the saved MetricSample, or None when another worker already stored one
-    in this interval. Old samples are pruned at most once an hour.
+
+def record(data=None, force=False, interval=None):
+    """Store a sample, at most once per interval per host (atomic cache lock).
+
+    ``force`` (the dedicated collector) always writes and reserves the slot for its
+    own ``interval`` so an open dashboard doesn't add samples in between. Returns
+    the saved MetricSample, or None when the slot was already taken. When the cache
+    is unavailable the sample is written anyway. Old samples are pruned hourly.
     """
     host = (data or {}).get("host") or host_name()
-    interval = max(1, int(conf("INTERVAL")))
+    interval = max(1, int(interval or conf("INTERVAL")))
     lock = f"wn:monitoring:lock:{host}"
     if force:
-        # the dedicated collector always writes; take the slot so an open dashboard
-        # doesn't store a second sample in the same interval
-        cache.set(lock, 1, timeout=max(1, interval - 1))
-    elif not cache.add(lock, 1, timeout=max(1, interval - 1)):
+        _cache_call(cache.set, lock, 1, timeout=max(1, interval - 1))
+    elif not _cache_call(cache.add, lock, 1, timeout=max(1, interval - 1), default=True):
         return None
     sample = MetricSample.objects.create(**(data or snapshot()))
-    if cache.add("wn:monitoring:prune", 1, timeout=3600):
+    if _cache_call(cache.add, "wn:monitoring:prune", 1, timeout=3600, default=False):
         prune()
     return sample
 
@@ -134,13 +142,14 @@ def heartbeat_key(host):
     return f"wn:monitoring:collector:{host}"
 
 
-def beat(host=None):
-    """Mark that a real collector (command or Celery task) is sampling this host."""
-    cache.set(heartbeat_key(host or host_name()), timezone.now().isoformat(), timeout=max(1, int(conf("INTERVAL"))) * 3)
+def beat(host=None, interval=None):
+    """Mark that a real collector (command or Celery task) samples this host every ``interval`` s."""
+    ttl = max(1, int(interval or conf("INTERVAL"))) * 3
+    _cache_call(cache.set, heartbeat_key(host or host_name()), timezone.now().isoformat(), timeout=ttl)
 
 
 def collector_running(host):
-    return cache.get(heartbeat_key(host)) is not None
+    return _cache_call(cache.get, heartbeat_key(host)) is not None
 
 
 def prune():

@@ -208,16 +208,19 @@ class NotificationAdmin(ModelAdmin):
             self.resolve_components([instance])
         return instance._wn_components
 
+    _changelist_classes = {}
+
     def get_changelist(self, request, **kwargs):
         base = super().get_changelist(request, **kwargs)
-        admin_cls = type(self)
+        cls = self._changelist_classes.get(base)
+        if cls is None:  # built once per base class, not per request
+            class NotificationChangeList(base):
+                def get_results(self, request):
+                    super().get_results(request)
+                    self.model_admin.resolve_components(list(self.result_list))
 
-        class NotificationChangeList(base):
-            def get_results(self, request):
-                super().get_results(request)
-                admin_cls.resolve_components(list(self.result_list))
-
-        return NotificationChangeList
+            cls = self._changelist_classes[base] = NotificationChangeList
+        return cls
 
     def display_title(self, instance: Notification):
         # Parse obj_link → extract app_label, model_name, object_id

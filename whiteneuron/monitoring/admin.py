@@ -95,8 +95,9 @@ class MetricSampleAdmin(ModelAdmin):
             last = MetricSample.objects.filter(host=host).order_by("-timestamp").first()
             live = _sample_as_live(last) if last else None
 
-        system = _cached(f"wn:mon:sys:{host}:{range_key}", lambda: stats.system_series(host, seconds))
-        requests = _cached(f"wn:mon:req:{range_key}", lambda: stats.request_stats(seconds))
+        ttl = _stats_ttl(seconds)
+        system = _cached(f"wn:mon:sys:{host}:{range_key}", lambda: stats.system_series(host, seconds), ttl)
+        requests = _cached(f"wn:mon:req:{range_key}", lambda: stats.request_stats(seconds), ttl)
 
         latest = MetricSample.objects.filter(host=host).order_by("-timestamp").values_list("timestamp", flat=True).first()
         interval = int(collector.conf("INTERVAL"))
@@ -121,11 +122,22 @@ class MetricSampleAdmin(ModelAdmin):
         })
 
 
-def _cached(key, compute):
-    value = cache.get(key)
+def _stats_ttl(seconds):
+    """Share results between dashboards for a fraction of a chart bucket (5s..5min)."""
+    return int(max(_STATS_TTL, min(300, seconds / stats.MAX_POINTS / 2)))
+
+
+def _cached(key, compute, timeout=_STATS_TTL):
+    try:
+        value = cache.get(key)
+    except Exception:  # cache down: compute every time rather than fail
+        return compute()
     if value is None:
         value = compute()
-        cache.set(key, value, timeout=_STATS_TTL)
+        try:
+            cache.set(key, value, timeout=timeout)
+        except Exception:
+            pass
     return value
 
 

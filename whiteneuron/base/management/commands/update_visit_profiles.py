@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from django.db.models import Max, Min, OuterRef, Q, Subquery
+from django.db.models import Exists, Max, Min, OuterRef, Subquery
 from whiteneuron.base.models import AnonymousActivity, UserActivity, VisitProfile
 
 
@@ -25,9 +25,11 @@ class Command(BaseCommand):
         dry_run = options['dry_run']
 
         # Min/max timestamps computed in the same query (was 4 aggregate queries per profile)
+        # EXISTS keeps one row per profile (a JOIN + DISTINCT re-ran the subqueries per activity row)
         profiles = VisitProfile.objects.filter(
-            Q(useractivities__isnull=False) | Q(anonymousactivities__isnull=False)
-        ).distinct().annotate(
+            Exists(UserActivity.objects.filter(profile=OuterRef('pk')))
+            | Exists(AnonymousActivity.objects.filter(profile=OuterRef('pk')))
+        ).annotate(
             user_min=_bound(UserActivity, Min), user_max=_bound(UserActivity, Max),
             anon_min=_bound(AnonymousActivity, Min), anon_max=_bound(AnonymousActivity, Max),
         )

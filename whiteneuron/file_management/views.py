@@ -1,6 +1,6 @@
 import posixpath
 
-from django.http import FileResponse, HttpResponseForbidden, Http404, HttpResponse
+from django.http import FileResponse, HttpResponseForbidden, Http404
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _

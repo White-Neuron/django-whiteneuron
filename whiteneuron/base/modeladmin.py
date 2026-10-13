@@ -4,7 +4,6 @@ from django.http import HttpRequest, HttpResponseRedirect
 from django.http.response import HttpResponseRedirectBase
 from django.db.models.query import QuerySet
 from urllib.parse import parse_qsl, urlencode, urlparse
-from django.utils.safestring import mark_safe
 from django.contrib.admin.views.main import ChangeList
 from collections import OrderedDict
 from typing import Any, Sequence
@@ -12,7 +11,7 @@ from typing import Any, Sequence
 import ast
 import contextvars
 import json
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 
 from unfold.contrib.forms.widgets import WysiwygWidget as UnfoldWysiwygWidget
 from whiteneuron.base.widgets import WysiwygWidget, CKEditor5Widget, MarkdownEditorWidget
@@ -22,11 +21,27 @@ from django.db import models, transaction
 from .utils import timeit
 from .models import User, BaseModel
 from django.utils import timezone
-from django.utils.html import format_html
+from django.utils.html import format_html, format_html_join
+from django.templatetags.static import static
 from whiteneuron.notification.models import Notification
 from .filters import FieldSelectionFilter
 
 _current_request = contextvars.ContextVar('wn_admin_request', default=None)
+_changelist_classes = {}
+
+
+def request_changelist(base):
+    """ChangeList subclass applying the per-user page size / grid view (built once per base)."""
+    cls = _changelist_classes.get(base)
+    if cls is None:
+        class RequestChangeList(base):
+            def get_results(self, request):
+                self.list_per_page = self.model_admin._per_page_for(request)
+                self.wn_grid_view = self.model_admin._grid_view_for(request)
+                return super().get_results(request)
+
+        cls = _changelist_classes[base] = RequestChangeList
+    return cls
 
 from django.urls import path
 from django.shortcuts import render
@@ -284,6 +299,9 @@ class ModelAdmin(UnfoldAdmin):
         if not self.has_display_links:
             return None
         fields= super().get_list_display_links(request, list_display)
+        if fields is None:  # list_display_links = None: links disabled on purpose
+            return None
+        fields = list(fields)
         if not self.action_buttons:
             try:
                 fields.remove('buttons')
@@ -363,17 +381,17 @@ class ModelAdmin(UnfoldAdmin):
         # ModelAdmin instances are shared by all threads/users: keep per-request values
         # on the request / ChangeList, never on `self`.
         _current_request.set(request)  # used by buttons(), which Django calls without request
-        base = super().get_changelist(request, **kwargs)
-        per_page = self._per_page_for(request)
-        grid_view = self._grid_view_for(request)
+        return request_changelist(super().get_changelist(request, **kwargs))
 
-        class RequestChangeList(base):
-            def get_results(self, request):
-                self.list_per_page = per_page
-                self.wn_grid_view = grid_view
-                return super().get_results(request)
+    @property
+    def request(self):
+        """Backward compatibility: ``self.request`` used to be set (unsafely) on the
+        shared admin instance; it now returns the request of the current context."""
+        return _current_request.get()
 
-        return RequestChangeList
+    @request.setter
+    def request(self, value):
+        _current_request.set(value)
 
     def _view_state(self, request, name, default, parse):
         """Per-user list setting (grid view, page size): from POST, else remembered in the session."""
@@ -430,36 +448,23 @@ class ModelAdmin(UnfoldAdmin):
         return fieldsets
     
     def buttons(self, obj):
-        svg_url_edit = '/static/base/images/edit.svg'
-        svg_url_delete = '/static/base/images/delete.svg'
-        svg_url_view = '/static/base/images/icon-viewlink.svg'
-
-        button_edit = ''
-        button_delete = ''
-        button_view = ''
-        
-        width = 18
-        height = 18
-
-        path= f'admin:{obj._meta.app_label}_{obj._meta.model_name}'
-        path_change= reverse_lazy(path + '_change', args=[obj.pk])
-        path_delete= reverse_lazy(path + '_delete', args=[obj.pk])
-        c= 0
         request = _current_request.get()
+        url_name = f'admin:{obj._meta.app_label}_{obj._meta.model_name}'
+        size = 'width: 18px; height: 18px;'
+        links = []
         if request is not None and self.has_change_permission(request, obj):
-            button_edit = f'<a class="btn-edit col-span-1" href="{path_change}"> <img src="{svg_url_edit}" alt="{_("Edit")}" style="width: {width}px; height: {height}px;"></a>'
-            c+= 1
+            links.append(('btn-edit', reverse(url_name + '_change', args=[obj.pk]), 'base/images/edit.svg', _('Edit')))
         else:
-            button_view = f'<a class="btn-view col-span-1" href="{path_change}"> <img src="{svg_url_view}" alt="{_("View")}" style="width: {width}px; height: {height}px;"></a>'
-            c+= 1
-
+            links.append(('btn-view', reverse(url_name + '_change', args=[obj.pk]), 'base/images/icon-viewlink.svg', _('View')))
         if request is not None and self.has_delete_permission(request, obj):
-            c+= 1
-            button_delete = f'<a class="btn-delete btn-danger col-span-1" href="{path_delete}"> <img src="{svg_url_delete}" alt="{_("Delete")}" style="width: {width}px; height: {height}px;"></a>'
-
-        return mark_safe(f'''
-                         <div id="action_buttons_{obj.pk}" class="action_buttons grid gap-1 grid-cols-{c}" style="width: {33*c}px;">{button_view} {button_edit} {button_delete} </div> 
-                          ''')
+            links.append(('btn-delete btn-danger', reverse(url_name + '_delete', args=[obj.pk]), 'base/images/delete.svg', _('Delete')))
+        # format_html escapes the pk too (CharField primary keys are user data)
+        return format_html(
+            '<div id="action_buttons_{}" class="action_buttons grid gap-1 grid-cols-{}" style="width: {}px;">{}</div>',
+            obj.pk, len(links), 33 * len(links),
+            format_html_join(' ', '<a class="{} col-span-1" href="{}" title="{}"><img src="{}" alt="{}" style="{}"></a>',
+                             ((cls, url, label, static(icon), label, size) for cls, url, icon, label in links)),
+        )
 
     buttons.short_description = ''
 

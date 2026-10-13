@@ -691,7 +691,7 @@ UNFOLD = {
                         "title": _("Server monitoring"),
                         "icon": "monitor_heart",
                         "link": reverse_lazy("admin:monitoring_metricsample_changelist"),
-                        "permission": "whiteneuron.base.utils.permission_superuser_callback",
+                        "permission": "whiteneuron.monitoring.permissions.can_view_dashboard",
                     },
                     {
                         "title": _("Images"),

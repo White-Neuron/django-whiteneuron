@@ -719,7 +719,7 @@
     async function load() {
         clearTimeout(state.timer);
         if (state.controller) state.controller.abort();
-        state.controller = new AbortController();
+        const controller = (state.controller = new AbortController());
         const btn = root.querySelector("[data-refresh-now]");
         btn.classList.add("is-loading");
         try {
@@ -727,19 +727,24 @@
             const res = await fetch(`${state.api}?${params}`, {
                 headers: { Accept: "application/json" },
                 credentials: "same-origin",
-                signal: state.controller.signal,
+                signal: controller.signal,
             });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            state.data = await res.json();
-            state.host = state.data.host;
-            render(state.data);
+            const data = await res.json();
+            if (controller !== state.controller) return; // superseded while parsing
+            state.data = data;
+            state.host = data.host;
+            render(data);
         } catch (err) {
-            if (err.name === "AbortError") return;
+            if (err.name === "AbortError" || controller !== state.controller) return;
             banner(`${T.fetchError}: ${err.message}`, true);
         } finally {
-            btn.classList.remove("is-loading");
-            root.classList.remove("is-loading");
-            schedule();
+            // only the latest request owns the spinner and the refresh timer
+            if (controller === state.controller) {
+                btn.classList.remove("is-loading");
+                root.classList.remove("is-loading");
+                schedule();
+            }
         }
     }
 

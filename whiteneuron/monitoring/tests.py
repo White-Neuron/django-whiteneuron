@@ -7,6 +7,8 @@ from django.utils import timezone
 
 from whiteneuron.base.models import UserActivity
 
+from whiteneuron.base.testing import package_test_settings
+
 from . import collector, stats
 from .models import MetricSample
 
@@ -81,11 +83,12 @@ class RequestStatsTests(TestCase):
         self.assertEqual(result["top_endpoints"][0]["path"], "/a/:id/")
 
 
+@package_test_settings(WN_MONITORING={"INTERVAL": 10, "RETENTION_DAYS": 1, "DISK_PATH": "/", "HOST": "h1"})
 class DashboardViewTests(TestCase):
     def setUp(self):
-        # cached VisitProfile ids from other tests point at rolled-back rows
+        # only the keys these tests depend on (never flush a shared cache/broker DB)
         from django.core.cache import cache
-        cache.clear()
+        cache.delete_many(["wn:monitoring:lock:h1", collector.heartbeat_key("h1")])
         User = get_user_model()
         self.admin = User.objects.create_superuser("root", "r@x.io", "pw")
         self.staff = User.objects.create_user("staff", password="pw", is_staff=True)

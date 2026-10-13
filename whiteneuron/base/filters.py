@@ -8,6 +8,19 @@ from unfold.contrib.filters.admin import MultipleDropdownFilter
 SENSITIVE_FIELDS = frozenset({"password"})
 
 
+def _change_form_fields(request, model_admin):
+    """Field names on the *change* form of ``model_admin``.
+
+    ``get_fieldsets(request, None)`` would be the add form (e.g. UserAdmin's
+    add_fieldsets), so an unsaved instance stands in for "an object". If the admin's
+    layout code can't handle it, fall back to the default list columns only.
+    """
+    try:
+        return flatten_fieldsets(model_admin.get_fieldsets(request, model_admin.model()))
+    except Exception:
+        return [f for f in model_admin.list_display if isinstance(f, str)]
+
+
 class FieldSelectionFilter(MultipleDropdownFilter):
     title = _('field(s) to display')
     parameter_name = 'display_fields'
@@ -25,8 +38,7 @@ class FieldSelectionFilter(MultipleDropdownFilter):
         if key not in cache:
             excluded = SENSITIVE_FIELDS | set(getattr(model_admin, 'field_selection_exclude', ()) or ())
             choices = [('default', _('Default fields'))]
-            # obj passed explicitly: some admins declare get_fieldsets(self, request, obj)
-            for name in flatten_fieldsets(model_admin.get_fieldsets(request, None)):
+            for name in _change_form_fields(request, model_admin):
                 if not isinstance(name, str) or name in excluded:
                     continue
                 try:

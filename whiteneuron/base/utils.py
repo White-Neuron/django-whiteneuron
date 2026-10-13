@@ -1,4 +1,5 @@
 from django.utils import timezone
+from django.utils.html import format_html
 from .models import User, UserActivity, AnonymousActivity
 from django.contrib.auth.models import Group
 from django.utils.translation import gettext_lazy as _
@@ -206,13 +207,16 @@ def send_email_login(username, password, receiver, is_reset=False):
     subject= SUBJECT
     template= TEMPLATE
     system_name= SYSTEM_NAME
-    context= template.format(username= username, password= password, url= URL, system_name= system_name, signature= _load_signature())
+    # The password is wrapped in a marker so the stored copy can be masked after sending
+    # without passing the secret itself to the task queue (broker, Flower, results).
+    secret = format_html('<span data-wn-secret="1">{}</span>', password)
+    context= template.format(username= username, password= secret, url= URL, system_name= system_name, signature= _load_signature())
     mail= Mail.objects.create(subject= subject, content= context, receiver= receiver)
     # SMTP can take seconds: hand it to a worker when Celery is enabled.
     # Returns True/False when sent inline, None when queued.
     from .queue import enqueue, async_tasks_enabled
     from .tasks import send_mail_task
-    result = enqueue(send_mail_task, mail.pk, redact=password)
+    result = enqueue(send_mail_task, mail.pk, redact_secrets=True)
     return None if async_tasks_enabled() else result
 
 def make_random_password(length=12):

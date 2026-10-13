@@ -41,15 +41,10 @@ def gpt_translate_vi(request, obj):
 
 def translate_object(obj):
     """Translate obj's *_en fields to *_vi with GPT (no request needed: usable from Celery)."""
+    if not client:
+        return {"success": False, "message": _("OpenAI API key not found"), "object_id": obj.id, "result": {}}
+
     def translate(obj):
-        if not client:
-            print("OpenAI API key not found")
-            return {
-                "success": False,
-                "message": _("OpenAI API key not found"),
-                "object_id": obj.id,
-                "result": {},
-            }
         prompt = ""
         obj_data = obj.__dict__
         fields= []

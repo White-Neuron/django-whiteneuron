@@ -126,9 +126,10 @@ class User(AbstractUser):
     @property
     def avatar_badge_count(self):
         """Unread notifications today, shown as a badge on the sidebar avatar."""
-        from whiteneuron.notification.utils import unread_today_count
-        count = unread_today_count(self)
-        return count if count else None
+        if not hasattr(self, '_wn_badge_count'):  # read 3x per render by avatar.html
+            from whiteneuron.notification.utils import unread_today_count
+            self._wn_badge_count = unread_today_count(self) or None
+        return self._wn_badge_count
 
     @property
     def avatar_badge_variant(self):
@@ -422,7 +423,6 @@ class UABlacklist(models.Model):
 ############################################
 # Base Model
 ############################################
-from django.utils.html import format_html, format_html_join
 from .thread_local import thread_local
 from whiteneuron.notification.models import Notification
 
@@ -747,7 +747,7 @@ class Image(BaseModel):
         with a queryset update (no BaseModel.save → no extra SELECT / notifications).
         """
         field = getattr(self, field_name)
-        if field and field.name:
+        if field and field.name and self._derivative_exists(field):
             return field.url
         if not self.image or not self.image.name:
             return None
@@ -762,6 +762,27 @@ class Image(BaseModel):
         if self.pk:
             type(self).objects_all.filter(pk=self.pk).update(**{field_name: field.name})
         return field.url
+
+    @staticmethod
+    def _derivative_exists(field):
+        """Whether a recorded derivative file is still on storage (checked at most hourly)."""
+        from django.core.cache import cache
+        key = 'wn:img:exists:' + field.name
+        try:
+            if cache.get(key):
+                return True
+        except Exception:
+            pass
+        try:
+            exists = field.storage.exists(field.name)
+        except Exception:
+            return True  # storage unreachable: keep the link rather than regenerate
+        if exists:
+            try:
+                cache.set(key, 1, timeout=3600)
+            except Exception:
+                pass
+        return exists
 
     def getImgThumbnailUrl(self):
         return self._derivative_url('thumbnail', THUMBNAIL_SIZE, 'thumbnail')
@@ -860,7 +881,6 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.core.mail import BadHeaderError
 import smtplib
-import ssl
 
 class Mail(BaseModel):
     subject = models.CharField(max_length=255, verbose_name= _('Subject'))

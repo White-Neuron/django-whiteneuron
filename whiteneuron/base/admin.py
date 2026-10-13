@@ -461,7 +461,7 @@ class UserActivityAdmin(ModelAdmin):
                 obj.save()
             blocked.append(ip)
         if blocked:
-            messages.success(request, _("Blocked %(count)d IP(s): %(ips)s") % {"count": len(blocked), "ips": ", ".join(sorted(set(blocked)))})
+            messages.success(request, _("Blocked %(count)d IP(s): %(ips)s") % {"count": len(set(blocked)), "ips": ", ".join(sorted(set(blocked)))})
         if skipped:
             messages.warning(request, _("%(count)d activity records had no IP address.") % {"count": len(skipped)})
 

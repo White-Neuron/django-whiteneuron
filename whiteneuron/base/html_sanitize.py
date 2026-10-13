@@ -3,8 +3,11 @@
 Used for notification bodies created before values were escaped: it keeps simple
 formatting tags and drops everything else (scripts, event handlers, styles...).
 """
+import re
 from html import escape
 from html.parser import HTMLParser
+
+from django.utils.http import url_has_allowed_host_and_scheme
 
 ALLOWED_TAGS = {"p", "ul", "ol", "li", "strong", "b", "em", "i", "br", "code", "span", "a"}
 VOID_TAGS = {"br"}
@@ -12,12 +15,16 @@ SAFE_URL_PREFIXES = ("/", "http://", "https://", "mailto:")
 
 
 def is_safe_href(href):
-    """http(s)/mailto URLs and same-site paths. "//host" and "/\\host" are protocol-relative
-    to browsers (backslash is read as a slash), so they are rejected."""
-    href = (href or "").strip()
-    if href.startswith("/"):
-        return len(href) == 1 or href[1] not in "/\\"
-    return href.lower().startswith(SAFE_URL_PREFIXES[1:])
+    """http(s)/mailto URLs, or a path on this site.
+
+    Browsers drop tab/CR/LF anywhere in a URL and read "\\" as "/", so "/\t/evil.com"
+    or "/\\evil.com" are protocol-relative links to another host: same-site paths are
+    checked with Django's url_has_allowed_host_and_scheme after that normalization.
+    """
+    cleaned = re.sub(r"[\t\n\r]", "", href or "").strip()
+    if cleaned.lower().startswith(SAFE_URL_PREFIXES[1:]):
+        return True
+    return cleaned.startswith("/") and url_has_allowed_host_and_scheme(cleaned, allowed_hosts=set())
 
 
 class _Sanitizer(HTMLParser):

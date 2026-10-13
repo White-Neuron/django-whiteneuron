@@ -130,10 +130,7 @@ def dashboard_callback(request, context):
         "Sun",
     ]
 
-    stats = _dashboard_stats(time)
-    if stats is None:
-        time = "week"
-        stats = _dashboard_stats(time)
+    stats = _dashboard_stats(time)  # `time` is validated above
     (total_activities, total_activities_success, total_activities_last,
      total_anonymous_activities, total_anonymous_activities_success,
      total_anonymous_activities_last) = stats["kpi"]

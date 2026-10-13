@@ -1,3 +1,5 @@
+import re
+
 from celery import shared_task
 
 from whiteneuron.contrib.wn_import_export import export
@@ -6,18 +8,22 @@ from .queue import async_tasks_enabled, enqueue  # noqa: F401  (re-exported)
 
 export_task = export
 
+# <span data-wn-secret="1">…</span> written by utils.send_email_login
+SECRET_MARKER = re.compile(r'(<span data-wn-secret="1">)[^<]*(</span>)')
+
 
 @shared_task
-def send_mail_task(mail_id, redact=None):
-    """Send a stored Mail; optionally mask a secret (e.g. a password) in the stored copy."""
+def send_mail_task(mail_id, redact_secrets=False):
+    """Send a stored Mail; with ``redact_secrets`` mask the marked secrets in the stored copy."""
     from .models import Mail
 
     mail = Mail.objects_all.filter(pk=mail_id).first()
     if mail is None:
         return False
     mail.send()
-    if redact:
-        Mail.objects_all.filter(pk=mail_id).update(content=mail.content.replace(redact, "********"))
+    if redact_secrets:
+        masked = SECRET_MARKER.sub(r"\1********\2", mail.content)
+        Mail.objects_all.filter(pk=mail_id).update(content=masked)
     return mail.is_sent()
 
 

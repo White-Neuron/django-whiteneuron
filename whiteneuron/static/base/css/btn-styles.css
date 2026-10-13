@@ -38,3 +38,9 @@
     outline: 2px solid var(--color-primary-500);
     outline-offset: 1px;
 }
+
+/* the edit/delete icons are black SVGs: invert them on the dark button background */
+.dark .btn-edit img,
+.dark .btn-delete img {
+    filter: invert(1) brightness(1.1);
+}

@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from unfold.widgets import UnfoldAdminFileFieldWidget
 from unfold.decorators import action
 
-from .models import ExcelFile, PDFFile, HTMLFile, compute_file_hash
+from .models import ExcelFile, PDFFile, HTMLFile
 
 
 class FileInputNoDownload(UnfoldAdminFileFieldWidget):
