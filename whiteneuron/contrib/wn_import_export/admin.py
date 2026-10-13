@@ -1,7 +1,8 @@
 from django.utils.translation import gettext_lazy as _
 from django.contrib import messages
+from django.db import transaction
 from django.utils import timezone
-from django.utils.safestring import mark_safe
+from django.utils.html import format_html
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
@@ -11,6 +12,11 @@ from unfold.contrib.import_export.forms import ImportForm, ExportForm
 from whiteneuron.file_management.models import ExcelFile
 
 from .tasks import export
+
+
+def _export_selected_action(modeladmin, request, queryset):
+    """Admin action (Django calls actions as func(modeladmin, request, queryset))."""
+    return modeladmin._export_selected_items(request, queryset)
 
 
 class ImportExportModelAdmin(DefaultImportExportModelAdmin):
@@ -28,8 +34,8 @@ class ImportExportModelAdmin(DefaultImportExportModelAdmin):
 
     def get_actions(self, request):
         actions = super().get_actions(request)
-        if not "export_selected_items" in actions:
-            actions["export_selected_items"] = (self.export_action, "export_selected_items", _("Export selected records"))
+        if "export_selected_items" not in actions and self.has_export_permission(request):
+            actions["export_selected_items"] = (_export_selected_action, "export_selected_items", _("Export selected records"))
         return actions
 
     def _export_selected_items(self, request, queryset=None):
@@ -38,29 +44,30 @@ class ImportExportModelAdmin(DefaultImportExportModelAdmin):
             queryset = self.get_export_queryset(request)
         else:
             title = f"Export selected {self.model._meta.verbose_name_plural}"
-        ids = list(queryset.values_list("id", flat=True).all())
+        ids = list(queryset.values_list("pk", flat=True))
         file = ExcelFile(title=title,
-                         description=f"""
-                            <p> User: {request.user}</p>
-                            <p> Exported at: {timezone.now()}</p>
-                            <p> Model: {self.model._meta.verbose_name_plural}</p>
-                            <p> IDs: {ids[:10]}... (Total: {queryset.count()})</p>
-                            """,
+                         description=format_html(
+                             "<p>User: {}</p><p>Exported at: {}</p><p>Model: {}</p><p>IDs: {}... (Total: {})</p>",
+                             request.user, timezone.now(), self.model._meta.verbose_name_plural, ids[:10], len(ids)),
                          status='pending',
                          method='auto',
+                         # exports contain table data: private to the requesting user (and superusers)
+                         is_public=False,
                          created_by=request.user,
                          updated_by=request.user)
         file.save()
+        file.allowed_users.add(request.user)
         applabel = self.model._meta.app_label
         modelname = self.model._meta.model_name
         # Call export task .delay to run in background
-        export.delay(file.id,
-                     applabel, modelname, ids,
-                     file_name=f"{self.model._meta.verbose_name_plural}.xlsx")
+        file_name = f"{self.model._meta.verbose_name_plural}.xlsx"
+        # enqueue after commit so the worker can always see the ExcelFile row
+        transaction.on_commit(lambda: export.delay(file.id, applabel, modelname, ids, file_name=file_name))
 
         # Thêm thông báo thành công
-        messages.success(request, mark_safe(
-            f"Export is in progress. You can download the file when it's ready in <a style='color: red; text-decoration: underline; font-weight: bold;' href='{reverse('admin:file_management_excelfile_change', args=[file.id])}'>here</a>."))
+        messages.success(request, format_html(
+            "Export is in progress. You can download the file when it's ready <a class='underline font-semibold text-primary-600' href='{}'>here</a>.",
+            reverse('admin:file_management_excelfile_change', args=[file.id])))
 
         # Redirect về lại trang admin
         return HttpResponseRedirect(

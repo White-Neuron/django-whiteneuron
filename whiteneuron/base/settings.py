@@ -12,7 +12,7 @@ load_dotenv()
 import sentry_sdk
 
 FEEDBACK_COOLDOWN_SECONDS= int(environ.get("FEEDBACK_COOLDOWN_SECONDS", 60))
-DATA_UPLOAD_MAX_NUMBER_FILES = environ.get("DATA_UPLOAD_MAX_NUMBER_FILES", 1000)
+DATA_UPLOAD_MAX_NUMBER_FILES = int(environ.get("DATA_UPLOAD_MAX_NUMBER_FILES", 1000))
 
 PROJECT_NAME = environ.get("PROJECT_NAME", "base")
 NAME= environ.get("NAME", "White Neuron")
@@ -36,9 +36,15 @@ EMAIL_USE_TLS = True
 ######################################################################
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = environ.get("SECRET_KEY", get_random_secret_key())
-
 DEBUG = environ.get("DEBUG", "False") == "True"
+
+SECRET_KEY = environ.get("SECRET_KEY")
+if not SECRET_KEY:
+    if not DEBUG:
+        # A random per-process key breaks signed-cookie sessions/CSRF across workers and restarts.
+        from django.core.exceptions import ImproperlyConfigured
+        raise ImproperlyConfigured("SECRET_KEY environment variable is required when DEBUG=False")
+    SECRET_KEY = get_random_secret_key()
 # DEBUG = False
 
 ROOT_URLCONF = f"{PROJECT_NAME}.urls"
@@ -70,6 +76,9 @@ USER_RATE_LIMIT_WINDOW = int(environ.get("USER_RATE_LIMIT_WINDOW", 60))       # 
 # Chỉ bật khi deploy sau Cloudflare — tin tưởng CF-Connecting-IP / True-Client-IP header.
 # Nếu không bật, các header này sẽ bị bỏ qua để tránh giả mạo IP.
 BEHIND_CLOUDFLARE = environ.get("BEHIND_CLOUDFLARE", "False") == "True"
+# Number of reverse proxies that append to X-Forwarded-For (0 = auto: trust XFF only
+# when the request comes from a private/loopback proxy, using its right-most public IP)
+TRUSTED_PROXY_COUNT = int(environ.get("TRUSTED_PROXY_COUNT", "0"))
 
 # Cảnh báo: rate limiting chỉ hiệu quả khi dùng Redis (shared cache giữa các worker).
 # Với LocMemCache (USE_CACHE=False hoặc CACHENAME=default), mỗi gunicorn worker có cache
@@ -249,7 +258,10 @@ if USE_CACHE:
     else:
         print("Unknown cache backend")
         sys.exit(1)
-    MIDDLEWARE = ["django.middleware.cache.UpdateCacheMiddleware"] + MIDDLEWARE + ["django.middleware.cache.FetchFromCacheMiddleware"]
+    # Whole-page caching serves stale admin pages (changelists, badges) after edits:
+    # opt in explicitly, only for sites whose pages are public and static.
+    if environ.get("USE_CACHE_MIDDLEWARE", "False") == "True":
+        MIDDLEWARE = ["django.middleware.cache.UpdateCacheMiddleware"] + MIDDLEWARE + ["django.middleware.cache.FetchFromCacheMiddleware"]
 
 # settings.py
 DEBUG_TOOLBAR_PANELS = [
@@ -575,7 +587,6 @@ UNFOLD = {
     # Command settings
     "COMMAND": {
         "search_models": True,  
-        "search_callback": "whiteneuron.base.utils.search_callback",
         "show_history": True, 
     },
     "SIDEBAR": {

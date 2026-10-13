@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 import json
 import logging
 from django.urls import path
@@ -39,9 +40,20 @@ def receive_feedback(request):
 
         # Lấy ContentType
         try:
-            content_type = ContentType.objects.get(model=model_name, app_label=app_label)
+            content_type = ContentType.objects.get_by_natural_key(app_label, model_name)  # cached
         except ContentType.DoesNotExist:
             return JsonResponse({"success": False, "message": _("Invalid model or app_label")}, status=400)
+
+        # Only feedback on objects that exist and that the user may view
+        model_class = content_type.model_class()
+        if model_class is None or not request.user.has_perm(f"{app_label}.view_{model_name}"):
+            return JsonResponse({"success": False, "message": _("Invalid model or app_label")}, status=403)
+        manager = getattr(model_class, 'objects_all', model_class._default_manager)
+        try:
+            if not manager.filter(pk=object_id).exists():
+                return JsonResponse({"success": False, "message": _("Object not found")}, status=404)
+        except (ValueError, TypeError, ValidationError):
+            return JsonResponse({"success": False, "message": _("Object not found")}, status=404)
 
         # Kiểm tra cooldown chống spam — per user, không phân biệt đối tượng
         cooldown_since = timezone.now() - timedelta(seconds=FEEDBACK_COOLDOWN_SECONDS)

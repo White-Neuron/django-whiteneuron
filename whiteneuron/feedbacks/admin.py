@@ -97,6 +97,9 @@ class FeedbackDataAdmin(ModelAdmin):
         #?resolved=1 
 
         if request.GET.get('resolved') == '1' and object_id:
+            # state change: POST only (CSRF-protected)
+            if request.method != 'POST':
+                return JsonResponse({"success": False, "message": "Method not allowed"}, status=405)
             # chỉ cho phép superuser thực hiện
             if not request.user.is_superuser:
                 return JsonResponse({"success": False, "message": str(_("Only superuser can mark feedback as resolved"))}, status=403)

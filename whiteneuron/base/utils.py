@@ -102,12 +102,27 @@ def app_badge_callback(request):
     except Exception:
         return 0
 
+def user_group_names(user):
+    """Group names of ``user``, memoized on the user object (one query per request).
+
+    Sidebar permission callbacks run for every item on every admin page; without
+    this each of them issued its own ``groups.filter(...).exists()`` query.
+    """
+    if not user or not user.is_authenticated:
+        return frozenset()
+    names = getattr(user, "_wn_group_names", None)
+    if names is None:
+        names = frozenset(user.groups.values_list("name", flat=True))
+        user._wn_group_names = names
+    return names
+
+
 def is_guest_user(user):
     if not user or not user.is_authenticated:
         return True
     if user.username.lower() == "guest":
         return True
-    return user.groups.filter(name__in=["Khách thăm", "Guest", "guest"]).exists()
+    return bool(user_group_names(user) & {"Khách thăm", "Guest", "guest"})
 
 
 def permission_callback(request):
@@ -119,7 +134,7 @@ def permission_superuser_callback(request):
 def permission_admin_callback(request):
     if request.user.is_superuser:
         return True
-    return request.user.groups.filter(name='Quản trị viên').exists()
+    return 'Quản trị viên' in user_group_names(request.user)
 
 def permission_non_guest_callback(request):
     return not is_guest_user(request.user)
@@ -178,12 +193,15 @@ def send_email_login(username, password, receiver, is_reset=False):
     context= template.format(username= username, password= password, url= URL, system_name= system_name, signature= _load_signature())
     mail= Mail.objects.create(subject= subject, content= context, receiver= receiver)
     mail.send()
+    # don't keep the plaintext password in the database once the e-mail is out
+    Mail.objects.filter(pk=mail.pk).update(content=context.replace(password, '********'))
     return mail.is_sent()
 
-def make_random_password():
-    import random
+def make_random_password(length=12):
+    import secrets
     import string
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+    alphabet = string.ascii_letters + string.digits
+    return ''.join(secrets.choice(alphabet) for _ in range(length))
 
 from django.utils.safestring import mark_safe
 def announcement_callback(request):

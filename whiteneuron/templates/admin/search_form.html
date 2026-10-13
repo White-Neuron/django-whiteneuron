@@ -23,7 +23,7 @@
         {% if cl.model_admin.using_grid_view == True %}
         <form method="post" action="">
            {% csrf_token %}
-            {% if cl.model_admin.grid_view == True %}
+            {% if cl.wn_grid_view %}
                 <input type="hidden" name="grid_view" value="0">
                 <button type="submit" 
                 style="font-size: 1.2rem"

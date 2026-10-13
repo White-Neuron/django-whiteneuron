@@ -61,6 +61,7 @@ from unfold.widgets import (
 from .models import User, Tag, UserActivity, AnonymousActivity, VisitProfile, UserProfile, App, IPBlacklist, UABlacklist
 from .sites import base_admin_site
 from django.utils.safestring import mark_safe
+from django.utils.html import escape
 
 from .modeladmin import ModelAdmin
 
@@ -179,7 +180,7 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
         else:
             avatar_content = f'''
             <div class="w-full h-full rounded-2xl overflow-hidden bg-base-300/50 dark:bg-base-700/50 ring-1 ring-base-content/10 dark:ring-base-content/20">
-                <img src="{obj.avatar.url}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"/>
+                <img src="{escape(obj.avatar.url)}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"/>
             </div>
             '''
         
@@ -199,8 +200,8 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
         badges_html = ' '.join(badges)
         
         # Tên đầy đủ hoặc fallback
-        display_name = obj.full_name or obj.username or _('Unknown User')
-        username_display = f'{obj.username}' if obj.username else _('No username')
+        display_name = escape(obj.full_name or obj.username or _('Unknown User'))
+        username_display = escape(obj.username) if obj.username else _('No username')
 
         role= ""
         if obj.is_superuser:
@@ -386,6 +387,7 @@ class UserActivityAdmin(ModelAdmin):
     compressed_fields = True
     using_grid_view = False
 
+    list_select_related = ["user", "profile"]  # profile is nullable: not auto-joined
     list_display = [
         "user",
         "profile",
@@ -470,6 +472,7 @@ class AnonymousActivityAdmin(ModelAdmin):
     compressed_fields = True
     using_grid_view = False
 
+    list_select_related = ["profile"]
     list_display = [
         "profile",
         "path",
@@ -557,6 +560,7 @@ class VisitProfileAdmin(ModelAdmin):
 @admin.register(IPBlacklist, site=base_admin_site)
 class IPBlacklistAdmin(ModelAdmin):
     compressed_fields = True
+    list_select_related = ["created_by"]
     list_display = ['ip_address', 'is_active_display', 'reason', 'blocked_until', 'created_at', 'created_by']
     search_fields = ['ip_address', 'reason']
     list_filter = ['is_active']
@@ -604,6 +608,7 @@ class IPBlacklistAdmin(ModelAdmin):
 @admin.register(UABlacklist, site=base_admin_site)
 class UABlacklistAdmin(ModelAdmin):
     compressed_fields = True
+    list_select_related = ["created_by"]
     list_display = ['pattern', 'is_regex', 'is_active_display', 'reason', 'created_at', 'created_by']
     search_fields = ['pattern', 'reason']
     list_filter = ['is_active', 'is_regex']
@@ -752,7 +757,7 @@ class MailAdmin(ModelAdmin):
         content = obj.content if obj.content else ''
         encoded = base64.b64encode(content.encode('utf-8')).decode('utf-8')
         return format_html(
-            '<iframe src="data:text/html;charset=utf-8;base64,{}" style="width: 100%; border: none; min-height: 600px;" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" frameborder="0"></iframe>',
+            '<iframe src="data:text/html;charset=utf-8;base64,{}" style="width: 100%; border: none; min-height: 600px;" sandbox="allow-popups" frameborder="0"></iframe>',
             encoded,
         )
     preview_email.short_description = _('Content')

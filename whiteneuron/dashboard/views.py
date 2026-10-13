@@ -15,14 +15,102 @@ from whiteneuron.base.models import UserActivity, AnonymousActivity
 import datetime
 # timezones
 from django.utils import timezone
-from django.db.models import Count
+from django.core.cache import cache
+from django.db.models import Count, Q
 from django.db.models.functions import TruncDay
-import numpy as np
+
+_STATS_CACHE_TIMEOUT = 60  # seconds
+
+
+def _period_ranges(time, today):
+    """Half-open [start, end) ranges (local dates) for the period and the previous one."""
+    if time == "today":
+        start, end = today, today + datetime.timedelta(days=1)
+        start_last = start - datetime.timedelta(days=1)
+    elif time == "7days":
+        start, end = today - datetime.timedelta(days=6), today + datetime.timedelta(days=1)
+        start_last = start - datetime.timedelta(days=7)
+    elif time == "week":
+        start = today - datetime.timedelta(days=today.weekday())
+        end = start + datetime.timedelta(days=7)
+        start_last = start - datetime.timedelta(days=7)
+    elif time == "month":
+        start = today.replace(day=1)
+        end = (start + datetime.timedelta(days=32)).replace(day=1)
+        start_last = (start - datetime.timedelta(days=1)).replace(day=1)
+    elif time == "year":
+        start = today.replace(month=1, day=1)
+        end = start.replace(year=start.year + 1)
+        start_last = start.replace(year=start.year - 1)
+    else:
+        return None
+    return start, end, start_last
+
+
+def _aware(day):
+    return timezone.make_aware(datetime.datetime.combine(day, datetime.time.min))
+
+
+def _dashboard_stats(time):
+    """KPI + 28-day chart numbers: 4 aggregate queries, cached briefly."""
+    today = timezone.localdate()
+    ranges = _period_ranges(time, today)
+    if ranges is None:
+        return None
+    cache_key = f"wn:dashboard:{time}:{today.isoformat()}"
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+
+    start, end, start_last = (_aware(d) for d in ranges)
+    ok = Q(status_code__lt=400)
+
+    def kpi(model):
+        # current period, its successes, previous period — in one query
+        current = Q(timestamp__gte=start, timestamp__lt=end)
+        row = model.objects.filter(timestamp__gte=start_last, timestamp__lt=end).aggregate(
+            total=Count("id", filter=current),
+            success=Count("id", filter=current & ok),
+            last=Count("id", filter=Q(timestamp__lt=start)),
+        )
+        return row["total"], row["success"], row["last"]
+
+    days = [today - datetime.timedelta(days=n) for n in range(27, -1, -1)]  # oldest -> today
+    tz = timezone.get_current_timezone()
+
+    def per_day(model):
+        rows = (model.objects.filter(timestamp__gte=_aware(days[0]))
+                .annotate(day=TruncDay("timestamp", tzinfo=tz)).values("day")
+                .annotate(success=Count("id", filter=ok), error=Count("id", filter=~ok | Q(status_code__isnull=True))))
+        by_day = {row["day"].date() if hasattr(row["day"], "date") else row["day"]: row for row in rows}
+        success = [by_day.get(d, {}).get("success", 0) for d in days]
+        error = [by_day.get(d, {}).get("error", 0) for d in days]
+        return success, error
+
+    user_success, user_error = per_day(UserActivity)
+    anon_success, anon_error = per_day(AnonymousActivity)
+    stats = {
+        "kpi": kpi(UserActivity) + kpi(AnonymousActivity),
+        "chart": {
+            "success": user_success,
+            "error": user_error,
+            "anonymous_success": anon_success,
+            "anonymous_error": anon_error,
+            "average": [(a + b) / 2 for a, b in zip(user_success, user_error)],
+            "anonymous_average": [(a + b) / 2 for a, b in zip(anon_success, anon_error)],
+        },
+        "weekdays": [d.weekday() for d in days],
+    }
+    cache.set(cache_key, stats, timeout=_STATS_CACHE_TIMEOUT)
+    return stats
+
 
 def dashboard_callback(request, context):
     # messages.info(request, render_to_string("CCMS/service.html"))
 
     time= request.GET.get("time", "week")
+    if time not in ("today", "7days", "week", "month", "year"):
+        time = "week"
     
     MAPTIME = {
         'today': _('today'),
@@ -42,134 +130,15 @@ def dashboard_callback(request, context):
         "Sun",
     ]
 
-    # Range of time
-    if time == "today":
-        start= datetime.date.today()
-        end= datetime.date.today() + datetime.timedelta(days=1)
-        start_last= start - datetime.timedelta(days=1)
-        end_last= end - datetime.timedelta(days=1)
-    elif time == "7days":
-        start= datetime.date.today() - datetime.timedelta(days=7)
-        end= datetime.date.today() + datetime.timedelta(days=1)
-        start_last= start - datetime.timedelta(days=7)
-        end_last= end - datetime.timedelta(days=7)
-    elif time == "week":
-        start= datetime.date.today() - datetime.timedelta(days=datetime.date.today().weekday())
-        end= start + datetime.timedelta(days=7)
-        start_last= start - datetime.timedelta(days=7)
-        end_last= end - datetime.timedelta(days=7)
-    elif time == "month":
-        today = datetime.date.today()
-        start= today.replace(day=1)
-        end= (start + datetime.timedelta(days=32)).replace(day=1)
-        start_last= (start - datetime.timedelta(days=1)).replace(day=1)
-        end_last= (end - datetime.timedelta(days=1)).replace(day=1)
-    elif time == "year":
-        today = datetime.date.today()
-        start= today.replace(month=1, day=1)
-        end= start.replace(year=start.year+1)
-        start_last= start.replace(year=start.year-1)
-        end_last= end.replace(year=end.year-1)
-    else:
+    stats = _dashboard_stats(time)
+    if stats is None:
         time = "week"
-        start= datetime.date.today() - datetime.timedelta(days=datetime.date.today().weekday())
-        end= start + datetime.timedelta(days=7)
-        start_last= start - datetime.timedelta(days=7)
-        end_last= end - datetime.timedelta(days=7)
-
-    
-    
-
-    # convert to timezone
-    start= timezone.make_aware(datetime.datetime.combine(start, datetime.datetime.min.time()))
-    end= timezone.make_aware(datetime.datetime.combine(end, datetime.datetime.max.time()))
-    start_last= timezone.make_aware(datetime.datetime.combine(start_last, datetime.datetime.min.time()))
-    end_last= timezone.make_aware(datetime.datetime.combine(end_last, datetime.datetime.max.time()))
-
-
-    # start_of_week = timezone.make_aware(datetime.datetime.combine(start_of_week, datetime.datetime.min.time()))
-    # end_of_week = timezone.make_aware(datetime.datetime.combine(end_of_week, datetime.datetime.max.time()))
-    # start_of_last_week = timezone.make_aware(datetime.datetime.combine(start_of_last_week, datetime.datetime.min.time()))
-    # end_of_last_week = timezone.make_aware(datetime.datetime.combine(end_of_last_week, datetime.datetime.max.time()))
-
-    # print(start_of_week, end_of_week)
-    # print(start_of_last_week, end_of_last_week)
-
-    # user_activities = UserActivity.objects.filter(timestamp__range=(start_of_week, end_of_week))
-    # user_activities_last_week = UserActivity.objects.filter(timestamp__range=(start_of_last_week, end_of_last_week))
-
-    user_activities = UserActivity.objects.filter(timestamp__range=(start, end))
-    user_activities_last = UserActivity.objects.filter(timestamp__range=(start_last, end_last))
-
-    # total_activities = user_activities.count()
-    # total_activities_last_week = user_activities_last_week.count()
-
-    total_activities = user_activities.count()
-    total_activities_last = user_activities_last.count()
-
-    # total_activities_success = user_activities.filter(status_code__lt=400).count()
-    # total_activities_last_week_success = user_activities_last_week.filter(status_code="200").count()
-
-    total_activities_success = user_activities.filter(status_code__lt=400).count()
-    total_activities_last_success = user_activities_last.filter(status_code__lt=400).count()
-
-    anonymous_activities = AnonymousActivity.objects.filter(timestamp__range=(start, end))
-    anonymous_activities_last = AnonymousActivity.objects.filter(timestamp__range=(start_last, end_last))
-    total_anonymous_activities = anonymous_activities.count()
-    total_anonymous_activities_last = anonymous_activities_last.count()
-    total_anonymous_activities_success = anonymous_activities.filter(status_code__lt=400).count()
-    total_anonymous_activities_last_success = anonymous_activities_last.filter(status_code__lt=400).count()
-
-    # total_activities_icd10 = user_activities.filter(path__startswith="/admin/icd10").count()
-    # total_activities_last_week_icd10 = user_activities_last_week.filter(path__startswith="/admin/icd10").count()
-
-    # total_activities_icd10 = user_activities.filter(path__startswith="/admin/icd10").count()
-    # total_activities_last_icd10 = user_activities_last.filter(path__startswith="/admin/icd10").count()
-
-    # # top user TODO: top user
-    # top_user = user_activities.values("user").annotate(count=Count("id")).order_by("-count")[:5]
-    # top_user_last = user_activities_last.values("user").annotate(count=Count("id")).order_by("-count")[:5]
-
-    # chart data 28 days for activities success, error
-    user_activities_28_days = UserActivity.objects.filter(timestamp__gte=timezone.now()-datetime.timedelta(days=28))
-    user_activities_28_days_success = user_activities_28_days.filter(status_code__lt=400).annotate(day= TruncDay("timestamp")).values("day").annotate(count=Count("id")).values("day", "count")
-    user_activities_28_days_error = user_activities_28_days.exclude(status_code__lt=400).annotate(day=TruncDay("timestamp")).values("day").annotate(count=Count("id")).values("day", "count") 
-    # convert data to fit day of week
-    # print(user_activities_28_days_success)
-    user_activities_28_days_success = {item["day"].strftime("%Y-%m-%d"): item["count"] for item in user_activities_28_days_success}
-    user_activities_28_days_error = {item["day"].strftime("%Y-%m-%d"): item["count"] for item in user_activities_28_days_error}
-
-    anonymous_activities_28_days = AnonymousActivity.objects.filter(timestamp__gte=timezone.now()-datetime.timedelta(days=28))
-    anonymous_success_dict = {item["day"].strftime("%Y-%m-%d"): item["count"] for item in 
-        anonymous_activities_28_days.filter(status_code__lt=400).annotate(day=TruncDay("timestamp")).values("day").annotate(count=Count("id")).values("day", "count")}
-    anonymous_error_dict = {item["day"].strftime("%Y-%m-%d"): item["count"] for item in 
-        anonymous_activities_28_days.exclude(status_code__lt=400).annotate(day=TruncDay("timestamp")).values("day").annotate(count=Count("id")).values("day", "count")}
-
-    # Update data 0 for missing day
-    # print(user_activities_28_days_success)
-    user_activities_28_days= {
-        'success': [],
-        'error': [],
-        'anonymous_success': [],
-        'anonymous_error': [],
-    }
-    for day in range(28): # 28 days
-        day = (timezone.now() - datetime.timedelta(days=day)).strftime("%Y-%m-%d")
-        user_activities_28_days['success'].append(user_activities_28_days_success.get(day, 0))  
-        user_activities_28_days['error'].append(user_activities_28_days_error.get(day, 0))
-        user_activities_28_days['anonymous_success'].append(anonymous_success_dict.get(day, 0))
-        user_activities_28_days['anonymous_error'].append(anonymous_error_dict.get(day, 0))
-    
-    # Lấy thứ của ngày hiện tại
-    last_day = datetime.datetime.now().weekday() 
-    # Thứ của 28 ngày trước tính từ ngày hiện tại
-    _28_days= [WEEKDAYS[(last_day - i) % 7] for i in range(28)][::-1]
-    user_activities_28_days['success'].reverse()
-    user_activities_28_days['error'].reverse()
-    user_activities_28_days['anonymous_success'].reverse()
-    user_activities_28_days['anonymous_error'].reverse()
-    user_activities_28_days['average'] = ((np.array(user_activities_28_days['success']) + np.array(user_activities_28_days['error'])) / 2).tolist()
-    user_activities_28_days['anonymous_average'] = ((np.array(user_activities_28_days['anonymous_success']) + np.array(user_activities_28_days['anonymous_error'])) / 2).tolist()
+        stats = _dashboard_stats(time)
+    (total_activities, total_activities_success, total_activities_last,
+     total_anonymous_activities, total_anonymous_activities_success,
+     total_anonymous_activities_last) = stats["kpi"]
+    user_activities_28_days = stats["chart"]
+    _28_days = [_(WEEKDAYS[d]) for d in stats["weekdays"]]
 
     def render_kpi(label, object_name, value, last_value, time, success=None):
         is_increase = value > last_value

@@ -119,6 +119,7 @@
 
 var TOAST_CLASSES = {
     info: "ui-alert-info",
+    danger: "ui-alert-error",
     success: "ui-alert-success",
     warning: "ui-alert-warning",
     error: "ui-alert-error",

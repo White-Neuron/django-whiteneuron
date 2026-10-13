@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser, Group
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
-from django.db import models
+from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 from django.template.defaultfilters import truncatechars
 
@@ -10,6 +10,7 @@ from imagekit.processors import ResizeToFill
 import uuid
 import os
 from django.utils.safestring import mark_safe
+from django.utils.html import escape, format_html, format_html_join
 
 from django.utils import timezone
 
@@ -29,11 +30,11 @@ class ImageModel(models.Model):
         return self.image.name
     
     def display_image(self):
-        return mark_safe(f'<img src="{self.image.url}" alt="{self.image}" />')
+        return format_html('<img src="{}" alt="{}" />', self.image.url, self.image)
     
     def display_thumbnail(self):
         if self.image:
-            return mark_safe(f'<img src="{self.thumbnail.url}" alt="{self.thumbnail}" />')
+            return format_html('<img src="{}" alt="{}" />', self.thumbnail.url, self.thumbnail)
         return mark_safe(f'<span class="material-symbols-outlined" style="font-size: 50px;">person</span>')
     
     def clear(self):
@@ -122,7 +123,7 @@ class User(AbstractUser):
             return mark_safe(f'<span class="material-symbols-outlined" style="font-size: 32px;">smart_toy</span>')
         if self.avatar:
             # print(instance.avatar.url)
-            return mark_safe(f'<img src="{self.avatar.url}" style="width: 32px; height: 32px; border-radius: 50%;">')
+            return format_html('<img src="{}" style="width: 32px; height: 32px; border-radius: 50%;">', self.avatar.url)
         return mark_safe(f'<span class="material-symbols-outlined" style="font-size: 32px;">person</span>')
     
     def display_header(self):
@@ -135,7 +136,7 @@ class User(AbstractUser):
                          {self.display_avatar()}
                 </div>
                 <div style="margin-left: 10px;">
-                    {self.username}
+                    {escape(self.username)}
                 </div>
             </div>
         </a>
@@ -171,6 +172,7 @@ class VisitProfile(models.Model):
         indexes = [
             models.Index(fields=["ip_address"]),
             models.Index(fields=["first_seen"]),
+            models.Index(fields=["last_seen"], name="visit_prof_last_seen_idx"),
         ]
 
     def __str__(self):
@@ -205,6 +207,8 @@ class UserActivity(models.Model):
         indexes = [
             models.Index(fields=["user", "timestamp"]),
             models.Index(fields=["profile", "timestamp"]),
+            # changelist ordering, date_hierarchy, dashboard ranges, cleanup command
+            models.Index(fields=["timestamp"], name="user_act_timestamp_idx"),
         ]
         ordering = ["-timestamp"]
 
@@ -228,6 +232,7 @@ class AnonymousActivity(models.Model):
         verbose_name_plural = _("anonymous activities")
         indexes = [
             models.Index(fields=["profile", "timestamp"]),
+            models.Index(fields=["timestamp"], name="anon_act_timestamp_idx"),
         ]
 
     def __str__(self):
@@ -289,6 +294,23 @@ class IPBlacklist(models.Model):
                     cache.set(key, True, timeout=None)
             else:
                 cache.delete(key)
+        except Exception:
+            pass
+
+    LOADED_KEY = "blacklist:dynamic:loaded"
+
+    @classmethod
+    def ensure_cache_loaded(cls):
+        """Re-populate the cache from the DB if it was flushed (Redis restart, new cache).
+
+        A marker key tells whether the dynamic blocks are in the cache; when it is
+        missing, the first caller rebuilds every active block.
+        """
+        from django.core.cache import cache
+        try:
+            if cache.add(cls.LOADED_KEY, 1, timeout=None):
+                for block in cls.objects.filter(is_active=True):
+                    block.sync_cache()
         except Exception:
             pass
 
@@ -366,8 +388,19 @@ class UABlacklist(models.Model):
 ############################################
 # Base Model
 ############################################
+from django.utils.html import format_html, format_html_join
 from .thread_local import thread_local
 from whiteneuron.notification.models import Notification
+
+
+def _current_user():
+    """User of the current request; falls back to the first superuser (commands, celery)."""
+    request = getattr(thread_local, 'request', None)
+    user = getattr(request, 'user', None)
+    if user is not None and user.is_authenticated:
+        return user
+    return User.objects.filter(is_superuser=True).order_by('pk').first()
+
 class SoftDeleteModel(models.Model):
     is_deleted = models.BooleanField(default=False, verbose_name= _('Deleted'))
     deleted_at = models.DateTimeField(null=True, blank=True, verbose_name= _('Deleted at'))
@@ -421,84 +454,71 @@ class BaseModel(SoftDeleteModel):
         super(BaseModel, self).delete(*args, **kwargs)
 
     def save(self, *args, **kwargs):
-        request = getattr(thread_local, 'request', None)
-        # save created_by and updated_by when create or update
-        # Lấy tham số notification từ kwargs, mặc định là True
-        # Trong các trường hợp không muốn gửi thông báo, có thể gọi save với notification= False: ví dụ obj.save(notification= False)
-        notification= kwargs.pop('notification', True)
-        title= ''
-        content_html= ''
-        action= ''
-        if request is None:
-            user= User.objects.filter(is_superuser=True).first()
-        else:
-            user= request.user
-            if user.is_anonymous:
-                user= User.objects.filter(is_superuser=True).first()
-        changed_data= []
+        # Trong các trường hợp không muốn gửi thông báo, gọi save(notification=False)
+        notification = kwargs.pop('notification', True)
+        user = _current_user()
+        action = ''
+        fields_changed = []
         if not self.pk:  # Nếu là tạo mới
+            now = timezone.now()
             self.created_by = user
             self.updated_by = user
-            self.created_at = timezone.now()
-            self.updated_at = timezone.now()
-            action= 'create'
-            if notification: title= f"{_('New')} {self._meta.verbose_name} \"{self}\" {_('has been created by user')} \"{self.created_by}\"" 
-        else:  # Nếu là cập nhật và có yêu cầu gửi thông báo
-            fields_changed= []
-            if hasattr(self.__class__, 'objects_all'):
-                old= self.__class__.objects_all.get(pk= self.pk)
+            self.created_at = now
+            self.updated_at = now
+            action = 'create'
+        else:  # Nếu là cập nhật
+            manager = self.__class__.objects_all if hasattr(self.__class__, 'objects_all') else self.__class__.objects
+            old = manager.filter(pk=self.pk).first()
+            if old is None:
+                action = 'create'
             else:
-                old= self.__class__.objects.get(pk= self.pk)
-            for attr in self.__dict__:
-                if attr in ['_state', 'created_at', 'created_by', 'updated_at', 'updated_by']:
-                    continue
-                # kiểm tra attr có phải là field không
-                if not hasattr(self.__class__, attr):
-                    continue
-                try:
-                    if getattr(self, attr) != getattr(old, attr):
-                        fields_changed.append((attr, getattr(old, attr), getattr(self, attr)))
-                except Exception as e:
-                    print(e)
-                    pass
-            if fields_changed:
-                self.updated_at = timezone.now()
-                self.updated_by = user
-                if notification:
-                    action= 'update'
-                    title= f"{_('Update')} {self._meta.verbose_name} <strong>{self}</strong>({self.id}) {_('has been updated by user')} \"{self.updated_by}\""
-                    content_html= f"{self._meta.verbose_name} <strong>{self}</strong>({self.id}) has been updated by user \"{self.updated_by}\" with the following changes: <ul>"
-                    for field in fields_changed:
-                        changed_data.append({
-                            'field_name': field[0],
-                            'old_value': field[1],
-                            'new_value': field[2]
-                        })
-                        content_html+= f"<li>{field[0].verbose_name if hasattr(field[0], 'verbose_name') else field[0]}: {field[1]} -> {field[2]}</li>"
-                    content_html+= "</ul>"
-        
-        super(BaseModel, self).save(*args, **kwargs)  # Lưu đối tượng trước khi gửi thông báo
-        # Gửi thông báo đến người dùng
-        if title and notification:
-            if action == 'create':
-                content_html= f"""
-<p>{_('New')} {self._meta.verbose_name} <strong>{self}({self.id})</strong> {_('has been created by user')} <strong>{self.created_by}</strong></p>
-"""
-                if self.path():
-                    content_html+= f"""<p>{_('You can view it at')} <a href="{self.path()}">{_('this link')}</a>.</p>"""
+                for attr in self.__dict__:
+                    if attr in ('_state', 'created_at', 'created_by', 'updated_at', 'updated_by'):
+                        continue
+                    # chỉ so sánh các field của model
+                    if not hasattr(self.__class__, attr):
+                        continue
+                    try:
+                        if getattr(self, attr) != getattr(old, attr):
+                            fields_changed.append((attr, getattr(old, attr), getattr(self, attr)))
+                    except Exception:
+                        pass
+                if fields_changed:
+                    self.updated_at = timezone.now()
+                    self.updated_by = user
+                    action = 'update'
 
-            obj_link= self.path() if hasattr(self, 'path') else None
-            action_by_user = self.updated_by if action == 'update' else self.created_by
-            superuser_ids = User.objects.filter(is_superuser=True).values_list('id', flat=True)
-            for user_id in superuser_ids:
-                obj= Notification.objects.create(   user_id=user_id, title= title,
-                                                    action_by=action_by_user,
-                                                    flag= 'info',
-                                                    action= action,
-                                                    obj_link= obj_link,
-                                                    changed_data= str(changed_data),
-                                                    content= content_html)
-                obj.alert()
+        super(BaseModel, self).save(*args, **kwargs)  # Lưu đối tượng trước khi gửi thông báo
+
+        if not notification or not action:
+            return
+        verbose_name = self._meta.verbose_name
+        obj_link = self.path()
+        if action == 'create':
+            title = f'{_("New")} {verbose_name} "{self}" {_("has been created by user")} "{self.created_by}"'
+            content_html = format_html(
+                '<p>{} {} <strong>{} ({})</strong> {} <strong>{}</strong></p>',
+                _('New'), verbose_name, self, self.pk, _('has been created by user'), self.created_by,
+            )
+            if obj_link:
+                content_html += format_html('<p>{} <a href="{}">{}</a>.</p>', _('You can view it at'), obj_link, _('this link'))
+            changed_data = []
+        else:
+            title = f'{_("Update")} {verbose_name} "{self}" ({self.pk}) {_("has been updated by user")} "{self.updated_by}"'
+            changed_data = [
+                {'field_name': name, 'old_value': old_value, 'new_value': new_value}
+                for name, old_value, new_value in fields_changed
+            ]
+            content_html = format_html(
+                '{} <strong>{}</strong> ({}) has been updated by user "{}" with the following changes: <ul>{}</ul>',
+                verbose_name, self, self.pk, self.updated_by,
+                format_html_join('', '<li>{}: {} -> {}</li>', fields_changed),
+            )
+        Notification.notify_superusers(
+            title=title, content=content_html, action=action, flag='info',
+            obj_link=obj_link or None, changed_data=changed_data,
+            action_by=self.updated_by if action == 'update' else self.created_by,
+        )
 
 # ── M2M tracking ────────────────────────────────────────────────────────────
 # Changes to ManyToMany fields (.add / .remove / .set / .clear) never call
@@ -515,13 +535,7 @@ def _base_model_m2m_changed(sender, instance, action, pk_set, model, **kwargs):
     if not isinstance(instance, BaseModel) or instance.pk is None:
         return
 
-    request = getattr(thread_local, 'request', None)
-    if request is None or not hasattr(request, 'user'):
-        user = User.objects.filter(is_superuser=True).first()
-    else:
-        user = request.user
-        if user.is_anonymous:
-            user = User.objects.filter(is_superuser=True).first()
+    user = _current_user()
 
     now = timezone.now()
     # Guard: if no user found, still update timestamps but skip notification
@@ -587,32 +601,21 @@ def _base_model_m2m_changed(sender, instance, action, pk_set, model, **kwargs):
     changed_data = [{'field_name': field_name, 'old_value': old_value, 'new_value': new_value}]
 
     title = (
-        f"{_('Update')} {instance._meta.verbose_name} "
-        f"<strong>{instance}</strong>({instance.id}) "
-        f"{_('has been updated by user')} \"{user}\""
+        f'{_("Update")} {instance._meta.verbose_name} "{instance}" ({instance.pk}) '
+        f'{_("has been updated by user")} "{user}"'
     )
-    content_html = (
-        f"{instance._meta.verbose_name} <strong>{instance}</strong>({instance.id}) "
-        f"has been updated by user \"{user}\" with the following changes: "
-        f"<ul><li>{field_verbose}: {desc}</li></ul>"
+    content_html = format_html(
+        '{} <strong>{}</strong> ({}) has been updated by user "{}" with the following changes: '
+        '<ul><li>{}: {}</li></ul>',
+        instance._meta.verbose_name, instance, instance.pk, user, field_verbose, desc,
     )
-    obj_link = instance.path()
-
-    for superuser in User.objects.filter(is_superuser=True):
-        try:
-            notif = Notification.objects.create(
-                user=superuser,
-                title=title,
-                action_by=user,
-                flag='info',
-                action='update',
-                obj_link=obj_link,
-                changed_data=str(changed_data),
-                content=content_html,
-            )
-            notif.alert()
-        except Exception:
-            pass
+    try:
+        Notification.notify_superusers(
+            title=title, content=content_html, action='update', flag='info',
+            obj_link=instance.path() or None, changed_data=changed_data, action_by=user,
+        )
+    except Exception:
+        pass
 
 
 def _connect_m2m_for_base_model(sender, **kwargs):
@@ -889,16 +892,15 @@ class Mail(BaseModel):
             self.save()
             return
         try:
-            context = ssl._create_unverified_context()
-            with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as server:
-                send_mail(
-                    self.subject,
-                    self.content,
-                    settings.EMAIL_ALIAS_USER,
-                    [self.receiver],
-                    html_message= self.content,
-                    fail_silently=False,
-                )
+            # send_mail uses the configured EMAIL_BACKEND / SMTP settings (with TLS verification)
+            send_mail(
+                self.subject,
+                self.content,
+                settings.EMAIL_ALIAS_USER,
+                [self.receiver],
+                html_message= self.content,
+                fail_silently=False,
+            )
             print("Email sent successfully")
             self.status = 'sent'
             self.note = "Email sent successfully"
@@ -937,7 +939,7 @@ class App(BaseModel):
 
     def __str__(self):
         if self.name:
-            return _(self.name)
+            return str(_(self.name))  # __str__ must return str, not a lazy proxy
         return f'App {self.id}'
 
 
@@ -952,11 +954,15 @@ def _send_email_to_new_user(sender, instance, created, **kwargs):
         return
     if not instance.email:
         return
+    # Only users created without a password (e.g. invited by e-mail) get a generated
+    # one: never overwrite a password set by create_user()/createsuperuser/fixtures.
+    if instance.has_usable_password():
+        return
     from .utils import send_email_login, make_random_password
     password = make_random_password()
     instance.set_password(password)
     instance.save(update_fields=['password'])
-    send_email_login(instance.username, password, instance.email)
+    transaction.on_commit(lambda: send_email_login(instance.username, password, instance.email))
 
 
 post_save.connect(
