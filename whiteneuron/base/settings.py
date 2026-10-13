@@ -40,7 +40,9 @@ DEBUG = environ.get("DEBUG", "False") == "True"
 
 SECRET_KEY = environ.get("SECRET_KEY")
 if not SECRET_KEY:
-    if not DEBUG:
+    # build-time commands (e.g. in a Docker build) don't sign anything
+    _BUILD_COMMANDS = {"collectstatic", "compilemessages", "makemessages", "check", "makemigrations"}
+    if not DEBUG and not _BUILD_COMMANDS.intersection(sys.argv[1:2]):
         # A random per-process key breaks signed-cookie sessions/CSRF across workers and restarts.
         from django.core.exceptions import ImproperlyConfigured
         raise ImproperlyConfigured("SECRET_KEY environment variable is required when DEBUG=False")
@@ -82,9 +84,11 @@ WN_MONITORING = {
     "RETENTION_DAYS": int(environ.get("MONITORING_RETENTION_DAYS", 7)),
     "DISK_PATH": environ.get("MONITORING_DISK_PATH", "/"),
 }
-# Number of reverse proxies that append to X-Forwarded-For (0 = auto: trust XFF only
-# when the request comes from a private/loopback proxy, using its right-most public IP)
+# Client IP behind reverse proxies (rate limiting, IP blacklist, activity logs):
+# number of proxies that append to X-Forwarded-For (0 = auto: right-most public IP)
 TRUSTED_PROXY_COUNT = int(environ.get("TRUSTED_PROXY_COUNT", "0"))
+# Set when the app is reachable directly (no proxy): X-Forwarded-For is then client-controlled
+IGNORE_X_FORWARDED_FOR = environ.get("IGNORE_X_FORWARDED_FOR", "False") == "True"
 
 # Cảnh báo: rate limiting chỉ hiệu quả khi dùng Redis (shared cache giữa các worker).
 # Với LocMemCache (USE_CACHE=False hoặc CACHENAME=default), mỗi gunicorn worker có cache
@@ -806,11 +810,9 @@ if SENTRY_DSN:
 # Celery
 ######################################################################
 CELERY_BROKER_URL = environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
-# Send email / exports / GPT translation to Celery workers. Defaults to on only when a
-# broker is configured explicitly; otherwise these run inline in the request.
-WN_ASYNC_TASKS = environ.get(
-    "WN_ASYNC_TASKS", "True" if environ.get("CELERY_BROKER_URL") else "False"
-) == "True"
+# Send email / exports / GPT translation to Celery workers (opt-in: needs a running
+# worker; otherwise these run inline in the request).
+WN_ASYNC_TASKS = environ.get("WN_ASYNC_TASKS", "False") == "True"
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 

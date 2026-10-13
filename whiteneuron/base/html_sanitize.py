@@ -11,6 +11,15 @@ VOID_TAGS = {"br"}
 SAFE_URL_PREFIXES = ("/", "http://", "https://", "mailto:")
 
 
+def is_safe_href(href):
+    """http(s)/mailto URLs and same-site paths. "//host" and "/\\host" are protocol-relative
+    to browsers (backslash is read as a slash), so they are rejected."""
+    href = (href or "").strip()
+    if href.startswith("/"):
+        return len(href) == 1 or href[1] not in "/\\"
+    return href.lower().startswith(SAFE_URL_PREFIXES[1:])
+
+
 class _Sanitizer(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
@@ -26,7 +35,7 @@ class _Sanitizer(HTMLParser):
         attr = ""
         if tag == "a":
             href = dict(attrs).get("href") or ""
-            if href.strip().lower().startswith(SAFE_URL_PREFIXES) and not href.strip().startswith("//"):
+            if is_safe_href(href):
                 attr = f' href="{escape(href, quote=True)}"'
         self.out.append(f"<{tag}{attr}>")
 

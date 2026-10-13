@@ -263,10 +263,18 @@ def is_global_ip(ip):
         return False
 
 def _parse_ip(raw: str | None) -> str | None:
-    """Validate và trả về IP string chuẩn hóa, None nếu không hợp lệ."""
+    """Validate và trả về IP string chuẩn hóa, None nếu không hợp lệ.
+
+    Accepts the forms proxies put in X-Forwarded-For: "1.2.3.4", "1.2.3.4:5678",
+    "2001:db8::1" and "[2001:db8::1]:5678".
+    """
     if not raw:
         return None
     raw = raw.strip()
+    if raw.startswith("["):  # [v6]:port
+        raw = raw[1:].split("]", 1)[0]
+    elif raw.count(":") == 1:  # v4:port
+        raw = raw.split(":", 1)[0]
     try:
         return str(ipaddress.ip_address(raw))
     except ValueError:
@@ -285,20 +293,19 @@ def get_client_ip(request):
 
     remote_ip = _parse_ip(request.META.get("REMOTE_ADDR"))
 
-    # X-Forwarded-For: "client, proxy1, proxy2". The left part is whatever the client
-    # sent (spoofable); only entries appended by our own proxies can be trusted, so
-    # read it from the right:
-    #   - TRUSTED_PROXY_COUNT = N  -> the N-th address from the right
-    #   - otherwise, only when the request came from a private/loopback proxy,
-    #     the right-most public address.
+    # X-Forwarded-For: "client, proxy1, proxy2". Every proxy appends the address it
+    # received the request from, so only the right-hand part is trustworthy:
+    #   - TRUSTED_PROXY_COUNT = N: the N-th entry from the right (exact; recommended)
+    #   - 0 (auto): the right-most public address
+    #   - IGNORE_X_FORWARDED_FOR = True: never trust the header (app exposed directly)
     xff = request.headers.get("X-Forwarded-For")
-    proxy_count = int(getattr(settings, "TRUSTED_PROXY_COUNT", 0) or 0)
-    if xff and remote_ip and (proxy_count or not is_global_ip(remote_ip)):
-        hops = [ip for ip in (_parse_ip(raw) for raw in xff.split(",")) if ip]
+    if xff and not getattr(settings, "IGNORE_X_FORWARDED_FOR", False):
+        hops = [hop.strip() for hop in xff.split(",") if hop.strip()]  # raw: keep positions
+        proxy_count = int(getattr(settings, "TRUSTED_PROXY_COUNT", 0) or 0)
         if proxy_count:
-            ip = hops[-proxy_count] if len(hops) >= proxy_count else None
+            ip = _parse_ip(hops[-proxy_count]) if len(hops) >= proxy_count else None
         else:
-            ip = next((hop for hop in reversed(hops) if is_global_ip(hop)), None)
+            ip = next((p for p in (_parse_ip(h) for h in reversed(hops)) if p and is_global_ip(p)), None)
         if ip:
             return ip, request.headers.get("User-Agent")
 
@@ -308,7 +315,7 @@ def get_client_ip(request):
     return None, request.headers.get("User-Agent")
 
 
-from django.db import IntegrityError
+from django.db import IntegrityError, connection
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
 from .models import UserActivity, AnonymousActivity, VisitProfile
@@ -473,6 +480,10 @@ class UserActivityMiddleware:
         Without the cache every tracked request did SELECT profile + UPDATE last_seen
         + INSERT activity; now the profile lookup and the last_seen write are rare.
         """
+        # Inside a transaction (tests, ATOMIC wrappers) a cached id could point at a
+        # row rolled back since; the FK is only checked at commit, too late to recover.
+        if connection.in_atomic_block:
+            return self._get_or_create_visit_profile(ip_address, user_agent)[0].pk
         key = self._visit_profile_key(ip_address, user_agent)
         try:
             profile_id = cache.get(key)

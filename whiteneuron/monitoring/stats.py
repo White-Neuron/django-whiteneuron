@@ -21,7 +21,7 @@ RANGES = {
 }
 DEFAULT_RANGE = "1h"
 MAX_POINTS = 240                 # points per series sent to the browser
-MAX_REQUEST_ROWS = 200_000       # cap on request-log rows read per refresh
+MAX_REQUEST_ROWS = 100_000       # cap on request-log rows read per model per refresh
 APDEX_T_MS = 500                 # "satisfied" threshold for the Apdex score
 
 # averaged per bucket
@@ -124,7 +124,7 @@ def request_stats(seconds):
     bucket = _bucket_seconds(seconds)
     per_bucket = defaultdict(lambda: {"ok": 0, "4xx": 0, "5xx": 0, "lat": []})
     status_classes = defaultdict(int)
-    endpoints = defaultdict(lambda: {"lat": [], "errors": 0})
+    endpoints = defaultdict(lambda: {"lat": [], "errors": 0, "count": 0})
     latencies = []
     satisfied = tolerating = 0
 
@@ -136,6 +136,7 @@ def request_stats(seconds):
         status_classes[f"{status // 100}xx" if status else "other"] += 1
         ms = elapsed.total_seconds() * 1000 if elapsed is not None else None
         ep = endpoints[(method or "", normalize_path(path))]
+        ep["count"] += 1
         if status >= 500:
             ep["errors"] += 1
         if ms is not None:
@@ -165,17 +166,16 @@ def request_stats(seconds):
     errors = sum(1 for r in rows if (r[1] or 0) >= 500)
     top = []
     for (method, path), ep in endpoints.items():
-        lat = sorted(ep["lat"])
-        count = len(lat) or 1
+        lat = sorted(ep["lat"])  # only requests with a recorded duration
         top.append({
             "method": method,
             "path": path,
-            "count": len(lat),
-            "avg": _round(sum(lat) / count) if lat else None,
+            "count": ep["count"],
+            "avg": _round(sum(lat) / len(lat)) if lat else None,
             "p95": _round(percentile(lat, 95)),
             "max": _round(lat[-1]) if lat else None,
             "total": _round(sum(lat)),
-            "error_rate": round(ep["errors"] * 100 / count, 2),
+            "error_rate": round(ep["errors"] * 100 / ep["count"], 2),
         })
     top.sort(key=lambda e: e["total"] or 0, reverse=True)
 

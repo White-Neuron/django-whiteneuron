@@ -110,7 +110,10 @@ class MetricSampleAdmin(ModelAdmin):
             "server_time": timezone.now().isoformat(),
             "collector": {
                 "last_sample": latest.isoformat() if latest else None,
-                "stale": latest is None or (timezone.now() - latest).total_seconds() > interval * 3,
+                # the dashboard stores samples itself, so sample age can't tell whether a
+                # collector runs: use its heartbeat (local host) or sample age (remote hosts)
+                "stale": (not collector.collector_running(host)) if host == local_host
+                else (latest is None or (timezone.now() - latest).total_seconds() > interval * 3),
             },
             "live": _jsonable(live),
             "system": system,

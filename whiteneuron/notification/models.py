@@ -141,15 +141,16 @@ class Notification(models.Model):
                 flag=flag, obj_link=obj_link, changed_data=data, action_by=action_by)
             for user_id in user_ids
         ])
-        transaction.on_commit(objs[0].alert)
+        transaction.on_commit(lambda: objs[0].alert(user_ids=user_ids))
         return objs
 
-    def alert(self):
+    def alert(self, user_ids=None):
         """
         Returns a dictionary suitable for use in a JavaScript alert.
         """
         try:
             return notify_admin(self.title, type=self.flag, obj_link=self.obj_link, action=self.action,
-                                changed_data=self.changed_data if self.changed_data else "")
+                                changed_data=self.changed_data if self.changed_data else "",
+                                user_ids=user_ids or [self.user_id])
         except Exception:  # channel layer down: the notification row is still stored
             logger.warning("Notification broadcast failed", exc_info=True)

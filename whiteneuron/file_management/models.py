@@ -1,7 +1,5 @@
 import hashlib
 
-from django.core.cache import cache
-
 from whiteneuron.base.models import BaseModel
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
@@ -98,35 +96,19 @@ class BaseFile(BaseModel):
     def current_hash(self):
         """SHA-256 of the file currently on storage, or None if it can't be read.
 
-        Hashing reads the whole file, so the result is memoized on the instance and
-        cached keyed by (name, size, mtime): any change on storage invalidates it.
-        Storages without modification times are always hashed fresh.
+        Memoized on the instance only (admin pages call it from several columns).
+        It is deliberately not cached across requests: a tamper check must read the
+        bytes — size/mtime can be preserved by whoever rewrites the file, and a cache
+        outage must never look like a modified file.
         """
         if not self.file or not self.file.name:
             return None
-        if hasattr(self, '_current_hash'):
-            return self._current_hash
-        storage, name = self.file.storage, self.file.name
-        cache_key = None
-        try:
-            stamp = f"{storage.size(name)}:{storage.get_modified_time(name).timestamp()}"
-            cache_key = "wn:filehash:" + hashlib.sha256(f"{name}|{stamp}".encode()).hexdigest()
-            value = cache.get(cache_key)
-        except NotImplementedError:
-            value = None
-        except Exception:
-            self._current_hash = None  # missing / unreadable
-            return None
-        if value is None:
+        if not hasattr(self, '_current_hash'):
             try:
-                value = compute_file_hash(self.file)
+                self._current_hash = compute_file_hash(self.file)
             except Exception:
-                self._current_hash = None
-                return None
-            if cache_key:
-                cache.set(cache_key, value, timeout=24 * 3600)
-        self._current_hash = value
-        return value
+                self._current_hash = None  # missing / unreadable
+        return self._current_hash
 
     def verify_integrity(self):
         """Verify the file on storage matches its stored hash. Returns True if OK."""

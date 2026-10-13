@@ -7,7 +7,7 @@ from .queue import async_tasks_enabled, enqueue  # noqa: F401  (re-exported)
 export_task = export
 
 
-@shared_task(autoretry_for=(OSError,), retry_backoff=True, max_retries=3)
+@shared_task
 def send_mail_task(mail_id, redact=None):
     """Send a stored Mail; optionally mask a secret (e.g. a password) in the stored copy."""
     from .models import Mail

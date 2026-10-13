@@ -186,22 +186,32 @@ class ModelAdmin(UnfoldAdmin):
         )
 
     @staticmethod
-    def _soft_delete_obj(obj, deleted):
-        # Save once without the generic "update" notification; the action sends its own.
+    def _soft_delete_obj(request, obj, deleted):
+        """Soft-delete / restore one object and record it in that object's history."""
         if isinstance(obj, BaseModel) and type(obj).delete is BaseModel.delete:
             obj.is_deleted = deleted
             obj.deleted_at = timezone.now() if deleted else None
-            obj.save(notification=False)
-        elif deleted:
+            obj.save(notification=False)  # replaced by the specific notification below
+            verb = _('has been soft-deleted by user') if deleted else _('has been restored by user')
+            title = f'{obj._meta.verbose_name} "{obj}" ({obj.pk}) {verb} "{request.user}"'
+            Notification.notify_superusers(
+                title=title, content=format_html('<p>{}</p>', title),
+                action='delete' if deleted else 'restore', flag='danger' if deleted else 'info',
+                obj_link=obj.path() or None, action_by=request.user,
+                changed_data=[{'field_name': 'is_deleted', 'old_value': not deleted, 'new_value': deleted}],
+            )
+            return True
+        if deleted:
             obj.delete()
         else:
             obj.restore()
+        return False
 
     def soft_delete(self, cl, request, queryset):
         objs = list(queryset)
-        for obj in objs:
-            self._soft_delete_obj(obj, True)
-        self._notify_bulk(request, objs, _('%(name)s %(obj)s has been soft-deleted by user "%(user)s"'), 'delete', 'danger')
+        recorded = [obj for obj in objs if self._soft_delete_obj(request, obj, True)]
+        others = [obj for obj in objs if obj not in recorded]
+        self._notify_bulk(request, others, _('%(name)s %(obj)s has been soft-deleted by user "%(user)s"'), 'delete', 'danger')
     soft_delete.short_description = _('Delete selected records')
 
     def hard_delete(self, cl, request, queryset):
@@ -216,9 +226,9 @@ class ModelAdmin(UnfoldAdmin):
 
     def restore(self, cl, request, queryset):
         objs = list(queryset)
-        for obj in objs:
-            self._soft_delete_obj(obj, False)
-        self._notify_bulk(request, objs, _('%(name)s %(obj)s has been restored by user "%(user)s"'), 'restore', 'info')
+        recorded = [obj for obj in objs if self._soft_delete_obj(request, obj, False)]
+        others = [obj for obj in objs if obj not in recorded]
+        self._notify_bulk(request, others, _('%(name)s %(obj)s has been restored by user "%(user)s"'), 'restore', 'info')
     restore.short_description = _('Restore selected records')
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
@@ -230,8 +240,8 @@ class ModelAdmin(UnfoldAdmin):
         return super().get_queryset(request)
 
     def delete_model(self, request, obj):
-        super().delete_model(request, obj)
-        self._notify_bulk(request, [obj], _('%(name)s %(obj)s has been soft-deleted by user "%(user)s"'), 'delete', 'danger')
+        if not self._soft_delete_obj(request, obj, True):
+            self._notify_bulk(request, [obj], _('%(name)s %(obj)s has been soft-deleted by user "%(user)s"'), 'delete', 'danger')
 
     show_meta_filter = True
     def get_list_filter(self, request: HttpRequest) -> Sequence[str]:
@@ -259,13 +269,14 @@ class ModelAdmin(UnfoldAdmin):
         return list_filter
 
     def get_readonly_fields(self, request: HttpRequest, obj: Any | None = ...) -> list[str] | tuple[Any, ...]:
-        # copy: super() may return the class-level list, which `+=` would grow on every request
-        readonly_fields = tuple(super().get_readonly_fields(request, obj))
-        # check nếu model có trường sau thì mới thêm vào readonly_fields
-        for field in ['id', 'created_at', 'created_by', 'updated_at', 'updated_by']:
-            if field in [f.name for f in self.model._meta.fields]:
-                readonly_fields += (field,)
-        return readonly_fields
+        declared = super().get_readonly_fields(request, obj)
+        # build a new container: `+=` on the class-level list grew it on every request.
+        # Keep the declared type (list or tuple) so subclasses can still `+ [...]`/`+ (...)`.
+        model_fields = {f.name for f in self.model._meta.fields}
+        extra = [f for f in ('id', 'created_at', 'created_by', 'updated_at', 'updated_by')
+                 if f in model_fields and f not in declared]
+        container = list if isinstance(declared, list) else tuple
+        return container([*declared, *extra])
     
 
     
@@ -344,10 +355,10 @@ class ModelAdmin(UnfoldAdmin):
     
     def delete_queryset(self, request: HttpRequest, queryset: QuerySet[Any]) -> None:
         objs = list(queryset)
-        for obj in objs:
-            self._soft_delete_obj(obj, True)
-        self._notify_bulk(request, objs, _('%(name)s %(obj)s has been soft-deleted by user "%(user)s"'), 'delete', 'danger')
-    
+        recorded = [obj for obj in objs if self._soft_delete_obj(request, obj, True)]
+        others = [obj for obj in objs if obj not in recorded]
+        self._notify_bulk(request, others, _('%(name)s %(obj)s has been soft-deleted by user "%(user)s"'), 'delete', 'danger')
+
     def get_changelist(self, request: HttpRequest, **kwargs: Any) -> type[ChangeList]:
         # ModelAdmin instances are shared by all threads/users: keep per-request values
         # on the request / ChangeList, never on `self`.

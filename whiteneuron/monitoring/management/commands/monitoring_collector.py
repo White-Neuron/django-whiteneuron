@@ -29,6 +29,7 @@ class Command(BaseCommand):
             try:
                 # cpu_interval=1 measures CPU over one second instead of since the last call
                 collector.record(collector.snapshot(cpu_interval=1), force=True)
+                collector.beat()
             except Exception as exc:  # keep the collector alive (DB restart, etc.)
                 self.stderr.write(f"collect failed: {exc}")
             if once:

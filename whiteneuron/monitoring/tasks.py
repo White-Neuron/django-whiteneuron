@@ -13,4 +13,5 @@ def collect_metrics():
 
     Note: it samples the machine running the worker.
     """
-    collector.record(collector.snapshot(cpu_interval=1))
+    collector.record(collector.snapshot(cpu_interval=1), force=True)
+    collector.beat()

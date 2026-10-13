@@ -117,12 +117,30 @@ def record(data=None, force=False):
     """
     host = (data or {}).get("host") or host_name()
     interval = max(1, int(conf("INTERVAL")))
-    if not force and not cache.add(f"wn:monitoring:lock:{host}", 1, timeout=max(1, interval - 1)):
+    lock = f"wn:monitoring:lock:{host}"
+    if force:
+        # the dedicated collector always writes; take the slot so an open dashboard
+        # doesn't store a second sample in the same interval
+        cache.set(lock, 1, timeout=max(1, interval - 1))
+    elif not cache.add(lock, 1, timeout=max(1, interval - 1)):
         return None
     sample = MetricSample.objects.create(**(data or snapshot()))
     if cache.add("wn:monitoring:prune", 1, timeout=3600):
         prune()
     return sample
+
+
+def heartbeat_key(host):
+    return f"wn:monitoring:collector:{host}"
+
+
+def beat(host=None):
+    """Mark that a real collector (command or Celery task) is sampling this host."""
+    cache.set(heartbeat_key(host or host_name()), timezone.now().isoformat(), timeout=max(1, int(conf("INTERVAL"))) * 3)
+
+
+def collector_running(host):
+    return cache.get(heartbeat_key(host)) is not None
 
 
 def prune():

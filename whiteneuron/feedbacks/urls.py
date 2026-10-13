@@ -46,7 +46,8 @@ def receive_feedback(request):
 
         # Only feedback on objects that exist and that the user may view
         model_class = content_type.model_class()
-        if model_class is None or not request.user.has_perm(f"{app_label}.view_{model_name}"):
+        can_see = request.user.has_perm(f"{app_label}.view_{model_name}") or request.user.has_perm(f"{app_label}.change_{model_name}")
+        if model_class is None or not can_see:
             return JsonResponse({"success": False, "message": _("Invalid model or app_label")}, status=403)
         manager = getattr(model_class, 'objects_all', model_class._default_manager)
         try:

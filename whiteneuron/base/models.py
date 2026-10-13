@@ -333,11 +333,20 @@ class IPBlacklist(models.Model):
         """
         from django.core.cache import cache
         try:
-            if cache.add(cls.LOADED_KEY, 1, timeout=None):
-                for block in cls.objects.filter(is_active=True):
-                    block.sync_cache()
+            if cache.get(cls.LOADED_KEY):
+                return
+            # short lock so one worker reloads; the permanent marker is only written
+            # after a successful load, so a failed attempt is retried next time
+            if not cache.add(cls.LOADED_KEY + ":lock", 1, timeout=30):
+                return
+            for block in cls.objects.filter(is_active=True):
+                block.sync_cache()
+            cache.set(cls.LOADED_KEY, 1, timeout=None)
         except Exception:
-            pass
+            try:
+                cache.delete(cls.LOADED_KEY + ":lock")
+            except Exception:
+                pass
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -946,9 +955,11 @@ def _send_email_to_new_user(sender, instance, created, **kwargs):
         return
     if not instance.email:
         return
-    # Only users created without a password (e.g. invited by e-mail) get a generated
-    # one: never overwrite a password set by create_user()/createsuperuser/fixtures.
-    if instance.has_usable_password():
+    # Only users created without a password get a generated one: never overwrite a
+    # password set by create_user()/createsuperuser/fixtures. "Without a password"
+    # covers both set_unusable_password() and an empty password field (User(...) /
+    # objects.create() with no password) — Django treats "" as "usable".
+    if instance.password and instance.has_usable_password():
         return
     from .utils import send_email_login, make_random_password
     password = make_random_password()

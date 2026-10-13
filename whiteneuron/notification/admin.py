@@ -18,7 +18,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from unfold.contrib.filters.admin import AutocompleteSelectFilter
 from unfold.decorators import action, display
 
-from whiteneuron.base.html_sanitize import sanitize_html
+from whiteneuron.base.html_sanitize import is_safe_href, sanitize_html
 
 @admin.register(NotificationConfig, site=base_admin_site)
 class NotificationConfigAdmin(ModelAdmin):
@@ -108,7 +108,7 @@ class NotificationAdmin(ModelAdmin):
         return redirect(reverse('admin:notification_notification_changeform', args=[object_id]))
     
     def has_view_obj_link_permission(self, request, object_id: int):
-        if object_id is not None:
+        if object_id is not None and str(object_id).isdigit():
             return Notification.objects.filter(pk=object_id, user=request.user, obj_link__isnull=False).exclude(obj_link='').exists()
         return False
     
@@ -136,8 +136,8 @@ class NotificationAdmin(ModelAdmin):
     
     # Cập nhật đã đọc khi xem chi tiết
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
-        if object_id:
-            # mark as read with a single UPDATE
+        if object_id and str(object_id).isdigit():
+            # mark as read with a single UPDATE (non-numeric ids fall through to the admin's 404 handling)
             Notification.objects.filter(pk=object_id, user=request.user, is_read=False).update(is_read=True)
         return super().changeform_view(request, object_id=object_id, form_url=form_url, extra_context=extra_context)
     
@@ -241,7 +241,7 @@ class NotificationAdmin(ModelAdmin):
 
         # [#ID] — clickable link (only same-site paths)
         if object_id:
-            if instance.obj_link and instance.obj_link.startswith("/") and not instance.obj_link.startswith("//"):
+            if instance.obj_link and instance.obj_link.startswith("/") and is_safe_href(instance.obj_link):
                 parts.append(format_html(
                     '<a href="{}" class="ui-badge ui-badge-xs font-mono">#{}</a>', instance.obj_link, object_id))
             else:

@@ -91,12 +91,18 @@ def visitprofile_badge_callback(request):
 def group_badge_callback(request):
     return 0
 
-def iter_nav_items(items):
-    """Leaf sidebar items: sub-navigation parents (unfold "items") are expanded."""
+def iter_nav_items(items, inherited_permission=None):
+    """Leaf sidebar items: sub-navigation parents (unfold "items") are expanded.
+
+    A child without its own "permission" inherits its parent's.
+    """
     for item in items:
+        permission = item.get('permission') or inherited_permission
         children = item.get('items')
         if isinstance(children, (list, tuple)) and children:
-            yield from iter_nav_items(children)
+            yield from iter_nav_items(children, permission)
+        elif permission and not item.get('permission'):
+            yield {**item, 'permission': permission}
         else:
             yield item
 
