@@ -1,4 +1,4 @@
-"""URLconf for the package regression tests (base/tests_regressions.py)."""
+"""URLconf for the package test suite (projects provide their own)."""
 from django.urls import include, path
 
 from .sites import base_admin_site
