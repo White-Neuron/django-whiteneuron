@@ -3,36 +3,24 @@ from modeltranslation.admin import TabbedTranslationAdmin as DefaultTabbedTransl
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 
-from .utils import gpt_translate_vi
+from whiteneuron.base.queue import enqueue
+from whiteneuron.base.tasks import gpt_translate_task
 
 def _gpt_translate_vi_action(admin_obj, request, queryset):
-    # print("GPT Translate to Vietnamese")
-    # print("Params:")
-    # print("self:", admin_obj)
-    # print("request:", request)
-    # print("queryset:", queryset)
-
-    success = []
-    failed = []
-    model = admin_obj.model
-    message = set()
-    for obj in queryset:
-        result = gpt_translate_vi(request, obj)
-        if result["success"]:
-            for key, value in result["result"].items():
-                if key.endswith("_vi"):
-                    setattr(obj, key, value)
-            obj.save()
-            success.append(str(obj.__str__()))
-        else:
-            # messages.error(request, result["message"])
-            failed.append(str(obj.__str__()))
-            message.add(result["message"])
-            pass
-    if success:
-        messages.success(request, f"Translated successfully: {', '.join(success)}")
-    if failed:
-        messages.error(request, f"Translated failed: {', '.join(failed)} ({', '.join(message)})")
+    if not request.user.is_superuser:
+        messages.error(request, _("You must be a superuser to use this action"))
+        return
+    ids = list(queryset.values_list("pk", flat=True))
+    opts = admin_obj.model._meta
+    # One OpenAI call per object: run on a Celery worker when available.
+    result = enqueue(gpt_translate_task, opts.app_label, opts.model_name, ids)
+    if result is True:
+        messages.info(request, _("Translating %(count)d record(s) in the background.") % {"count": len(ids)})
+        return
+    if result["done"]:
+        messages.success(request, _("Translated successfully: %s") % ", ".join(result["done"]))
+    if result["failed"]:
+        messages.error(request, _("Translated failed: %s") % "; ".join(f"{name} ({msg})" for name, msg in result["failed"]))
 
 class TabbedTranslationAdmin(DefaultTabbedTranslationAdmin):
     def get_actions(self, request):

@@ -1,8 +1,10 @@
+import hashlib
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 import ipaddress
+import time
 import json
 import re
 from django.core.cache import cache
@@ -72,6 +74,7 @@ class RateLimitMiddleware:
         if any(addr in net for net in self._blacklist_nets):
             return True
         # Dynamic blacklist from Redis (managed via Django admin, real-time)
+        self._ensure_blacklist_loaded()
         try:
             if cache.get(f'blacklist:dynamic:{addr}'):
                 return True
@@ -87,7 +90,26 @@ class RateLimitMiddleware:
         for kw in self._ua_keywords:
             if kw in ua_lower:
                 return True
-        # Dynamic patterns từ Redis, fallback DB khi cache miss (Redis restart / first boot)
+        # Dynamic patterns (Redis → DB fallback), kept compiled in process memory
+        substrings, regexes = self._ua_patterns()
+        if any(sub in ua_lower for sub in substrings):
+            return True
+        return any(rx.search(ua) for rx in regexes)
+
+    _UA_PATTERNS_TTL = 30  # seconds a worker reuses its compiled UA patterns
+    _BLACKLIST_CHECK_INTERVAL = 60
+
+    def _ua_patterns(self):
+        """(substrings, compiled regexes), refreshed from the cache every 30s.
+
+        Previously the whole pattern list was fetched and unpickled from Redis and
+        every regex recompiled on each request.
+        """
+        now = time.monotonic()
+        memo = getattr(self, '_ua_memo', None)
+        if memo and now - memo[0] < self._UA_PATTERNS_TTL:
+            return memo[1]
+        substrings, regexes = [], []
         try:
             from .models import UA_PATTERNS_CACHE_KEY, UABlacklist
             patterns = cache.get(UA_PATTERNS_CACHE_KEY)
@@ -100,16 +122,23 @@ class RateLimitMiddleware:
             for pattern, is_regex in patterns:
                 if is_regex:
                     try:
-                        if re.search(pattern, ua, re.IGNORECASE):
-                            return True
+                        regexes.append(re.compile(pattern, re.IGNORECASE))
                     except re.error:
                         pass  # pattern regex không hợp lệ, bỏ qua
                 else:
-                    if pattern.lower() in ua_lower:
-                        return True
+                    substrings.append(pattern.lower())
         except Exception:
             pass
-        return False
+        self._ua_memo = (now, (substrings, regexes))
+        return substrings, regexes
+
+    def _ensure_blacklist_loaded(self):
+        now = time.monotonic()
+        if now - getattr(self, '_blacklist_checked_at', -1e9) < self._BLACKLIST_CHECK_INTERVAL:
+            return
+        self._blacklist_checked_at = now
+        from .models import IPBlacklist
+        IPBlacklist.ensure_cache_loaded()
 
     def __call__(self, request):
         if not any(request.path.startswith(p) for p in self.EXEMPT_PATHS):
@@ -144,21 +173,8 @@ class RateLimitMiddleware:
         return self.get_response(request)
 
     def _is_rate_limited(self, ip: str) -> bool:
-        # incr-first pattern: atomic trên Redis.
-        # Khi count == 1: key mới tạo bởi Redis (không có TTL) → cần touch để set TTL.
-        # Khi ValueError: LocMemCache không tự tạo key → dùng set với timeout.
-        # Khi Exception khác (VD: ConnectionError khi Redis không đủ reach): fail-open (không block).
-        key = f'rl:global:{ip}'
-        try:
-            count = cache.incr(key)
-            if count == 1:
-                cache.touch(key, timeout=self.window)
-        except ValueError:
-            cache.set(key, 1, timeout=self.window)
-            count = 1
-        except Exception:
-            return False  # fail-open: không block khi cache lỗi
-        return count > self.rate
+        count = hit_counter(f'rl:global:{ip}', self.window)
+        return count is not None and count > self.rate
 
 
 class ReadonlyExceptionHandlerMiddleware:
@@ -184,6 +200,61 @@ class ReadonlyExceptionHandlerMiddleware:
             return redirect(reverse_lazy("admin:login"))
         
 
+_VP_VERSION_KEY = "wn:vp:version"
+_vp_version_memo = (0.0, 1)
+
+
+def visit_profile_cache_version():
+    """Namespace for cached VisitProfile ids; bumped when profiles are deleted.
+
+    Memoized per process for 30s to avoid an extra cache round-trip per request.
+    """
+    global _vp_version_memo
+    now = time.monotonic()
+    if now - _vp_version_memo[0] < 30:
+        return _vp_version_memo[1]
+    try:
+        version = cache.get(_VP_VERSION_KEY) or 1
+    except Exception:
+        version = _vp_version_memo[1]
+    _vp_version_memo = (now, version)
+    return version
+
+
+def invalidate_visit_profile_cache():
+    """Call after deleting VisitProfiles so cached ids aren't reused."""
+    global _vp_version_memo
+    try:
+        try:
+            version = cache.incr(_VP_VERSION_KEY)
+        except ValueError:
+            version = 2
+            cache.set(_VP_VERSION_KEY, version, timeout=None)
+    except Exception:
+        return
+    _vp_version_memo = (time.monotonic(), version)
+
+
+def hit_counter(key, window):
+    """Atomically count a hit in a fixed window; None if the cache is unavailable.
+
+    ``add`` creates the key with its TTL only if missing, then ``incr`` is atomic on
+    Redis/Memcached — so the TTL is always set and concurrent requests can't reset it.
+    """
+    try:
+        if cache.add(key, 1, timeout=window):
+            return 1
+        return cache.incr(key)
+    except ValueError:  # expired between add and incr
+        try:
+            cache.set(key, 1, timeout=window)
+        except Exception:
+            return None
+        return 1
+    except Exception:
+        return None
+
+
 def is_global_ip(ip):
     try:
         obj = ipaddress.ip_address(ip)
@@ -192,10 +263,18 @@ def is_global_ip(ip):
         return False
 
 def _parse_ip(raw: str | None) -> str | None:
-    """Validate và trả về IP string chuẩn hóa, None nếu không hợp lệ."""
+    """Validate và trả về IP string chuẩn hóa, None nếu không hợp lệ.
+
+    Accepts the forms proxies put in X-Forwarded-For: "1.2.3.4", "1.2.3.4:5678",
+    "2001:db8::1" and "[2001:db8::1]:5678".
+    """
     if not raw:
         return None
     raw = raw.strip()
+    if raw.startswith("["):  # [v6]:port
+        raw = raw[1:].split("]", 1)[0]
+    elif raw.count(":") == 1:  # v4:port
+        raw = raw.split(":", 1)[0]
     try:
         return str(ipaddress.ip_address(raw))
     except ValueError:
@@ -212,25 +291,32 @@ def get_client_ip(request):
             if ip:
                 return ip, request.headers.get("User-Agent")
 
-    # X-Forwarded-For: format "client, proxy1, proxy2" — lấy IP client đầu tiên là global.
-    # Lưu ý: XFF dễ bị spoof khi không có trusted proxy; chỉ dùng khi BEHIND_CLOUDFLARE=False.
-    xff = request.headers.get("X-Forwarded-For")
-    if xff:
-        for raw in xff.split(","):
-            ip = _parse_ip(raw)
-            if ip and is_global_ip(ip):
-                return ip, request.headers.get("User-Agent")
+    remote_ip = _parse_ip(request.META.get("REMOTE_ADDR"))
 
-    ra = request.META.get("REMOTE_ADDR")
-    if ra:
-        ip = _parse_ip(ra)
+    # X-Forwarded-For: "client, proxy1, proxy2". Every proxy appends the address it
+    # received the request from, so only the right-hand part is trustworthy:
+    #   - TRUSTED_PROXY_COUNT = N: the N-th entry from the right (exact; recommended)
+    #   - 0 (auto): the right-most public address
+    #   - IGNORE_X_FORWARDED_FOR = True: never trust the header (app exposed directly)
+    xff = request.headers.get("X-Forwarded-For")
+    if xff and not getattr(settings, "IGNORE_X_FORWARDED_FOR", False):
+        hops = [hop.strip() for hop in xff.split(",") if hop.strip()]  # raw: keep positions
+        proxy_count = int(getattr(settings, "TRUSTED_PROXY_COUNT", 0) or 0)
+        if proxy_count:
+            ip = _parse_ip(hops[-proxy_count]) if len(hops) >= proxy_count else None
+        else:
+            ip = next((p for p in (_parse_ip(h) for h in reversed(hops)) if p and is_global_ip(p)), None)
         if ip:
             return ip, request.headers.get("User-Agent")
+
+    if remote_ip:
+        return remote_ip, request.headers.get("User-Agent")
 
     return None, request.headers.get("User-Agent")
 
 
-from django.db import IntegrityError
+from django.db import IntegrityError, connection
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
 from .models import UserActivity, AnonymousActivity, VisitProfile
 class UserActivityMiddleware:
@@ -289,19 +375,8 @@ class UserActivityMiddleware:
         return False
 
     def _is_user_rate_limited(self, user_id: int) -> bool:
-        # incr-first pattern: atomic trên Redis.
-        # Khi count == 1: key mới tạo bởi Redis (không có TTL) → cần touch để set TTL.
-        # Khi ValueError: LocMemCache không tự tạo key → dùng set với timeout.
-        # Khi Exception khác (VD: ConnectionError khi Redis không reach được): fail-open.
-        key = f'rl:user:{user_id}'
-        try:
-            count = cache.incr(key)
-            if count == 1:
-                cache.touch(key, timeout=self.user_window)
-        except ValueError:
-            cache.set(key, 1, timeout=self.user_window)
-            count = 1
-        except Exception:
+        count = hit_counter(f'rl:user:{user_id}', self.user_window)
+        if count is None:
             return False  # fail-open: không block khi cache lỗi
         return count > self.user_rate
 
@@ -325,7 +400,9 @@ class UserActivityMiddleware:
                 return response
 
         # Đọc body sớm cho JSON requests (trước khi DRF consume)
-        if request.method in ('POST', 'PATCH', 'PUT', 'DELETE') and 'application/json' in request.META.get('CONTENT_TYPE', ''):
+        if (request.method in ('POST', 'PATCH', 'PUT', 'DELETE')
+                and 'application/json' in request.META.get('CONTENT_TYPE', '')
+                and self._content_length(request) <= self._MAX_BODY_SIZE):
             try:
                 raw_body = request.body
                 if len(raw_body) <= self._MAX_BODY_SIZE:
@@ -360,33 +437,77 @@ class UserActivityMiddleware:
             log_data = self._get_request_data(request)
 
         if request.user.is_authenticated:
-            profile, created = self._get_or_create_visit_profile(ip, user_agent)
-            if not created:
-                VisitProfile.objects.filter(pk=profile.pk).update(last_seen=timezone.now())
-            UserActivity.objects.create(
-                user=request.user,
-                profile=profile,
-                path=request.path,
-                method=request.method,
-                data=log_data,
-                status_code=response.status_code,
-                timestamp=timezone.now(),
-                timelapse=timelapse,
-            )
+            model, extra = UserActivity, {'user': request.user}
         elif getattr(response, 'status_code', None) not in (301, 302):
-            profile, created = self._get_or_create_visit_profile(ip, user_agent)
-            if not created:
-                VisitProfile.objects.filter(pk=profile.pk).update(last_seen=timezone.now())
-            AnonymousActivity.objects.create(
-                profile=profile,
-                path=request.path,
-                method=request.method,
-                data=log_data,
-                status_code=response.status_code,
-                timestamp=timezone.now(),
-                timelapse=timelapse,
-            )
+            model, extra = AnonymousActivity, {}
+        else:
+            return response
+        fields = dict(
+            extra,
+            path=request.path[:255],
+            method=request.method,
+            data=log_data,
+            status_code=response.status_code,
+            timestamp=timezone.now(),
+            timelapse=timelapse,
+        )
+        try:
+            model.objects.create(profile_id=self._visit_profile_id(ip, user_agent), **fields)
+        except IntegrityError:
+            # cached profile was deleted meanwhile: forget it and log without profile
+            self._forget_visit_profile(ip, user_agent)
+            model.objects.create(profile_id=None, **fields)
         return response
+
+    _PROFILE_CACHE_TTL = 3600
+    _LAST_SEEN_INTERVAL = 300  # refresh VisitProfile.last_seen at most every 5 minutes
+
+    @staticmethod
+    def _visit_profile_key(ip_address, user_agent):
+        ua = user_agent[:500] if user_agent else ''
+        version = visit_profile_cache_version()
+        return f"wn:vp:{version}:" + hashlib.sha1(f"{ip_address}|{ua}".encode()).hexdigest()
+
+    def _forget_visit_profile(self, ip_address, user_agent):
+        try:
+            cache.delete(self._visit_profile_key(ip_address, user_agent))
+        except Exception:
+            pass
+
+    def _visit_profile_id(self, ip_address: str, user_agent: str):
+        """VisitProfile id for (IP, UA), cached so that logging costs a single INSERT.
+
+        Without the cache every tracked request did SELECT profile + UPDATE last_seen
+        + INSERT activity; now the profile lookup and the last_seen write are rare.
+        """
+        # Inside a transaction (tests, ATOMIC wrappers) a cached id could point at a
+        # row rolled back since; the FK is only checked at commit, too late to recover.
+        if connection.in_atomic_block:
+            return self._get_or_create_visit_profile(ip_address, user_agent)[0].pk
+        key = self._visit_profile_key(ip_address, user_agent)
+        try:
+            profile_id = cache.get(key)
+        except Exception:
+            profile_id = None
+        if profile_id is None:
+            profile, created = self._get_or_create_visit_profile(ip_address, user_agent)
+            profile_id = profile.pk
+            try:
+                cache.set(key, profile_id, timeout=self._PROFILE_CACHE_TTL)
+                if created:
+                    cache.add(f"{key}:seen", 1, timeout=self._LAST_SEEN_INTERVAL)
+            except Exception:
+                pass
+            if created:
+                return profile_id
+        try:
+            # cache.add is atomic: only the first request in each interval writes
+            touch = cache.add(f"{key}:seen", 1, timeout=self._LAST_SEEN_INTERVAL)
+        except Exception:
+            touch = True
+        if touch:
+            VisitProfile.objects.filter(pk=profile_id).update(last_seen=timezone.now())
+        return profile_id
 
     def _get_or_create_visit_profile(self, ip_address: str, user_agent: str):
         """Get or create a VisitProfile based on IP + UA. Returns (profile, created)."""
@@ -403,12 +524,21 @@ class UserActivityMiddleware:
                 )
                 return profile, False
 
+    @staticmethod
+    def _content_length(request):
+        try:
+            return int(request.META.get('CONTENT_LENGTH') or 0)
+        except ValueError:
+            return 0
+
     def _get_request_data(self, request):
         if request.method == 'POST' and request.POST:
             return self._sanitize_post(request.POST.dict())
         # JSON body đã được cache trong __call__, chỉ fallback khi cần
         try:
-            raw = getattr(request, '_raw_body', None) or (request.body.decode('utf-8') if request.body else None)
+            raw = getattr(request, '_raw_body', None)
+            if raw is None and 0 < self._content_length(request) <= self._MAX_BODY_SIZE:
+                raw = request.body.decode('utf-8')
             if raw:
                 body = json.loads(raw)
                 if isinstance(body, dict):
@@ -482,8 +612,11 @@ class ThreadLocalMiddleware:
 
     def __call__(self, request):
         thread_local.request = request
-        response = self.get_response(request)
-        return response
+        try:
+            return self.get_response(request)
+        finally:
+            # don't leak this request/user into later work on the same thread
+            thread_local.request = None
 
 
 class AutoGuestLoginMiddleware:
@@ -513,7 +646,9 @@ class AutoGuestLoginMiddleware:
                     login(request, guest_user, backend='django.contrib.auth.backends.ModelBackend')
                     # Nếu có tham số next thì redirect luôn tới đó
                     next_url = request.GET.get('next')
-                    if next_url:
+                    if next_url and url_has_allowed_host_and_scheme(
+                        next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+                    ):
                         return redirect(next_url)
                 else:
                     pass

@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from unfold.widgets import UnfoldAdminFileFieldWidget
 from unfold.decorators import action
 
-from .models import ExcelFile, PDFFile, HTMLFile, compute_file_hash
+from .models import ExcelFile, PDFFile, HTMLFile
 
 
 class FileInputNoDownload(UnfoldAdminFileFieldWidget):
@@ -20,6 +20,7 @@ class BaseFileAdmin(ModelAdmin):
     accepted_file_types = None  # e.g. '.xlsx,.xls' — passed as HTML accept attribute
 
     list_display = ("title", "is_public_badge", "method_view", "status_view", "created_at", "created_by")
+    list_select_related = ("created_by",)
     autocomplete_fields= ["allowed_users", "allowed_groups"] 
 
     def is_public_badge(self, obj):
@@ -48,11 +49,8 @@ class BaseFileAdmin(ModelAdmin):
     # fieldsets is intentionally omitted — get_fieldsets() handles all cases dynamically.
 
     def _get_current_hash(self, obj, request=None):
-        """Compute the current SHA-256 hash of the file on storage. No caching — always fresh."""
-        try:
-            return compute_file_hash(obj.file)
-        except Exception:
-            return None
+        """Current SHA-256 of the file on storage (memoized; re-hashed when the file changes)."""
+        return obj.current_hash()
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         field = super().formfield_for_dbfield(db_field, request, **kwargs)

@@ -4,23 +4,44 @@ from django.http import HttpRequest, HttpResponseRedirect
 from django.http.response import HttpResponseRedirectBase
 from django.db.models.query import QuerySet
 from urllib.parse import parse_qsl, urlencode, urlparse
-from django.utils.safestring import mark_safe
 from django.contrib.admin.views.main import ChangeList
 from collections import OrderedDict
 from typing import Any, Sequence
 
 import ast
-from django.urls import reverse, reverse_lazy
+import contextvars
+import json
+from django.urls import reverse
 
 from unfold.contrib.forms.widgets import WysiwygWidget as UnfoldWysiwygWidget
 from whiteneuron.base.widgets import WysiwygWidget, CKEditor5Widget, MarkdownEditorWidget
 from unfold.widgets import UnfoldAdminSplitDateTimeWidget
-from django.db import models
+from django.db import models, transaction
 
 from .utils import timeit
-from .models import User
+from .models import User, BaseModel
+from django.utils import timezone
+from django.utils.html import format_html, format_html_join
+from django.templatetags.static import static
 from whiteneuron.notification.models import Notification
 from .filters import FieldSelectionFilter
+
+_current_request = contextvars.ContextVar('wn_admin_request', default=None)
+_changelist_classes = {}
+
+
+def request_changelist(base):
+    """ChangeList subclass applying the per-user page size / grid view (built once per base)."""
+    cls = _changelist_classes.get(base)
+    if cls is None:
+        class RequestChangeList(base):
+            def get_results(self, request):
+                self.list_per_page = self.model_admin._per_page_for(request)
+                self.wn_grid_view = self.model_admin._grid_view_for(request)
+                return super().get_results(request)
+
+        cls = _changelist_classes[base] = RequestChangeList
+    return cls
 
 from django.urls import path
 from django.shortcuts import render
@@ -72,7 +93,6 @@ class ModelAdmin(UnfoldAdmin):
     action_buttons = True
 
     warn_unsaved_form = True
-    compressed_fields = True
 
     use_infinite_paginator = True
 
@@ -168,70 +188,75 @@ class ModelAdmin(UnfoldAdmin):
         
         return actions
 
-    def soft_delete(self, cl, request, queryset):
-        for obj in queryset:
-            title= _('%(name)s "%(obj)s" has been soft-deleted by user "%(user)s"') % {'name': obj._meta.verbose_name, 'obj': obj, 'user': request.user}
-            content_html= _('%(name)s "%(obj)s" has been soft-deleted by user "%(user)s"') % {'name': obj._meta.verbose_name, 'obj': obj, 'user': request.user}
+    def _notify_bulk(self, request, queryset_objs, message, action, flag):
+        """One notification (per superuser) summarising a bulk admin action."""
+        objs = list(queryset_objs)
+        if not objs:
+            return
+        names = ", ".join(f'"{obj}"' for obj in objs[:10]) + (" …" if len(objs) > 10 else "")
+        text = message % {'name': objs[0]._meta.verbose_name, 'obj': names, 'user': request.user}
+        Notification.notify_superusers(
+            title=text, content=format_html('<p>{}</p>', text),
+            action=action, flag=flag, action_by=request.user,
+        )
+
+    @staticmethod
+    def _soft_delete_obj(request, obj, deleted):
+        """Soft-delete / restore one object and record it in that object's history."""
+        if isinstance(obj, BaseModel) and type(obj).delete is BaseModel.delete:
+            obj.is_deleted = deleted
+            obj.deleted_at = timezone.now() if deleted else None
+            obj.save(notification=False)  # replaced by the specific notification below
+            verb = _('has been soft-deleted by user') if deleted else _('has been restored by user')
+            title = f'{obj._meta.verbose_name} "{obj}" ({obj.pk}) {verb} "{request.user}"'
+            Notification.notify_superusers(
+                title=title, content=format_html('<p>{}</p>', title),
+                action='delete' if deleted else 'restore', flag='danger' if deleted else 'info',
+                obj_link=obj.path() or None, action_by=request.user,
+                changed_data=[{'field_name': 'is_deleted', 'old_value': not deleted, 'new_value': deleted}],
+            )
+            return True
+        if deleted:
             obj.delete()
-            # send notification to superuser when delete successfully
-            for user in User.objects.filter(is_superuser= True):
-                Notification.objects.create(user= user, title= title,
-                                            action_by= request.user,
-                                            flag= 'danger',
-                                            action= 'delete',
-                                            content= content_html)
+        else:
+            obj.restore()
+        return False
+
+    def soft_delete(self, cl, request, queryset):
+        objs = list(queryset)
+        recorded = [obj for obj in objs if self._soft_delete_obj(request, obj, True)]
+        others = [obj for obj in objs if obj not in recorded]
+        self._notify_bulk(request, others, _('%(name)s %(obj)s has been soft-deleted by user "%(user)s"'), 'delete', 'danger')
     soft_delete.short_description = _('Delete selected records')
 
     def hard_delete(self, cl, request, queryset):
-        for obj in queryset:
-            title= _('%(name)s "%(obj)s" has been hard-deleted by user "%(user)s"') % {'name': obj._meta.verbose_name, 'obj': obj, 'user': request.user}
-            content_html= _('%(name)s "%(obj)s" has been hard-deleted by user "%(user)s"') % {'name': obj._meta.verbose_name, 'obj': obj, 'user': request.user}
+        objs = list(queryset)
+        for obj in objs:
             if hasattr(obj, 'hard_delete'):
                 obj.hard_delete()
             else:
                 obj.delete()
-            # send notification to superuser when delete successfully
-            for user in User.objects.filter(is_superuser= True):
-                Notification.objects.create(user= user, title= title,
-                                            action_by= request.user,
-                                            flag= 'danger',
-                                            action= 'delete',
-                                            content= content_html)
+        self._notify_bulk(request, objs, _('%(name)s %(obj)s has been hard-deleted by user "%(user)s"'), 'delete', 'danger')
     hard_delete.short_description = _('Hard delete selected records')
 
     def restore(self, cl, request, queryset):
-        for obj in queryset:
-            title= _('%(name)s "%(obj)s" has been restored by user "%(user)s"') % {'name': obj._meta.verbose_name, 'obj': obj, 'user': request.user}
-            content_html= _('%(name)s "%(obj)s" has been restored by user "%(user)s"') % {'name': obj._meta.verbose_name, 'obj': obj, 'user': request.user}
-            obj.restore(request)
-            # send notification to superuser when delete successfully
-            for user in User.objects.filter(is_superuser= True):
-                Notification.objects.create(user= user, title= title,
-                                            action_by= request.user,
-                                            flag= 'info',
-                                            action= 'restore',
-                                            content= content_html)
+        objs = list(queryset)
+        recorded = [obj for obj in objs if self._soft_delete_obj(request, obj, False)]
+        others = [obj for obj in objs if obj not in recorded]
+        self._notify_bulk(request, others, _('%(name)s %(obj)s has been restored by user "%(user)s"'), 'restore', 'info')
     restore.short_description = _('Restore selected records')
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
-        if request.user.is_superuser and request.user.show_softdelete:
+        if request.user.is_superuser and getattr(request.user, 'show_softdelete', False):
             if hasattr(self.model, 'objects_all'):
-                return self.model.objects_all.all()
-        return self.model.objects.all()
+                qs = self.model.objects_all.all()
+                ordering = self.get_ordering(request)
+                return qs.order_by(*ordering) if ordering else qs
+        return super().get_queryset(request)
 
     def delete_model(self, request, obj):
-        title= _('%(name)s "%(obj)s" has been soft-deleted by user "%(user)s"') % {'name': obj._meta.verbose_name, 'obj': obj, 'user': request.user}
-        content_html= _('%(name)s "%(obj)s" has been soft-deleted by user "%(user)s"') % {'name': obj._meta.verbose_name, 'obj': obj, 'user': request.user}
-        super().delete_model(request, obj)
-        # send notification to superuser when delete successfully
-        for user in User.objects.filter(is_superuser= True):
-            Notification.objects.create(user= user, title= title,
-                                        action_by= request.user,
-                                        flag= 'danger',
-                                        action= 'delete',
-                                        content= content_html)
-
-
+        if not self._soft_delete_obj(request, obj, True):
+            self._notify_bulk(request, [obj], _('%(name)s %(obj)s has been soft-deleted by user "%(user)s"'), 'delete', 'danger')
 
     show_meta_filter = True
     def get_list_filter(self, request: HttpRequest) -> Sequence[str]:
@@ -259,12 +284,14 @@ class ModelAdmin(UnfoldAdmin):
         return list_filter
 
     def get_readonly_fields(self, request: HttpRequest, obj: Any | None = ...) -> list[str] | tuple[Any, ...]:
-        readonly_fields = super().get_readonly_fields(request, obj)
-        # check nếu model có trường sau thì mới thêm vào readonly_fields
-        for field in ['id', 'created_at', 'created_by', 'updated_at', 'updated_by']:
-            if field in [f.name for f in self.model._meta.fields]:
-                readonly_fields += (field,)
-        return readonly_fields
+        declared = super().get_readonly_fields(request, obj)
+        # build a new container: `+=` on the class-level list grew it on every request.
+        # Keep the declared type (list or tuple) so subclasses can still `+ [...]`/`+ (...)`.
+        model_fields = {f.name for f in self.model._meta.fields}
+        extra = [f for f in ('id', 'created_at', 'created_by', 'updated_at', 'updated_by')
+                 if f in model_fields and f not in declared]
+        container = list if isinstance(declared, list) else tuple
+        return container([*declared, *extra])
     
 
     
@@ -272,6 +299,9 @@ class ModelAdmin(UnfoldAdmin):
         if not self.has_display_links:
             return None
         fields= super().get_list_display_links(request, list_display)
+        if fields is None:  # list_display_links = None: links disabled on purpose
+            return None
+        fields = list(fields)
         if not self.action_buttons:
             try:
                 fields.remove('buttons')
@@ -289,8 +319,7 @@ class ModelAdmin(UnfoldAdmin):
                 fields = [list_display[0]]
             else:
                 fields = [list_display[1]]
-        grid_view= int(request.POST.get('grid_view', self.grid_view))
-        if grid_view:
+        if self._grid_view_for(request):
             fields = ['grid_item_header']
         return fields
     
@@ -299,16 +328,18 @@ class ModelAdmin(UnfoldAdmin):
         filtered_list_display = request.GET.getlist(FieldSelectionFilter.parameter_name, None)
         # print(filtered_list_display)
         if "All" in filtered_list_display:
-            list_display = [field for field, _ in FieldSelectionFilter.lookups(None, request, self)]
+            list_display = [field for field, _ in FieldSelectionFilter.lookups(None, request, self) if field != 'default']
         elif 'default' in filtered_list_display or not filtered_list_display:
             # default list_display
             list_display = list(list_display)
         else:
-            list_display = filtered_list_display
-            try:
-                list_display.remove('buttons')
-            except Exception:
-                pass
+            # Only accept known columns: Django calls any non-field name on each row,
+            # so an arbitrary ?display_fields=delete would run obj.delete() on a GET.
+            allowed = {field for field, _ in FieldSelectionFilter.lookups(None, request, self)} - {'default'}
+            allowed.update(f for f in list_display if isinstance(f, str))
+            list_display = [f for f in filtered_list_display if f in allowed and f != 'buttons']
+            if not list_display:
+                list_display = list(super().get_list_display(request))
         # check nếu model có trường sau thì mới thêm vào list_display
         # fields_extra = ['updated_at', 'updated_by']
         fields_extra = []
@@ -329,9 +360,9 @@ class ModelAdmin(UnfoldAdmin):
             else:
                 list_display += ['buttons',]
 
-        grid_view= int(request.POST.get('grid_view', self.grid_view))
-        if grid_view:
-            list_display = list(set(['grid_item_header'] + list(list_display)))
+        if self._grid_view_for(request):
+            # keep column order stable (set() shuffled it on every request)
+            list_display = ['grid_item_header'] + [f for f in list_display if f != 'grid_item_header']
             if self.grid_exclude_fields_list_display:
                 for field in self.grid_exclude_fields_list_display:
                     try:
@@ -341,13 +372,56 @@ class ModelAdmin(UnfoldAdmin):
         return list_display
     
     def delete_queryset(self, request: HttpRequest, queryset: QuerySet[Any]) -> None:
-        for object in queryset:
-            object.delete()
-        return None
-    
+        objs = list(queryset)
+        recorded = [obj for obj in objs if self._soft_delete_obj(request, obj, True)]
+        others = [obj for obj in objs if obj not in recorded]
+        self._notify_bulk(request, others, _('%(name)s %(obj)s has been soft-deleted by user "%(user)s"'), 'delete', 'danger')
+
     def get_changelist(self, request: HttpRequest, **kwargs: Any) -> type[ChangeList]:
-        self.request = request #trick to use request in buttons
-        return super().get_changelist(request, **kwargs)
+        # ModelAdmin instances are shared by all threads/users: keep per-request values
+        # on the request / ChangeList, never on `self`.
+        _current_request.set(request)  # used by buttons(), which Django calls without request
+        return request_changelist(super().get_changelist(request, **kwargs))
+
+    @property
+    def request(self):
+        """Backward compatibility: ``self.request`` used to be set (unsafely) on the
+        shared admin instance; it now returns the request of the current context."""
+        return _current_request.get()
+
+    @request.setter
+    def request(self, value):
+        _current_request.set(value)
+
+    def _view_state(self, request, name, default, parse):
+        """Per-user list setting (grid view, page size): from POST, else remembered in the session."""
+        cache = request.__dict__.setdefault('_wn_view_state', {})
+        key = f"wn:{self.model._meta.label_lower}:{name}"
+        if key in cache:
+            return cache[key]
+        value = parse(request.POST.get(name)) if request.method == 'POST' else None
+        if value is None:
+            value = request.session.get(key, default)
+        elif request.session.get(key) != value:
+            request.session[key] = value
+        cache[key] = value
+        return value
+
+    def _grid_view_for(self, request):
+        if not self.using_grid_view:
+            return False
+        return self._view_state(request, 'grid_view', bool(self.grid_view),
+                                lambda raw: {'0': False, '1': True}.get(raw))
+
+    def _per_page_for(self, request):
+        def parse(raw):
+            try:
+                value = int(raw)
+            except (TypeError, ValueError):
+                return None
+            return value if value in self.page_sizes else None
+        value = self._view_state(request, 'per_page', self.list_per_page, parse)
+        return value if value in self.page_sizes or value == self.list_per_page else self.list_per_page
     
     def get_fieldsets(self, request: HttpRequest, obj: Any | None = ...) -> list[tuple[str, dict]]:
         fieldsets = super().get_fieldsets(request, obj)
@@ -374,53 +448,25 @@ class ModelAdmin(UnfoldAdmin):
         return fieldsets
     
     def buttons(self, obj):
-        svg_url_edit = '/static/base/images/edit.svg'
-        svg_url_delete = '/static/base/images/delete.svg'
-        svg_url_view = '/static/base/images/icon-viewlink.svg'
-
-        button_edit = ''
-        button_delete = ''
-        button_view = ''
-        
-        width = 18
-        height = 18
-
-        path= f'admin:{obj._meta.app_label}_{obj._meta.model_name}'
-        path_change= reverse_lazy(path + '_change', args=[obj.pk])
-        path_delete= reverse_lazy(path + '_delete', args=[obj.pk])
-        c= 0
-        if self.has_change_permission(self.request, obj):
-            button_edit = f'<a class="btn-edit col-span-1" href="{path_change}"> <img src="{svg_url_edit}" alt="{_("Edit")}" style="width: {width}px; height: {height}px;"></a>'
-            c+= 1
+        request = _current_request.get()
+        url_name = f'admin:{obj._meta.app_label}_{obj._meta.model_name}'
+        size = 'width: 18px; height: 18px;'
+        links = []
+        if request is not None and self.has_change_permission(request, obj):
+            links.append(('btn-edit', reverse(url_name + '_change', args=[obj.pk]), 'base/images/edit.svg', _('Edit')))
         else:
-            button_view = f'<a class="btn-view col-span-1" href="{path_change}"> <img src="{svg_url_view}" alt="{_("View")}" style="width: {width}px; height: {height}px;"></a>'
-            c+= 1
-
-        if self.has_delete_permission(self.request, obj):
-            c+= 1
-            button_delete = f'<a class="btn-delete btn-danger col-span-1" href="{path_delete}"> <img src="{svg_url_delete}" alt="{_("Delete")}" style="width: {width}px; height: {height}px;"></a>'
-
-        return mark_safe(f'''
-                         <div id="action_buttons_{obj.pk}" class="action_buttons grid gap-1 grid-cols-{c}" style="width: {33*c}px;">{button_view} {button_edit} {button_delete} </div> 
-                          ''')
+            links.append(('btn-view', reverse(url_name + '_change', args=[obj.pk]), 'base/images/icon-viewlink.svg', _('View')))
+        if request is not None and self.has_delete_permission(request, obj):
+            links.append(('btn-delete btn-danger', reverse(url_name + '_delete', args=[obj.pk]), 'base/images/delete.svg', _('Delete')))
+        # format_html escapes the pk too (CharField primary keys are user data)
+        return format_html(
+            '<div id="action_buttons_{}" class="action_buttons grid gap-1 grid-cols-{}" style="width: {}px;">{}</div>',
+            obj.pk, len(links), 33 * len(links),
+            format_html_join(' ', '<a class="{} col-span-1" href="{}" title="{}"><img src="{}" alt="{}" style="{}"></a>',
+                             ((cls, url, label, static(icon), label, size) for cls, url, icon, label in links)),
+        )
 
     buttons.short_description = ''
-
-    def save_related(self, request, form, formsets, change):
-        super().save_related(request, form, formsets, change)
-
-        # Lấy đối tượng chính vừa được lưu
-        parent_object = form.instance
-
-        # Duyệt qua tất cả các formset của các đối tượng con
-        for formset in formsets:
-            # Duyệt qua các đối tượng con trong formset
-            for inline_form in formset.forms:
-                if inline_form.has_changed():
-                    child_object = inline_form.instance
-                    # Thực hiện hành động tùy chỉnh, chẳng hạn như gọi hàm save
-                    child_object.save()
-
 
     # GRID VIEW
     using_grid_view = True # True if you want to use grid view, False if you want to use list view
@@ -437,29 +483,9 @@ class ModelAdmin(UnfoldAdmin):
             f"{self.model._meta.app_label}_{self.model._meta.model_name}"
         )
         extra_context['using_grid_view'] = self.using_grid_view
-        if not self.using_grid_view:
-            grid_view= False
-        else:
-            grid_view= int(request.POST.get('grid_view', self.grid_view))
-        
-        self.grid_view = grid_view
+        grid_view = self._grid_view_for(request)
         if grid_view:
-            extra_context = extra_context or {}
             extra_context['grid_view'] = grid_view
-
-            # self.list_display_links= list(set(list(self.list_display_links) + ['grid_item_header']))
-            # self.list_display= self.get_list_display(request)
-
-
-        # Xác định số lượng hiển thị từ request
-        per_page = self.list_per_page
-        if 'per_page' in request.POST:
-            try:
-                per_page = int(request.POST.get('per_page'))
-                if per_page in self.page_sizes:
-                    self.list_per_page = per_page
-            except ValueError:
-                pass  # Giữ nguyên giá trị mặc định nếu không hợp lệ
 
         # Truyền danh sách số lượng hiển thị vào context
         if extra_context is None:
@@ -469,7 +495,8 @@ class ModelAdmin(UnfoldAdmin):
         extra_context['grid_cols'] = self.grid_cols
 
         if self.default_toggle_sidebar is not None:
-            request.session["toggle_sidebar"] = self.default_toggle_sidebar
+            if request.session.get("toggle_sidebar") != self.default_toggle_sidebar:  # avoid a session write (Set-Cookie) on every page
+                request.session["toggle_sidebar"] = self.default_toggle_sidebar
         res = super().changelist_view(request, extra_context)
         return res
     
@@ -485,7 +512,8 @@ class ModelAdmin(UnfoldAdmin):
             f"{self.model._meta.app_label}_{self.model._meta.model_name}"
         )
         if self.default_toggle_sidebar is not None:
-            request.session["toggle_sidebar"] = self.default_toggle_sidebar
+            if request.session.get("toggle_sidebar") != self.default_toggle_sidebar:  # avoid a session write (Set-Cookie) on every page
+                request.session["toggle_sidebar"] = self.default_toggle_sidebar
 
         can_view_history = self.show_history and self.has_view_history_permission(request)
         extra_context['show_history'] = can_view_history
@@ -498,7 +526,7 @@ class ModelAdmin(UnfoldAdmin):
                 # Query notifications for one superuser — each event is recorded once per superuser,
                 # so filtering by one superuser gives exactly one entry per event.
                 # Prefer request.user if superuser to avoid extra DB query.
-                ref_user = request.user if request.user.is_superuser else User.objects.filter(is_superuser=True).first()
+                ref_user = request.user if request.user.is_superuser else User.objects.filter(is_superuser=True, is_active=True).order_by("pk").first()
                 notifications = []
                 if ref_user:
                     qs = (
@@ -509,7 +537,12 @@ class ModelAdmin(UnfoldAdmin):
                     )
                     for notif in qs:
                         try:
-                            notif.parsed_changed_data = ast.literal_eval(notif.changed_data) if notif.changed_data else []
+                            notif.parsed_changed_data = json.loads(notif.changed_data) if notif.changed_data else []
+                        except ValueError:
+                            try:  # rows saved before changed_data was JSON
+                                notif.parsed_changed_data = ast.literal_eval(notif.changed_data)
+                            except Exception:
+                                notif.parsed_changed_data = []
                         except Exception:
                             notif.parsed_changed_data = []
                         notifications.append(notif)
@@ -522,31 +555,35 @@ class ModelAdmin(UnfoldAdmin):
     # GridItemHeader
     def grid_item_header(self, obj):
         # TODO: implement this method to return the header of the grid item
-        return mark_safe(f'<div class="grid-item-header">{obj}</div>')
+        return format_html('<div class="grid-item-header">{}</div>', obj)
     grid_item_header.short_description = 'Header'
 
     # action make a copy of the current object
     @admin.action(description=_('Duplicate selected objects'), permissions=['add'])
     def duplicate_objects(self, request, queryset):
-        for obj in queryset:
+        from uuid import uuid4
+        duplicated = 0
+        for obj in list(queryset):
+            # copy many-to-many values too (they are lost when only the row is copied)
+            m2m = {f.name: list(getattr(obj, f.name).all()) for f in obj._meta.many_to_many
+                   if f.remote_field.through._meta.auto_created}
             obj.pk = None  # This will create a new object when saved
+            obj._state.adding = True
             # Regenerate UUID to avoid unique constraint violation
-            uuid_field = next((f for f in obj._meta.fields if f.name == 'uuid' and isinstance(f, models.UUIDField)), None)
-            if uuid_field:
-                from uuid import uuid4
-                setattr(obj, 'uuid', uuid4())
+            if any(f.name == 'uuid' and isinstance(f, models.UUIDField) for f in obj._meta.fields):
+                obj.uuid = uuid4()
             if hasattr(obj, 'name'):
                 obj.name = f"{obj.name} (Copy)"
             elif hasattr(obj, 'title'):
                 obj.title = f"{obj.title} (Copy)"
-            else:
-                # If the object has neither 'name' nor 'title', we can try to set a generic field or skip renaming
-                pass
             try:
-                obj.save()
+                with transaction.atomic():
+                    obj.save()
+                    for name, values in m2m.items():
+                        getattr(obj, name).set(values)
             except Exception as e:
-                self.message_user(request, _(f'Error duplicating object: {e}'), level='error')
+                self.message_user(request, _('Error duplicating object: %(error)s') % {'error': e}, level='error')
                 continue
+            duplicated += 1
 
-        message = _(f'{queryset.count()} object(s) duplicated successfully.')
-        self.message_user(request, message)
+        self.message_user(request, _('%(count)d object(s) duplicated successfully.') % {'count': duplicated})

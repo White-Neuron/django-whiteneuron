@@ -14,7 +14,11 @@ from django.urls import reverse
 from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 from django.utils.html import format_html
+from django.utils.http import url_has_allowed_host_and_scheme
+from unfold.contrib.filters.admin import AutocompleteSelectFilter
 from unfold.decorators import action, display
+
+from whiteneuron.base.html_sanitize import is_safe_href, sanitize_html
 
 @admin.register(NotificationConfig, site=base_admin_site)
 class NotificationConfigAdmin(ModelAdmin):
@@ -61,8 +65,9 @@ class NotificationAdmin(ModelAdmin):
         "content",
         "action_by__username",
     ]
+    list_select_related = ["action_by"]
     list_filter = [
-        "action_by",
+        ("action_by", AutocompleteSelectFilter),
         "is_read",
         "created_at",
     ]
@@ -96,17 +101,15 @@ class NotificationAdmin(ModelAdmin):
             permissions= ["view_obj_link"],
             url_path="view-obj-link")
     def view_obj_link(self, request, object_id: int):
-        obj = get_object_or_404(Notification, pk=object_id)
-        if obj.obj_link:
+        obj = get_object_or_404(Notification, pk=object_id, user=request.user)
+        if obj.obj_link and url_has_allowed_host_and_scheme(obj.obj_link, allowed_hosts={request.get_host()}):
             return redirect(obj.obj_link)
         self.message_user(request, _("No object link available for this notification."))
         return redirect(reverse('admin:notification_notification_changeform', args=[object_id]))
     
     def has_view_obj_link_permission(self, request, object_id: int):
-        if object_id is not None:
-            obj= get_object_or_404(Notification, pk=object_id)
-            if obj.obj_link:
-                return True
+        if object_id is not None and str(object_id).isdigit():
+            return Notification.objects.filter(pk=object_id, user=request.user, obj_link__isnull=False).exclude(obj_link='').exists()
         return False
     
     def has_add_permission(self, request):
@@ -133,24 +136,21 @@ class NotificationAdmin(ModelAdmin):
     
     # Cập nhật đã đọc khi xem chi tiết
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
-        try:
-            obj = get_object_or_404(Notification, pk=object_id)
-            if not obj.is_read and obj.user == request.user:
-                obj.is_read = True
-                obj.save()
-        except Exception:
-            pass
+        if object_id and str(object_id).isdigit():
+            # mark as read with a single UPDATE (non-numeric ids fall through to the admin's 404 handling)
+            Notification.objects.filter(pk=object_id, user=request.user, is_read=False).update(is_read=True)
         return super().changeform_view(request, object_id=object_id, form_url=form_url, extra_context=extra_context)
     
     def get_list_filter(self, request: HttpRequest) -> Sequence[str]:
         list_filter = super().get_list_filter(request)
         if request.user.is_superuser:
-            return list(list_filter) + ['user']
+            return list(list_filter) + [('user', AutocompleteSelectFilter)]
         return list_filter
     
     @display(description=_("Content"), header=True)
     def display_content(self, instance: Notification):
-        return mark_safe(instance.content)
+        # stored HTML may predate escaping: keep only simple formatting tags
+        return mark_safe(sanitize_html(instance.content))
 
     @display(description=_("Action"), label=True)
     def display_action(self, instance: Notification):
@@ -160,32 +160,68 @@ class NotificationAdmin(ModelAdmin):
     def display_flag(self, instance: Notification):
         return instance.flag
     
+    _OBJ_LINK_RE = re.compile(r'/([^/]+)/([^/]+)/(\d+)/change/')
+
+    @classmethod
+    def _parse_obj_link(cls, obj_link):
+        m = cls._OBJ_LINK_RE.search(obj_link or '')
+        return (m.group(1), m.group(2), m.group(3)) if m else None
+
+    @classmethod
+    def resolve_components(cls, notifications):
+        """Attach (app_label, model_verbose, object_id, obj_str) to each notification.
+
+        Linked objects are fetched with one query per model for the whole page,
+        instead of a ContentType + object query for every row.
+        """
+        wanted = {}
+        for n in notifications:
+            parsed = cls._parse_obj_link(n.obj_link)
+            if parsed:
+                wanted.setdefault(parsed[:2], set()).add(int(parsed[2]))
+        found = {}
+        for (app_label, raw_model), ids in wanted.items():
+            try:
+                mc = ContentType.objects.get_by_natural_key(app_label, raw_model).model_class()
+            except ContentType.DoesNotExist:
+                mc = None
+            if mc is None:
+                found[(app_label, raw_model)] = (raw_model.replace('_', ' ').title(), {})
+                continue
+            manager = getattr(mc, 'objects_all', mc._default_manager)
+            try:
+                objs = {o.pk: str(o) for o in manager.filter(pk__in=ids)}
+            except Exception:
+                objs = {}
+            found[(app_label, raw_model)] = (mc._meta.verbose_name.title(), objs)
+        for n in notifications:
+            parsed = cls._parse_obj_link(n.obj_link)
+            if not parsed:
+                n._wn_components = (None, None, None, None)
+                continue
+            app_label, raw_model, object_id = parsed
+            model_verbose, objs = found[(app_label, raw_model)]
+            n._wn_components = (app_label, model_verbose, object_id, objs.get(int(object_id), f"#{object_id}"))
+
     def get_components(self, instance: Notification):
-        app_label = None
-        model_verbose = None
-        object_id = None
-        obj_str = None
-        if instance.obj_link:
-            m = re.search(r'/([^/]+)/([^/]+)/(\d+)/change/', instance.obj_link)
-            if m:
-                app_label = m.group(1)
-                raw_model = m.group(2)
-                object_id = m.group(3)
-                try:
-                    ct = ContentType.objects.get(app_label=app_label, model=raw_model)
-                    mc = ct.model_class()
-                    model_verbose = mc._meta.verbose_name.title()
-                    try:
-                        manager = getattr(mc, 'objects_all', mc.objects)
-                        obj = manager.get(pk=int(object_id))
-                        obj_str = str(obj)
-                    except Exception:
-                        obj_str = f"#{object_id}"
-                except Exception:
-                    model_verbose = raw_model.replace('_', ' ').title()
-                    obj_str = f"#{object_id}"
-        return app_label, model_verbose, object_id, obj_str
-    
+        if not hasattr(instance, '_wn_components'):
+            self.resolve_components([instance])
+        return instance._wn_components
+
+    _changelist_classes = {}
+
+    def get_changelist(self, request, **kwargs):
+        base = super().get_changelist(request, **kwargs)
+        cls = self._changelist_classes.get(base)
+        if cls is None:  # built once per base class, not per request
+            class NotificationChangeList(base):
+                def get_results(self, request):
+                    super().get_results(request)
+                    self.model_admin.resolve_components(list(self.result_list))
+
+            cls = self._changelist_classes[base] = NotificationChangeList
+        return cls
+
     def display_title(self, instance: Notification):
         # Parse obj_link → extract app_label, model_name, object_id
         app_label, model_verbose, object_id, obj_str = self.get_components(instance)
@@ -203,49 +239,38 @@ class NotificationAdmin(ModelAdmin):
 
         # [Model name]
         if model_verbose:
-            parts.append(
-                f'<span class="ui-badge ui-badge-xs font-mono opacity-70">'
-                f'<strong>{model_verbose}</strong></span>'
-            )
+            parts.append(format_html(
+                '<span class="ui-badge ui-badge-xs font-mono opacity-70"><strong>{}</strong></span>', model_verbose))
 
-        # [#ID] — clickable link
+        # [#ID] — clickable link (only same-site paths)
         if object_id:
-            if instance.obj_link:
-                parts.append(
-                    f'<a href="{instance.obj_link}" class="ui-badge ui-badge-xs font-mono">'
-                    f'#{object_id}</a>'
-                )
+            if instance.obj_link and instance.obj_link.startswith("/") and is_safe_href(instance.obj_link):
+                parts.append(format_html(
+                    '<a href="{}" class="ui-badge ui-badge-xs font-mono">#{}</a>', instance.obj_link, object_id))
             else:
-                parts.append(
-                    f'<span class="ui-badge ui-badge-xs font-mono">#{object_id}</span>'
-                )
+                parts.append(format_html('<span class="ui-badge ui-badge-xs font-mono">#{}</span>', object_id))
 
         # [Object name]
         if obj_str:
-            parts.append(f'<span class="text-sm font-semibold">{obj_str}</span>')
+            parts.append(format_html('<span class="text-sm font-semibold">{}</span>', obj_str))
 
         # [Action]
-        parts.append(
-            f'<span class="ui-badge ui-badge-xs {action_cls}">{action_label}</span>'
-        )
+        parts.append(format_html('<span class="ui-badge ui-badge-xs {}">{}</span>', action_cls, action_label))
 
         # by [Alias] [@username]
         if instance.action_by:
             ab = instance.action_by
             alias = getattr(ab, 'full_name', None) or ''
             username = ab.username
-            parts.append(f'<span class="text-xs opacity-50">{_("by")}</span>')
+            parts.append(format_html('<span class="text-xs opacity-50">{}</span>', _("by")))
             if alias and alias != username:
-                parts.append(
-                    f'<span class="ui-badge ui-badge-xs">{alias}</span>'
-                    f'<span class="ui-badge ui-badge-xs opacity-60">@{username}</span>'
-                )
+                parts.append(format_html(
+                    '<span class="ui-badge ui-badge-xs">{}</span><span class="ui-badge ui-badge-xs opacity-60">@{}</span>',
+                    alias, username))
             else:
-                parts.append(f'<span class="ui-badge ui-badge-xs">@{username}</span>')
+                parts.append(format_html('<span class="ui-badge ui-badge-xs">@{}</span>', username))
 
-        return mark_safe(
-            '<div class="flex flex-wrap items-center gap-1">' + ''.join(parts) + '</div>'
-        )
+        return format_html('<div class="flex flex-wrap items-center gap-1">{}</div>', mark_safe(''.join(parts)))
     display_title.short_description = _("Title")
     
     def display_changed_data(self, instance: Notification):

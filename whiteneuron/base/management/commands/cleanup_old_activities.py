@@ -80,6 +80,9 @@ class Command(BaseCommand):
             if not dry_run:
                 deleted, _ = orphan_profiles.delete()
                 total_deleted += deleted
+                # the activity middleware caches profile ids: start a new namespace
+                from whiteneuron.base.middleware import invalidate_visit_profile_cache
+                invalidate_visit_profile_cache()
 
         self.stdout.write('-' * 60)
         if dry_run:

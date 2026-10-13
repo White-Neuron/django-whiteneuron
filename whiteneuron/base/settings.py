@@ -12,7 +12,7 @@ load_dotenv()
 import sentry_sdk
 
 FEEDBACK_COOLDOWN_SECONDS= int(environ.get("FEEDBACK_COOLDOWN_SECONDS", 60))
-DATA_UPLOAD_MAX_NUMBER_FILES = environ.get("DATA_UPLOAD_MAX_NUMBER_FILES", 1000)
+DATA_UPLOAD_MAX_NUMBER_FILES = int(environ.get("DATA_UPLOAD_MAX_NUMBER_FILES", 1000))
 
 PROJECT_NAME = environ.get("PROJECT_NAME", "base")
 NAME= environ.get("NAME", "White Neuron")
@@ -36,9 +36,17 @@ EMAIL_USE_TLS = True
 ######################################################################
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = environ.get("SECRET_KEY", get_random_secret_key())
-
 DEBUG = environ.get("DEBUG", "False") == "True"
+
+SECRET_KEY = environ.get("SECRET_KEY")
+if not SECRET_KEY:
+    # build-time commands (e.g. in a Docker build) don't sign anything
+    _BUILD_COMMANDS = {"collectstatic", "compilemessages", "makemessages", "check", "makemigrations"}
+    if not DEBUG and not _BUILD_COMMANDS.intersection(sys.argv[1:2]):
+        # A random per-process key breaks signed-cookie sessions/CSRF across workers and restarts.
+        from django.core.exceptions import ImproperlyConfigured
+        raise ImproperlyConfigured("SECRET_KEY environment variable is required when DEBUG=False")
+    SECRET_KEY = get_random_secret_key()
 # DEBUG = False
 
 ROOT_URLCONF = f"{PROJECT_NAME}.urls"
@@ -70,6 +78,17 @@ USER_RATE_LIMIT_WINDOW = int(environ.get("USER_RATE_LIMIT_WINDOW", 60))       # 
 # Chỉ bật khi deploy sau Cloudflare — tin tưởng CF-Connecting-IP / True-Client-IP header.
 # Nếu không bật, các header này sẽ bị bỏ qua để tránh giả mạo IP.
 BEHIND_CLOUDFLARE = environ.get("BEHIND_CLOUDFLARE", "False") == "True"
+# Server monitoring dashboard (whiteneuron.monitoring)
+WN_MONITORING = {
+    "INTERVAL": int(environ.get("MONITORING_INTERVAL", 15)),          # seconds between samples
+    "RETENTION_DAYS": int(environ.get("MONITORING_RETENTION_DAYS", 7)),
+    "DISK_PATH": environ.get("MONITORING_DISK_PATH", "/"),
+}
+# Client IP behind reverse proxies (rate limiting, IP blacklist, activity logs):
+# number of proxies that append to X-Forwarded-For (0 = auto: right-most public IP)
+TRUSTED_PROXY_COUNT = int(environ.get("TRUSTED_PROXY_COUNT", "0"))
+# Set when the app is reachable directly (no proxy): X-Forwarded-For is then client-controlled
+IGNORE_X_FORWARDED_FOR = environ.get("IGNORE_X_FORWARDED_FOR", "False") == "True"
 
 # Cảnh báo: rate limiting chỉ hiệu quả khi dùng Redis (shared cache giữa các worker).
 # Với LocMemCache (USE_CACHE=False hoặc CACHENAME=default), mỗi gunicorn worker có cache
@@ -154,6 +173,7 @@ INSTALLED_APPS = [
     "whiteneuron.contrib", # Contrib app
     "whiteneuron.dashboard",
     "whiteneuron.notification",  # Notification app
+    "whiteneuron.monitoring",  # Server monitoring dashboard
 
     "modeltranslation",
     "unfold",
@@ -249,7 +269,10 @@ if USE_CACHE:
     else:
         print("Unknown cache backend")
         sys.exit(1)
-    MIDDLEWARE = ["django.middleware.cache.UpdateCacheMiddleware"] + MIDDLEWARE + ["django.middleware.cache.FetchFromCacheMiddleware"]
+    # Whole-page caching serves stale admin pages (changelists, badges) after edits:
+    # opt in explicitly, only for sites whose pages are public and static.
+    if environ.get("USE_CACHE_MIDDLEWARE", "False") == "True":
+        MIDDLEWARE = ["django.middleware.cache.UpdateCacheMiddleware"] + MIDDLEWARE + ["django.middleware.cache.FetchFromCacheMiddleware"]
 
 # settings.py
 DEBUG_TOOLBAR_PANELS = [
@@ -480,6 +503,8 @@ UNFOLD = {
     "SITE_HEADER": _(NAME), 
     "SITE_TITLE": _(NAME),
     "SITE_SUBHEADER": _("Admin panel"),
+    # Shown next to the site name (unfold >= 0.102); set SITE_VERSION in the environment
+    "SITE_VERSION": environ.get("SITE_VERSION") or None,
     "SITE_DROPDOWN": [
         {
             "icon": "diamond",
@@ -495,15 +520,15 @@ UNFOLD = {
     # Nếu không có SITE_LOGO thì sẽ sử dụng SITE_ICON, nếu dùng SITE_LOGO thì sẽ không sử dụng SITE_ICON và SITE_TITLE
     # Vì vậy nên dùng SITE_ICON để đảm bảo hiển thị đúng
     "SITE_ICON": {
-        "light": lambda request: static("base/images/logo/WhiteNeuron.png"),  # light mode
-        "dark": lambda request: static("base/images/logo/WhiteNeuron.png"),  # dark mode
+        "light": lambda request: static("base/images/logo/WhiteNeuron-128.png"),  # light mode (14KB, was 187KB)
+        "dark": lambda request: static("base/images/logo/WhiteNeuron-128.png"),  # dark mode
     },
     "SITE_FAVICONS": [
         {
             "rel": "icon",
             "sizes": "32x32",
-            "type": "image/svg+xml",
-            "href": lambda request: static("base/images/logo/WhiteNeuron.png"),
+            "type": "image/png",
+            "href": lambda request: static("base/images/logo/WhiteNeuron-32.png"),
         },
     ],
     "SHOW_HISTORY": False,
@@ -561,21 +586,12 @@ UNFOLD = {
             "950": "8 47 73",
         },
     },
-    "EXTENSIONS": {
-        "modeltranslation": {
-            "flags": {
-                "en": "🇬🇧",
-                "vi": "🇻🇳",
-            },
-        },
-    },
     "TABS": [
         # "apps.projects.tabs.tabs_callback"
     ],
     # Command settings
     "COMMAND": {
         "search_models": True,  
-        "search_callback": "whiteneuron.base.utils.search_callback",
         "show_history": True, 
     },
     "SIDEBAR": {
@@ -672,6 +688,12 @@ UNFOLD = {
                 "collapsible": True,
                 "items": [
                     {
+                        "title": _("Server monitoring"),
+                        "icon": "monitor_heart",
+                        "link": reverse_lazy("admin:monitoring_metricsample_changelist"),
+                        "permission": "whiteneuron.monitoring.permissions.can_view_dashboard",
+                    },
+                    {
                         "title": _("Images"),
                         "icon": "image",
                         "link": reverse_lazy("admin:base_image_changelist"),
@@ -709,30 +731,6 @@ UNFOLD = {
                 "collapsible": True,
                 "items": [
                     {
-                        "title": _("Clocked"),
-                        "icon": "hourglass_bottom",
-                        "link": reverse_lazy(
-                            "admin:django_celery_beat_clockedschedule_changelist"
-                        ),
-                        "permission": "whiteneuron.base.utils.permission_superuser_callback",
-                    },
-                    {
-                        "title": _("Crontabs"),
-                        "icon": "update",
-                        "link": reverse_lazy(
-                            "admin:django_celery_beat_crontabschedule_changelist"
-                        ),
-                        "permission": "whiteneuron.base.utils.permission_superuser_callback",
-                    },
-                    {
-                        "title": _("Intervals"),
-                        "icon": "arrow_range",
-                        "link": reverse_lazy(
-                            "admin:django_celery_beat_intervalschedule_changelist"
-                        ),
-                        "permission": "whiteneuron.base.utils.permission_superuser_callback",
-                    },
-                    {
                         "title": _("Periodic tasks"),
                         "icon": "task",
                         "link": reverse_lazy(
@@ -741,12 +739,46 @@ UNFOLD = {
                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
                     },
                     {
-                        "title": _("Solar events"),
-                        "icon": "event",
-                        "link": reverse_lazy(
-                            "admin:django_celery_beat_solarschedule_changelist"
-                        ),
+                        # Sidebar subnavigation (unfold >= 0.109): schedules grouped under one item
+                        "title": _("Schedules"),
+                        "icon": "schedule",
+                        # unfold skips items without a link; clicking a parent only toggles its sub-items
+                        "link": reverse_lazy("admin:django_celery_beat_crontabschedule_changelist"),
                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
+                        "items": [
+                            {
+                                "title": _("Clocked"),
+                                "icon": "hourglass_bottom",
+                                "link": reverse_lazy(
+                                    "admin:django_celery_beat_clockedschedule_changelist"
+                                ),
+                                "permission": "whiteneuron.base.utils.permission_superuser_callback",
+                            },
+                            {
+                                "title": _("Crontabs"),
+                                "icon": "update",
+                                "link": reverse_lazy(
+                                    "admin:django_celery_beat_crontabschedule_changelist"
+                                ),
+                                "permission": "whiteneuron.base.utils.permission_superuser_callback",
+                            },
+                            {
+                                "title": _("Intervals"),
+                                "icon": "arrow_range",
+                                "link": reverse_lazy(
+                                    "admin:django_celery_beat_intervalschedule_changelist"
+                                ),
+                                "permission": "whiteneuron.base.utils.permission_superuser_callback",
+                            },
+                            {
+                                "title": _("Solar events"),
+                                "icon": "event",
+                                "link": reverse_lazy(
+                                    "admin:django_celery_beat_solarschedule_changelist"
+                                ),
+                                "permission": "whiteneuron.base.utils.permission_superuser_callback",
+                            },
+                        ],
                     },
                 ],
             },
@@ -778,6 +810,9 @@ if SENTRY_DSN:
 # Celery
 ######################################################################
 CELERY_BROKER_URL = environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
+# Send email / exports / GPT translation to Celery workers (opt-in: needs a running
+# worker; otherwise these run inline in the request).
+WN_ASYNC_TASKS = environ.get("WN_ASYNC_TASKS", "False") == "True"
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 

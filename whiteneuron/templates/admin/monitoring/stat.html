@@ -1,0 +1,9 @@
+<section class="wn-panel wn-stat" data-stat="{{ key }}">
+    <header class="wn-panel-head">
+        <h3>{{ title }}</h3>
+        {% if help %}<span class="material-symbols-outlined wn-help" title="{{ help }}">info</span>{% endif %}
+    </header>
+    <div class="wn-stat-value"><span data-value>—</span><small data-unit></small></div>
+    <div class="wn-stat-sub" data-sub>&nbsp;</div>
+    <canvas class="wn-spark" aria-hidden="true"></canvas>
+</section>

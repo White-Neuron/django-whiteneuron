@@ -93,14 +93,28 @@ class BaseFile(BaseModel):
                 self.hash = compute_file_hash(self.file)
         super().save(*args, **kwargs)
 
+    def current_hash(self):
+        """SHA-256 of the file currently on storage, or None if it can't be read.
+
+        Memoized on the instance only (admin pages call it from several columns).
+        It is deliberately not cached across requests: a tamper check must read the
+        bytes — size/mtime can be preserved by whoever rewrites the file, and a cache
+        outage must never look like a modified file.
+        """
+        if not self.file or not self.file.name:
+            return None
+        if not hasattr(self, '_current_hash'):
+            try:
+                self._current_hash = compute_file_hash(self.file)
+            except Exception:
+                self._current_hash = None  # missing / unreadable
+        return self._current_hash
+
     def verify_integrity(self):
         """Verify the file on storage matches its stored hash. Returns True if OK."""
-        if not self.hash or not self.file or not self.file.name:
+        if not self.hash:
             return False
-        try:
-            return compute_file_hash(self.file) == self.hash
-        except Exception:
-            return False
+        return self.current_hash() == self.hash
 
     def __str__(self):
         return self.title

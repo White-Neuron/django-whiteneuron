@@ -1,0 +1,149 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{% block is_fullwidth %}1{% endblock %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'monitoring/css/dashboard.css' %}">
+{% endblock %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <script src="{% static 'monitoring/js/dashboard.js' %}" defer></script>
+{% endblock %}
+
+{% block content %}
+<div id="wn-monitoring" class="wn-mon"
+     data-api="{{ api_url }}"
+     data-range="{{ range }}"
+     data-refresh="{{ refresh }}"
+     data-host="{{ host }}"
+     data-interval="{{ interval }}">
+
+    {# ── Toolbar ─────────────────────────────────────────────── #}
+    <div class="wn-toolbar">
+        <div class="wn-toolbar-group">
+            <span class="material-symbols-outlined wn-toolbar-icon">monitor_heart</span>
+            <h2 class="wn-toolbar-title">{% trans "Server monitoring" %}</h2>
+            <label class="wn-field">
+                <span class="material-symbols-outlined">dns</span>
+                <select data-host-select aria-label="{% trans 'Host' %}">
+                    <option value="{{ host }}">{{ host }}</option>
+                </select>
+            </label>
+            <span class="wn-live" data-live title="{% trans 'Auto refresh is on' %}"><span></span>{% trans "Live" %}</span>
+        </div>
+
+        <div class="wn-toolbar-group">
+            <div class="wn-seg" role="group" aria-label="{% trans 'Time range' %}">
+                {% for key in ranges %}
+                    <button type="button" data-range-btn="{{ key }}" {% if key == range %}aria-pressed="true"{% endif %}>{{ key }}</button>
+                {% endfor %}
+            </div>
+            <div class="wn-refresh">
+                <button type="button" data-refresh-now title="{% trans 'Refresh now' %}" aria-label="{% trans 'Refresh now' %}">
+                    <span class="material-symbols-outlined">refresh</span>
+                </button>
+                <select data-refresh-select aria-label="{% trans 'Auto refresh' %}">
+                    {% for choice in refresh_choices %}
+                        <option value="{{ choice }}" {% if choice == refresh %}selected{% endif %}>{% if choice == "off" %}{% trans "Off" %}{% else %}{{ choice }}{% endif %}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <span class="wn-updated" data-updated>—</span>
+        </div>
+    </div>
+
+    <div class="wn-banner" data-banner hidden></div>
+
+    {# ── Overview ────────────────────────────────────────────── #}
+    <div class="wn-row" data-row="overview">
+        <button type="button" class="wn-row-head"><span class="material-symbols-outlined">expand_more</span>{% trans "Overview" %}</button>
+        <div class="wn-row-body wn-grid wn-grid-stats">
+            {% include "admin/monitoring/stat.html" with key="uptime" title=_("Uptime") help=_("Time since the host booted") %}
+            {% include "admin/monitoring/stat.html" with key="cpu" title=_("CPU") help=_("Average CPU usage across all cores") %}
+            {% include "admin/monitoring/stat.html" with key="mem" title=_("Memory") help=_("RAM in use (total minus available)") %}
+            {% include "admin/monitoring/stat.html" with key="disk" title=_("Disk") help=_("Used space on the monitored filesystem") %}
+            {% include "admin/monitoring/stat.html" with key="load" title=_("Load (1m)") help=_("1-minute load average; above the core count means queued work") %}
+            {% include "admin/monitoring/stat.html" with key="rpm" title=_("Throughput") help=_("Requests per minute over the selected range") %}
+            {% include "admin/monitoring/stat.html" with key="errors" title=_("Error rate") help=_("Share of 5xx responses over the selected range") %}
+            {% include "admin/monitoring/stat.html" with key="p95" title=_("Latency p95") help=_("95 out of 100 requests were faster than this") %}
+        </div>
+    </div>
+
+    {# ── System ──────────────────────────────────────────────── #}
+    <div class="wn-row" data-row="system">
+        <button type="button" class="wn-row-head"><span class="material-symbols-outlined">expand_more</span>{% trans "System" %}</button>
+        <div class="wn-row-body wn-grid">
+            <section class="wn-panel wn-span-4">
+                <header class="wn-panel-head"><h3>{% trans "Resource usage" %}</h3></header>
+                <div class="wn-gauges">
+                    <div class="wn-gauge" data-gauge="cpu"><canvas></canvas><div class="wn-gauge-label"><strong>—</strong><span>{% trans "CPU" %}</span></div></div>
+                    <div class="wn-gauge" data-gauge="mem"><canvas></canvas><div class="wn-gauge-label"><strong>—</strong><span>{% trans "Memory" %}</span></div></div>
+                    <div class="wn-gauge" data-gauge="disk"><canvas></canvas><div class="wn-gauge-label"><strong>—</strong><span>{% trans "Disk" %}</span></div></div>
+                </div>
+                <div class="wn-cores" data-cores></div>
+            </section>
+            {% include "admin/monitoring/timeseries.html" with key="cpu" span="wn-span-8" title=_("CPU usage") help=_("Percentage of CPU time spent working, averaged per interval") %}
+            {% include "admin/monitoring/timeseries.html" with key="load" span="wn-span-4" title=_("Load average") help=_("1, 5 and 15-minute load averages; the dashed line is the core count") %}
+            {% include "admin/monitoring/timeseries.html" with key="mem" span="wn-span-4" title=_("Memory") help=_("RAM in use and swap usage") %}
+            {% include "admin/monitoring/timeseries.html" with key="disk_io" span="wn-span-4" title=_("Disk I/O") help=_("Bytes read from and written to disk per second") %}
+            {% include "admin/monitoring/timeseries.html" with key="net" span="wn-span-6" title=_("Network traffic") help=_("Bytes received and sent per second, all interfaces") %}
+            {% include "admin/monitoring/timeseries.html" with key="disk_pct" span="wn-span-6" title=_("Disk space") help=_("Used space on the monitored filesystem") %}
+        </div>
+    </div>
+
+    {# ── Application ─────────────────────────────────────────── #}
+    <div class="wn-row" data-row="application">
+        <button type="button" class="wn-row-head"><span class="material-symbols-outlined">expand_more</span>{% trans "Application" %}</button>
+        <div class="wn-row-body wn-grid">
+            {% include "admin/monitoring/timeseries.html" with key="throughput" span="wn-span-8" title=_("Throughput") help=_("Requests per minute by outcome") %}
+            <section class="wn-panel wn-span-4">
+                <header class="wn-panel-head"><h3>{% trans "Responses" %}</h3><span class="material-symbols-outlined wn-help" title="{% trans 'Share of responses by status class' %}">info</span></header>
+                <div class="wn-panel-body wn-split">
+                    <div class="wn-donut"><canvas data-chart="status"></canvas></div>
+                    <div class="wn-apdex" data-apdex>
+                        <span>{% trans "Apdex" %}</span>
+                        <strong>—</strong>
+                        <small>{% trans "T = 500 ms" %}</small>
+                    </div>
+                </div>
+            </section>
+            {% include "admin/monitoring/timeseries.html" with key="latency" span="wn-span-12" title=_("Response time") help=_("Latency percentiles per interval") %}
+            <section class="wn-panel wn-span-12">
+                <header class="wn-panel-head"><h3>{% trans "Slowest endpoints" %}</h3><span class="material-symbols-outlined wn-help" title="{% trans 'Endpoints ranked by total time spent (count × average)' %}">info</span></header>
+                <div class="wn-table-wrap">
+                    <table class="wn-table">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Endpoint" %}</th>
+                                <th class="num">{% trans "Requests" %}</th>
+                                <th class="num">{% trans "Avg" %}</th>
+                                <th class="num">p95</th>
+                                <th class="num">{% trans "Max" %}</th>
+                                <th class="num">{% trans "Errors" %}</th>
+                                <th>{% trans "Share of time" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody data-endpoints>
+                            <tr><td colspan="7" class="wn-empty">{% trans "No requests in this range" %}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    {# ── Process & dependencies ──────────────────────────────── #}
+    <div class="wn-row" data-row="process">
+        <button type="button" class="wn-row-head"><span class="material-symbols-outlined">expand_more</span>{% trans "Process & dependencies" %}</button>
+        <div class="wn-row-body wn-grid">
+            {% include "admin/monitoring/timeseries.html" with key="deps" span="wn-span-6" title=_("Dependency latency") help=_("Round-trip time of a trivial database query and cache read") %}
+            {% include "admin/monitoring/timeseries.html" with key="proc" span="wn-span-6" title=_("Application process") help=_("Resident memory and threads of the web process that served the dashboard") %}
+        </div>
+    </div>
+</div>
+
+{{ i18n_strings|json_script:"wn-mon-i18n" }}
+{% endblock %}

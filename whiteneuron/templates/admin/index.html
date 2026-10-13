@@ -8,13 +8,6 @@
     {% trans 'Dashboard' %} | {{ site_title|default:_('Django site admin') }}
 {% endblock %}
 
-{% block branding %}
-    <h1 id="site-name">
-        <a href="{% url 'admin:index' %}">
-            {{ site_header }}
-        </a>
-    </h1>
-{% endblock %}
 
 {% block extrahead %}
     {% if plausible_domain %}
@@ -52,7 +45,8 @@
         {% endcomponent %}
         
         {% trans "Website performance in last 28 days" as title %}
-        {% component "unfold/components/card.html" with class="mb-8" title=title %}
+        {% trans "Successful vs failed requests per day, users and anonymous visitors" as chart_description %}
+        {% component "unfold/components/card.html" with class="mb-8" title=title title_icon="monitoring" description=chart_description %}
             {% component "unfold/components/chart/bar.html" with data=chart height=320 %}{% endcomponent %}
         {% endcomponent %}
 

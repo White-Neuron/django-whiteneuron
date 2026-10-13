@@ -1,4 +1,5 @@
 from django.utils import timezone
+from django.utils.html import format_html
 from .models import User, UserActivity, AnonymousActivity
 from django.contrib.auth.models import Group
 from django.utils.translation import gettext_lazy as _
@@ -91,23 +92,54 @@ def visitprofile_badge_callback(request):
 def group_badge_callback(request):
     return 0
 
+def iter_nav_items(items, inherited_permission=None):
+    """Leaf sidebar items: sub-navigation parents (unfold "items") are expanded.
+
+    A child without its own "permission" inherits its parent's.
+    """
+    for item in items:
+        permission = item.get('permission') or inherited_permission
+        children = item.get('items')
+        if isinstance(children, (list, tuple)) and children:
+            yield from iter_nav_items(children, permission)
+        elif permission and not item.get('permission'):
+            yield {**item, 'permission': permission}
+        else:
+            yield item
+
+
 def app_badge_callback(request):
     from django.conf import settings
     try:
         navigation = settings.UNFOLD.get('SIDEBAR', {}).get('navigation', [])
         return sum(
-            1 for section in navigation for item in section.get('items', [])
+            1 for section in navigation for item in iter_nav_items(section.get('items', []))
             if item.get('title') and item.get('link') and '/base/app/' not in str(item.get('link'))
         )
     except Exception:
         return 0
+
+def user_group_names(user):
+    """Group names of ``user``, memoized on the user object (one query per request).
+
+    Sidebar permission callbacks run for every item on every admin page; without
+    this each of them issued its own ``groups.filter(...).exists()`` query.
+    """
+    if not user or not user.is_authenticated:
+        return frozenset()
+    names = getattr(user, "_wn_group_names", None)
+    if names is None:
+        names = frozenset(user.groups.values_list("name", flat=True))
+        user._wn_group_names = names
+    return names
+
 
 def is_guest_user(user):
     if not user or not user.is_authenticated:
         return True
     if user.username.lower() == "guest":
         return True
-    return user.groups.filter(name__in=["Khách thăm", "Guest", "guest"]).exists()
+    return bool(user_group_names(user) & {"Khách thăm", "Guest", "guest"})
 
 
 def permission_callback(request):
@@ -119,7 +151,7 @@ def permission_superuser_callback(request):
 def permission_admin_callback(request):
     if request.user.is_superuser:
         return True
-    return request.user.groups.filter(name='Quản trị viên').exists()
+    return 'Quản trị viên' in user_group_names(request.user)
 
 def permission_non_guest_callback(request):
     return not is_guest_user(request.user)
@@ -175,15 +207,23 @@ def send_email_login(username, password, receiver, is_reset=False):
     subject= SUBJECT
     template= TEMPLATE
     system_name= SYSTEM_NAME
-    context= template.format(username= username, password= password, url= URL, system_name= system_name, signature= _load_signature())
+    # The password is wrapped in a marker so the stored copy can be masked after sending
+    # without passing the secret itself to the task queue (broker, Flower, results).
+    secret = format_html('<span data-wn-secret="1">{}</span>', password)
+    context= template.format(username= username, password= secret, url= URL, system_name= system_name, signature= _load_signature())
     mail= Mail.objects.create(subject= subject, content= context, receiver= receiver)
-    mail.send()
-    return mail.is_sent()
+    # SMTP can take seconds: hand it to a worker when Celery is enabled.
+    # Returns True/False when sent inline, None when queued.
+    from .queue import enqueue, async_tasks_enabled
+    from .tasks import send_mail_task
+    result = enqueue(send_mail_task, mail.pk, redact_secrets=True)
+    return None if async_tasks_enabled() else result
 
-def make_random_password():
-    import random
+def make_random_password(length=12):
+    import secrets
     import string
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+    alphabet = string.ascii_letters + string.digits
+    return ''.join(secrets.choice(alphabet) for _ in range(length))
 
 from django.utils.safestring import mark_safe
 def announcement_callback(request):

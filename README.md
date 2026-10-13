@@ -10,9 +10,30 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.3.8.0
+v0.4.0.0
 
 ## Changelog
+
+### Latest: v0.4.0.0 (2026-10-13)
+**Feature release: daisyUI multi-theme admin, server monitoring dashboard, django-unfold 0.109, security hardening and performance work**
+- **Added**: 35 daisyUI themes selectable from the user menu (**Themes**); each theme also re-colors Unfold and drives its dark mode. `WN_ADMIN_THEMES` limits the picker (`[]` hides it); `WN_THEMES="nord,dracula" bash scripts/tailwind.sh` builds a smaller CSS bundle.
+- **Added**: `whiteneuron.monitoring` — Grafana-style **Server monitoring** dashboard (CPU, memory, disk, load, network, disk I/O, request throughput, p50/p95/p99 latency, error rate, Apdex, slowest endpoints, DB/cache latency) with time ranges, auto-refresh, host selector and shared crosshair. Collect with `manage.py monitoring_collector` or the Celery task `whiteneuron.monitoring.tasks.collect_metrics`; configure with `WN_MONITORING`. New dependency: `psutil`.
+- **Changed**: `django-unfold>=0.109.0`; template overrides ported; uses the avatar badge (unread notifications), sidebar sub-navigation (Celery "Schedules"), `SITE_VERSION`, theme-aware dashboard charts.
+- **Security**: escaped notification/grid HTML (stored XSS), whitelisted `?display_fields` (a GET could call `obj.delete()`) and limited the column picker to fields shown on the change form (never `password`; extra exclusions via `ModelAdmin.field_selection_exclude`), staff-only per-user notification WebSocket with origin check, sandboxed uploaded-HTML preview, private exports scoped to the selected rows, `X-Forwarded-For` read from the right (`TRUSTED_PROXY_COUNT`, `IGNORE_X_FORWARDED_FOR`), open-redirect fix in guest login, new-user signal no longer overwrites passwords, `secrets`-based passwords redacted after sending (never passed to the task broker), POST-only feedback resolve, notification IDOR fix.
+- **Performance**: activity logging 1 INSERT per request (was 3–4 queries), dashboard 4 queries (was ~16) + 60s cache, one `bulk_create` + one broadcast per notification, new indexes, atomic rate-limit counters, request-scoped admin state (grid view / page size no longer shared between users), thumbnails built at upload (regenerated if the file is missing), N+1 fixes, 14KB logo instead of 187KB.
+- **Fixed**: dashboard date ranges overlapped by a day, `App.__str__` crash on create, export action signature, `readonly_fields` growing per request, header horizontal overflow on phones, `_(f"…")` strings that could never be translated, Chart.js crash on oklch theme colors, notification WebSocket reconnect loops, monitoring collector stopping when the cache is down; Vietnamese translations updated.
+- **Compatibility**: `ModelAdmin.request` still works (now request-scoped, not stored on the shared instance); the *Server monitoring* sidebar link follows the `monitoring.view_metricsample` permission.
+- **Validation**: 35 package tests pass (also under the package's own settings via `whiteneuron.base.testing.package_test_settings`) (`manage.py test whiteneuron`), `check` clean, `makemigrations` reports no changes, Tailwind build and `uv build` succeed; changelists, add/change forms, themes and the monitoring dashboard checked in Chromium (desktop + mobile).
+- **Breaking / behavior changes**:
+  - `SECRET_KEY` is required when `DEBUG=False` (build commands such as `collectstatic` are exempt).
+  - `WN_ASYNC_TASKS` (Celery for email, export, GPT translation) is opt-in; without it these run inline.
+  - Client IP: auto mode uses the right-most public `X-Forwarded-For` hop — set `TRUSTED_PROXY_COUNT`, or `IGNORE_X_FORWARDED_FOR=True` when the app is not behind a proxy.
+  - Whole-page cache middleware only with `USE_CACHE_MIDDLEWARE=True`; `EXTENSIONS.modeltranslation` and `compressed_fields` removed (dropped by Unfold); new notifications store plain-text titles and JSON `changed_data`.
+  - Project overrides of `unfold/helpers/navigation_user.html` should be compared with Unfold 0.109.
+- **Upgrade Guidance**: `pip install --upgrade django-whiteneuron`, add `"whiteneuron.monitoring"` to `INSTALLED_APPS`, run `migrate` (indexes + monitoring table), `compilemessages`, and start `monitoring_collector` on each host.
+- **Rollback**: revert to v0.3.8.0 after `migrate monitoring zero`, `migrate base 0027` and `migrate notification 0012` (index-only migrations; no data loss).
+
+See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
 ### Latest: v0.3.8.0 (2026-09-25)
 **Bugfixes: Django 6 format_html crash in Image previews, app mosaic thumbnail URLs, SHOW_FILE_MANAGEMENT sidebar flag**
@@ -217,15 +238,15 @@ UNFOLD = {
     "SITE_TITLE": _("White Neuron Admin"),
     "SITE_SUBHEADER": _("Admin panel"),
     "SITE_ICON": {
-        "light": lambda request: static("base/images/logo/WhiteNeuron.png"),
-        "dark": lambda request: static("base/images/logo/WhiteNeuron.png"),
+        "light": lambda request: static("base/images/logo/WhiteNeuron-128.png"),
+        "dark": lambda request: static("base/images/logo/WhiteNeuron-128.png"),
     },
     "SITE_FAVICONS": [
         {
             "rel": "icon",
             "sizes": "32x32",
-            "type": "image/svg+xml",
-            "href": lambda request: static("base/images/logo/WhiteNeuron.png"),
+            "type": "image/png",
+            "href": lambda request: static("base/images/logo/WhiteNeuron-32.png"),
         },
     ],
     "SHOW_HISTORY": False,
@@ -248,6 +269,52 @@ UNFOLD = {
     "BORDER_RADIUS": "6px",
 }
 ```
+
+### Server monitoring dashboard
+
+`whiteneuron.monitoring` adds a Grafana-style dashboard at **System → Server monitoring**
+(superusers, or staff with the `view_metricsample` permission):
+
+- **Overview**: uptime, CPU, memory, disk, load, throughput, 5xx error rate and p95 latency,
+  with sparklines and green / orange / red thresholds.
+- **System**: CPU / memory / disk gauges, per-core heatmap, CPU, load, memory, disk I/O,
+  network and disk space time series.
+- **Application** (from the request logs `UserActivityMiddleware` already writes): requests
+  per minute by outcome, p50 / p95 / p99 latency, status-code breakdown, Apdex score, and the
+  slowest endpoints (IDs are grouped, e.g. `/user/:id/change/`).
+- **Process & dependencies**: database and cache round-trip time, app memory and threads.
+- Time range 5m–7d, auto-refresh (off–5m), host selector, shared crosshair across charts,
+  shareable URLs (`?range=6h&refresh=30s&host=web-1`), follows the selected admin theme.
+
+Add `"whiteneuron.monitoring"` to `INSTALLED_APPS`, run `migrate`, then collect samples on
+each host (the dashboard also stores a sample while it is open, at most once per interval):
+
+```bash
+python manage.py monitoring_collector              # long-running, e.g. a systemd service
+python manage.py monitoring_collector --once       # single sample (cron)
+```
+
+or schedule the Celery task `whiteneuron.monitoring.tasks.collect_metrics` with celery beat.
+
+```python
+WN_MONITORING = {
+    "INTERVAL": 15,          # seconds between samples
+    "RETENTION_DAYS": 7,     # older samples are pruned automatically
+    "DISK_PATH": "/",        # filesystem shown in the disk panels
+    # "HOST": "web-1",       # defaults to the machine hostname
+}
+```
+
+### Admin themes (daisyUI)
+
+All 35 daisyUI themes are compiled into `base/css/styles.css` and selectable from the user menu (**Themes**). The selected theme also re-colors Unfold (primary/base palettes), and its light/dark scheme drives Unfold's dark mode. The choice is stored per browser.
+
+```python
+# Optional: limit the themes offered in the picker (Light/Dark/System are always available)
+WN_ADMIN_THEMES = ["corporate", "nord", "dracula", "forest"]  # [] hides the picker
+```
+
+To ship a smaller CSS bundle, compile only some themes: `WN_THEMES="nord,dracula" bash scripts/tailwind.sh`.
 
 ## Modules
 

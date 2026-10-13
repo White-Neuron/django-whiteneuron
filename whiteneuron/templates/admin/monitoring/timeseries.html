@@ -1,0 +1,11 @@
+<section class="wn-panel {{ span }}">
+    <header class="wn-panel-head">
+        <h3>{{ title }}</h3>
+        {% if help %}<span class="material-symbols-outlined wn-help" title="{{ help }}">info</span>{% endif %}
+        <span class="wn-panel-meta" data-meta="{{ key }}"></span>
+    </header>
+    <div class="wn-panel-body wn-chart-box">
+        <canvas data-chart="{{ key }}"></canvas>
+        <div class="wn-nodata" data-nodata="{{ key }}" hidden>No data</div>
+    </div>
+</section>

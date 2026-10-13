@@ -4,7 +4,7 @@ from django.urls import reverse
 
 
 @override_settings(
-	ROOT_URLCONF="whiteneuron.base.test_urls",
+	ROOT_URLCONF="whiteneuron.base.urls_testing",
 	SECURE_SSL_REDIRECT=False,
 	UNFOLD={
 		"ENVIRONMENT": None,

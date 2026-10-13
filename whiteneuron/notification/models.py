@@ -1,4 +1,6 @@
-from django.db import models
+import logging
+
+from django.db import models, transaction
 from whiteneuron.base.models import User, Group
 from django.utils.translation import gettext_lazy as _
 
@@ -62,6 +64,8 @@ class NotificationConfig(models.Model):
 
 from .views import notify_admin
 import json
+
+logger = logging.getLogger(__name__)
 class Notification(models.Model):
     user= models.ForeignKey(User, on_delete=models.CASCADE, verbose_name=_("User to Notify"))
     title = models.CharField(max_length=255)
@@ -87,6 +91,10 @@ class Notification(models.Model):
 
     class Meta:
         db_table = "notifications"
+        indexes = [
+            models.Index(fields=["user", "is_read", "created_at"], name="notif_user_read_created_idx"),
+            models.Index(fields=["obj_link", "user", "created_at"], name="notif_objlink_user_idx"),
+        ]
         verbose_name = _("notification")
         verbose_name_plural = _("notifications")
 
@@ -112,10 +120,37 @@ class Notification(models.Model):
     # def get_changed_data(self):
         
 
-    def alert(self):
+    @classmethod
+    def notify_superusers(cls, *, title, content="", action=None, flag="info",
+                          obj_link=None, changed_data=None, action_by=None):
+        """Create one notification per active superuser and broadcast it once.
+
+        ``title`` is plain text (escaped wherever it is rendered); ``content`` must
+        already be safe HTML (build it with ``format_html``). Rows are inserted with
+        a single ``bulk_create`` and the websocket broadcast runs after the
+        transaction commits, so a failing channel layer never breaks the save.
+        """
+        user_ids = list(User.objects.filter(is_superuser=True, is_active=True).values_list("id", flat=True))
+        if not user_ids:
+            return []
+        if action_by is not None and not getattr(action_by, "pk", None):
+            action_by = None  # AnonymousUser
+        data = json.dumps(changed_data, default=str, ensure_ascii=False) if changed_data else None
+        objs = cls.objects.bulk_create([
+            cls(user_id=user_id, title=str(title)[:255], content=str(content), action=action,
+                flag=flag, obj_link=obj_link, changed_data=data, action_by=action_by)
+            for user_id in user_ids
+        ])
+        transaction.on_commit(lambda: objs[0].alert(user_ids=user_ids))
+        return objs
+
+    def alert(self, user_ids=None):
         """
         Returns a dictionary suitable for use in a JavaScript alert.
         """
-        message = f"{self.title}"
-        type= self.flag
-        return notify_admin(message, type=type, obj_link=self.obj_link, action=self.action, changed_data=self.changed_data if self.changed_data else "")
+        try:
+            return notify_admin(self.title, type=self.flag, obj_link=self.obj_link, action=self.action,
+                                changed_data=self.changed_data if self.changed_data else "",
+                                user_ids=user_ids or [self.user_id])
+        except Exception:  # channel layer down: the notification row is still stored
+            logger.warning("Notification broadcast failed", exc_info=True)

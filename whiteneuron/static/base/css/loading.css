@@ -1,18 +1,26 @@
 /* CSS cho màn hình loading */
 #loading-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.9);
+    inset: 0;
+    background-color: rgb(0 0 0 / 0.35);
+    backdrop-filter: blur(2px);
     z-index: 9999;
     display: none;
     justify-content: center;
     align-items: center;
+    cursor: progress;
+    animation: wn-loading-fade-in 150ms ease-out;
 }
 
-#loading-overlay img {
-    width: 100px;
-    height: 100px;
+#loading-overlay .ui-loading {
+    width: 3.5rem;
+}
+
+@keyframes wn-loading-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #loading-overlay { animation: none; backdrop-filter: none; }
 }

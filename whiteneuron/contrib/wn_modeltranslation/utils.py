@@ -10,7 +10,8 @@ load_dotenv()
 
 OPEN_AI_API_KEY = os.getenv("OPENAI_API_KEY")
 if OPEN_AI_API_KEY:
-    client = openai.Client(api_key=OPEN_AI_API_KEY)
+    # bounded timeout/retries: a stuck API call must not hold a worker (or request) forever
+    client = openai.Client(api_key=OPEN_AI_API_KEY, timeout=60, max_retries=2)
 else:
     client = None
 
@@ -35,16 +36,15 @@ def gpt_translate_vi(request, obj):
     # Superuser check
     if not request.user.is_superuser:
         return {"success": False, "message": _("You must be a superuser to use this action"), "object_id": obj.id, "result": {}}
+    return translate_object(obj)
+
+
+def translate_object(obj):
+    """Translate obj's *_en fields to *_vi with GPT (no request needed: usable from Celery)."""
+    if not client:
+        return {"success": False, "message": _("OpenAI API key not found"), "object_id": obj.id, "result": {}}
 
     def translate(obj):
-        if not client:
-            print("OpenAI API key not found")
-            return {
-                "success": False,
-                "message": _("OpenAI API key not found"),
-                "object_id": obj.id,
-                "result": {},
-            }
         prompt = ""
         obj_data = obj.__dict__
         fields= []

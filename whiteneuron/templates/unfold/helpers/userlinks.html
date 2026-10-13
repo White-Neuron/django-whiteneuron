@@ -1,6 +1,7 @@
 {% load i18n static unfold %}
 
-<div class="flex flex-row gap-4 items-center ml-auto">
+{% if not is_popup %}{# unfold >= 0.107: hidden inside related-object modals #}
+<div class="flex flex-row gap-3 items-center ml-auto">
     {% if announcement %}
         <style>
         @keyframes wn-glow-pulse {
@@ -13,6 +14,9 @@
         }
         .wn-announcement-btn { animation: wn-glow-pulse 3s ease-in-out infinite; }
         .wn-announcement-btn .wn-flame-icon { animation: wn-flame 2s ease-in-out infinite; display:inline-block; }
+        /* daisyUI's .modal is display:grid even when closed: inside this flex row it
+           took ~450px and made every admin page scroll sideways on phones */
+        #wn-announcement-modal:not([open]) { display: none; }
         </style>
         <button
             type="button"
@@ -24,7 +28,8 @@
                    dark:bg-orange-950/40 dark:text-orange-400 dark:border-orange-800 dark:hover:bg-orange-900/40"
         >
             <span class="material-symbols-outlined wn-flame-icon shrink-0" style="font-size:0.95rem;line-height:1">local_fire_department</span>
-            <span class="whitespace-nowrap">{{ announcement.title }}</span>
+            {# compact on smaller screens so the breadcrumb/title keeps its room #}
+            <span class="max-xl:hidden max-w-[18rem] truncate">{{ announcement.title }}</span>
             {% if announcement.badge %}
                 <span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded-full bg-orange-500 text-white text-[10px] font-bold shrink-0 leading-none">
                     {{ announcement.badge }}
@@ -44,3 +49,4 @@
         {{ nav_global_side }}
     {% endif %}
 </div>
+{% endif %}

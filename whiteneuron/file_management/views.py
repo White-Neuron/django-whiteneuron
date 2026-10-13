@@ -1,6 +1,6 @@
 import posixpath
 
-from django.http import FileResponse, HttpResponseForbidden, Http404, HttpResponse
+from django.http import FileResponse, HttpResponseForbidden, Http404
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -23,9 +23,9 @@ def _check_access(user, instance):
         return True, False
     if not user.is_authenticated:
         return False, True
-    if user in instance.allowed_users.all():
+    if instance.allowed_users.filter(pk=user.pk).exists():
         return True, False
-    if user.groups.filter(id__in=instance.allowed_groups.values_list('pk', flat=True)).exists():
+    if instance.allowed_groups.filter(pk__in=user.groups.values('pk')).exists():
         return True, False
     return False, False
 
@@ -97,14 +97,17 @@ def preview_file(request, file_type, pk):
         )
 
     try:
-        with instance.file.open('rb') as f:
-            content = f.read()
+        handle = instance.file.open('rb')
     except (IOError, OSError):
         return HttpResponseForbidden(
             str(_('Cannot read file from storage. The file may be missing.'))
         )
 
-    if not content:
-        return HttpResponseForbidden(str(_('File is empty.')))
-
-    return HttpResponse(content, content_type='text/html; charset=utf-8')
+    # Stream instead of loading the whole file, and render uploaded HTML in a
+    # sandbox: its scripts run in an opaque origin, so they can't read the admin's
+    # cookies or call its APIs as the logged-in user.
+    response = FileResponse(handle, content_type='text/html; charset=utf-8')
+    response['Content-Security-Policy'] = "sandbox allow-scripts allow-popups"
+    response['X-Content-Type-Options'] = 'nosniff'
+    response['Referrer-Policy'] = 'no-referrer'
+    return response
