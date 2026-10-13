@@ -5,6 +5,7 @@
     --mon-muted: var(--color-base-500);
     --mon-text: var(--color-base-900);
     --mon-hover: var(--color-base-50);
+    --mon-control-border: var(--color-base-200);
     --mon-ok: oklch(72% 0.17 150);
     --mon-warn: oklch(78% 0.16 70);
     --mon-crit: oklch(64% 0.22 25);
@@ -26,6 +27,7 @@
     --mon-muted: var(--color-base-400);
     --mon-text: var(--color-base-100);
     --mon-hover: var(--color-base-800);
+    --mon-control-border: var(--color-base-700);
 }
 
 /* toolbar */
@@ -43,6 +45,20 @@
 /* soft alert keeps the theme tint, but its warning-colored text is unreadable on light
    themes (yellow on pale yellow): use the theme's text color */
 .wn-mon [data-banner] { color: var(--color-base-content, var(--mon-text)); }
+/* daisyUI buttons drawn like unfold's own controls (search box, filter button): panel
+   background + input border, instead of a filled base-200 block */
+.wn-toolbar .ui-btn:not(.ui-btn-primary) {
+    --ui-btn-bg: var(--mon-panel);
+    --ui-btn-border: var(--mon-control-border);
+    --ui-btn-shadow: none;
+}
+.wn-toolbar .ui-btn:not(.ui-btn-primary):hover { --ui-btn-bg: var(--mon-hover); }
+.wn-toolbar .ui-select { border-color: var(--mon-control-border); background-color: var(--mon-panel); }
+/* the soft alert's 8% tint is barely visible on unfold's dark surfaces */
+.wn-mon [data-banner] {
+    background: color-mix(in oklab, var(--ui-alert-color, var(--color-warning)) 12%, var(--mon-panel));
+    border-color: color-mix(in oklab, var(--ui-alert-color, var(--color-warning)) 30%, transparent);
+}
 [data-refresh-now].is-loading .material-symbols-outlined { animation: wn-spin 0.9s linear infinite; }
 
 /* rows */

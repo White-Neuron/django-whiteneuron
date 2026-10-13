@@ -3,9 +3,9 @@
 :root:not([data-theme]), [data-theme="light"] {
   color-scheme: light;
   --ui-color-base-100: oklch(100% 0 0);
-  --ui-color-base-200: oklch(98% 0 0);
-  --ui-color-base-300: oklch(95% 0 0);
-  --color-base-content: oklch(21% 0.006 285.885);
+  --ui-color-base-200: var(--color-base-50);
+  --ui-color-base-300: var(--color-base-100);
+  --color-base-content: var(--color-base-900);
   --color-primary: var(--color-primary-600);
   --color-primary-content: oklch(100% 0 0);
   --color-secondary: oklch(65% 0.241 354.308);
@@ -34,10 +34,10 @@
 
 [data-theme="dark"] {
   color-scheme: dark;
-  --ui-color-base-100: oklch(25.33% .016 252.42);
-  --ui-color-base-200: oklch(23.26% .014 253.1);
-  --ui-color-base-300: oklch(21.15% .012 254.09);
-  --color-base-content: oklch(97.807% 0.029 256.847);
+  --ui-color-base-100: var(--color-base-900);
+  --ui-color-base-200: color-mix(in oklab, var(--color-base-900), var(--color-base-950));
+  --ui-color-base-300: var(--color-base-950);
+  --color-base-content: var(--color-base-100);
   --color-primary: var(--color-primary-500);
   --color-primary-content: oklch(100% 0 0);
   --color-secondary: oklch(65% 0.241 354.308);

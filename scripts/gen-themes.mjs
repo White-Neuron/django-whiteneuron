@@ -10,20 +10,25 @@
 import { writeFileSync } from "node:fs";
 import themes from "daisyui/theme/object.js";
 
-// Keep the original look of the default themes: same base colors as before,
-// and daisyUI "primary" follows unfold's primary palette so buttons match.
+// light/dark follow the project's UNFOLD["COLORS"]: daisyUI's base and primary point at
+// unfold's palette (resolved at runtime), so daisyUI components (buttons, selects,
+// alerts...) sit on the same surfaces as unfold's own widgets. daisyUI's stock dark
+// base (a gray slate) looked like gray blocks on unfold's navy dark background.
 const OVERRIDES = {
   light: {
     "--color-base-100": "oklch(100% 0 0)",
-    "--color-base-200": "oklch(98% 0 0)",
-    "--color-base-300": "oklch(95% 0 0)",
+    "--color-base-200": "var(--color-base-50)",
+    "--color-base-300": "var(--color-base-100)",
+    "--color-base-content": "var(--color-base-900)",
     "--color-primary": "var(--color-primary-600)",
     "--color-primary-content": "oklch(100% 0 0)",
   },
   dark: {
-    "--color-base-100": "oklch(25.33% .016 252.42)",
-    "--color-base-200": "oklch(23.26% .014 253.1)",
-    "--color-base-300": "oklch(21.15% .012 254.09)",
+    // unfold dark: page/cards on base-900, darker wells on base-950, text base-100
+    "--color-base-100": "var(--color-base-900)",
+    "--color-base-200": "color-mix(in oklab, var(--color-base-900), var(--color-base-950))",
+    "--color-base-300": "var(--color-base-950)",
+    "--color-base-content": "var(--color-base-100)",
     "--color-primary": "var(--color-primary-500)",
     "--color-primary-content": "oklch(100% 0 0)",
   },
