@@ -14,7 +14,6 @@
        white), so text/lines mix it with the text color */
     --mon-accent: color-mix(in oklab, var(--color-primary, var(--color-primary-600)) 70%, var(--mon-text));
     --mon-accent-soft: color-mix(in oklab, var(--mon-accent) 55%, var(--mon-panel));
-    --mon-accent-strong: color-mix(in oklab, var(--mon-accent) 70%, var(--mon-text));
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
@@ -41,8 +40,6 @@
 .wn-toolbar-icon { color: var(--mon-accent); font-size: 1.6rem; }
 .wn-toolbar-title { font-size: 1.125rem; font-weight: 600; margin-right: 0.5rem; }
 .wn-updated { font-size: 0.75rem; color: var(--mon-muted); font-variant-numeric: tabular-nums; min-width: 7.5rem; text-align: right; }
-/* daisyUI .ui-alert/.ui-badge set display, which beats the hidden attribute */
-.wn-mon [hidden] { display: none !important; }
 /* soft alert keeps the theme tint, but its warning-colored text is unreadable on light
    themes (yellow on pale yellow): use the theme's text color */
 .wn-mon [data-banner] { color: var(--color-base-content, var(--mon-text)); }
@@ -205,7 +202,7 @@
 .wn-level-warn { color: var(--mon-warn); }
 .wn-level-crit { color: var(--mon-crit); font-weight: 600; }
 .wn-share { display: flex; align-items: center; gap: 0.5rem; min-width: 9rem; }
-.wn-share progress { flex: 1; height: 0.4rem; }
+.wn-share progress { flex: 1; height: 0.4rem; color: var(--mon-accent); } /* theme primary can vanish on the page (black, cupcake) */
 .wn-share span { font-size: 0.6875rem; color: var(--mon-muted); width: 2.8rem; text-align: right; }
 .wn-empty { text-align: center; color: var(--mon-muted); padding: 1.5rem !important; }
 

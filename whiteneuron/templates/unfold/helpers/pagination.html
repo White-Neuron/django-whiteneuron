@@ -6,15 +6,24 @@
         <div class="flex flex-row gap-4 items-center {% if not cl.model_admin.list_fullwidth and not is_popup %}container mx-auto{% endif %}">
             {# InfinitePaginator's own template already renders Previous/Next #}
             {% if not cl.paginator.template_name %}
-            <a {% if cl.page_num > 1 and not cl.show_all %}href="{% infinite_paginator_url cl cl.page_num|add:-1 %}"{% endif %} class="ui-btn ui-btn-sm ui-btn-soft ui-btn-primary {% if cl.page_num > 1 and not cl.show_all %}hover:text-primary-600 dark:hover:text-primary-500{% else %}ui-btn-disabled pointer-events-none opacity-60{% endif %}">
-                {% trans "Previous" %}
-            </a>
+                {# Django ignores ?all and keeps paginating when result_count > list_max_show_all #}
+                {% if cl.show_all and cl.can_show_all %}
+                    {% include "unfold/helpers/wn_page_button.html" with label=_("Previous") %}
+                {% elif cl.page_num > 1 %}
+                    {% include "unfold/helpers/wn_page_button.html" with label=_("Previous") page=cl.page_num|add:-1 %}
+                {% else %}
+                    {% include "unfold/helpers/wn_page_button.html" with label=_("Previous") %}
+                {% endif %}
             {% endif %}
             {% pagination cl %}
             {% if not cl.paginator.template_name %}
-            <a {% if cl.page_num < cl.paginator.num_pages and not cl.show_all %}href="{% infinite_paginator_url cl cl.page_num|add:1 %}"{% endif %} class="ui-btn ui-btn-sm ui-btn-soft ui-btn-primary {% if cl.page_num < cl.paginator.num_pages and not cl.show_all %}hover:text-primary-600 dark:hover:text-primary-500{% else %}ui-btn-disabled pointer-events-none opacity-60{% endif %}">
-                {% trans "Next" %}
-            </a>
+                {% if cl.show_all and cl.can_show_all %}
+                    {% include "unfold/helpers/wn_page_button.html" with label=_("Next") %}
+                {% elif cl.page_num < cl.paginator.num_pages %}
+                    {% include "unfold/helpers/wn_page_button.html" with label=_("Next") page=cl.page_num|add:1 %}
+                {% else %}
+                    {% include "unfold/helpers/wn_page_button.html" with label=_("Next") %}
+                {% endif %}
             {% endif %}
         </div>
     </div>

@@ -102,7 +102,8 @@
         root.appendChild(el);
         const color = getComputedStyle(el).color;
         el.remove();
-        return color && color !== "rgba(0, 0, 0, 0)" ? color : "";
+        // an unusable value (no color-mix() support, missing theme vars) inherits the root's text color
+        return color && color !== getComputedStyle(root).color ? color : "";
     }
     function palette() {
         const html = getComputedStyle(document.documentElement);
@@ -114,7 +115,6 @@
             // theme accents mixed for contrast in dashboard.css (resolved through the DOM)
             primary: resolved("--mon-accent") || v("--color-primary-500", "#0ea5e9"),
             primaryLight: resolved("--mon-accent-soft") || v("--color-primary-300", "#7dd3fc"),
-            primaryDark: resolved("--mon-accent-strong") || v("--color-primary-700", "#0369a1"),
             accent: v("--color-accent", "#14b8a6"),
             secondary: v("--color-secondary", "#d946ef"),
             info: v("--color-info", "#38bdf8"),
@@ -678,7 +678,7 @@
                 const p95 = cell(join(fmt.ms(r.p95)), `num wn-level-${level(r.p95, 300, 1000) || "ok"}`);
                 const err = cell(`${fixed(r.error_rate, 100)}%`, `num ${r.error_rate ? `wn-level-${level(r.error_rate, 1, 5)}` : ""}`);
                 const share = document.createElement("td");
-                share.innerHTML = '<div class="wn-share"><progress class="ui-progress ui-progress-primary" max="100"></progress><span></span></div>';
+                share.innerHTML = '<div class="wn-share"><progress class="ui-progress" max="100" aria-hidden="true"></progress><span></span></div>';
                 share.querySelector("progress").value = ((r.total || 0) * 100) / maxTotal;
                 share.querySelector("span").textContent = `${(((r.total || 0) * 100) / grandTotal).toFixed(1)}%`;
                 tr.append(ep, cell(r.count.toLocaleString(), "num"), cell(join(fmt.ms(r.avg)), "num"), p95, cell(join(fmt.ms(r.max)), "num"), err, share);
@@ -693,7 +693,8 @@
         el.hidden = !message;
         el.classList.toggle("ui-alert-error", !!isError);
         el.classList.toggle("ui-alert-warning", !isError);
-        el.textContent = message || "";
+        // role=status: rewriting the same text would be announced again on every refresh
+        if (el.textContent !== (message || "")) el.textContent = message || "";
     }
 
     function renderToolbar(d) {
