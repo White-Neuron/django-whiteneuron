@@ -10,9 +10,29 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.3.8.0
+v0.4.0.0
 
 ## Changelog
+
+### Latest: v0.4.0.0 (2026-10-13)
+**Feature release: daisyUI multi-theme admin, server monitoring dashboard, django-unfold 0.109, security hardening and performance work**
+- **Added**: 35 daisyUI themes selectable from the user menu (**Themes**); each theme also re-colors Unfold and drives its dark mode. `WN_ADMIN_THEMES` limits the picker; `WN_THEMES="nord,dracula" bash scripts/tailwind.sh` builds a smaller CSS bundle.
+- **Added**: `whiteneuron.monitoring` — Grafana-style **Server monitoring** dashboard (CPU, memory, disk, load, network, disk I/O, request throughput, p50/p95/p99 latency, error rate, Apdex, slowest endpoints, DB/cache latency) with time ranges, auto-refresh, host selector and shared crosshair. Collect with `manage.py monitoring_collector` or the Celery task `whiteneuron.monitoring.tasks.collect_metrics`; configure with `WN_MONITORING`. New dependency: `psutil`.
+- **Changed**: `django-unfold>=0.109.0`; template overrides ported; uses the avatar badge (unread notifications), sidebar sub-navigation (Celery "Schedules"), `SITE_VERSION`, theme-aware dashboard charts.
+- **Security**: escaped notification/grid HTML (stored XSS), whitelisted `?display_fields` (a GET could call `obj.delete()`), staff-only per-user notification WebSocket with origin check, sandboxed uploaded-HTML preview, private exports scoped to the selected rows, `X-Forwarded-For` read from the right (`TRUSTED_PROXY_COUNT`, `IGNORE_X_FORWARDED_FOR`), open-redirect fix in guest login, new-user signal no longer overwrites passwords, `secrets`-based passwords redacted after sending, POST-only feedback resolve, notification IDOR fix.
+- **Performance**: activity logging 1 INSERT per request (was 3–4 queries), dashboard 4 queries (was ~16) + 60s cache, one `bulk_create` + one broadcast per notification, new indexes, atomic rate-limit counters, request-scoped admin state (grid view / page size no longer shared between users), thumbnails built at upload, N+1 fixes, 14KB logo instead of 187KB.
+- **Fixed**: dashboard date ranges overlapped by a day, `App.__str__` crash on create, export action signature, `readonly_fields` growing per request, header horizontal overflow on phones, `_(f"…")` strings that could never be translated; Vietnamese translations updated.
+- **Validation**: 21 package tests pass (`manage.py test whiteneuron`), `check` clean, `makemigrations` reports no changes, Tailwind build and `uv build` succeed; changelists, add/change forms, themes and the monitoring dashboard checked in Chromium (desktop + mobile).
+- **Breaking / behavior changes**:
+  - `SECRET_KEY` is required when `DEBUG=False` (build commands such as `collectstatic` are exempt).
+  - `WN_ASYNC_TASKS` (Celery for email, export, GPT translation) is opt-in; without it these run inline.
+  - Client IP: auto mode uses the right-most public `X-Forwarded-For` hop — set `TRUSTED_PROXY_COUNT`, or `IGNORE_X_FORWARDED_FOR=True` when the app is not behind a proxy.
+  - Whole-page cache middleware only with `USE_CACHE_MIDDLEWARE=True`; `EXTENSIONS.modeltranslation` and `compressed_fields` removed (dropped by Unfold); new notifications store plain-text titles and JSON `changed_data`.
+  - Project overrides of `unfold/helpers/navigation_user.html` should be compared with Unfold 0.109.
+- **Upgrade Guidance**: `pip install --upgrade django-whiteneuron`, add `"whiteneuron.monitoring"` to `INSTALLED_APPS`, run `migrate` (indexes + monitoring table), `compilemessages`, and start `monitoring_collector` on each host.
+- **Rollback**: revert to v0.3.8.0 after `migrate monitoring zero`, `migrate base 0027` and `migrate notification 0012` (index-only migrations; no data loss).
+
+See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
 ### Latest: v0.3.8.0 (2026-09-25)
 **Bugfixes: Django 6 format_html crash in Image previews, app mosaic thumbnail URLs, SHOW_FILE_MANAGEMENT sidebar flag**

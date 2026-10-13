@@ -68,7 +68,7 @@
             {% include "admin/monitoring/stat.html" with key="load" title=_("Load (1m)") help=_("1-minute load average; above the core count means queued work") %}
             {% include "admin/monitoring/stat.html" with key="rpm" title=_("Throughput") help=_("Requests per minute over the selected range") %}
             {% include "admin/monitoring/stat.html" with key="errors" title=_("Error rate") help=_("Share of 5xx responses over the selected range") %}
-            {% include "admin/monitoring/stat.html" with key="p95" title=_("Latency p95") help=_("95% of requests were faster than this") %}
+            {% include "admin/monitoring/stat.html" with key="p95" title=_("Latency p95") help=_("95 out of 100 requests were faster than this") %}
         </div>
     </div>
 
