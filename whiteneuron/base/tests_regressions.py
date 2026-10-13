@@ -110,7 +110,7 @@ class NotificationRoutingTests(TestCase):
         self.assertEqual(asyncio.run(groups_for(root)), [user_group(root.pk), ADMIN_GROUP])
 
 
-@override_settings(ROOT_URLCONF="whiteneuron.base.test_urls")
+@override_settings(ROOT_URLCONF="whiteneuron.base.urls_testing")
 class FeedbackPermissionTests(TestCase):
     def test_change_permission_is_enough(self):
         from django.contrib.auth.models import Permission
