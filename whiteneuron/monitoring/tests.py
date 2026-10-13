@@ -98,12 +98,20 @@ class DashboardViewTests(TestCase):
         page = self.client.get(reverse("admin:monitoring_metricsample_changelist"))
         self.assertEqual(page.status_code, 200)
         self.assertContains(page, 'id="wn-monitoring"')
+        # site_branding.html (sidebar logo/title) lives in base_site.html, not base.html
+        self.assertTemplateUsed(page, "unfold/helpers/site_branding.html")
         api = self.client.get(reverse("admin:monitoring_metricsample_api"), {"range": "15m"})
         self.assertEqual(api.status_code, 200)
         body = api.json()
         self.assertEqual(body["range"], "15m")
         self.assertIn("cpu_percent", body["live"])
         self.assertEqual(MetricSample.objects.count(), 1)  # the dashboard records a sample
+
+    def test_admin_index_shows_site_branding(self):
+        self.client.force_login(self.admin)
+        page = self.client.get(reverse("admin:index"))
+        self.assertEqual(page.status_code, 200)
+        self.assertTemplateUsed(page, "unfold/helpers/site_branding.html")
 
     def test_staff_without_permission_is_denied(self):
         self.client.force_login(self.staff)
