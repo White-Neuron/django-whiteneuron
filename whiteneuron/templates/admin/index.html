@@ -4,6 +4,10 @@
 
 {% block breadcrumbs %}{% endblock %}
 
+{% block branding %}
+    {% include "unfold/helpers/site_branding.html" %}
+{% endblock %}
+
 {% block title %}
     {% trans 'Dashboard' %} | {{ site_title|default:_('Django site admin') }}
 {% endblock %}

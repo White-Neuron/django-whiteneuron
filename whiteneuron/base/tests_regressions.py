@@ -306,3 +306,37 @@ class SecondReviewRegressionTests(TestCase):
         asyncio.run(consumer.connect())
         consumer.accept.assert_awaited_once()
         consumer.close.assert_awaited_once_with(code=4401)
+
+
+@package_test_settings()
+class AdminTemplateRegressionTests(TestCase):
+    def setUp(self):
+        self.root = User.objects.create_superuser("tpl", "tpl@example.com", "pw")
+        self.client.force_login(self.root)
+
+    def test_toolbar_controls_render_without_search_fields(self):
+        # IntervalScheduleAdmin has list_filter but no search_fields: the filter button, grid
+        # toggle and page-size picker used to disappear with the search box
+        page = self.client.get(reverse("admin:django_celery_beat_intervalschedule_changelist"))
+        self.assertEqual(page.status_code, 200)
+        self.assertFalse(page.context["cl"].search_fields)
+        self.assertContains(page, 'class="filter-open-button')
+        self.assertContains(page, 'name="grid_view"')
+        self.assertContains(page, 'name="per_page"')
+        self.assertNotContains(page, 'id="changelist-search"')
+
+    def test_next_disabled_on_last_full_page(self):
+        # a full last page used to keep "Next" active, linking to a page that doesn't exist
+        url = reverse("admin:base_user_changelist")
+        cl = self.client.get(url).context["cl"]
+        per_page = cl.list_per_page
+        missing = -cl.result_count % per_page + per_page  # at least two full pages
+        User.objects.bulk_create(User(username=f"pad{i}") for i in range(missing))
+        cl = self.client.get(url).context["cl"]
+        self.assertEqual(cl.result_count % per_page, 0)
+        last = cl.paginator.num_pages
+        self.assertGreater(last, 1)
+        page = self.client.get(url, {"p": last})
+        self.assertEqual(page.status_code, 200)
+        self.assertNotContains(page, f"?p={last + 1}")
+        self.assertContains(page, f"?p={last - 1}")
