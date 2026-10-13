@@ -94,6 +94,16 @@
         const [r, g, b] = probe.getImageData(0, 0, 1, 1).data;
         return `rgba(${r}, ${g}, ${b}, ${alpha === undefined ? 1 : alpha})`;
     }
+    // computed color of a custom property defined with color-mix()/var() on the dashboard root
+    function resolved(name) {
+        const el = document.createElement("span");
+        el.style.color = `var(${name})`;
+        el.hidden = true;
+        root.appendChild(el);
+        const color = getComputedStyle(el).color;
+        el.remove();
+        return color && color !== "rgba(0, 0, 0, 0)" ? color : "";
+    }
     function palette() {
         const html = getComputedStyle(document.documentElement);
         const mon = getComputedStyle(root);
@@ -101,9 +111,10 @@
         const dark = document.documentElement.classList.contains("dark");
         return {
             dark,
-            primary: v("--color-primary-500", "#0ea5e9"),
-            primaryLight: v("--color-primary-300", "#7dd3fc"),
-            primaryDark: v("--color-primary-700", "#0369a1"),
+            // theme accents mixed for contrast in dashboard.css (resolved through the DOM)
+            primary: resolved("--mon-accent") || v("--color-primary-500", "#0ea5e9"),
+            primaryLight: resolved("--mon-accent-soft") || v("--color-primary-300", "#7dd3fc"),
+            primaryDark: resolved("--mon-accent-strong") || v("--color-primary-700", "#0369a1"),
             accent: v("--color-accent", "#14b8a6"),
             secondary: v("--color-secondary", "#d946ef"),
             info: v("--color-info", "#38bdf8"),

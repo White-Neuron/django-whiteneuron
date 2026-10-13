@@ -8,6 +8,13 @@
     --mon-ok: oklch(72% 0.17 150);
     --mon-warn: oklch(78% 0.16 70);
     --mon-crit: oklch(64% 0.22 25);
+    /* accents come from the active theme: daisyUI's --color-primary (synced with Unfold's
+       primary for plain light/dark) is only guaranteed to contrast with --color-primary-content,
+       not with the page (black/business: dark gray/blue on near-black; cupcake: pale teal on
+       white), so text/lines mix it with the text color */
+    --mon-accent: color-mix(in oklab, var(--color-primary, var(--color-primary-600)) 70%, var(--mon-text));
+    --mon-accent-soft: color-mix(in oklab, var(--mon-accent) 55%, var(--mon-panel));
+    --mon-accent-strong: color-mix(in oklab, var(--mon-accent) 70%, var(--mon-text));
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
@@ -31,7 +38,7 @@
     gap: 0.75rem;
 }
 .wn-toolbar-group { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
-.wn-toolbar-icon { color: var(--color-primary-600); font-size: 1.6rem; }
+.wn-toolbar-icon { color: var(--mon-accent); font-size: 1.6rem; }
 .wn-toolbar-title { font-size: 1.125rem; font-weight: 600; margin-right: 0.5rem; }
 .wn-field, .wn-refresh, .wn-seg {
     display: inline-flex;
@@ -55,7 +62,7 @@
 }
 .wn-field select:focus-visible, .wn-refresh select:focus-visible,
 .wn-seg button:focus-visible, .wn-refresh button:focus-visible, .wn-row-head:focus-visible {
-    outline: 2px solid var(--color-primary-500);
+    outline: 2px solid var(--mon-accent);
     outline-offset: -2px;
 }
 .wn-seg button {
@@ -69,7 +76,10 @@
 }
 .wn-seg button:last-child { border-right: 0; }
 .wn-seg button:hover { color: var(--mon-text); background: var(--mon-hover); }
-.wn-seg button[aria-pressed="true"] { background: var(--color-primary-600); color: #fff; }
+.wn-seg button[aria-pressed="true"] {
+    background: var(--color-primary, var(--color-primary-600));
+    color: var(--color-primary-content, #fff);
+}
 .wn-refresh button {
     height: 100%;
     padding: 0 0.5rem;
@@ -271,10 +281,9 @@
     padding: 0.1rem 0.35rem;
     margin-right: 0.5rem;
     border-radius: 4px;
-    background: color-mix(in oklab, var(--color-primary-500) 15%, transparent);
-    color: var(--color-primary-600);
+    background: color-mix(in oklab, var(--mon-accent) 15%, transparent);
+    color: var(--mon-accent);
 }
-.dark .wn-method { color: var(--color-primary-400); }
 .wn-method[data-method="POST"], .wn-method[data-method="PUT"], .wn-method[data-method="PATCH"] {
     background: color-mix(in oklab, var(--mon-warn) 18%, transparent); color: color-mix(in oklab, var(--mon-warn) 70%, black);
 }
@@ -285,7 +294,7 @@
 .wn-level-crit { color: var(--mon-crit); font-weight: 600; }
 .wn-share { display: flex; align-items: center; gap: 0.5rem; min-width: 9rem; }
 .wn-share div { flex: 1; height: 0.4rem; border-radius: 9999px; background: var(--mon-hover); overflow: hidden; }
-.wn-share i { display: block; height: 100%; background: var(--color-primary-500); border-radius: inherit; }
+.wn-share i { display: block; height: 100%; background: var(--mon-accent); border-radius: inherit; }
 .wn-share span { font-size: 0.6875rem; color: var(--mon-muted); width: 2.8rem; text-align: right; }
 .wn-empty { text-align: center; color: var(--mon-muted); padding: 1.5rem !important; }
 
