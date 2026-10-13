@@ -12,9 +12,8 @@
     animation: wn-loading-fade-in 150ms ease-out;
 }
 
-#loading-overlay img {
-    width: 72px;
-    height: 72px;
+#loading-overlay .ui-loading {
+    width: 3.5rem;
 }
 
 @keyframes wn-loading-fade-in {

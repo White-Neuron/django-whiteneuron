@@ -217,15 +217,15 @@ UNFOLD = {
     "SITE_TITLE": _("White Neuron Admin"),
     "SITE_SUBHEADER": _("Admin panel"),
     "SITE_ICON": {
-        "light": lambda request: static("base/images/logo/WhiteNeuron.png"),
-        "dark": lambda request: static("base/images/logo/WhiteNeuron.png"),
+        "light": lambda request: static("base/images/logo/WhiteNeuron-128.png"),
+        "dark": lambda request: static("base/images/logo/WhiteNeuron-128.png"),
     },
     "SITE_FAVICONS": [
         {
             "rel": "icon",
             "sizes": "32x32",
-            "type": "image/svg+xml",
-            "href": lambda request: static("base/images/logo/WhiteNeuron.png"),
+            "type": "image/png",
+            "href": lambda request: static("base/images/logo/WhiteNeuron-32.png"),
         },
     ],
     "SHOW_HISTORY": False,

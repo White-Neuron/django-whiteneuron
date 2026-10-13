@@ -160,32 +160,65 @@ class NotificationAdmin(ModelAdmin):
     def display_flag(self, instance: Notification):
         return instance.flag
     
+    _OBJ_LINK_RE = re.compile(r'/([^/]+)/([^/]+)/(\d+)/change/')
+
+    @classmethod
+    def _parse_obj_link(cls, obj_link):
+        m = cls._OBJ_LINK_RE.search(obj_link or '')
+        return (m.group(1), m.group(2), m.group(3)) if m else None
+
+    @classmethod
+    def resolve_components(cls, notifications):
+        """Attach (app_label, model_verbose, object_id, obj_str) to each notification.
+
+        Linked objects are fetched with one query per model for the whole page,
+        instead of a ContentType + object query for every row.
+        """
+        wanted = {}
+        for n in notifications:
+            parsed = cls._parse_obj_link(n.obj_link)
+            if parsed:
+                wanted.setdefault(parsed[:2], set()).add(int(parsed[2]))
+        found = {}
+        for (app_label, raw_model), ids in wanted.items():
+            try:
+                mc = ContentType.objects.get_by_natural_key(app_label, raw_model).model_class()
+            except ContentType.DoesNotExist:
+                mc = None
+            if mc is None:
+                found[(app_label, raw_model)] = (raw_model.replace('_', ' ').title(), {})
+                continue
+            manager = getattr(mc, 'objects_all', mc._default_manager)
+            try:
+                objs = {o.pk: str(o) for o in manager.filter(pk__in=ids)}
+            except Exception:
+                objs = {}
+            found[(app_label, raw_model)] = (mc._meta.verbose_name.title(), objs)
+        for n in notifications:
+            parsed = cls._parse_obj_link(n.obj_link)
+            if not parsed:
+                n._wn_components = (None, None, None, None)
+                continue
+            app_label, raw_model, object_id = parsed
+            model_verbose, objs = found[(app_label, raw_model)]
+            n._wn_components = (app_label, model_verbose, object_id, objs.get(int(object_id), f"#{object_id}"))
+
     def get_components(self, instance: Notification):
-        app_label = None
-        model_verbose = None
-        object_id = None
-        obj_str = None
-        if instance.obj_link:
-            m = re.search(r'/([^/]+)/([^/]+)/(\d+)/change/', instance.obj_link)
-            if m:
-                app_label = m.group(1)
-                raw_model = m.group(2)
-                object_id = m.group(3)
-                try:
-                    ct = ContentType.objects.get_by_natural_key(app_label, raw_model)  # cached
-                    mc = ct.model_class()
-                    model_verbose = mc._meta.verbose_name.title()
-                    try:
-                        manager = getattr(mc, 'objects_all', mc.objects)
-                        obj = manager.get(pk=int(object_id))
-                        obj_str = str(obj)
-                    except Exception:
-                        obj_str = f"#{object_id}"
-                except Exception:
-                    model_verbose = raw_model.replace('_', ' ').title()
-                    obj_str = f"#{object_id}"
-        return app_label, model_verbose, object_id, obj_str
-    
+        if not hasattr(instance, '_wn_components'):
+            self.resolve_components([instance])
+        return instance._wn_components
+
+    def get_changelist(self, request, **kwargs):
+        base = super().get_changelist(request, **kwargs)
+        admin_cls = type(self)
+
+        class NotificationChangeList(base):
+            def get_results(self, request):
+                super().get_results(request)
+                admin_cls.resolve_components(list(self.result_list))
+
+        return NotificationChangeList
+
     def display_title(self, instance: Notification):
         # Parse obj_link → extract app_label, model_name, object_id
         app_label, model_verbose, object_id, obj_str = self.get_components(instance)

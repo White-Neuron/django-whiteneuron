@@ -363,7 +363,9 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
             obj.save(update_fields=['password'])
             try:
                 s = send_email_login(obj.username, password, obj.email)
-                if not s:
+                if s is None:
+                    messages.info(request, _("The login email is being sent in the background."))
+                elif not s:
                     messages.error(request, _("Failed to send email notification! Please change the password so that the user can log in."))
                 else:
                     messages.success(request, _("Email notification has been sent, please check your inbox!"))

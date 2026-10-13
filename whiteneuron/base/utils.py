@@ -192,10 +192,12 @@ def send_email_login(username, password, receiver, is_reset=False):
     system_name= SYSTEM_NAME
     context= template.format(username= username, password= password, url= URL, system_name= system_name, signature= _load_signature())
     mail= Mail.objects.create(subject= subject, content= context, receiver= receiver)
-    mail.send()
-    # don't keep the plaintext password in the database once the e-mail is out
-    Mail.objects.filter(pk=mail.pk).update(content=context.replace(password, '********'))
-    return mail.is_sent()
+    # SMTP can take seconds: hand it to a worker when Celery is enabled.
+    # Returns True/False when sent inline, None when queued.
+    from .queue import enqueue, async_tasks_enabled
+    from .tasks import send_mail_task
+    result = enqueue(send_mail_task, mail.pk, redact=password)
+    return None if async_tasks_enabled() else result
 
 def make_random_password(length=12):
     import secrets

@@ -1,6 +1,5 @@
 from django.utils.translation import gettext_lazy as _
 from django.contrib import messages
-from django.db import transaction
 from django.utils import timezone
 from django.utils.html import format_html
 from django.http import HttpResponseRedirect
@@ -12,6 +11,7 @@ from unfold.contrib.import_export.forms import ImportForm, ExportForm
 from whiteneuron.file_management.models import ExcelFile
 
 from .tasks import export
+from whiteneuron.base.queue import enqueue
 
 
 def _export_selected_action(modeladmin, request, queryset):
@@ -61,8 +61,8 @@ class ImportExportModelAdmin(DefaultImportExportModelAdmin):
         modelname = self.model._meta.model_name
         # Call export task .delay to run in background
         file_name = f"{self.model._meta.verbose_name_plural}.xlsx"
-        # enqueue after commit so the worker can always see the ExcelFile row
-        transaction.on_commit(lambda: export.delay(file.id, applabel, modelname, ids, file_name=file_name))
+        # worker (after commit, so it sees the ExcelFile row) or inline without Celery
+        enqueue(export, file.id, applabel, modelname, ids, file_name=file_name)
 
         # Thêm thông báo thành công
         messages.success(request, format_html(

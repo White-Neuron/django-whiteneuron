@@ -634,66 +634,38 @@ class_prepared.connect(_connect_m2m_for_base_model)
 
 from django.utils.html import format_html
 from PIL import Image as PILImage
-from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.core.files.base import ContentFile
 from io import BytesIO
-from PIL import ExifTags
+from PIL import ImageOps
 
 def handle_orientation(pilimage):
-    img= pilimage
-    # Xử lý EXIF Orientation nếu có
+    """Apply the EXIF Orientation tag (all 8 cases); always returns a new image."""
     try:
-        # Lấy metadata EXIF
-        exif = img._getexif()
-        if exif:
-            # Lấy thông tin về Orientation
-            for orientation in ExifTags.TAGS.keys():
-                if ExifTags.TAGS[orientation] == 'Orientation':
-                    break
-            exif_orientation = exif.get(orientation)
+        return ImageOps.exif_transpose(pilimage)
+    except Exception:
+        return pilimage.copy()
 
-            # Điều chỉnh ảnh theo Orientation
-            if exif_orientation == 3:
-                img = img.rotate(180, expand=True)
-            elif exif_orientation == 6:
-                img = img.rotate(270, expand=True)
-            elif exif_orientation == 8:
-                img = img.rotate(90, expand=True)
+def save_pilimage_to_imagefield(pilimage, field, quality=85, max_size= None, new_name= None, save=True):
+    """Resize (keeping aspect ratio, never upscaling) and store a PIL image in ``field``.
 
-    except AttributeError:
-        # Nếu ảnh không có EXIF, bỏ qua
-        pass
-    return img
-
-def save_pilimage_to_imagefield(pilimage, field, quality=100, max_size= None, new_name= None):
-    img= pilimage
-
-    img= handle_orientation(img)
-
+    The encoder follows the file extension (JPEG for .jpg/.jpeg, PNG otherwise) —
+    previously PNG data was written to files named *.jpg.
+    """
+    img= handle_orientation(pilimage)
     if max_size is not None:
-        # max size cho mỗi chiều, giữ nguyên tỷ lệ
-        h= img.height
-        w= img.width
-        if h > w:
-            max_h= max_size[1] if h > max_size[1] else h
-            max_w= int(max_h / h * w)
-        else:
-            max_w= max_size[0] if w > max_size[0] else w
-            max_h= int(max_w / w * h)
-        max_size= (max_w, max_h)
-        img= img.resize(max_size, PILImage.LANCZOS)
-    if img.mode != 'RGB':
-        img= img.convert('RGB')
+        img.thumbnail(max_size, PILImage.LANCZOS)
 
-    if new_name is None:
-        filename= field.name.split('/')[-1]
+    filename = new_name or field.name.split('/')[-1]
+    is_jpeg = filename.lower().endswith(('.jpg', '.jpeg'))
+    if is_jpeg and img.mode != 'RGB':
+        img = img.convert('RGB')
+
+    buffer = BytesIO()
+    if is_jpeg:
+        img.save(buffer, format='JPEG', quality=quality, optimize=True)
     else:
-        filename= new_name
-
-    tempfile= img
-    tempfile_io= BytesIO()
-    tempfile.save(tempfile_io, format='PNG', quality=quality)
-    image_file= InMemoryUploadedFile(tempfile_io, None, filename, 'image/png', tempfile_io.tell(), None)
-    field.save(filename, image_file)
+        img.save(buffer, format='PNG', optimize=True)
+    field.save(filename, ContentFile(buffer.getvalue()), save=save)
 
 
 MAX_SIZE= (1280, 1280)
@@ -722,7 +694,8 @@ class Image(BaseModel):
     def getImage(self):
         if hasattr(self, 'img'):
             return self.img
-        img= handle_orientation(PILImage.open(self.image))
+        with self.image.open('rb') as fh, PILImage.open(fh) as raw:
+            img = handle_orientation(raw)
         self.img= img
         return img
     
@@ -732,44 +705,35 @@ class Image(BaseModel):
     def height(self):
         return self.getImage().height
     
-    def getImgThumbnailUrl(self):
-        fl= True
-        try:
-            self.thumbnail.url
-        except:
-            # Nếu không có ảnh thumbnail thì lấy ảnh preview giảm kích thước để làm thumbnail
-            fl= False
-        try:
-            img= PILImage.open(self.thumbnail)
-        except:
-            fl= False
-        if not fl:
-            try:
-                img= PILImage.open(self.image)
-            except:
-                return None
-            save_pilimage_to_imagefield(img, self.thumbnail, max_size=THUMBNAIL_SIZE, new_name= self.image.name.split('/')[-1][:-4] + '_thumbnail.jpg')
-        return self.thumbnail.url
-    
-    def getImgPreviewUrl(self):
-        fl= True
-        try:
-            self.preview.url
-        except:
-            fl= False
-        try:
-            img= PILImage.open(self.preview)
-        except:
-            fl= False
+    def _derivative_url(self, field_name, max_size, suffix):
+        """URL of a resized copy (thumbnail/preview), generated once if missing.
 
-        if not fl:
-            # Nếu không có ảnh preview thì giảm kích thước ảnh gốc để làm preview
-            try:
-                img= PILImage.open(self.image)
-            except:
-                return None
-            save_pilimage_to_imagefield(img, self.preview, max_size=MAX_SIZE, new_name= self.image.name.split('/')[-1][:-4] + '_preview.jpg')
-        return self.preview.url
+        Changelists call this for every row: when the file is already recorded it only
+        builds the URL — no file is opened. A missing derivative is created and stored
+        with a queryset update (no BaseModel.save → no extra SELECT / notifications).
+        """
+        field = getattr(self, field_name)
+        if field and field.name:
+            return field.url
+        if not self.image or not self.image.name:
+            return None
+        base = os.path.splitext(os.path.basename(self.image.name))[0]
+        try:
+            with self.image.open('rb') as fh, PILImage.open(fh) as img:
+                img.load()
+                save_pilimage_to_imagefield(img, field, max_size=max_size,
+                                            new_name=f"{base}_{suffix}.jpg", save=False)
+        except Exception:
+            return None
+        if self.pk:
+            type(self).objects_all.filter(pk=self.pk).update(**{field_name: field.name})
+        return field.url
+
+    def getImgThumbnailUrl(self):
+        return self._derivative_url('thumbnail', THUMBNAIL_SIZE, 'thumbnail')
+
+    def getImgPreviewUrl(self):
+        return self._derivative_url('preview', MAX_SIZE, 'preview')
 
     def imgThumbnail(self):
         r= self.getImgThumbnailUrl()
@@ -846,9 +810,12 @@ class Image(BaseModel):
             self.preview= None
 
         super(Image, self).save(*args, **kwargs)
+        # Build derivatives at upload time instead of during the next changelist GET
+        self.getImgThumbnailUrl()
+        self.getImgPreviewUrl()
 
     def set_image_from_pilimage(self, pilimage, fname= None):
-        save_pilimage_to_imagefield(pilimage, self.image, max_size=MAX_SIZE, new_name= fname)
+        save_pilimage_to_imagefield(pilimage, self.image, max_size=MAX_SIZE, new_name= fname, save=False)
         self.save()
 
 ############################################

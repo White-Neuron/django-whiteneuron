@@ -17,7 +17,7 @@ from django.urls import reverse, reverse_lazy
 from unfold.contrib.forms.widgets import WysiwygWidget as UnfoldWysiwygWidget
 from whiteneuron.base.widgets import WysiwygWidget, CKEditor5Widget, MarkdownEditorWidget
 from unfold.widgets import UnfoldAdminSplitDateTimeWidget
-from django.db import models
+from django.db import models, transaction
 
 from .utils import timeit
 from .models import User, BaseModel
@@ -300,14 +300,14 @@ class ModelAdmin(UnfoldAdmin):
         filtered_list_display = request.GET.getlist(FieldSelectionFilter.parameter_name, None)
         # print(filtered_list_display)
         if "All" in filtered_list_display:
-            list_display = [field for field, _ in FieldSelectionFilter.lookups(None, request, self)]
+            list_display = [field for field, _ in FieldSelectionFilter.lookups(None, request, self) if field != 'default']
         elif 'default' in filtered_list_display or not filtered_list_display:
             # default list_display
             list_display = list(list_display)
         else:
             # Only accept known columns: Django calls any non-field name on each row,
             # so an arbitrary ?display_fields=delete would run obj.delete() on a GET.
-            allowed = {field for field, _ in FieldSelectionFilter.lookups(None, request, self)}
+            allowed = {field for field, _ in FieldSelectionFilter.lookups(None, request, self)} - {'default'}
             allowed.update(f for f in list_display if isinstance(f, str))
             list_display = [f for f in filtered_list_display if f in allowed and f != 'buttons']
             if not list_display:
@@ -546,25 +546,29 @@ class ModelAdmin(UnfoldAdmin):
     # action make a copy of the current object
     @admin.action(description=_('Duplicate selected objects'), permissions=['add'])
     def duplicate_objects(self, request, queryset):
-        for obj in queryset:
+        from uuid import uuid4
+        duplicated = 0
+        for obj in list(queryset):
+            # copy many-to-many values too (they are lost when only the row is copied)
+            m2m = {f.name: list(getattr(obj, f.name).all()) for f in obj._meta.many_to_many
+                   if f.remote_field.through._meta.auto_created}
             obj.pk = None  # This will create a new object when saved
+            obj._state.adding = True
             # Regenerate UUID to avoid unique constraint violation
-            uuid_field = next((f for f in obj._meta.fields if f.name == 'uuid' and isinstance(f, models.UUIDField)), None)
-            if uuid_field:
-                from uuid import uuid4
-                setattr(obj, 'uuid', uuid4())
+            if any(f.name == 'uuid' and isinstance(f, models.UUIDField) for f in obj._meta.fields):
+                obj.uuid = uuid4()
             if hasattr(obj, 'name'):
                 obj.name = f"{obj.name} (Copy)"
             elif hasattr(obj, 'title'):
                 obj.title = f"{obj.title} (Copy)"
-            else:
-                # If the object has neither 'name' nor 'title', we can try to set a generic field or skip renaming
-                pass
             try:
-                obj.save()
+                with transaction.atomic():
+                    obj.save()
+                    for name, values in m2m.items():
+                        getattr(obj, name).set(values)
             except Exception as e:
-                self.message_user(request, _(f'Error duplicating object: {e}'), level='error')
+                self.message_user(request, _('Error duplicating object: %(error)s') % {'error': e}, level='error')
                 continue
+            duplicated += 1
 
-        message = _(f'{queryset.count()} object(s) duplicated successfully.')
-        self.message_user(request, message)
+        self.message_user(request, _('%(count)d object(s) duplicated successfully.') % {'count': duplicated})

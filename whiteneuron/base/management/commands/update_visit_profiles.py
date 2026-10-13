@@ -1,6 +1,14 @@
 from django.core.management.base import BaseCommand
-from django.db.models import Min, Max, Q
-from whiteneuron.base.models import VisitProfile
+from django.db.models import Max, Min, OuterRef, Q, Subquery
+from whiteneuron.base.models import AnonymousActivity, UserActivity, VisitProfile
+
+
+def _bound(model, func):
+    """Correlated subquery: MIN/MAX(timestamp) of ``model`` rows for the outer profile."""
+    return Subquery(
+        model.objects.filter(profile=OuterRef('pk')).order_by()
+        .values('profile').annotate(v=func('timestamp')).values('v')[:1]
+    )
 
 
 class Command(BaseCommand):
@@ -16,9 +24,13 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         dry_run = options['dry_run']
 
+        # Min/max timestamps computed in the same query (was 4 aggregate queries per profile)
         profiles = VisitProfile.objects.filter(
             Q(useractivities__isnull=False) | Q(anonymousactivities__isnull=False)
-        ).distinct()
+        ).distinct().annotate(
+            user_min=_bound(UserActivity, Min), user_max=_bound(UserActivity, Max),
+            anon_min=_bound(AnonymousActivity, Min), anon_max=_bound(AnonymousActivity, Max),
+        )
 
         total_count = profiles.count()
         updated_count = 0
@@ -29,14 +41,9 @@ class Command(BaseCommand):
             self.stdout.write('[DRY RUN] Chế độ xem trước, không cập nhật')
         self.stdout.write('-' * 60)
 
-        for profile in profiles:
-            min_ts = profile.useractivities.aggregate(Min('timestamp'))['timestamp__min']
-            max_ts = profile.useractivities.aggregate(Max('timestamp'))['timestamp__max']
-
-            anon_min = profile.anonymousactivities.aggregate(Min('timestamp'))['timestamp__min']
-            anon_max = profile.anonymousactivities.aggregate(Max('timestamp'))['timestamp__max']
-
-            all_timestamps = [ts for ts in [min_ts, max_ts, anon_min, anon_max] if ts is not None]
+        for profile in profiles.iterator(chunk_size=2000):
+            all_timestamps = [ts for ts in [profile.user_min, profile.user_max, profile.anon_min, profile.anon_max]
+                              if ts is not None]
 
             if not all_timestamps:
                 skipped_count += 1
@@ -63,6 +70,7 @@ class Command(BaseCommand):
                         f'first_seen: {profile.first_seen} -> {updates.get("first_seen", profile.first_seen).date()}, '
                         f'last_seen: {profile.last_seen} -> {updates.get("last_seen", profile.last_seen).date()}'
                     )
+                    updated_count += 1
                 else:
                     VisitProfile.objects.filter(pk=profile.pk).update(**updates)
                     updated_count += 1
@@ -71,7 +79,7 @@ class Command(BaseCommand):
 
         self.stdout.write('-' * 60)
         if dry_run:
-            self.style.SUCCESS(f'[DRY RUN] Sẽ cập nhật {updated_count}/{total_count} profiles')
+            self.stdout.write(self.style.SUCCESS(f'[DRY RUN] Sẽ cập nhật {updated_count}/{total_count} profiles'))
         else:
             self.stdout.write(
                 self.style.SUCCESS(f'Đã cập nhật: {updated_count}')

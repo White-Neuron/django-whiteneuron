@@ -5,7 +5,7 @@
 {% block base %}
     <!-- Overlay loading -->
     <div id="loading-overlay" role="status" aria-live="polite">
-        <img src="{% static 'base/images/loading.gif' %}" alt="Loading...">
+        <span class="ui-loading ui-loading-spinner ui-loading-lg text-white" aria-label="{% trans 'Loading' %}"></span>
     </div>
 
     <!-- toast -->

@@ -507,15 +507,15 @@ UNFOLD = {
     # Nếu không có SITE_LOGO thì sẽ sử dụng SITE_ICON, nếu dùng SITE_LOGO thì sẽ không sử dụng SITE_ICON và SITE_TITLE
     # Vì vậy nên dùng SITE_ICON để đảm bảo hiển thị đúng
     "SITE_ICON": {
-        "light": lambda request: static("base/images/logo/WhiteNeuron.png"),  # light mode
-        "dark": lambda request: static("base/images/logo/WhiteNeuron.png"),  # dark mode
+        "light": lambda request: static("base/images/logo/WhiteNeuron-128.png"),  # light mode (14KB, was 187KB)
+        "dark": lambda request: static("base/images/logo/WhiteNeuron-128.png"),  # dark mode
     },
     "SITE_FAVICONS": [
         {
             "rel": "icon",
             "sizes": "32x32",
-            "type": "image/svg+xml",
-            "href": lambda request: static("base/images/logo/WhiteNeuron.png"),
+            "type": "image/png",
+            "href": lambda request: static("base/images/logo/WhiteNeuron-32.png"),
         },
     ],
     "SHOW_HISTORY": False,
@@ -789,6 +789,11 @@ if SENTRY_DSN:
 # Celery
 ######################################################################
 CELERY_BROKER_URL = environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
+# Send email / exports / GPT translation to Celery workers. Defaults to on only when a
+# broker is configured explicitly; otherwise these run inline in the request.
+WN_ASYNC_TASKS = environ.get(
+    "WN_ASYNC_TASKS", "True" if environ.get("CELERY_BROKER_URL") else "False"
+) == "True"
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 

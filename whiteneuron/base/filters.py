@@ -4,13 +4,13 @@ class FieldSelectionFilter(MultipleDropdownFilter):
     title = _('field(s) to display')
     parameter_name = 'display_fields'
     def lookups(self, request, model_admin):
+        # Built from model metadata (get_fields() instantiated a ModelForm on every
+        # changelist render). Many-to-many fields can't be list_display columns.
+        excluded = set(model_admin.exclude or ())
         r= [('default', _('Default fields'))]
-
-        for field_name in model_admin.get_fields(request):
-            try:
-                r.append((field_name, model_admin.model._meta.get_field(field_name).verbose_name))
-            except Exception:
-                pass
+        for field in model_admin.model._meta.concrete_fields:
+            if field.editable and not field.auto_created and field.name not in excluded:
+                r.append((field.name, field.verbose_name))
         return r
 
     def queryset(self, request, queryset):
