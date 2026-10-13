@@ -14,6 +14,9 @@
         }
         .wn-announcement-btn { animation: wn-glow-pulse 3s ease-in-out infinite; }
         .wn-announcement-btn .wn-flame-icon { animation: wn-flame 2s ease-in-out infinite; display:inline-block; }
+        /* daisyUI's .modal is display:grid even when closed: inside this flex row it
+           took ~450px and made every admin page scroll sideways on phones */
+        #wn-announcement-modal:not([open]) { display: none; }
         </style>
         <button
             type="button"
@@ -26,7 +29,7 @@
         >
             <span class="material-symbols-outlined wn-flame-icon shrink-0" style="font-size:0.95rem;line-height:1">local_fire_department</span>
             {# compact on smaller screens so the breadcrumb/title keeps its room #}
-            <span class="hidden xl:inline max-w-[18rem] truncate">{{ announcement.title }}</span>
+            <span class="max-xl:hidden max-w-[18rem] truncate">{{ announcement.title }}</span>
             {% if announcement.badge %}
                 <span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded-full bg-orange-500 text-white text-[10px] font-bold shrink-0 leading-none">
                     {{ announcement.badge }}

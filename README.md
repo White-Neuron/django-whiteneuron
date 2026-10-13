@@ -249,6 +249,41 @@ UNFOLD = {
 }
 ```
 
+### Server monitoring dashboard
+
+`whiteneuron.monitoring` adds a Grafana-style dashboard at **System → Server monitoring**
+(superusers, or staff with the `view_metricsample` permission):
+
+- **Overview**: uptime, CPU, memory, disk, load, throughput, 5xx error rate and p95 latency,
+  with sparklines and green / orange / red thresholds.
+- **System**: CPU / memory / disk gauges, per-core heatmap, CPU, load, memory, disk I/O,
+  network and disk space time series.
+- **Application** (from the request logs `UserActivityMiddleware` already writes): requests
+  per minute by outcome, p50 / p95 / p99 latency, status-code breakdown, Apdex score, and the
+  slowest endpoints (IDs are grouped, e.g. `/user/:id/change/`).
+- **Process & dependencies**: database and cache round-trip time, app memory and threads.
+- Time range 5m–7d, auto-refresh (off–5m), host selector, shared crosshair across charts,
+  shareable URLs (`?range=6h&refresh=30s&host=web-1`), follows the selected admin theme.
+
+Add `"whiteneuron.monitoring"` to `INSTALLED_APPS`, run `migrate`, then collect samples on
+each host (the dashboard also stores a sample while it is open, at most once per interval):
+
+```bash
+python manage.py monitoring_collector              # long-running, e.g. a systemd service
+python manage.py monitoring_collector --once       # single sample (cron)
+```
+
+or schedule the Celery task `whiteneuron.monitoring.tasks.collect_metrics` with celery beat.
+
+```python
+WN_MONITORING = {
+    "INTERVAL": 15,          # seconds between samples
+    "RETENTION_DAYS": 7,     # older samples are pruned automatically
+    "DISK_PATH": "/",        # filesystem shown in the disk panels
+    # "HOST": "web-1",       # defaults to the machine hostname
+}
+```
+
 ### Admin themes (daisyUI)
 
 All 35 daisyUI themes are compiled into `base/css/styles.css` and selectable from the user menu (**Themes**). The selected theme also re-colors Unfold (primary/base palettes), and its light/dark scheme drives Unfold's dark mode. The choice is stored per browser.

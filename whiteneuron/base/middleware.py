@@ -200,6 +200,41 @@ class ReadonlyExceptionHandlerMiddleware:
             return redirect(reverse_lazy("admin:login"))
         
 
+_VP_VERSION_KEY = "wn:vp:version"
+_vp_version_memo = (0.0, 1)
+
+
+def visit_profile_cache_version():
+    """Namespace for cached VisitProfile ids; bumped when profiles are deleted.
+
+    Memoized per process for 30s to avoid an extra cache round-trip per request.
+    """
+    global _vp_version_memo
+    now = time.monotonic()
+    if now - _vp_version_memo[0] < 30:
+        return _vp_version_memo[1]
+    try:
+        version = cache.get(_VP_VERSION_KEY) or 1
+    except Exception:
+        version = _vp_version_memo[1]
+    _vp_version_memo = (now, version)
+    return version
+
+
+def invalidate_visit_profile_cache():
+    """Call after deleting VisitProfiles so cached ids aren't reused."""
+    global _vp_version_memo
+    try:
+        try:
+            version = cache.incr(_VP_VERSION_KEY)
+        except ValueError:
+            version = 2
+            cache.set(_VP_VERSION_KEY, version, timeout=None)
+    except Exception:
+        return
+    _vp_version_memo = (time.monotonic(), version)
+
+
 def hit_counter(key, window):
     """Atomically count a hit in a fixed window; None if the cache is unavailable.
 
@@ -423,7 +458,8 @@ class UserActivityMiddleware:
     @staticmethod
     def _visit_profile_key(ip_address, user_agent):
         ua = user_agent[:500] if user_agent else ''
-        return "wn:vp:" + hashlib.sha1(f"{ip_address}|{ua}".encode()).hexdigest()
+        version = visit_profile_cache_version()
+        return f"wn:vp:{version}:" + hashlib.sha1(f"{ip_address}|{ua}".encode()).hexdigest()
 
     def _forget_visit_profile(self, ip_address, user_agent):
         try:

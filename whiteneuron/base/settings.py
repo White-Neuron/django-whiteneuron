@@ -76,6 +76,12 @@ USER_RATE_LIMIT_WINDOW = int(environ.get("USER_RATE_LIMIT_WINDOW", 60))       # 
 # Chỉ bật khi deploy sau Cloudflare — tin tưởng CF-Connecting-IP / True-Client-IP header.
 # Nếu không bật, các header này sẽ bị bỏ qua để tránh giả mạo IP.
 BEHIND_CLOUDFLARE = environ.get("BEHIND_CLOUDFLARE", "False") == "True"
+# Server monitoring dashboard (whiteneuron.monitoring)
+WN_MONITORING = {
+    "INTERVAL": int(environ.get("MONITORING_INTERVAL", 15)),          # seconds between samples
+    "RETENTION_DAYS": int(environ.get("MONITORING_RETENTION_DAYS", 7)),
+    "DISK_PATH": environ.get("MONITORING_DISK_PATH", "/"),
+}
 # Number of reverse proxies that append to X-Forwarded-For (0 = auto: trust XFF only
 # when the request comes from a private/loopback proxy, using its right-most public IP)
 TRUSTED_PROXY_COUNT = int(environ.get("TRUSTED_PROXY_COUNT", "0"))
@@ -163,6 +169,7 @@ INSTALLED_APPS = [
     "whiteneuron.contrib", # Contrib app
     "whiteneuron.dashboard",
     "whiteneuron.notification",  # Notification app
+    "whiteneuron.monitoring",  # Server monitoring dashboard
 
     "modeltranslation",
     "unfold",
@@ -676,6 +683,12 @@ UNFOLD = {
                 "title": _("System"),
                 "collapsible": True,
                 "items": [
+                    {
+                        "title": _("Server monitoring"),
+                        "icon": "monitor_heart",
+                        "link": reverse_lazy("admin:monitoring_metricsample_changelist"),
+                        "permission": "whiteneuron.base.utils.permission_superuser_callback",
+                    },
                     {
                         "title": _("Images"),
                         "icon": "image",
