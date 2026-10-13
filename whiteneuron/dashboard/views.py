@@ -240,6 +240,7 @@ def dashboard_callback(request, context):
             #         "value": random.randint(10, 90),
             #     },
             # ],
+            # colors are CSS variables: unfold (>= 0.105) resolves them, so the chart follows the admin theme
             "chart": json.dumps(
                 {
                     "labels": _28_days,
@@ -248,35 +249,35 @@ def dashboard_callback(request, context):
                             "label": _("User average"),
                             "type": "line",
                             "data": user_activities_28_days['average'],
-                            "backgroundColor": "#f0abfc",
-                            "borderColor": "#f0abfc",
+                            "backgroundColor": "var(--color-primary-300)",
+                            "borderColor": "var(--color-primary-300)",
                         },
                         {
                             "label": _("Anonymous average"),
                             "type": "line",
                             "data": user_activities_28_days['anonymous_average'],
-                            "backgroundColor": "#a78bfa",
-                            "borderColor": "#a78bfa",
+                            "backgroundColor": "var(--color-secondary)",
+                            "borderColor": "var(--color-secondary)",
                         },
                         {
                             "label": _("User success"),
                             "data": user_activities_28_days['success'],
-                            "backgroundColor": "#9333ea",
+                            "backgroundColor": "var(--color-primary-600)",
                         },
                         {
                             "label": _("Anonymous success"),
                             "data": user_activities_28_days['anonymous_success'],
-                            "backgroundColor": "#22d3ee",
+                            "backgroundColor": "var(--color-accent)",
                         },
                         {
                             "label": _("User error"),
                             "data": user_activities_28_days['error'],
-                            "backgroundColor": "#f43f5e",
+                            "backgroundColor": "var(--color-error)",
                         },
                         {
                             "label": _("Anonymous error"),
                             "data": user_activities_28_days['anonymous_error'],
-                            "backgroundColor": "#fb923c",
+                            "backgroundColor": "var(--color-warning)",
                         },
                     ],
                 }

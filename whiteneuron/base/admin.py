@@ -136,7 +136,7 @@ class BaseActivityInline(TabularInline):
     can_delete = False
     show_change_link = False
     per_page = 20
-    hide_title = True
+    show_title = False
     tab=True
     
     readonly_fields = ["path", "method", "status_code", "timestamp"]
@@ -386,7 +386,6 @@ class UserActivityAdmin(ModelAdmin):
     timelapse = models.DurationField(_("Timelapse")) # Thời gian thực hiện hành động
     """
 
-    compressed_fields = True
     using_grid_view = False
 
     list_select_related = ["user", "profile"]  # profile is nullable: not auto-joined
@@ -471,7 +470,6 @@ class UserActivityAdmin(ModelAdmin):
 
 @admin.register(AnonymousActivity, site=base_admin_site)
 class AnonymousActivityAdmin(ModelAdmin):
-    compressed_fields = True
     using_grid_view = False
 
     list_select_related = ["profile"]
@@ -528,7 +526,6 @@ class AnonymousActivityAdmin(ModelAdmin):
 
 @admin.register(VisitProfile, site=base_admin_site)
 class VisitProfileAdmin(ModelAdmin):
-    compressed_fields = True
     
     list_display = ["ip_address", "user_agent_preview", "first_seen", "last_seen"]
     search_fields = ["ip_address", "user_agent"]
@@ -561,7 +558,6 @@ class VisitProfileAdmin(ModelAdmin):
 
 @admin.register(IPBlacklist, site=base_admin_site)
 class IPBlacklistAdmin(ModelAdmin):
-    compressed_fields = True
     list_select_related = ["created_by"]
     list_display = ['ip_address', 'is_active_display', 'reason', 'blocked_until', 'created_at', 'created_by']
     search_fields = ['ip_address', 'reason']
@@ -609,7 +605,6 @@ class IPBlacklistAdmin(ModelAdmin):
 
 @admin.register(UABlacklist, site=base_admin_site)
 class UABlacklistAdmin(ModelAdmin):
-    compressed_fields = True
     list_select_related = ["created_by"]
     list_display = ['pattern', 'is_regex', 'is_active_display', 'reason', 'created_at', 'created_by']
     search_fields = ['pattern', 'reason']
@@ -767,6 +762,9 @@ class MailAdmin(ModelAdmin):
 
 from django.conf import settings
 
+from .utils import iter_nav_items as _iter_nav_items
+
+
 def _parse_sidebar_apps():
     """Parse UNFOLD SIDEBAR settings into app-like objects. No DB access."""
     apps = []
@@ -774,7 +772,7 @@ def _parse_sidebar_apps():
         navigation = settings.UNFOLD.get('SIDEBAR', {}).get('navigation', [])
         for section in navigation:
             category = section.get('title')
-            for item in section.get('items', []):
+            for item in _iter_nav_items(section.get('items', [])):
                 name = item.get('title')
                 link = item.get('link')
                 if not (name and link) or '/base/app/' in str(link):

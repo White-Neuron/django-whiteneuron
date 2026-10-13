@@ -118,6 +118,31 @@ class User(AbstractUser):
                 s+= ' (bot)'
         return s
     
+    # ── Unfold avatar helper (unfold/helpers/avatar.html, unfold >= 0.105) ──
+    @property
+    def avatar_url(self):
+        return self.avatar.url if self.avatar and self.avatar.name else None
+
+    @property
+    def avatar_badge_count(self):
+        """Unread notifications today, shown as a badge on the sidebar avatar."""
+        from whiteneuron.notification.utils import unread_today_count
+        count = unread_today_count(self)
+        return count if count else None
+
+    @property
+    def avatar_badge_variant(self):
+        return "danger" if self.avatar_badge_count else None
+
+    @property
+    def avatar_badge_url(self):
+        if not self.avatar_badge_count:
+            return None
+        try:
+            return reverse("admin:notification_notification_changelist") + "?is_read__exact=0"
+        except Exception:
+            return None
+
     def display_avatar(self):
         if self.is_bot:
             return mark_safe(f'<span class="material-symbols-outlined" style="font-size: 32px;">smart_toy</span>')

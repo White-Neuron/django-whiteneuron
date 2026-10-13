@@ -1,6 +1,7 @@
 {% load i18n static unfold %}
 
-<div class="flex flex-row gap-4 items-center ml-auto">
+{% if not is_popup %}{# unfold >= 0.107: hidden inside related-object modals #}
+<div class="flex flex-row gap-3 items-center ml-auto">
     {% if announcement %}
         <style>
         @keyframes wn-glow-pulse {
@@ -24,7 +25,8 @@
                    dark:bg-orange-950/40 dark:text-orange-400 dark:border-orange-800 dark:hover:bg-orange-900/40"
         >
             <span class="material-symbols-outlined wn-flame-icon shrink-0" style="font-size:0.95rem;line-height:1">local_fire_department</span>
-            <span class="whitespace-nowrap">{{ announcement.title }}</span>
+            {# compact on smaller screens so the breadcrumb/title keeps its room #}
+            <span class="hidden xl:inline max-w-[18rem] truncate">{{ announcement.title }}</span>
             {% if announcement.badge %}
                 <span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded-full bg-orange-500 text-white text-[10px] font-bold shrink-0 leading-none">
                     {{ announcement.badge }}
@@ -44,3 +46,4 @@
         {{ nav_global_side }}
     {% endif %}
 </div>
+{% endif %}

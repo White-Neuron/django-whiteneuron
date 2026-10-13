@@ -492,6 +492,8 @@ UNFOLD = {
     "SITE_HEADER": _(NAME), 
     "SITE_TITLE": _(NAME),
     "SITE_SUBHEADER": _("Admin panel"),
+    # Shown next to the site name (unfold >= 0.102); set SITE_VERSION in the environment
+    "SITE_VERSION": environ.get("SITE_VERSION") or None,
     "SITE_DROPDOWN": [
         {
             "icon": "diamond",
@@ -571,14 +573,6 @@ UNFOLD = {
             "800": "7 89 133",
             "900": "12 74 110",
             "950": "8 47 73",
-        },
-    },
-    "EXTENSIONS": {
-        "modeltranslation": {
-            "flags": {
-                "en": "🇬🇧",
-                "vi": "🇻🇳",
-            },
         },
     },
     "TABS": [
@@ -720,30 +714,6 @@ UNFOLD = {
                 "collapsible": True,
                 "items": [
                     {
-                        "title": _("Clocked"),
-                        "icon": "hourglass_bottom",
-                        "link": reverse_lazy(
-                            "admin:django_celery_beat_clockedschedule_changelist"
-                        ),
-                        "permission": "whiteneuron.base.utils.permission_superuser_callback",
-                    },
-                    {
-                        "title": _("Crontabs"),
-                        "icon": "update",
-                        "link": reverse_lazy(
-                            "admin:django_celery_beat_crontabschedule_changelist"
-                        ),
-                        "permission": "whiteneuron.base.utils.permission_superuser_callback",
-                    },
-                    {
-                        "title": _("Intervals"),
-                        "icon": "arrow_range",
-                        "link": reverse_lazy(
-                            "admin:django_celery_beat_intervalschedule_changelist"
-                        ),
-                        "permission": "whiteneuron.base.utils.permission_superuser_callback",
-                    },
-                    {
                         "title": _("Periodic tasks"),
                         "icon": "task",
                         "link": reverse_lazy(
@@ -752,12 +722,46 @@ UNFOLD = {
                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
                     },
                     {
-                        "title": _("Solar events"),
-                        "icon": "event",
-                        "link": reverse_lazy(
-                            "admin:django_celery_beat_solarschedule_changelist"
-                        ),
+                        # Sidebar subnavigation (unfold >= 0.109): schedules grouped under one item
+                        "title": _("Schedules"),
+                        "icon": "schedule",
+                        # unfold skips items without a link; clicking a parent only toggles its sub-items
+                        "link": reverse_lazy("admin:django_celery_beat_crontabschedule_changelist"),
                         "permission": "whiteneuron.base.utils.permission_superuser_callback",
+                        "items": [
+                            {
+                                "title": _("Clocked"),
+                                "icon": "hourglass_bottom",
+                                "link": reverse_lazy(
+                                    "admin:django_celery_beat_clockedschedule_changelist"
+                                ),
+                                "permission": "whiteneuron.base.utils.permission_superuser_callback",
+                            },
+                            {
+                                "title": _("Crontabs"),
+                                "icon": "update",
+                                "link": reverse_lazy(
+                                    "admin:django_celery_beat_crontabschedule_changelist"
+                                ),
+                                "permission": "whiteneuron.base.utils.permission_superuser_callback",
+                            },
+                            {
+                                "title": _("Intervals"),
+                                "icon": "arrow_range",
+                                "link": reverse_lazy(
+                                    "admin:django_celery_beat_intervalschedule_changelist"
+                                ),
+                                "permission": "whiteneuron.base.utils.permission_superuser_callback",
+                            },
+                            {
+                                "title": _("Solar events"),
+                                "icon": "event",
+                                "link": reverse_lazy(
+                                    "admin:django_celery_beat_solarschedule_changelist"
+                                ),
+                                "permission": "whiteneuron.base.utils.permission_superuser_callback",
+                            },
+                        ],
                     },
                 ],
             },

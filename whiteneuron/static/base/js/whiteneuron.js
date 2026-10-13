@@ -64,6 +64,13 @@
         }
     }
 
+    // Charts resolve their CSS-variable colors once at render: redraw them by reloading
+    function refreshCharts() {
+        if (document.querySelector("canvas.chart")) {
+            window.location.reload();
+        }
+    }
+
     function setUnfoldMode(mode) {
         var data = window.Alpine && window.Alpine.$data ? window.Alpine.$data(html) : null;
         if (data && "adminTheme" in data) {
@@ -80,12 +87,17 @@
             write(STORAGE_KEY, name);
             setUnfoldMode(scheme === "dark" ? "dark" : "light");
             apply();
+            refreshCharts();
         },
         // Back to plain unfold light / dark / auto.
         mode: function (mode) {
+            var changed = customTheme() !== "";
             write(STORAGE_KEY, null);
             setUnfoldMode(mode);
             apply();
+            if (changed) {
+                refreshCharts();
+            }
         },
     };
 

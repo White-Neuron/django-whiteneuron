@@ -29,7 +29,7 @@
                 {% endfor %}
             {% endcomponent %}
             {% trans "Website performance in last 28 days" as title_ %}
-            {% component "unfold/components/card.html" with class="" title=title_ %}
+            {% component "unfold/components/card.html" with class="" title=title_ title_icon="monitoring" %}
                 {% component "unfold/components/chart/bar.html" with data=chart height=126 %}{% endcomponent %}
             {% endcomponent %}
         {% endcomponent %}

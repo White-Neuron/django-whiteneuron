@@ -2,30 +2,30 @@
 
 {% if not theme %}
     {% wn_admin_themes as wn_themes %}
-    <div class="border-b border-base-200 mb-1 pb-1 px-1 dark:border-base-700" x-data="wnThemePicker()">
+    <div class="@container border-b border-base-200 mb-1 pb-1 px-2 dark:border-base-700" x-data="wnThemePicker()">
         <div class="flex flex-row gap-1">
-            <button type="button" class="cursor-pointer flex flex-row grow px-2 py-1.5 rounded-default hover:bg-base-100 hover:text-base-700 dark:hover:bg-base-700 dark:hover:text-base-200"
+            <button type="button" class="cursor-pointer flex flex-row gap-2 grow px-2 py-1.5 @max-[240px]:justify-center rounded-default hover:bg-base-100 hover:text-base-700 dark:hover:bg-base-700 dark:hover:text-base-200"
                x-on:click="setMode('light')"
                x-bind:aria-pressed="!wnTheme && adminTheme == 'light'"
                x-bind:class="!wnTheme && adminTheme == 'light' && 'text-primary-600 dark:text-primary-500 dark:hover:text-primary-500! hover:text-primary-600!'">
-                <span class="material-symbols-outlined mr-2">light_mode</span>
-                <span class="leading-none self-center">{% trans "Light" %}</span>
+                <span class="material-symbols-outlined">light_mode</span>
+                <span class="leading-none self-center @max-[240px]:hidden">{% trans "Light" %}</span>
             </button>
 
-            <button type="button" class="cursor-pointer flex flex-row grow leading-none -ml-1 px-2 py-1.5 rounded-default hover:bg-base-100 hover:text-base-700 dark:hover:bg-base-700 dark:hover:text-base-200"
+            <button type="button" class="cursor-pointer flex flex-row gap-2 grow leading-none -ms-1 px-2 py-1.5 @max-[240px]:justify-center rounded-default hover:bg-base-100 hover:text-base-700 dark:hover:bg-base-700 dark:hover:text-base-200"
                x-on:click="setMode('dark')"
                x-bind:aria-pressed="!wnTheme && adminTheme == 'dark'"
                x-bind:class="!wnTheme && adminTheme == 'dark' && 'text-primary-600 dark:text-primary-500 dark:hover:text-primary-500! hover:text-primary-600!'">
-                <span class="material-symbols-outlined mr-2">dark_mode</span>
-                <span class="leading-none self-center">{% trans "Dark" %}</span>
+                <span class="material-symbols-outlined">dark_mode</span>
+                <span class="leading-none self-center @max-[240px]:hidden">{% trans "Dark" %}</span>
             </button>
 
-            <button type="button" class="cursor-pointer flex flex-row grow -mr-1 px-2 py-1.5 rounded-default hover:bg-base-100 hover:text-base-700 dark:hover:bg-base-700 dark:hover:text-base-200"
+            <button type="button" class="cursor-pointer flex flex-row gap-2 grow -me-1 px-2 py-1.5 @max-[240px]:justify-center rounded-default hover:bg-base-100 hover:text-base-700 dark:hover:bg-base-700 dark:hover:text-base-200"
                x-on:click="setMode('auto')"
                x-bind:aria-pressed="!wnTheme && adminTheme == 'auto'"
                x-bind:class="!wnTheme && adminTheme == 'auto' && 'text-primary-600 dark:text-primary-500 dark:hover:text-primary-500! hover:text-primary-600!'">
-                <span class="material-symbols-outlined mr-2">computer</span>
-                <span class="leading-none self-center">{% trans "System" %}</span>
+                <span class="material-symbols-outlined">computer</span>
+                <span class="leading-none self-center @max-[240px]:hidden">{% trans "System" %}</span>
             </button>
         </div>
 
@@ -34,10 +34,10 @@
                     x-on:click="showThemes = !showThemes"
                     x-bind:aria-expanded="showThemes"
                     x-bind:class="wnTheme && 'text-primary-600 dark:text-primary-500'">
-                <span class="material-symbols-outlined mr-2">palette</span>
+                <span class="material-symbols-outlined me-2">palette</span>
                 <span class="leading-none self-center">{% trans "Themes" %}</span>
-                <span class="ml-auto text-xs text-font-subtle-light dark:text-font-subtle-dark capitalize" x-text="wnTheme"></span>
-                <span class="material-symbols-outlined ml-1 transition-transform" x-bind:class="showThemes && 'rotate-180'">expand_more</span>
+                <span class="ms-auto text-xs text-font-subtle-light dark:text-font-subtle-dark capitalize" x-text="wnTheme"></span>
+                <span class="material-symbols-outlined ms-1 transition-transform" x-bind:class="showThemes && 'rotate-180'">expand_more</span>
             </button>
 
             <div class="grid grid-cols-2 gap-1 max-h-64 overflow-y-auto mt-1 p-0.5" x-show="showThemes" x-cloak x-transition.opacity>

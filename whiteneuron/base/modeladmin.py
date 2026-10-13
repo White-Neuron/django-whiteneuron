@@ -78,7 +78,6 @@ class ModelAdmin(UnfoldAdmin):
     action_buttons = True
 
     warn_unsaved_form = True
-    compressed_fields = True
 
     use_infinite_paginator = True
 

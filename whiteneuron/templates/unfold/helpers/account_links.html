@@ -56,7 +56,7 @@
             {% csrf_token %}
             <button 
                 type="submit" 
-                class="flex items-center gap-2.5 px-3 py-2 text-sm cursor-pointer w-full text-left text-error hover:bg-error/10 transition-colors"
+                class="flex items-center gap-2.5 px-3 py-2 text-sm cursor-pointer w-full text-start text-error hover:bg-error/10 transition-colors"
                 onclick="document.cookie='skip_auto_guest=1; path=/; max-age=31536000';"
             >
                 <span class="material-symbols-outlined text-lg">logout</span>

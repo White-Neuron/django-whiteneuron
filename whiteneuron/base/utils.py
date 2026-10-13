@@ -91,12 +91,22 @@ def visitprofile_badge_callback(request):
 def group_badge_callback(request):
     return 0
 
+def iter_nav_items(items):
+    """Leaf sidebar items: sub-navigation parents (unfold "items") are expanded."""
+    for item in items:
+        children = item.get('items')
+        if isinstance(children, (list, tuple)) and children:
+            yield from iter_nav_items(children)
+        else:
+            yield item
+
+
 def app_badge_callback(request):
     from django.conf import settings
     try:
         navigation = settings.UNFOLD.get('SIDEBAR', {}).get('navigation', [])
         return sum(
-            1 for section in navigation for item in section.get('items', [])
+            1 for section in navigation for item in iter_nav_items(section.get('items', []))
             if item.get('title') and item.get('link') and '/base/app/' not in str(item.get('link'))
         )
     except Exception:
