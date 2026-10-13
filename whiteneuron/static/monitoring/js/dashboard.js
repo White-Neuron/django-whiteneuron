@@ -636,6 +636,14 @@
         apdex.title = !isNum(score) ? "" : score >= 0.94 ? T.satisfied : score >= 0.85 ? T.good : score >= 0.7 ? T.fair : T.poor;
     }
 
+    // solid badges (soft ones use the status color as text: unreadable in some themes);
+    // full class names so Tailwind's scanner keeps them in styles.css
+    const METHOD_BADGE = {
+        GET: "ui-badge-info", HEAD: "ui-badge-info", OPTIONS: "ui-badge-info",
+        POST: "ui-badge-warning", PUT: "ui-badge-warning", PATCH: "ui-badge-warning",
+        DELETE: "ui-badge-error",
+    };
+
     function renderEndpoints(d) {
         const body = root.querySelector("[data-endpoints]");
         const rows = d.requests.top_endpoints || [];
@@ -663,16 +671,15 @@
                 const ep = document.createElement("td");
                 ep.className = "path";
                 const method = document.createElement("span");
-                method.className = "wn-method";
-                method.dataset.method = r.method;
+                method.className = `wn-method ui-badge ui-badge-sm ${METHOD_BADGE[r.method] || "ui-badge-neutral"}`;
                 method.textContent = r.method || "—";
                 ep.title = r.path;
                 ep.append(method, document.createTextNode(r.path)); // textContent only: paths are user-controlled
                 const p95 = cell(join(fmt.ms(r.p95)), `num wn-level-${level(r.p95, 300, 1000) || "ok"}`);
                 const err = cell(`${fixed(r.error_rate, 100)}%`, `num ${r.error_rate ? `wn-level-${level(r.error_rate, 1, 5)}` : ""}`);
                 const share = document.createElement("td");
-                share.innerHTML = '<div class="wn-share"><div><i></i></div><span></span></div>';
-                share.querySelector("i").style.width = `${((r.total || 0) * 100) / maxTotal}%`;
+                share.innerHTML = '<div class="wn-share"><progress class="ui-progress ui-progress-primary" max="100"></progress><span></span></div>';
+                share.querySelector("progress").value = ((r.total || 0) * 100) / maxTotal;
                 share.querySelector("span").textContent = `${(((r.total || 0) * 100) / grandTotal).toFixed(1)}%`;
                 tr.append(ep, cell(r.count.toLocaleString(), "num"), cell(join(fmt.ms(r.avg)), "num"), p95, cell(join(fmt.ms(r.max)), "num"), err, share);
                 return tr;
@@ -684,7 +691,8 @@
     function banner(message, isError) {
         const el = root.querySelector("[data-banner]");
         el.hidden = !message;
-        el.classList.toggle("is-error", !!isError);
+        el.classList.toggle("ui-alert-error", !!isError);
+        el.classList.toggle("ui-alert-warning", !isError);
         el.textContent = message || "";
     }
 
@@ -704,7 +712,11 @@
         select.value = d.host;
         root.querySelector("[data-updated]").textContent = `${T.updated} ${new Intl.DateTimeFormat(lang, { timeStyle: "medium" }).format(new Date())}`;
         root.querySelector("[data-live]").hidden = !REFRESH_MS[state.refresh];
-        root.querySelectorAll("[data-range-btn]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.rangeBtn === state.range)));
+        root.querySelectorAll("[data-range-btn]").forEach((b) => {
+            const on = b.dataset.rangeBtn === state.range;
+            b.setAttribute("aria-pressed", String(on));
+            b.classList.toggle("ui-btn-primary", on);
+        });
 
         const notes = [];
         if (d.host !== d.local_host) notes.push(T.remoteHost);

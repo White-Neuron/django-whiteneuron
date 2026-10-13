@@ -40,86 +40,13 @@
 .wn-toolbar-group { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
 .wn-toolbar-icon { color: var(--mon-accent); font-size: 1.6rem; }
 .wn-toolbar-title { font-size: 1.125rem; font-weight: 600; margin-right: 0.5rem; }
-.wn-field, .wn-refresh, .wn-seg {
-    display: inline-flex;
-    align-items: center;
-    height: 2.25rem;
-    border: 1px solid var(--mon-border);
-    border-radius: var(--border-radius, 6px);
-    background: var(--mon-panel);
-    overflow: hidden;
-}
-.wn-field { gap: 0.25rem; padding-left: 0.5rem; }
-.wn-field .material-symbols-outlined { font-size: 1.1rem; color: var(--mon-muted); }
-.wn-field select, .wn-refresh select {
-    height: 100%;
-    background: transparent;
-    padding: 0 1.75rem 0 0.5rem;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: inherit;
-    cursor: pointer;
-}
-.wn-field select:focus-visible, .wn-refresh select:focus-visible,
-.wn-seg button:focus-visible, .wn-refresh button:focus-visible, .wn-row-head:focus-visible {
-    outline: 2px solid var(--mon-accent);
-    outline-offset: -2px;
-}
-.wn-seg button {
-    height: 100%;
-    padding: 0 0.7rem;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: var(--mon-muted);
-    border-right: 1px solid var(--mon-border);
-    cursor: pointer;
-}
-.wn-seg button:last-child { border-right: 0; }
-.wn-seg button:hover { color: var(--mon-text); background: var(--mon-hover); }
-.wn-seg button[aria-pressed="true"] {
-    background: var(--color-primary, var(--color-primary-600));
-    color: var(--color-primary-content, #fff);
-}
-.wn-refresh button {
-    height: 100%;
-    padding: 0 0.5rem;
-    border-right: 1px solid var(--mon-border);
-    color: var(--mon-muted);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-}
-.wn-refresh button:hover { color: var(--mon-text); background: var(--mon-hover); }
-.wn-refresh button.is-loading .material-symbols-outlined { animation: wn-spin 0.9s linear infinite; }
 .wn-updated { font-size: 0.75rem; color: var(--mon-muted); font-variant-numeric: tabular-nums; min-width: 7.5rem; text-align: right; }
-.wn-live {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    font-size: 0.6875rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--mon-ok);
-}
-.wn-live span { width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: currentColor; animation: wn-pulse 1.6s ease-in-out infinite; }
-.wn-live[hidden] { display: none; }
-
-.wn-banner {
-    display: flex;
-    gap: 0.5rem;
-    align-items: flex-start;
-    padding: 0.6rem 0.85rem;
-    border-radius: var(--border-radius, 6px);
-    border: 1px solid color-mix(in oklab, var(--mon-warn) 45%, transparent);
-    background: color-mix(in oklab, var(--mon-warn) 12%, transparent);
-    font-size: 0.8125rem;
-}
-.wn-banner.is-error {
-    border-color: color-mix(in oklab, var(--mon-crit) 45%, transparent);
-    background: color-mix(in oklab, var(--mon-crit) 12%, transparent);
-}
-.wn-banner[hidden] { display: none; }
+/* daisyUI .ui-alert/.ui-badge set display, which beats the hidden attribute */
+.wn-mon [hidden] { display: none !important; }
+/* soft alert keeps the theme tint, but its warning-colored text is unreadable on light
+   themes (yellow on pale yellow): use the theme's text color */
+.wn-mon [data-banner] { color: var(--color-base-content, var(--mon-text)); }
+[data-refresh-now].is-loading .material-symbols-outlined { animation: wn-spin 0.9s linear infinite; }
 
 /* rows */
 .wn-row-head {
@@ -133,6 +60,7 @@
     color: var(--mon-text);
 }
 .wn-row-head .material-symbols-outlined { transition: transform 150ms; color: var(--mon-muted); }
+.wn-row-head:focus-visible { outline: 2px solid var(--mon-accent); outline-offset: 2px; border-radius: 4px; }
 .wn-row.is-collapsed .wn-row-head .material-symbols-outlined { transform: rotate(-90deg); }
 .wn-row.is-collapsed .wn-row-body { display: none; }
 
@@ -272,29 +200,12 @@
 .wn-table tbody tr:hover td { background: var(--mon-hover); }
 .wn-table .num { text-align: right; }
 .wn-table .path { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.75rem; max-width: 34rem; overflow: hidden; text-overflow: ellipsis; }
-.wn-method {
-    display: inline-block;
-    min-width: 3.2rem;
-    text-align: center;
-    font-size: 0.625rem;
-    font-weight: 700;
-    padding: 0.1rem 0.35rem;
-    margin-right: 0.5rem;
-    border-radius: 4px;
-    background: color-mix(in oklab, var(--mon-accent) 15%, transparent);
-    color: var(--mon-accent);
-}
-.wn-method[data-method="POST"], .wn-method[data-method="PUT"], .wn-method[data-method="PATCH"] {
-    background: color-mix(in oklab, var(--mon-warn) 18%, transparent); color: color-mix(in oklab, var(--mon-warn) 70%, black);
-}
-.wn-method[data-method="DELETE"] { background: color-mix(in oklab, var(--mon-crit) 15%, transparent); color: var(--mon-crit); }
-.dark .wn-method[data-method="POST"], .dark .wn-method[data-method="PUT"], .dark .wn-method[data-method="PATCH"] { color: var(--mon-warn); }
+.wn-method { min-width: 3.4rem; margin-right: 0.5rem; font-family: inherit; font-weight: 700; }
 .wn-level-ok { color: var(--mon-ok); }
 .wn-level-warn { color: var(--mon-warn); }
 .wn-level-crit { color: var(--mon-crit); font-weight: 600; }
 .wn-share { display: flex; align-items: center; gap: 0.5rem; min-width: 9rem; }
-.wn-share div { flex: 1; height: 0.4rem; border-radius: 9999px; background: var(--mon-hover); overflow: hidden; }
-.wn-share i { display: block; height: 100%; background: var(--mon-accent); border-radius: inherit; }
+.wn-share progress { flex: 1; height: 0.4rem; }
 .wn-share span { font-size: 0.6875rem; color: var(--mon-muted); width: 2.8rem; text-align: right; }
 .wn-empty { text-align: center; color: var(--mon-muted); padding: 1.5rem !important; }
 
@@ -302,8 +213,7 @@
 .wn-mon.is-loading .wn-stat-value span { color: transparent; background: linear-gradient(90deg, var(--mon-hover), var(--mon-border), var(--mon-hover)); background-size: 200% 100%; border-radius: 4px; animation: wn-shimmer 1.2s infinite; }
 
 @keyframes wn-spin { to { transform: rotate(360deg); } }
-@keyframes wn-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 @keyframes wn-shimmer { to { background-position: -200% 0; } }
 @media (prefers-reduced-motion: reduce) {
-    .wn-live span, .wn-refresh button.is-loading .material-symbols-outlined, .wn-mon.is-loading .wn-stat-value span { animation: none; }
+    [data-refresh-now].is-loading .material-symbols-outlined, .wn-mon.is-loading .wn-stat-value span { animation: none; }
 }

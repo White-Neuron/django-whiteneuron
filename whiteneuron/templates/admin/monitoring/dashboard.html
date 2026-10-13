@@ -26,26 +26,30 @@
         <div class="wn-toolbar-group">
             <span class="material-symbols-outlined wn-toolbar-icon">monitor_heart</span>
             <h2 class="wn-toolbar-title">{% trans "Server monitoring" %}</h2>
-            <label class="wn-field">
-                <span class="material-symbols-outlined">dns</span>
+            {# controls are daisyUI components: they follow the active theme's colors #}
+            <label class="ui-select ui-select-sm w-auto">
+                <span class="material-symbols-outlined opacity-60 text-lg">dns</span>
                 <select data-host-select aria-label="{% trans 'Host' %}">
                     <option value="{{ host }}">{{ host }}</option>
                 </select>
             </label>
-            <span class="wn-live" data-live title="{% trans 'Auto refresh is on' %}"><span></span>{% trans "Live" %}</span>
+            {# solid variants: daisyUI only guarantees contrast for color / color-content pairs #}
+            <span class="ui-badge ui-badge-sm ui-badge-success font-bold uppercase tracking-wider" data-live title="{% trans 'Auto refresh is on' %}">
+                <span class="size-1.5 rounded-full bg-current animate-pulse"></span>{% trans "Live" %}
+            </span>
         </div>
 
         <div class="wn-toolbar-group">
-            <div class="wn-seg" role="group" aria-label="{% trans 'Time range' %}">
+            <div class="ui-join" role="group" aria-label="{% trans 'Time range' %}">
                 {% for key in ranges %}
-                    <button type="button" data-range-btn="{{ key }}" {% if key == range %}aria-pressed="true"{% endif %}>{{ key }}</button>
+                    <button type="button" class="ui-join-item ui-btn ui-btn-sm{% if key == range %} ui-btn-primary{% endif %}" data-range-btn="{{ key }}" aria-pressed="{% if key == range %}true{% else %}false{% endif %}">{{ key }}</button>
                 {% endfor %}
             </div>
-            <div class="wn-refresh">
-                <button type="button" data-refresh-now title="{% trans 'Refresh now' %}" aria-label="{% trans 'Refresh now' %}">
-                    <span class="material-symbols-outlined">refresh</span>
+            <div class="ui-join">
+                <button type="button" class="ui-join-item ui-btn ui-btn-sm ui-btn-square" data-refresh-now title="{% trans 'Refresh now' %}" aria-label="{% trans 'Refresh now' %}">
+                    <span class="material-symbols-outlined text-lg">refresh</span>
                 </button>
-                <select data-refresh-select aria-label="{% trans 'Auto refresh' %}">
+                <select class="ui-join-item ui-select ui-select-sm w-24" data-refresh-select aria-label="{% trans 'Auto refresh' %}">
                     {% for choice in refresh_choices %}
                         <option value="{{ choice }}" {% if choice == refresh %}selected{% endif %}>{% if choice == "off" %}{% trans "Off" %}{% else %}{{ choice }}{% endif %}</option>
                     {% endfor %}
@@ -55,7 +59,7 @@
         </div>
     </div>
 
-    <div class="wn-banner" data-banner hidden></div>
+    <div class="ui-alert ui-alert-soft ui-alert-warning text-sm" role="status" data-banner hidden></div>
 
     {# ── Overview ────────────────────────────────────────────── #}
     <div class="wn-row" data-row="overview">
