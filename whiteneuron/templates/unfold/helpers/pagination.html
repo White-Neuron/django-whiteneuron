@@ -4,13 +4,18 @@
 {% if cl %}
     <div class="px-4 lg:backdrop-blur-xs lg:bg-white/80 lg:dark:bg-base-900/80 lg:left-0 lg:right-0 lg:bottom-0 lg:sticky relative z-40 lg:border-t lg:border-base-200 lg:relative lg:scrollable-top lg:dark:border-base-800 {% element_classes 'pagination' %}">
         <div class="flex flex-row gap-4 items-center {% if not cl.model_admin.list_fullwidth and not is_popup %}container mx-auto{% endif %}">
-            <a {% if cl.page_num != 1 %}href="{% infinite_paginator_url cl cl.page_num|add:-1 %}"{% endif %} class="ui-btn ui-btn-sm ui-btn-soft ui-btn-primary {% if cl.page_num == 1 %}ui-btn-disabled pointer-events-none opacity-60{% else %}hover:text-primary-600 dark:hover:text-primary-500{% endif %}">
+            {# InfinitePaginator's own template already renders Previous/Next #}
+            {% if not cl.paginator.template_name %}
+            <a {% if cl.page_num > 1 and not cl.show_all %}href="{% infinite_paginator_url cl cl.page_num|add:-1 %}"{% endif %} class="ui-btn ui-btn-sm ui-btn-soft ui-btn-primary {% if cl.page_num > 1 and not cl.show_all %}hover:text-primary-600 dark:hover:text-primary-500{% else %}ui-btn-disabled pointer-events-none opacity-60{% endif %}">
                 {% trans "Previous" %}
             </a>
+            {% endif %}
             {% pagination cl %}
-            <a {% if cl.result_list|length == cl.paginator.per_page %}href="{% infinite_paginator_url cl cl.page_num|add:1 %}"{% endif %} class="ui-btn ui-btn-sm ui-btn-soft ui-btn-primary {% if not cl.result_list|length or cl.result_list|length != cl.paginator.per_page %}ui-btn-disabled pointer-events-none opacity-60{% else %}hover:text-primary-600 dark:hover:text-primary-500{% endif %}">
+            {% if not cl.paginator.template_name %}
+            <a {% if cl.page_num < cl.paginator.num_pages and not cl.show_all %}href="{% infinite_paginator_url cl cl.page_num|add:1 %}"{% endif %} class="ui-btn ui-btn-sm ui-btn-soft ui-btn-primary {% if cl.page_num < cl.paginator.num_pages and not cl.show_all %}hover:text-primary-600 dark:hover:text-primary-500{% else %}ui-btn-disabled pointer-events-none opacity-60{% endif %}">
                 {% trans "Next" %}
             </a>
+            {% endif %}
         </div>
     </div>
 {% endif %}
