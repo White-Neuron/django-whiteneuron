@@ -143,3 +143,68 @@ class ExportChunkTests(TestCase):
         sheet = openpyxl.load_workbook(excel.file.path).active
         self.assertEqual(sheet.max_row - 1, 5)
         excel.file.delete(save=False)
+
+
+class FieldSelectionRestrictionTests(TestCase):
+    """The column picker must only offer fields the admin itself exposes."""
+
+    def setUp(self):
+        from django.contrib.sessions.backends.signed_cookies import SessionStore
+
+        self.request = RequestFactory().get("/")
+        self.request.session = SessionStore()
+        self.request.user = User.objects.create_superuser("picker", "p@example.com", "pw")
+
+    def columns(self, admin, *selected):
+        self.request.GET = self.request.GET.copy()
+        self.request.GET.setlist("display_fields", list(selected))
+        return list(admin.get_list_display(self.request))
+
+    def test_all_respects_admin_fields(self):
+        class RestrictedAppAdmin(ModelAdmin):
+            fields = ["name", "category"]
+            action_buttons = False
+
+        admin = RestrictedAppAdmin(App, AdminSite())
+        shown = self.columns(admin, "All")
+        self.assertIn("name", shown)
+        for hidden in ("url", "permission", "thumbnail_url", "icon"):
+            self.assertNotIn(hidden, shown)
+        # asking for a hidden field explicitly is refused too
+        self.assertNotIn("url", self.columns(admin, "url"))
+
+    def test_all_respects_exclude_and_fieldsets(self):
+        class ExcludeAdmin(ModelAdmin):
+            exclude = ["url"]
+            action_buttons = False
+
+        class FieldsetAdmin(ModelAdmin):
+            fieldsets = ((None, {"fields": ("name", ("icon", "category"))}),)
+            action_buttons = False
+
+        self.assertNotIn("url", self.columns(ExcludeAdmin(App, AdminSite()), "All"))
+        shown = self.columns(FieldsetAdmin(App, AdminSite()), "All")
+        self.assertEqual({"name", "icon", "category"} & set(shown), {"name", "icon", "category"})
+        self.assertNotIn("url", shown)
+
+    def test_password_never_offered(self):
+        from whiteneuron.base.sites import base_admin_site
+
+        user_admin = base_admin_site._registry[User]
+        self.assertNotIn("password", self.columns(user_admin, "All"))
+        self.assertNotIn("password", self.columns(user_admin, "password"))
+
+    def test_every_registered_admin_offers_only_form_fields(self):
+        from django.contrib.admin.utils import flatten_fieldsets
+
+        from whiteneuron.base.filters import FieldSelectionFilter
+        from whiteneuron.base.sites import base_admin_site
+
+        for model, model_admin in base_admin_site._registry.items():
+            if not hasattr(model_admin, "enable_field_selection_filter"):
+                continue
+            with self.subTest(admin=type(model_admin).__name__):
+                form_fields = set(flatten_fieldsets(model_admin.get_fieldsets(self.request, None)))
+                offered = {k for k, _ in FieldSelectionFilter.lookups(None, self.request, model_admin)} - {"default"}
+                self.assertLessEqual(offered, form_fields)
+                self.assertNotIn("password", offered)
