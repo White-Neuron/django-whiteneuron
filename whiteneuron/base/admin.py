@@ -184,18 +184,23 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
             </div>
             '''
         
+        # Labels are looked up outside the f-strings: makemessages can't read _() inside them
+        active_label, inactive_label = _("Active"), _("Inactive")
+        staff_label, admin_label = _("Staff"), _("Admin")
+        superuser_label, bot_label = _("Superuser"), _("Bot")
+
         # Status badges với dark mode support
         badges = []
         if obj.is_active:
-            badges.append(f'<span class="ui-badge ui-badge-success ui-badge-xs gap-1"><span class="w-1.5 h-1.5 bg-success dark:bg-success-300 rounded-full animate-pulse"></span>{_("Active")}</span>')
+            badges.append(f'<span class="ui-badge ui-badge-success ui-badge-xs gap-1"><span class="w-1.5 h-1.5 bg-success dark:bg-success-300 rounded-full animate-pulse"></span>{active_label}</span>')
         else:
-            badges.append(f'<span class="ui-badge ui-badge-error ui-badge-xs gap-1"><span class="w-1.5 h-1.5 bg-error dark:bg-error-300 rounded-full"></span>{_("Inactive")}</span>')
+            badges.append(f'<span class="ui-badge ui-badge-error ui-badge-xs gap-1"><span class="w-1.5 h-1.5 bg-error dark:bg-error-300 rounded-full"></span>{inactive_label}</span>')
         
         if obj.is_staff:
-            badges.append(f'<span class="ui-badge ui-badge-info ui-badge-xs">{_("Staff")}</span>')
+            badges.append(f'<span class="ui-badge ui-badge-info ui-badge-xs">{staff_label}</span>')
         
         if obj.is_superuser:
-            badges.append(f'<span class="ui-badge ui-badge-warning ui-badge-xs">{_("Admin")}</span>')
+            badges.append(f'<span class="ui-badge ui-badge-warning ui-badge-xs">{admin_label}</span>')
         
         badges_html = ' '.join(badges)
         
@@ -205,11 +210,11 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
 
         role= ""
         if obj.is_superuser:
-            role= f'<span class="material-symbols-outlined text-warning" style="font-size:18px" title="{_("Superuser")}">admin_panel_settings</span>'
+            role= f'<span class="material-symbols-outlined text-warning" style="font-size:18px" title="{superuser_label}">admin_panel_settings</span>'
         elif obj.is_staff:
-            role= f'<span class="material-symbols-outlined text-info" style="font-size:18px" title="{_("Staff")}">badge</span>'
+            role= f'<span class="material-symbols-outlined text-info" style="font-size:18px" title="{staff_label}">badge</span>'
         elif obj.is_bot:
-            role= f'<span class="material-symbols-outlined text-secondary" style="font-size:18px" title="{_("Bot")}">smart_toy</span>'
+            role= f'<span class="material-symbols-outlined text-secondary" style="font-size:18px" title="{bot_label}">smart_toy</span>'
         
         # Compact vertical card layout với dark mode support
         string = f"""
@@ -229,7 +234,7 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
         <h5>{display_name}</h5>
         <p class="ui-card-title justify-center text-xs">{username_display}</p>
         <div class="flex flex-wrap items-center justify-center gap-2 mt-3">
-        {f'<span class="material-symbols-outlined text-success" style="font-size:18px" title="{_("Active")}">check_circle</span>' if obj.is_active else f'<span class="material-symbols-outlined text-error" style="font-size:18px" title="{_("Inactive")}">cancel</span>'}
+        {f'<span class="material-symbols-outlined text-success" style="font-size:18px" title="{active_label}">check_circle</span>' if obj.is_active else f'<span class="material-symbols-outlined text-error" style="font-size:18px" title="{inactive_label}">cancel</span>'}
         {role}
         </div>
 

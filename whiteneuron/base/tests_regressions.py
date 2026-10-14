@@ -6,6 +6,7 @@ from django.contrib.admin.sites import AdminSite
 from django.contrib.auth import get_user_model
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
+from django.utils import translation
 
 from whiteneuron.base.middleware import get_client_ip
 from whiteneuron.base.testing import package_test_settings
@@ -369,3 +370,94 @@ class AdminTemplateRegressionTests(TestCase):
         self.assertEqual(page.context["cl"].page_num, 1)
         self.assertContains(page, 'aria-disabled="true">Previous', count=1)
         self.assertContains(page, 'p=2" class="ui-btn')
+
+
+class I18nCatalogRegressionTests(TestCase):
+    """makemessages can't read _() inside f-strings: such strings silently dropped out of
+    the Vietnamese catalog in 0.4.0.0 (marked obsolete, so missing from django.mo)."""
+
+    GETTEXT_FUNCS = {"_", "gettext", "gettext_lazy", "pgettext", "pgettext_lazy", "ngettext", "ngettext_lazy"}
+
+    @staticmethod
+    def _python_files():
+        import pathlib
+        root = pathlib.Path(__file__).resolve().parents[1]
+        for path in root.rglob("*.py"):
+            if "migrations" in path.parts or path.name.startswith("tests"):
+                continue
+            yield root, path
+
+    def _func_name(self, call):
+        return getattr(call.func, "id", None) or getattr(call.func, "attr", None)
+
+    def test_no_gettext_inside_fstrings(self):
+        import ast
+        found = []
+        for root, path in self._python_files():
+            for node in ast.walk(ast.parse(path.read_text())):
+                if isinstance(node, ast.JoinedStr):
+                    for call in ast.walk(node):
+                        if isinstance(call, ast.Call) and self._func_name(call) in self.GETTEXT_FUNCS:
+                            found.append(f"{path.relative_to(root)}:{call.lineno}")
+        self.assertEqual(found, [], "move these _() calls out of the f-strings so makemessages sees them")
+
+    def test_python_msgids_are_in_the_vietnamese_catalog(self):
+        import ast
+        import gettext
+        import pathlib
+
+        mo = pathlib.Path(__file__).resolve().parents[1] / "locale" / "vi" / "LC_MESSAGES" / "django.mo"
+        with mo.open("rb") as fh:
+            catalog = gettext.GNUTranslations(fh)._catalog
+        missing = {}
+        for root, path in self._python_files():
+            for call in ast.walk(ast.parse(path.read_text())):
+                if (isinstance(call, ast.Call) and self._func_name(call) in {"_", "gettext", "gettext_lazy"}
+                        and call.args and isinstance(call.args[0], ast.Constant)
+                        and isinstance(call.args[0].value, str) and call.args[0].value):
+                    msgid = call.args[0].value
+                    if msgid not in catalog:
+                        with translation.override("vi"):
+                            if str(translation.gettext(msgid)) == msgid:  # not covered by Django/Unfold either
+                                missing.setdefault(msgid, f"{path.relative_to(root)}:{call.lineno}")
+        self.assertEqual(missing, {}, "run scripts/makemessages.sh, translate, then scripts/compilemessages.sh")
+
+    def test_dashboard_kpi_is_fully_translated(self):
+        from whiteneuron.dashboard.views import dashboard_callback
+
+        request = RequestFactory().get("/admin/", {"time": "today"})
+        with translation.override("vi"):
+            kpi = dashboard_callback(request, {})["kpi"][0]
+        self.assertIn("trong", kpi["title"])
+        self.assertIn("tiến trình từ lần cuối", str(kpi["footer"]))
+        self.assertIn("ngày", str(kpi["footer"]))
+
+
+class UiModalCssRegressionTests(TestCase):
+    def test_ui_modal_overrides_unfold_dialog_rule(self):
+        # Unfold's unlayered `dialog {...}` beat daisyUI's layered .ui-modal (narrow white
+        # column, no overlay); styles.css must carry the dialog.ui-modal override.
+        import pathlib
+
+        css = (pathlib.Path(__file__).resolve().parents[1] / "static" / "base" / "css" / "styles.css").read_text()
+        rule = css[css.index("dialog.ui-modal{"):]
+        rule = rule[: rule.index("}")]
+        for decl in ("position:fixed", "inset:0", "translate:none", "width:100%", "padding:0"):
+            self.assertIn(decl, rule)
+
+
+class AnnouncementContentTests(TestCase):
+    def _get(self):
+        from whiteneuron.base.views import get_announcement_content
+        return get_announcement_content(RequestFactory().get("/announcement/"))
+
+    @override_settings(ANNOUNCEMENT_CONTENT_HTML_FILE="does-not-exist/announcement.html")
+    def test_missing_template_returns_empty_content(self):
+        with self.assertLogs("whiteneuron.base.views", level="WARNING"):
+            response = self._get()
+        self.assertEqual((response.status_code, response.content), (200, b""))
+
+    @override_settings(ANNOUNCEMENT_CONTENT_HTML_FILE=None)
+    def test_unset_setting_returns_empty_content(self):
+        response = self._get()  # used to return None (500)
+        self.assertEqual((response.status_code, response.content), (200, b""))

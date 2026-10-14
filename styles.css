@@ -55,6 +55,39 @@
   --color-base-300: var(--ui-color-base-300) !important;
 }
 
+/*
+  Unfold styles every <dialog> (unlayered: centered 28rem white card with padding,
+  translate(-50%,-50%), position relative). Unlayered CSS beats daisyUI's layered
+  .ui-modal whatever the specificity, so an open ui-modal rendered as a narrow white
+  column with no overlay. dialog.ui-modal (0,1,1) beats Unfold's dialog (0,0,1) and
+  restores daisyUI's full-screen modal; the box inside keeps its own styles.
+*/
+dialog.ui-modal {
+  position: fixed;
+  inset: 0; /* also resets Unfold's top/left: 50% */
+  translate: none;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background-color: transparent;
+}
+dialog.ui-modal[open],
+dialog.ui-modal:target,
+dialog.ui-modal.ui-modal-open {
+  background-color: oklch(0% 0 0 / 0.4);
+}
+/* daisyUI draws its own overlay; drop Unfold's blurred ::backdrop */
+dialog.ui-modal::backdrop {
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
 /* Theme picker option: previews a theme using its own colors */
 @layer components {
   .wn-theme-option {

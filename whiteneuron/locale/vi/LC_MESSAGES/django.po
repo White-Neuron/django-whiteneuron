@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-13 02:44+0000\n"
+"POT-Creation-Date: 2026-10-14 10:26+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -238,7 +238,7 @@ msgstr "Nhóm"
 
 #: _unfold_src/contrib/guardian/templates/admin/guardian/model/obj_perms_manage_group.html:20
 #: _unfold_src/contrib/guardian/templates/admin/guardian/model/obj_perms_manage_user.html:21
-#: base/admin.py:273 base/admin.py:298
+#: base/admin.py:278 base/admin.py:303
 msgid "Permissions"
 msgstr "Quyền"
 
@@ -246,8 +246,8 @@ msgstr "Quyền"
 #: _unfold_src/contrib/guardian/templates/unfold/guardian/user_form.html:16
 #: _unfold_src/contrib/reversion/templates/reversion/object_history.html:18
 #: _unfold_src/contrib/reversion_compare/templates/reversion-compare/action_list_partial.html:36
-#: _unfold_src/templates/admin/object_history.html:15 base/admin.py:333
-#: dashboard/views.py:199 feedbacks/models.py:15
+#: _unfold_src/templates/admin/object_history.html:15 base/admin.py:338
+#: dashboard/views.py:207 feedbacks/models.py:15
 msgid "User"
 msgstr "Người dùng"
 
@@ -257,6 +257,7 @@ msgstr "Quyền nhóm"
 
 #: _unfold_src/contrib/guardian/templates/unfold/guardian/group_form.html:51
 #: _unfold_src/contrib/guardian/templates/unfold/guardian/user_form.html:52
+#: base/modeladmin.py:456
 msgid "Edit"
 msgstr "Sửa"
 
@@ -338,8 +339,8 @@ msgid ""
 "Below is a preview of data to be imported. If you are satisfied with the "
 "results, click 'Confirm import'"
 msgstr ""
-"Dưới đây là bản xem trước của dữ liệu sẽ được nhập. Nếu bạn hài lòng với kết"
-" quả, hãy nhấp vào 'Xác nhận nhập'"
+"Dưới đây là bản xem trước của dữ liệu sẽ được nhập. Nếu bạn hài lòng với kết "
+"quả, hãy nhấp vào 'Xác nhận nhập'"
 
 #: _unfold_src/contrib/import_export/templates/admin/import_export/import_confirm.html:16
 msgid "Confirm import"
@@ -354,7 +355,7 @@ msgid "View traceback"
 msgstr "Xem traceback"
 
 #: _unfold_src/contrib/import_export/templates/admin/import_export/import_preview.html:23
-#: base/models.py:535
+#: base/models.py:532 base/models.py:536
 msgid "New"
 msgstr "Mới"
 
@@ -363,12 +364,13 @@ msgid "Skipped"
 msgstr "Đã bỏ qua"
 
 #: _unfold_src/contrib/import_export/templates/admin/import_export/import_preview.html:29
-#: _unfold_src/templates/admin/submit_line.html:63
+#: _unfold_src/templates/admin/submit_line.html:63 base/modeladmin.py:460
 #: templates/admin/wn_history_panel.html:74
 msgid "Delete"
 msgstr "Xóa"
 
 #: _unfold_src/contrib/import_export/templates/admin/import_export/import_preview.html:32
+#: base/models.py:542 base/models.py:641
 #: templates/admin/wn_history_panel.html:74
 msgid "Update"
 msgstr "Cập nhật"
@@ -444,16 +446,15 @@ msgid "Date/time"
 msgstr "Ngày/giờ"
 
 #: _unfold_src/contrib/reversion/templates/reversion/object_history.html:22
-#: _unfold_src/templates/admin/object_history.html:19
-#: notification/admin.py:155
+#: _unfold_src/templates/admin/object_history.html:19 notification/admin.py:155
 msgid "Action"
 msgstr "Hành động"
 
 #: _unfold_src/contrib/reversion/templates/reversion/object_history.html:54
 #: _unfold_src/contrib/reversion_compare/templates/reversion-compare/object_history.html:8
 msgid ""
-"This object doesn't have a change history. It probably wasn't added via this"
-" admin site."
+"This object doesn't have a change history. It probably wasn't added via this "
+"admin site."
 msgstr ""
 "Đối tượng này không có lịch sử thay đổi. Có lẽ nó không được thêm qua trang "
 "quản trị này."
@@ -497,11 +498,13 @@ msgstr "DATETIME_FORMAT"
 #, python-format
 msgid ""
 "\n"
-"            Compare <strong class=\"font-semibold underline\">%(date1)s</strong> with <strong class=\"font-semibold underline\">%(date2)s</strong>\n"
+"            Compare <strong class=\"font-semibold underline\">%(date1)s</"
+"strong> with <strong class=\"font-semibold underline\">%(date2)s</strong>\n"
 "        "
 msgstr ""
 "\n"
-"            So sánh <strong class=\"font-semibold underline\">%(date1)s</strong> với <strong class=\"font-semibold underline\">%(date2)s</strong>\n"
+"            So sánh <strong class=\"font-semibold underline\">%(date1)s</"
+"strong> với <strong class=\"font-semibold underline\">%(date2)s</strong>\n"
 "        "
 
 #: _unfold_src/contrib/reversion_compare/templates/reversion-compare/compare.html:19
@@ -515,12 +518,14 @@ msgstr "Quay lại phiên bản này"
 #: _unfold_src/contrib/reversion_compare/templates/reversion-compare/compare.html:30
 msgid ""
 "\n"
-"                Fields/entries marked with <sup class=\"follow\">*</sup> are not under reversion control.\n"
+"                Fields/entries marked with <sup class=\"follow\">*</sup> are "
+"not under reversion control.\n"
 "                It may be that not all marked information are correct.\n"
 "            "
 msgstr ""
 "\n"
-"                Các trường/mục được đánh dấu <sup class=\"follow\">*</sup> không được theo dõi phiên bản.\n"
+"                Các trường/mục được đánh dấu <sup class=\"follow\">*</sup> "
+"không được theo dõi phiên bản.\n"
 "                Thông tin được đánh dấu có thể không hoàn toàn chính xác.\n"
 "            "
 
@@ -621,8 +626,8 @@ msgid ""
 msgstr ""
 "Mật khẩu dạng văn bản không được lưu, vì vậy không có cách nào để xem mật "
 "khẩu của người dùng này, nhưng bạn có thể thay đổi mật khẩu bằng <a "
-"href=\"{}\" class=\"text-primary-600 dark:text-primary-500\">biểu mẫu "
-"này</a>."
+"href=\"{}\" class=\"text-primary-600 dark:text-primary-500\">biểu mẫu này</"
+"a>."
 
 #: _unfold_src/mixins/dataset_model_admin.py:56
 msgid ""
@@ -686,7 +691,7 @@ msgstr "Xóa lựa chọn"
 #: _unfold_src/templates/admin/index.html:5
 #: _unfold_src/templates/admin/login.html:15
 #: _unfold_src/templates/unfold/layouts/base.html:7
-#: templates/admin/index.html:8 templates/admin/login.html:5
+#: templates/admin/index.html:9 templates/admin/login.html:5
 msgid "Django site admin"
 msgstr "Quản trị trang Django"
 
@@ -742,8 +747,8 @@ msgstr ""
 #: _unfold_src/templates/admin/delete_confirmation.html:32
 #, python-format
 msgid ""
-"Deleting the %(object_name)s '%(escaped_object)s' would require deleting the"
-" following protected related objects:"
+"Deleting the %(object_name)s '%(escaped_object)s' would require deleting the "
+"following protected related objects:"
 msgstr ""
 "Xóa %(object_name)s '%(escaped_object)s' sẽ yêu cầu xóa các đối tượng liên "
 "quan được bảo vệ sau:"
@@ -778,8 +783,8 @@ msgid ""
 "Deleting the selected %(objects_name)s would require deleting the following "
 "protected related objects:"
 msgstr ""
-"Xóa %(objects_name)s đã chọn sẽ yêu cầu xóa các đối tượng liên quan được bảo"
-" vệ sau:"
+"Xóa %(objects_name)s đã chọn sẽ yêu cầu xóa các đối tượng liên quan được bảo "
+"vệ sau:"
 
 #: _unfold_src/templates/admin/delete_selected_confirmation.html:42
 #, python-format
@@ -801,8 +806,8 @@ msgstr "Chào mừng trở lại với"
 #: _unfold_src/templates/admin/login.html:26 templates/admin/login.html:16
 #, python-format
 msgid ""
-"You are authenticated as %(username)s, but are not authorized to access this"
-" page. Would you like to login to a different account?"
+"You are authenticated as %(username)s, but are not authorized to access this "
+"page. Would you like to login to a different account?"
 msgstr ""
 "Bạn đã xác thực với tư cách %(username)s, nhưng không được phép truy cập "
 "trang này. Bạn có muốn đăng nhập vào tài khoản khác không?"
@@ -817,8 +822,8 @@ msgstr "Quên mật khẩu hoặc tên người dùng?"
 
 #: _unfold_src/templates/admin/object_history.html:62
 msgid ""
-"This object doesn’t have a change history. It probably wasn’t added via this"
-" admin site."
+"This object doesn’t have a change history. It probably wasn’t added via this "
+"admin site."
 msgstr ""
 "Đối tượng này không có lịch sử thay đổi. Có lẽ nó đã không được thêm vào "
 "thông qua trang quản trị này."
@@ -830,7 +835,7 @@ msgstr "Hiển thị tất cả"
 
 #: _unfold_src/templates/admin/search_form.html:16
 #: _unfold_src/templates/unfold/helpers/command.html:20
-#: templates/admin/search_form.html:9
+#: templates/admin/search_form.html:11
 msgid "Type to search"
 msgstr "Gõ để tìm kiếm"
 
@@ -868,11 +873,11 @@ msgstr "Mật khẩu của bạn đã được thay đổi."
 
 #: _unfold_src/templates/registration/password_change_form.html:19
 msgid ""
-"Please enter your old password, for security’s sake, and then enter your new"
-" password twice so we can verify you typed it in correctly."
+"Please enter your old password, for security’s sake, and then enter your new "
+"password twice so we can verify you typed it in correctly."
 msgstr ""
-"Hãy nhập mật khẩu cũ của bạn, vì lý do bảo mật, sau đó nhập mật khẩu mới hai"
-" lần để chúng tôi có thể xác nhận bạn đã nhập đúng."
+"Hãy nhập mật khẩu cũ của bạn, vì lý do bảo mật, sau đó nhập mật khẩu mới hai "
+"lần để chúng tôi có thể xác nhận bạn đã nhập đúng."
 
 #: _unfold_src/templates/unfold/components/table.html:113
 #: monitoring/admin.py:28
@@ -903,6 +908,7 @@ msgstr "Tất cả ứng dụng"
 
 #: _unfold_src/templates/unfold/helpers/app_list_default.html:31
 #: _unfold_src/templates/unfold/helpers/edit_inline/inline_links.html:17
+#: base/modeladmin.py:458
 msgid "View"
 msgstr "Xem"
 
@@ -945,6 +951,7 @@ msgid "Clear all filters"
 msgstr "Đặt lại bộ lọc"
 
 #: _unfold_src/templates/unfold/helpers/change_list_filter_button.html:5
+#: templates/admin/search_form.html:59
 msgid "Filters"
 msgstr "Bộ lọc"
 
@@ -987,11 +994,13 @@ msgstr "Không có kết quả nào khớp với tìm kiếm của bạn"
 #, python-format
 msgid ""
 "\n"
-"            Found <span class=\"font-medium text-important\">%(counter)s</span> result in %(time)s seconds\n"
+"            Found <span class=\"font-medium text-important\">%(counter)s</"
+"span> result in %(time)s seconds\n"
 "        "
 msgid_plural ""
 "\n"
-"            Found <span class=\"font-medium text-important\">%(counter)s</span> results in %(time)s seconds\n"
+"            Found <span class=\"font-medium text-important\">%(counter)s</"
+"span> results in %(time)s seconds\n"
 "        "
 msgstr[0] ""
 "\n"
@@ -1066,12 +1075,14 @@ msgid_plural "Please correct the errors below."
 msgstr[0] "Vui lòng sửa các lỗi dưới đây."
 
 #: _unfold_src/templates/unfold/helpers/pagination_infinite.html:5
-#: templates/unfold/helpers/pagination.html:8
+#: templates/unfold/helpers/pagination.html:11
+#: templates/unfold/helpers/pagination.html:13
 msgid "Previous"
 msgstr "Trước"
 
 #: _unfold_src/templates/unfold/helpers/pagination_infinite.html:9
-#: templates/unfold/helpers/pagination.html:12
+#: templates/unfold/helpers/pagination.html:19
+#: templates/unfold/helpers/pagination.html:21
 msgid "Next"
 msgstr "Tiếp theo"
 
@@ -1159,7 +1170,7 @@ msgstr "Tối"
 
 #: _unfold_src/templates/unfold/helpers/theme_switch.html:23
 #: _unfold_src/templates/unfold/helpers/theme_switch_dropdown.html:30
-#: base/settings.py:687 templates/admin/monitoring/dashboard.html:77
+#: base/settings.py:687 templates/admin/monitoring/dashboard.html:81
 #: templates/unfold/helpers/theme_switch.html:28
 msgid "System"
 msgstr "Hệ thống"
@@ -1233,43 +1244,59 @@ msgstr "Chọn loại tiền tệ"
 msgid "A user with this email already exists."
 msgstr "Đã có người dùng với email này."
 
-#: base/admin.py:203
-msgid "Unknown User"
-msgstr "Người dùng không xác định"
+#: base/admin.py:188 base/admin.py:585 base/admin.py:632 base/models.py:954
+msgid "Active"
+msgstr "Hoạt động"
 
-#: base/admin.py:204
-msgid "No username"
-msgstr "Không có tên người dùng"
+#: base/admin.py:188
+msgid "Inactive"
+msgstr "Không hoạt động"
 
-#: base/admin.py:267 base/admin.py:291 base/admin.py:666
-msgid "Personal info"
-msgstr "Thông tin cá nhân"
-
-#: base/admin.py:312
-msgid "Important dates"
-msgstr "Ngày quan trọng"
-
-#: base/admin.py:337
-msgid "Avatar"
-msgstr "Ảnh đại diện"
-
-#: base/admin.py:341
+#: base/admin.py:189 base/admin.py:346
 msgid "Staff"
 msgstr "Nhân viên"
 
-#: base/admin.py:345
+#: base/admin.py:189
+msgid "Admin"
+msgstr "Quản trị"
+
+#: base/admin.py:190 base/admin.py:350
 msgid "Superuser"
 msgstr "Quản trị viên"
 
-#: base/admin.py:349
+#: base/admin.py:190
+msgid "Bot"
+msgstr "Bot"
+
+#: base/admin.py:208
+msgid "Unknown User"
+msgstr "Người dùng không xác định"
+
+#: base/admin.py:209
+msgid "No username"
+msgstr "Không có tên người dùng"
+
+#: base/admin.py:272 base/admin.py:296 base/admin.py:671
+msgid "Personal info"
+msgstr "Thông tin cá nhân"
+
+#: base/admin.py:317
+msgid "Important dates"
+msgstr "Ngày quan trọng"
+
+#: base/admin.py:342
+msgid "Avatar"
+msgstr "Ảnh đại diện"
+
+#: base/admin.py:354
 msgid "Created"
 msgstr "Đã tạo"
 
-#: base/admin.py:367
+#: base/admin.py:372
 msgid "The login email is being sent in the background."
 msgstr "Email đăng nhập đang được gửi trong nền."
 
-#: base/admin.py:369
+#: base/admin.py:374
 msgid ""
 "Failed to send email notification! Please change the password so that the "
 "user can log in."
@@ -1277,12 +1304,12 @@ msgstr ""
 "Không thể gửi thông báo qua email! Vui lòng thay đổi mật khẩu để người dùng "
 "có thể đăng nhập."
 
-#: base/admin.py:371
+#: base/admin.py:376
 msgid "Email notification has been sent, please check your inbox!"
 msgstr ""
 "Thông báo qua email đã được gửi, vui lòng kiểm tra hộp thư đến của bạn!"
 
-#: base/admin.py:373
+#: base/admin.py:378
 msgid ""
 "Failed to send email notification. The user was created but could not "
 "receive login credentials."
@@ -1290,103 +1317,99 @@ msgstr ""
 "Không thể gửi email thông báo. Người dùng đã được tạo nhưng chưa nhận được "
 "thông tin đăng nhập."
 
-#: base/admin.py:414 base/admin.py:496
+#: base/admin.py:419 base/admin.py:501
 msgid "Client information"
 msgstr "Thông tin khách hàng"
 
-#: base/admin.py:422 base/admin.py:502
+#: base/admin.py:427 base/admin.py:507
 msgid "Request information"
 msgstr "Thông tin yêu cầu"
 
-#: base/admin.py:441
+#: base/admin.py:446
 msgid "Block IP address"
 msgstr "Chặn địa chỉ IP"
 
-#: base/admin.py:464
+#: base/admin.py:469
 #, python-format
 msgid "Blocked %(count)d IP(s): %(ips)s"
 msgstr "Đã chặn %(count)d IP: %(ips)s"
 
-#: base/admin.py:466
+#: base/admin.py:471
 #, python-format
 msgid "%(count)d activity records had no IP address."
 msgstr "%(count)d bản ghi hoạt động không có địa chỉ IP."
 
-#: base/admin.py:513 base/admin.py:575 base/admin.py:622
-#: base/modeladmin.py:429 file_management/admin.py:92
+#: base/admin.py:518 base/admin.py:580 base/admin.py:627 base/modeladmin.py:447
+#: file_management/admin.py:92
 msgid "Meta"
 msgstr "Meta"
 
-#: base/admin.py:540
+#: base/admin.py:545
 msgid "Timestamps"
 msgstr "Dấu thời gian"
 
-#: base/admin.py:547 base/models.py:188
+#: base/admin.py:552 base/models.py:189
 msgid "User agent"
 msgstr "Trình duyệt người dùng"
 
-#: base/admin.py:569 base/admin.py:616
+#: base/admin.py:574 base/admin.py:621
 msgid "Target"
 msgstr "Mục tiêu"
 
-#: base/admin.py:572 base/admin.py:619
+#: base/admin.py:577 base/admin.py:624
 msgid "Block settings"
 msgstr "Cài đặt chặn"
 
-#: base/admin.py:580 base/admin.py:627 base/models.py:929
-msgid "Active"
-msgstr "Hoạt động"
-
-#: base/admin.py:589
+#: base/admin.py:594
 msgid "Activate selected IPs"
 msgstr "Kích hoạt các IP đã chọn"
 
-#: base/admin.py:594
+#: base/admin.py:599
 msgid "Selected IPs have been activated."
 msgstr "Các IP đã chọn đã được kích hoạt."
 
-#: base/admin.py:596
+#: base/admin.py:601
 msgid "Deactivate selected IPs"
 msgstr "Hủy kích hoạt các IP đã chọn"
 
-#: base/admin.py:601
+#: base/admin.py:606
 msgid "Selected IPs have been deactivated."
 msgstr "Các IP đã chọn đã được hủy kích hoạt."
 
-#: base/admin.py:636
+#: base/admin.py:641
 msgid "Activate selected patterns"
 msgstr "Kích hoạt các mẫu đã chọn"
 
-#: base/admin.py:641
+#: base/admin.py:646
 msgid "Selected UA patterns have been activated."
 msgstr "Các mẫu UA đã chọn đã được kích hoạt."
 
-#: base/admin.py:643
+#: base/admin.py:648
 msgid "Deactivate selected patterns"
 msgstr "Hủy kích hoạt các mẫu đã chọn"
 
-#: base/admin.py:648
+#: base/admin.py:653
 msgid "Selected UA patterns have been deactivated."
 msgstr "Các mẫu UA đã chọn đã được hủy kích hoạt."
 
-#: base/admin.py:697
+#: base/admin.py:702
 msgid "Configuration"
 msgstr "Cấu hình"
 
-#: base/admin.py:712
+#: base/admin.py:717
 msgid "Image info"
 msgstr "Thông tin hình ảnh"
 
-#: base/admin.py:739
+#: base/admin.py:744
 msgid "Mail info"
 msgstr "Thông tin thư"
 
-#: base/admin.py:760 base/models.py:867 notification/admin.py:150
+#: base/admin.py:765 base/models.py:892 notification/admin.py:150
 msgid "Content"
 msgstr "Nội dung"
 
-#: base/admin.py:830 base/settings.py:611 dashboard/apps.py:8
-#: dashboard/views.py:167 templates/admin/index.html:8
+#: base/admin.py:835 base/settings.py:611 dashboard/apps.py:8
+#: dashboard/views.py:175 templates/admin/index.html:9
 msgid "Dashboard"
 msgstr "Bảng điều khiển"
 
@@ -1394,11 +1417,11 @@ msgstr "Bảng điều khiển"
 msgid "Base"
 msgstr "Cơ sở"
 
-#: base/filters.py:4
+#: base/filters.py:25
 msgid "field(s) to display"
 msgstr "Trường hiển thị"
 
-#: base/filters.py:10
+#: base/filters.py:40
 msgid "Default fields"
 msgstr "Trường mặc định"
 
@@ -1408,56 +1431,56 @@ msgstr ""
 "Cơ sở dữ liệu đang hoạt động ở chế độ chỉ đọc. Không thể lưu bất kỳ dữ liệu "
 "nào."
 
-#: base/modeladmin.py:108
+#: base/modeladmin.py:123
 #, python-brace-format
 msgid "Search by {fields}"
 msgstr "Tìm kiếm theo {fields}"
 
-#: base/modeladmin.py:195
+#: base/modeladmin.py:210
 msgid "has been soft-deleted by user"
 msgstr "đã được xóa mềm bởi người dùng"
 
-#: base/modeladmin.py:195
+#: base/modeladmin.py:210
 msgid "has been restored by user"
 msgstr "đã được khôi phục bởi người dùng"
 
-#: base/modeladmin.py:214 base/modeladmin.py:244 base/modeladmin.py:360
+#: base/modeladmin.py:229 base/modeladmin.py:259 base/modeladmin.py:378
 #, python-format
 msgid "%(name)s %(obj)s has been soft-deleted by user \"%(user)s\""
 msgstr "%(name)s %(obj)s đã được xóa mềm bởi người dùng \"%(user)s\""
 
-#: base/modeladmin.py:215
+#: base/modeladmin.py:230
 msgid "Delete selected records"
 msgstr "Xóa các bản ghi đã chọn"
 
-#: base/modeladmin.py:224
+#: base/modeladmin.py:239
 #, python-format
 msgid "%(name)s %(obj)s has been hard-deleted by user \"%(user)s\""
 msgstr "%(name)s %(obj)s đã được xóa vĩnh viễn bởi người dùng \"%(user)s\""
 
-#: base/modeladmin.py:225
+#: base/modeladmin.py:240
 msgid "Hard delete selected records"
 msgstr "Xóa cứng các bản ghi đã chọn"
 
-#: base/modeladmin.py:231
+#: base/modeladmin.py:246
 #, python-format
 msgid "%(name)s %(obj)s has been restored by user \"%(user)s\""
 msgstr "%(name)s %(obj)s đã được khôi phục bởi người dùng \"%(user)s\""
 
-#: base/modeladmin.py:232
+#: base/modeladmin.py:247
 msgid "Restore selected records"
 msgstr "Khôi phục các bản ghi đã chọn"
 
-#: base/modeladmin.py:557
+#: base/modeladmin.py:562
 msgid "Duplicate selected objects"
 msgstr "Nhân bản các đối tượng đã chọn"
 
-#: base/modeladmin.py:580
+#: base/modeladmin.py:585
 #, python-format
 msgid "Error duplicating object: %(error)s"
 msgstr "Lỗi khi nhân bản đối tượng: %(error)s"
 
-#: base/modeladmin.py:584
+#: base/modeladmin.py:589
 #, python-format
 msgid "%(count)d object(s) duplicated successfully."
 msgstr "Đã nhân bản thành công %(count)d đối tượng."
@@ -1498,7 +1521,7 @@ msgstr "Ảnh đại diện"
 msgid "biography"
 msgstr "Tiểu sử"
 
-#: base/models.py:93 base/models.py:285 base/models.py:383
+#: base/models.py:93 base/models.py:286 base/models.py:384
 msgid "created at"
 msgstr "Tạo lúc"
 
@@ -1530,94 +1553,93 @@ msgstr "người dùng"
 msgid "users"
 msgstr "người dùng"
 
-#: base/models.py:180
+#: base/models.py:181
 msgid "user profile"
 msgstr "hồ sơ người dùng"
 
-#: base/models.py:181
+#: base/models.py:182
 msgid "user profiles"
 msgstr "hồ sơ người dùng"
 
-#: base/models.py:187 base/models.py:272
+#: base/models.py:188 base/models.py:273
 msgid "IP address"
 msgstr "Địa chỉ IP"
 
-#: base/models.py:189
+#: base/models.py:190
 msgid "First seen"
 msgstr "Lần đầu tiên thấy"
 
-#: base/models.py:190
+#: base/models.py:191
 msgid "Last seen"
 msgstr "Lần cuối thấy"
 
-#: base/models.py:194
+#: base/models.py:195
 msgid "visit profile"
 msgstr "hồ sơ truy cập"
 
-#: base/models.py:195
+#: base/models.py:196
 msgid "visit profiles"
 msgstr "hồ sơ truy cập"
 
-#: base/models.py:221 base/models.py:246
+#: base/models.py:222 base/models.py:247
 msgid "Path"
 msgstr "Đường dẫn"
 
-#: base/models.py:222 base/models.py:247 file_management/models.py:46
+#: base/models.py:223 base/models.py:248 file_management/models.py:46
 #: file_management/models.py:79
 msgid "Method"
 msgstr "Phương thức"
 
-#: base/models.py:223 base/models.py:248
+#: base/models.py:224 base/models.py:249
 msgid "Data"
 msgstr "Dữ liệu"
 
-#: base/models.py:224 base/models.py:249
+#: base/models.py:225 base/models.py:250
 msgid "Status code"
 msgstr "Mã trạng thái"
 
-#: base/models.py:225 base/models.py:250
+#: base/models.py:226 base/models.py:251
 msgid "Timestamp"
 msgstr "Thời gian"
 
-#: base/models.py:226 base/models.py:251
+#: base/models.py:227 base/models.py:252
 msgid "Timelapse"
 msgstr "Khoảng thời gian"
 
-#: base/models.py:230
+#: base/models.py:231
 msgid "user activity"
 msgstr "hoạt động người dùng"
 
-#: base/models.py:231
+#: base/models.py:232
 msgid "user activities"
 msgstr "hoạt động người dùng"
 
-#: base/models.py:256
+#: base/models.py:257
 msgid "anonymous activity"
 msgstr "hoạt động ẩn danh"
 
-#: base/models.py:257
+#: base/models.py:258
 msgid "anonymous activities"
 msgstr "hoạt động ẩn danh"
 
-#: base/models.py:275
+#: base/models.py:276
 msgid "Single IPv4 or IPv6 address. Use IP_BLACKLIST in .env for CIDR ranges."
 msgstr ""
-"Địa chỉ IPv4 hoặc IPv6 đơn. Sử dụng IP_BLACKLIST trong .env cho các dải "
-"CIDR."
+"Địa chỉ IPv4 hoặc IPv6 đơn. Sử dụng IP_BLACKLIST trong .env cho các dải CIDR."
 
-#: base/models.py:277 base/models.py:381
+#: base/models.py:278 base/models.py:382
 msgid "reason"
 msgstr "lý do"
 
-#: base/models.py:278 base/models.py:382
+#: base/models.py:279 base/models.py:383
 msgid "active"
 msgstr "hoạt động"
 
-#: base/models.py:280
+#: base/models.py:281
 msgid "blocked until"
 msgstr "bị chặn cho đến"
 
-#: base/models.py:283
+#: base/models.py:284
 msgid ""
 "Leave empty for permanent block. Temporary blocks expire automatically via "
 "Redis TTL."
@@ -1625,23 +1647,23 @@ msgstr ""
 "Để trống để khóa vĩnh viễn. Các khóa tạm thời sẽ tự động hết hạn thông qua "
 "Redis TTL."
 
-#: base/models.py:292 base/models.py:390
+#: base/models.py:293 base/models.py:391
 msgid "created by"
 msgstr "tạo bởi"
 
-#: base/models.py:297
+#: base/models.py:298
 msgid "IP blacklist"
 msgstr "Danh sách đen IP"
 
-#: base/models.py:298
+#: base/models.py:299
 msgid "IP blacklists"
 msgstr "Danh sách đen IP"
 
-#: base/models.py:371
+#: base/models.py:372
 msgid "pattern"
 msgstr "mẫu"
 
-#: base/models.py:374
+#: base/models.py:375
 msgid ""
 "Substring or regex to match against the User-Agent header. E.g. 'GPTBot', "
 "'https://openai.com'."
@@ -1649,11 +1671,11 @@ msgstr ""
 "Chuỗi con hoặc regex để khớp với header User-Agent. Ví dụ: 'GPTBot', "
 "'https://openai.com'."
 
-#: base/models.py:377
+#: base/models.py:378
 msgid "is regex"
 msgstr "là regex"
 
-#: base/models.py:379
+#: base/models.py:380
 msgid ""
 "If checked, pattern is treated as a Python regex (re.search, case-"
 "insensitive); otherwise simple case-insensitive substring match."
@@ -1662,11 +1684,11 @@ msgstr ""
 "chữ hoa chữ thường); nếu không, khớp chuỗi con không phân biệt chữ hoa chữ "
 "thường đơn giản."
 
-#: base/models.py:395
+#: base/models.py:396
 msgid "UA blacklist"
 msgstr "Danh sách đen UA"
 
-#: base/models.py:396
+#: base/models.py:397
 msgid "UA blacklists"
 msgstr "Danh sách đen UA"
 
@@ -1698,130 +1720,145 @@ msgstr "Cập nhật bởi"
 msgid "Hidden"
 msgstr "Ẩn"
 
-#: base/models.py:535
+#: base/models.py:532 base/models.py:536
 msgid "has been created by user"
 msgstr "Đã được tạo bởi người dùng"
 
-#: base/models.py:538
+#: base/models.py:539
 msgid "You can view it at"
 msgstr "Bạn có thể xem tại"
 
-#: base/models.py:538
+#: base/models.py:539
 msgid "this link"
 msgstr "liên kết này"
 
-#: base/models.py:633
+#: base/models.py:542 base/models.py:641
+msgid "has been updated by user"
+msgstr "Đã được cập nhật bởi người dùng"
+
+#: base/models.py:550 base/models.py:649
+msgid "with the following changes"
+msgstr "với các thay đổi sau"
+
+#: base/models.py:626
+msgid "added"
+msgstr "đã thêm"
+
+#: base/models.py:632
+msgid "removed"
+msgstr "đã xóa"
+
+#: base/models.py:637
 msgid "cleared"
 msgstr "đã xóa sạch"
 
-#: base/models.py:709
+#: base/models.py:714
 msgid "Image"
 msgstr "Hình ảnh"
 
-#: base/models.py:710 base/models.py:778
+#: base/models.py:715 base/models.py:804
 msgid "Thumbnail"
 msgstr "Hình thu nhỏ"
 
-#: base/models.py:712 base/models.py:788 file_management/admin.py:213
+#: base/models.py:717 base/models.py:814 file_management/admin.py:213
 msgid "Preview"
 msgstr "Xem trước"
 
-#: base/models.py:714 file_management/models.py:39
+#: base/models.py:719 file_management/models.py:39
 msgid "Description"
 msgstr "Mô tả"
 
-#: base/models.py:718
+#: base/models.py:723
 msgid "System image"
 msgstr "Hình ảnh hệ thống"
 
-#: base/models.py:719
+#: base/models.py:724
 msgid "System images"
 msgstr "Hình ảnh hệ thống"
 
-#: base/models.py:775 base/models.py:784
+#: base/models.py:801 base/models.py:810
 msgid "Image not found"
 msgstr "Hình ảnh không tìm thấy"
 
-#: base/models.py:786
+#: base/models.py:812
 msgid "View original image size"
 msgstr "Xem kích thước hình ảnh gốc"
 
-#: base/models.py:866
+#: base/models.py:891
 msgid "Subject"
 msgstr "Chủ đề"
 
-#: base/models.py:868
+#: base/models.py:893
 msgid "Receiver"
 msgstr "Người nhận"
 
-#: base/models.py:869 file_management/models.py:40
-#: file_management/models.py:55
+#: base/models.py:894 file_management/models.py:40 file_management/models.py:55
 #: templates/admin/feedbacks/change_form_feedback_list.html:38
 msgid "Pending"
 msgstr "Đang chờ"
 
-#: base/models.py:870 monitoring/admin.py:24
+#: base/models.py:895 monitoring/admin.py:24
 msgid "Sent"
 msgstr "Gửi"
 
-#: base/models.py:871
+#: base/models.py:896
 msgid "Failed"
 msgstr "Thất bại"
 
-#: base/models.py:872 feedbacks/admin.py:36 file_management/models.py:43
+#: base/models.py:897 feedbacks/admin.py:36 file_management/models.py:43
 #: file_management/models.py:66
 msgid "Status"
 msgstr "Trạng thái"
 
-#: base/models.py:873 feedbacks/admin.py:127 feedbacks/models.py:51
+#: base/models.py:898 feedbacks/admin.py:127 feedbacks/models.py:51
 msgid "Note"
 msgstr "Ghi chú"
 
-#: base/models.py:877
+#: base/models.py:902
 msgid "Email notification"
 msgstr "Thông báo qua email"
 
-#: base/models.py:878
+#: base/models.py:903
 msgid "Email notifications"
 msgstr "Thông báo qua email"
 
-#: base/models.py:928
+#: base/models.py:953
 msgid "App name"
 msgstr "Tên ứng dụng"
 
-#: base/models.py:930
+#: base/models.py:955
 msgid "Icon"
 msgstr "Icon"
 
-#: base/models.py:930
+#: base/models.py:955
 msgid "Icon name (Material Symbols Outlined) or URL"
 msgstr "Tên icon (Material Symbols Outlined) hoặc URL"
 
-#: base/models.py:931
+#: base/models.py:956
 msgid "URL"
 msgstr "URL"
 
-#: base/models.py:932
+#: base/models.py:957
 msgid "Category"
 msgstr "Danh mục"
 
-#: base/models.py:933
+#: base/models.py:958
 msgid "Permission"
 msgstr "Quyền"
 
-#: base/models.py:933
+#: base/models.py:958
 msgid "Permission required to access this app"
 msgstr "Quyền truy cập vào ứng dụng này"
 
-#: base/models.py:934
+#: base/models.py:959
 msgid "Thumbnail URL"
 msgstr "Hình thu nhỏ URL"
 
-#: base/models.py:937
+#: base/models.py:962
 msgid "App"
 msgstr "Ứng dụng"
 
-#: base/models.py:938
+#: base/models.py:963
 msgid "Apps"
 msgstr "Ứng dụng"
 
@@ -1951,12 +1988,12 @@ msgstr "Khoảng thời gian"
 msgid "Solar events"
 msgstr "Sự kiện Solar"
 
-#: base/utils.py:232
+#: base/utils.py:236
 #, python-brace-format
 msgid "New announcement for {NAME} - version {VERSION}!"
 msgstr "Thông báo mới cho {NAME} - phiên bản {VERSION}!"
 
-#: base/utils.py:237
+#: base/utils.py:241
 msgid "NEW"
 msgstr "MỚI"
 
@@ -1988,96 +2025,114 @@ msgstr "Dịch không thành công: %s"
 msgid "Translate to Vietnamese"
 msgstr "Dịch sang tiếng Việt"
 
-#: contrib/wn_modeltranslation/utils.py:49
+#: contrib/wn_modeltranslation/utils.py:45
 msgid "OpenAI API key not found"
 msgstr "Không tìm thấy khóa API OpenAI"
 
-#: contrib/wn_modeltranslation/utils.py:85
+#: contrib/wn_modeltranslation/utils.py:80
 #, python-format
 msgid "Translate failed: %s"
 msgstr "Dịch không thành công: %s"
 
-#: contrib/wn_modeltranslation/utils.py:86
+#: contrib/wn_modeltranslation/utils.py:81
 msgid "Translate successfully"
 msgstr "Dịch thành công"
 
-#: dashboard/views.py:116
+#: dashboard/views.py:117
 msgid "today"
 msgstr "hôm nay"
 
-#: dashboard/views.py:117 dashboard/views.py:178
+#: dashboard/views.py:118 dashboard/views.py:186
 msgid "7 days"
 msgstr "7 ngày"
 
-#: dashboard/views.py:118
+#: dashboard/views.py:119
 msgid "week"
 msgstr "tuần"
 
-#: dashboard/views.py:119
+#: dashboard/views.py:120
 msgid "month"
 msgstr "tháng"
 
-#: dashboard/views.py:120
+#: dashboard/views.py:121
 msgid "year"
 msgstr "năm"
 
-#: dashboard/views.py:168
+#: dashboard/views.py:146
+msgid "day"
+msgstr "ngày"
+
+#: dashboard/views.py:151
+msgid "progress from last"
+msgstr "tiến trình từ lần cuối"
+
+#: dashboard/views.py:156
+#, python-format
+msgid "%(object)s in %(period)s"
+msgstr "%(object)s trong %(period)s"
+
+#: dashboard/views.py:159
+#, python-format
+msgid "%(count)s successful (%(rate)s%%)"
+msgstr "%(count)s thành công (%(rate)s%%)"
+
+#: dashboard/views.py:176
 msgid "Analytics"
 msgstr "Phân tích"
 
-#: dashboard/views.py:169
+#: dashboard/views.py:177
 msgid "Settings"
 msgstr "Cài đặt"
 
-#: dashboard/views.py:173
+#: dashboard/views.py:181
 msgid "Today"
 msgstr "Hôm nay"
 
-#: dashboard/views.py:183
+#: dashboard/views.py:191
 msgid "Week"
 msgstr "Tuần"
 
-#: dashboard/views.py:188
+#: dashboard/views.py:196
 msgid "Month"
 msgstr "Tháng"
 
-#: dashboard/views.py:193
+#: dashboard/views.py:201
 msgid "Year"
 msgstr "Năm"
 
-#: dashboard/views.py:199
+#: dashboard/views.py:207
 msgid "Activities"
 msgstr "Hoạt động"
 
-#: dashboard/views.py:200
+#: dashboard/views.py:208
 msgid "Anonymous"
 msgstr "Ẩn danh"
 
-#: dashboard/views.py:200
+#: dashboard/views.py:208
 msgid "Visits"
 msgstr "Lượt truy cập"
 
-#: dashboard/views.py:249
+#: dashboard/views.py:257
 msgid "User average"
 msgstr "Trung bình người dùng"
 
-#: dashboard/views.py:256
+#: dashboard/views.py:264
 msgid "Anonymous average"
 msgstr "Trung bình ẩn danh"
 
-#: dashboard/views.py:263
+#: dashboard/views.py:271
 msgid "User success"
 msgstr "Thành công của người dùng"
 
-#: dashboard/views.py:268
+#: dashboard/views.py:276
 msgid "Anonymous success"
 msgstr "Thành công của ẩn danh"
 
-#: dashboard/views.py:273
+#: dashboard/views.py:281
 msgid "User error"
 msgstr "Lỗi của người dùng"
 
-#: dashboard/views.py:278
+#: dashboard/views.py:286
 msgid "Anonymous error"
 msgstr "Lỗi của ẩn danh"
 
@@ -2230,8 +2285,7 @@ msgid "Current hash (live)"
 msgstr "Hash hiện tại (thực tế)"
 
 #: file_management/admin.py:146
-msgid ""
-"Cannot read the file from storage. It may have been deleted externally."
+msgid "Cannot read the file from storage. It may have been deleted externally."
 msgstr ""
 "Không đọc được file từ storage. File có thể đã bị xóa bên ngoài hệ thống."
 
@@ -2259,7 +2313,7 @@ msgstr "Tải xuống (đã xác thực)"
 msgid "Verified Download"
 msgstr "Tải xuống (đã xác thực)"
 
-#: file_management/models.py:38 notification/admin.py:271
+#: file_management/models.py:38 notification/admin.py:274
 msgid "Title"
 msgstr "Tiêu đề"
 
@@ -2325,8 +2379,8 @@ msgstr ""
 "Kiểm tra toàn vẹn thất bại. File có thể đã bị thay đổi và không thể tải "
 "xuống."
 
-#: monitoring/admin.py:22 templates/admin/monitoring/dashboard.html:65
-#: templates/admin/monitoring/dashboard.html:82
+#: monitoring/admin.py:22 templates/admin/monitoring/dashboard.html:69
+#: templates/admin/monitoring/dashboard.html:86
 msgid "CPU"
 msgstr "CPU"
 
@@ -2428,8 +2482,8 @@ msgid ""
 "dashboard is open. Run \"manage.py monitoring_collector\" (or schedule the "
 "Celery task) to keep collecting."
 msgstr ""
-"Chưa có collector nào chạy cho máy chủ này: lịch sử chỉ được ghi khi đang mở"
-" dashboard. Hãy chạy \"manage.py monitoring_collector\" (hoặc lên lịch task "
+"Chưa có collector nào chạy cho máy chủ này: lịch sử chỉ được ghi khi đang mở "
+"dashboard. Hãy chạy \"manage.py monitoring_collector\" (hoặc lên lịch task "
 "Celery) để thu thập liên tục."
 
 #: monitoring/admin.py:30
@@ -2612,15 +2666,15 @@ msgstr "Không có liên kết đối tượng nào có sẵn cho thông báo n�
 msgid "Flag"
 msgstr "Cờ"
 
-#: notification/admin.py:262
+#: notification/admin.py:265
 msgid "by"
 msgstr "bởi"
 
-#: notification/admin.py:314
+#: notification/admin.py:317
 msgid "No changes"
 msgstr "Không có thay đổi nào"
 
-#: notification/admin.py:315 notification/models.py:75
+#: notification/admin.py:318 notification/models.py:75
 msgid "Changed Data"
 msgstr "Thay đổi dữ liệu"
 
@@ -2847,11 +2901,11 @@ msgid ""
 msgstr ""
 "Trang này không có kết quả nào. Tạo một mục mới hoặc đặt lại bộ lọc của bạn."
 
-#: templates/admin/header.html:31 templates/admin/index.html:47
+#: templates/admin/header.html:31 templates/admin/index.html:46
 msgid "Website performance in last 28 days"
 msgstr "Hiệu suất trang web trong 28 ngày qua"
 
-#: templates/admin/index.html:48
+#: templates/admin/index.html:47
 msgid "Successful vs failed requests per day, users and anonymous visitors"
 msgstr ""
 "Số request thành công và lỗi mỗi ngày, của người dùng và khách vãng lai"
@@ -2860,239 +2914,239 @@ msgstr ""
 msgid "Log in as guest"
 msgstr "Đăng nhập với tư cách khách"
 
-#: templates/admin/monitoring/dashboard.html:31
+#: templates/admin/monitoring/dashboard.html:32
 msgid "Host"
 msgstr "Máy chủ"
 
-#: templates/admin/monitoring/dashboard.html:35
+#: templates/admin/monitoring/dashboard.html:37
 msgid "Auto refresh is on"
 msgstr "Đang tự động làm mới"
 
-#: templates/admin/monitoring/dashboard.html:35
+#: templates/admin/monitoring/dashboard.html:38
 msgid "Live"
 msgstr "Trực tiếp"
 
-#: templates/admin/monitoring/dashboard.html:39
+#: templates/admin/monitoring/dashboard.html:43
 msgid "Time range"
 msgstr "Khoảng thời gian"
 
-#: templates/admin/monitoring/dashboard.html:45
+#: templates/admin/monitoring/dashboard.html:49
 msgid "Refresh now"
 msgstr "Làm mới ngay"
 
-#: templates/admin/monitoring/dashboard.html:48
+#: templates/admin/monitoring/dashboard.html:52
 msgid "Auto refresh"
 msgstr "Tự động làm mới"
 
-#: templates/admin/monitoring/dashboard.html:50
+#: templates/admin/monitoring/dashboard.html:54
 msgid "Off"
 msgstr "Tắt"
 
-#: templates/admin/monitoring/dashboard.html:62
+#: templates/admin/monitoring/dashboard.html:66
 msgid "Overview"
 msgstr "Tổng quan"
 
-#: templates/admin/monitoring/dashboard.html:64
+#: templates/admin/monitoring/dashboard.html:68
 msgid "Uptime"
 msgstr "Thời gian hoạt động"
 
-#: templates/admin/monitoring/dashboard.html:64
+#: templates/admin/monitoring/dashboard.html:68
 msgid "Time since the host booted"
 msgstr "Thời gian từ lần khởi động gần nhất"
 
-#: templates/admin/monitoring/dashboard.html:65
+#: templates/admin/monitoring/dashboard.html:69
 msgid "Average CPU usage across all cores"
 msgstr "Mức dùng CPU trung bình trên tất cả các nhân"
 
-#: templates/admin/monitoring/dashboard.html:66
-#: templates/admin/monitoring/dashboard.html:83
-#: templates/admin/monitoring/dashboard.html:90
+#: templates/admin/monitoring/dashboard.html:70
+#: templates/admin/monitoring/dashboard.html:87
+#: templates/admin/monitoring/dashboard.html:94
 msgid "Memory"
 msgstr "Bộ nhớ"
 
-#: templates/admin/monitoring/dashboard.html:66
+#: templates/admin/monitoring/dashboard.html:70
 msgid "RAM in use (total minus available)"
 msgstr "RAM đang dùng (tổng trừ phần còn trống)"
 
-#: templates/admin/monitoring/dashboard.html:67
-#: templates/admin/monitoring/dashboard.html:84
+#: templates/admin/monitoring/dashboard.html:71
+#: templates/admin/monitoring/dashboard.html:88
 msgid "Disk"
 msgstr "Đĩa"
 
-#: templates/admin/monitoring/dashboard.html:67
-#: templates/admin/monitoring/dashboard.html:93
+#: templates/admin/monitoring/dashboard.html:71
+#: templates/admin/monitoring/dashboard.html:97
 msgid "Used space on the monitored filesystem"
 msgstr "Dung lượng đã dùng trên phân vùng được giám sát"
 
-#: templates/admin/monitoring/dashboard.html:68
+#: templates/admin/monitoring/dashboard.html:72
 msgid "Load (1m)"
 msgstr "Tải (1 phút)"
 
-#: templates/admin/monitoring/dashboard.html:68
+#: templates/admin/monitoring/dashboard.html:72
 msgid "1-minute load average; above the core count means queued work"
 msgstr "Tải trung bình 1 phút; vượt số nhân nghĩa là có việc đang phải chờ"
 
-#: templates/admin/monitoring/dashboard.html:69
-#: templates/admin/monitoring/dashboard.html:101
+#: templates/admin/monitoring/dashboard.html:73
+#: templates/admin/monitoring/dashboard.html:105
 msgid "Throughput"
 msgstr "Lưu lượng"
 
-#: templates/admin/monitoring/dashboard.html:69
+#: templates/admin/monitoring/dashboard.html:73
 msgid "Requests per minute over the selected range"
 msgstr "Số request mỗi phút trong khoảng đã chọn"
 
-#: templates/admin/monitoring/dashboard.html:70
+#: templates/admin/monitoring/dashboard.html:74
 msgid "Error rate"
 msgstr "Tỷ lệ lỗi"
 
-#: templates/admin/monitoring/dashboard.html:70
+#: templates/admin/monitoring/dashboard.html:74
 msgid "Share of 5xx responses over the selected range"
 msgstr "Tỷ lệ phản hồi 5xx trong khoảng đã chọn"
 
-#: templates/admin/monitoring/dashboard.html:71
+#: templates/admin/monitoring/dashboard.html:75
 msgid "Latency p95"
 msgstr "Độ trễ p95"
 
-#: templates/admin/monitoring/dashboard.html:71
+#: templates/admin/monitoring/dashboard.html:75
 msgid "95 out of 100 requests were faster than this"
 msgstr "95/100 request nhanh hơn mức này"
 
-#: templates/admin/monitoring/dashboard.html:80
+#: templates/admin/monitoring/dashboard.html:84
 msgid "Resource usage"
 msgstr "Mức dùng tài nguyên"
 
-#: templates/admin/monitoring/dashboard.html:88
+#: templates/admin/monitoring/dashboard.html:92
 msgid "CPU usage"
 msgstr "Mức dùng CPU"
 
-#: templates/admin/monitoring/dashboard.html:88
+#: templates/admin/monitoring/dashboard.html:92
 msgid "Percentage of CPU time spent working, averaged per interval"
 msgstr "Tỷ lệ thời gian CPU làm việc, lấy trung bình theo từng khoảng"
 
-#: templates/admin/monitoring/dashboard.html:89
+#: templates/admin/monitoring/dashboard.html:93
 msgid "Load average"
 msgstr "Tải trung bình"
 
-#: templates/admin/monitoring/dashboard.html:89
+#: templates/admin/monitoring/dashboard.html:93
 msgid "1, 5 and 15-minute load averages; the dashed line is the core count"
 msgstr "Tải trung bình 1, 5 và 15 phút; đường nét đứt là số nhân"
 
-#: templates/admin/monitoring/dashboard.html:90
+#: templates/admin/monitoring/dashboard.html:94
 msgid "RAM in use and swap usage"
 msgstr "RAM đang dùng và mức dùng swap"
 
-#: templates/admin/monitoring/dashboard.html:91
+#: templates/admin/monitoring/dashboard.html:95
 msgid "Disk I/O"
 msgstr "Đọc/ghi đĩa"
 
-#: templates/admin/monitoring/dashboard.html:91
+#: templates/admin/monitoring/dashboard.html:95
 msgid "Bytes read from and written to disk per second"
 msgstr "Số byte đọc và ghi đĩa mỗi giây"
 
-#: templates/admin/monitoring/dashboard.html:92
+#: templates/admin/monitoring/dashboard.html:96
 msgid "Network traffic"
 msgstr "Lưu lượng mạng"
 
-#: templates/admin/monitoring/dashboard.html:92
+#: templates/admin/monitoring/dashboard.html:96
 msgid "Bytes received and sent per second, all interfaces"
 msgstr "Số byte nhận và gửi mỗi giây, mọi card mạng"
 
-#: templates/admin/monitoring/dashboard.html:93
+#: templates/admin/monitoring/dashboard.html:97
 msgid "Disk space"
 msgstr "Dung lượng đĩa"
 
-#: templates/admin/monitoring/dashboard.html:99
+#: templates/admin/monitoring/dashboard.html:103
 msgid "Application"
 msgstr "Ứng dụng"
 
-#: templates/admin/monitoring/dashboard.html:101
+#: templates/admin/monitoring/dashboard.html:105
 msgid "Requests per minute by outcome"
 msgstr "Số request mỗi phút theo kết quả"
 
-#: templates/admin/monitoring/dashboard.html:103
+#: templates/admin/monitoring/dashboard.html:107
 msgid "Responses"
 msgstr "Phản hồi"
 
-#: templates/admin/monitoring/dashboard.html:103
+#: templates/admin/monitoring/dashboard.html:107
 msgid "Share of responses by status class"
 msgstr "Tỷ lệ phản hồi theo nhóm mã trạng thái"
 
-#: templates/admin/monitoring/dashboard.html:107
+#: templates/admin/monitoring/dashboard.html:111
 msgid "Apdex"
 msgstr "Apdex"
 
-#: templates/admin/monitoring/dashboard.html:109
+#: templates/admin/monitoring/dashboard.html:113
 msgid "T = 500 ms"
 msgstr "T = 500 ms"
 
-#: templates/admin/monitoring/dashboard.html:113
+#: templates/admin/monitoring/dashboard.html:117
 msgid "Response time"
 msgstr "Thời gian phản hồi"
 
-#: templates/admin/monitoring/dashboard.html:113
+#: templates/admin/monitoring/dashboard.html:117
 msgid "Latency percentiles per interval"
 msgstr "Phân vị độ trễ theo từng khoảng"
 
-#: templates/admin/monitoring/dashboard.html:115
+#: templates/admin/monitoring/dashboard.html:119
 msgid "Slowest endpoints"
 msgstr "Endpoint chậm nhất"
 
-#: templates/admin/monitoring/dashboard.html:115
+#: templates/admin/monitoring/dashboard.html:119
 msgid "Endpoints ranked by total time spent (count × average)"
 msgstr "Xếp hạng endpoint theo tổng thời gian xử lý (số lượng × trung bình)"
 
-#: templates/admin/monitoring/dashboard.html:120
+#: templates/admin/monitoring/dashboard.html:124
 msgid "Endpoint"
 msgstr "Endpoint"
 
-#: templates/admin/monitoring/dashboard.html:121
+#: templates/admin/monitoring/dashboard.html:125
 msgid "Requests"
 msgstr "Request"
 
-#: templates/admin/monitoring/dashboard.html:122
+#: templates/admin/monitoring/dashboard.html:126
 msgid "Avg"
 msgstr "TB"
 
-#: templates/admin/monitoring/dashboard.html:124
+#: templates/admin/monitoring/dashboard.html:128
 msgid "Max"
 msgstr "Tối đa"
 
-#: templates/admin/monitoring/dashboard.html:125
+#: templates/admin/monitoring/dashboard.html:129
 msgid "Errors"
 msgstr "Lỗi"
 
-#: templates/admin/monitoring/dashboard.html:126
+#: templates/admin/monitoring/dashboard.html:130
 msgid "Share of time"
 msgstr "Tỷ trọng thời gian"
 
-#: templates/admin/monitoring/dashboard.html:130
+#: templates/admin/monitoring/dashboard.html:134
 msgid "No requests in this range"
 msgstr "Không có request nào trong khoảng này"
 
-#: templates/admin/monitoring/dashboard.html:140
+#: templates/admin/monitoring/dashboard.html:144
 msgid "Process & dependencies"
 msgstr "Tiến trình & phụ thuộc"
 
-#: templates/admin/monitoring/dashboard.html:142
+#: templates/admin/monitoring/dashboard.html:146
 msgid "Dependency latency"
 msgstr "Độ trễ phụ thuộc"
 
-#: templates/admin/monitoring/dashboard.html:142
+#: templates/admin/monitoring/dashboard.html:146
 msgid "Round-trip time of a trivial database query and cache read"
 msgstr ""
 "Thời gian khứ hồi của một truy vấn cơ sở dữ liệu đơn giản và một lần đọc "
 "cache"
 
-#: templates/admin/monitoring/dashboard.html:143
+#: templates/admin/monitoring/dashboard.html:147
 msgid "Application process"
 msgstr "Tiến trình ứng dụng"
 
-#: templates/admin/monitoring/dashboard.html:143
+#: templates/admin/monitoring/dashboard.html:147
 msgid ""
 "Resident memory and threads of the web process that served the dashboard"
 msgstr "Bộ nhớ thường trú và số luồng của tiến trình web phục vụ dashboard"
 
-#: templates/admin/search_form.html:46
+#: templates/admin/search_form.html:51
 msgid "Items per page"
 msgstr "Số mục trên mỗi trang"
 
@@ -3164,29 +3218,8 @@ msgstr "Giao diện"
 #~ msgid "Welcome"
 #~ msgstr "Chào mừng"
 
-#~ msgid "Inactive"
-#~ msgstr "Không hoạt động"
-
-#~ msgid "Admin"
-#~ msgstr "Trang quản trị"
-
-#~ msgid "Bot"
-#~ msgstr "Máy"
-
 #~ msgid ", "
 #~ msgstr ", "
-
-#~ msgid "has been updated by user"
-#~ msgstr "Đã được cập nhật bởi người dùng"
-
-#~ msgid "added"
-#~ msgstr "đã thêm"
-
-#~ msgid "removed"
-#~ msgstr "đã xóa"
-
-#~ msgid "progress from last"
-#~ msgstr "tiến trình từ lần cuối"
 
 #~ msgid "in"
 #~ msgstr "trong"
@@ -3236,8 +3269,8 @@ msgstr "Giao diện"
 #, python-brace-format
 #~ msgid ""
 #~ "Raw passwords are not stored, so there is no way to see this user's "
-#~ "password, but you can change the password using <a href=\"{}\" class=\"text-"
-#~ "primary-600 dark:text-primary-500\">this form</a>."
+#~ "password, but you can change the password using <a href=\"{}\" "
+#~ "class=\"text-primary-600 dark:text-primary-500\">this form</a>."
 #~ msgstr ""
 #~ "Mật khẩu dạng văn bản không được lưu, vì vậy không có cách nào để xem mật "
 #~ "khẩu của người dùng này, nhưng bạn có thể thay đổi mật khẩu bằng <a "
