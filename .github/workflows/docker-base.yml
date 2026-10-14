@@ -1,0 +1,94 @@
+name: Docker base images
+
+# Publishes ${namespace}/django-whiteneuron-{alpine,debian}:v<version>, the base images
+# WN-Sense (and other projects) build FROM. The build itself is docker/build-base.sh, so a
+# local `bash docker/push-base.sh` produces the same images.
+#
+#   GitHub Release published  -> build + push the release tag (must equal "v" + pyproject version)
+#   Run workflow (manual)     -> build any ref; "push" only works for a release tag v<version>
+#   Pull request (docker/**)  -> build only, to catch a broken Dockerfile before release
+#
+# Needs repository secrets DOCKERHUB_USERNAME and DOCKERHUB_TOKEN (a Docker Hub access
+# token with write access). Optional repository variable DOCKERHUB_NAMESPACE (default anhneuron).
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Git ref to build (tag, branch or SHA); empty = the selected branch. Pushing needs a release tag."
+        required: false
+        default: ""
+      push:
+        description: "Push the images to Docker Hub"
+        type: boolean
+        default: false
+  pull_request:
+    paths:
+      - "docker/**"
+      - ".dockerignore"
+      - "pyproject.toml"
+      - "uv.lock"
+      - ".github/workflows/docker-base.yml"
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  IMAGE_NAMESPACE: ${{ vars.DOCKERHUB_NAMESPACE || 'anhneuron' }}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docker-base-${{ github.event.release.tag_name || inputs.ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: django-whiteneuron-${{ matrix.variant }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [alpine, debian]
+    steps:
+      # Full history + tags: the script archives GIT_REF and checks it against tag v<version>.
+      # The checked-out commit only provides the Dockerfiles and the script.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve ref and push mode
+        id: mode
+        env:
+          EVENT: ${{ github.event_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          INPUT_REF: ${{ inputs.ref }}
+          PUSH_INPUT: ${{ inputs.push }}
+        run: |
+          case "$EVENT" in
+            release) ref="refs/tags/$RELEASE_TAG"; push=1 ;;
+            workflow_dispatch) ref="${INPUT_REF:-$GITHUB_SHA}"; push=$([ "$PUSH_INPUT" = "true" ] && echo 1 || echo 0) ;;
+            *) ref="$GITHUB_SHA"; push=0 ;;
+          esac
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+          echo "push=$push" >> "$GITHUB_OUTPUT"
+          echo "### django-whiteneuron-${{ matrix.variant }} from \`$ref\` (push: $push)" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: astral-sh/setup-uv@v5
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        if: steps.mode.outputs.push == '1'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build${{ steps.mode.outputs.push == '1' && ' and push' || '' }}
+        env:
+          GIT_REF: ${{ steps.mode.outputs.ref }}
+          PUSH: ${{ steps.mode.outputs.push }}
+          VARIANTS: ${{ matrix.variant }}
+        run: bash docker/build-base.sh

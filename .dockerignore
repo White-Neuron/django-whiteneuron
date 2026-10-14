@@ -1,0 +1,11 @@
+# Base images only need what `pip install .` builds plus the pinned requirements (allowlist)
+*
+!pyproject.toml
+!README.md
+!LICENSE
+!docker-requirements.txt
+!whiteneuron/
+whiteneuron/**/__pycache__
+whiteneuron/**/*.pyc
+whiteneuron/db.sqlite3
+whiteneuron/media

@@ -18,6 +18,7 @@ v0.4.0.0
 **Feature release: daisyUI multi-theme admin, server monitoring dashboard, django-unfold 0.109, security hardening and performance work**
 - **Added**: 35 daisyUI themes selectable from the user menu (**Themes**); each theme also re-colors Unfold and drives its dark mode. `WN_ADMIN_THEMES` limits the picker (`[]` hides it); `WN_THEMES="nord,dracula" bash scripts/tailwind.sh` builds a smaller CSS bundle.
 - **Added**: `whiteneuron.monitoring` — Grafana-style **Server monitoring** dashboard (CPU, memory, disk, load, network, disk I/O, request throughput, p50/p95/p99 latency, error rate, Apdex, slowest endpoints, DB/cache latency) with time ranges, auto-refresh, host selector and shared crosshair. Collect with `manage.py monitoring_collector` or the Celery task `whiteneuron.monitoring.tasks.collect_metrics`; configure with `WN_MONITORING`. New dependency: `psutil`.
+- **Added**: Docker base images `django-whiteneuron-{alpine,debian}:v<version>` built from this repository (`docker/`, moved from WN-Sense); `.github/workflows/docker-base.yml` builds and pushes them on every GitHub Release (secrets `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN`).
 - **Changed**: `django-unfold>=0.109.0,<0.111` (the cap is raised after each Unfold release is re-tested against the template overrides); template overrides ported; uses the avatar badge (unread notifications), sidebar sub-navigation (Celery "Schedules"), `SITE_VERSION`, theme-aware dashboard charts.
 - **Security**: escaped notification/grid HTML (stored XSS), whitelisted `?display_fields` (a GET could call `obj.delete()`) and limited the column picker to fields shown on the change form (never `password`; extra exclusions via `ModelAdmin.field_selection_exclude`), staff-only per-user notification WebSocket with origin check, sandboxed uploaded-HTML preview, private exports scoped to the selected rows, `X-Forwarded-For` read from the right (`TRUSTED_PROXY_COUNT`, `IGNORE_X_FORWARDED_FOR`), open-redirect fix in guest login, new-user signal no longer overwrites passwords, `secrets`-based passwords redacted after sending (never passed to the task broker), POST-only feedback resolve, notification IDOR fix.
 - **Performance**: activity logging 1 INSERT per request (was 3–4 queries), dashboard 4 queries (was ~16) + 60s cache, one `bulk_create` + one broadcast per notification, new indexes, atomic rate-limit counters, request-scoped admin state (grid view / page size no longer shared between users), thumbnails built at upload (regenerated if the file is missing), N+1 fixes, 14KB logo instead of 187KB.
@@ -407,6 +408,43 @@ bash scripts/build.sh
 ```
 
 This builds Tailwind CSS assets, runs migrations, and creates the Python package via `uv build`.
+
+Publishing a **GitHub Release** (tag `v<version>`, equal to `version` in `pyproject.toml`) runs two
+workflows: `python-publish.yml` uploads the package to PyPI, and `docker-base.yml` builds and pushes
+the Docker base images.
+
+### Docker base images
+
+`anhneuron/django-whiteneuron-alpine:v<version>` and `anhneuron/django-whiteneuron-debian:v<version>`
+contain Python 3.13 with this package installed. Its dependencies are pinned from `uv.lock`, the
+same set CI tests. The images run as `appuser` (uid 100, gid 101, home `/app`). Projects build
+`FROM` them, for example WN-Sense's web (Alpine) and core (Debian) images.
+
+Every build goes through `docker/build-base.sh`:
+- The source is a `git archive` of the chosen ref, never local files.
+- Dependencies come from that ref's `uv.lock` (`uv export`).
+- The Dockerfiles come from the current checkout, so older tags can be built too.
+- Pushing is only allowed for the release tag `v<version>`, which must match `pyproject.toml`.
+  A published tag is never rebuilt from other code.
+- Each image fails to build if the installed version differs from its tag.
+
+**CI/CD**: `.github/workflows/docker-base.yml` builds and pushes both images when a GitHub
+Release is published.
+- Required repository secrets: `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` (a Docker Hub access
+  token with write access).
+- Optional repository variable: `DOCKERHUB_NAMESPACE` (default `anhneuron`).
+- *Actions → Docker base images → Run workflow* builds any ref. Pushing from there also needs a
+  release tag.
+- Pull requests that touch `docker/`, `pyproject.toml` or `uv.lock` only build the images.
+
+**By hand** (needs git, uv and docker buildx):
+
+```bash
+bash docker/build-base.sh                     # HEAD, load into local docker
+GIT_REF=v0.3.8.0 bash docker/build-base.sh    # a tag / branch / commit
+GIT_REF=v0.4.0.0 bash docker/push-base.sh     # push a release, with provenance and SBOM
+VARIANTS=alpine IMAGE_NAMESPACE=myorg WN_PYTHON_VERSION=3.13 bash docker/build-base.sh
+```
 
 ## Error Pages
 
