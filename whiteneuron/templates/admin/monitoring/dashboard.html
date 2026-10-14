@@ -34,7 +34,7 @@
                 </select>
             </label>
             {# solid variants: daisyUI only guarantees contrast for color / color-content pairs #}
-            <span class="ui-badge ui-badge-sm ui-badge-success font-bold uppercase tracking-wider" data-live title="{% trans 'Auto refresh is on' %}">
+            <span class="ui-badge ui-badge-sm ui-badge-success font-bold uppercase tracking-wider" data-live{% if refresh == "off" %} hidden{% endif %} title="{% trans 'Auto refresh is on' %}">
                 <span class="size-1.5 rounded-full bg-current motion-safe:animate-pulse"></span>{% trans "Live" %}
             </span>
         </div>

@@ -42,9 +42,14 @@
 .wn-toolbar-icon { color: var(--mon-accent); font-size: 1.6rem; }
 .wn-toolbar-title { font-size: 1.125rem; font-weight: 600; margin-right: 0.5rem; }
 .wn-updated { font-size: 0.75rem; color: var(--mon-muted); font-variant-numeric: tabular-nums; min-width: 7.5rem; text-align: right; }
-/* soft alert keeps the theme tint, but its warning-colored text is unreadable on light
-   themes (yellow on pale yellow): use the theme's text color */
-.wn-mon [data-banner] { color: var(--color-base-content, var(--mon-text)); }
+/* status banner (daisyUI soft alert): the soft variant's warning-colored text is unreadable
+   on light themes (yellow on pale yellow) and its 8% tint barely shows on unfold's dark
+   surfaces, so keep the tint stronger and use the theme's text color */
+.wn-mon [data-banner] {
+    color: var(--color-base-content, var(--mon-text));
+    background: color-mix(in oklab, var(--ui-alert-color, var(--color-warning)) 12%, var(--mon-panel));
+    border-color: color-mix(in oklab, var(--ui-alert-color, var(--color-warning)) 30%, transparent);
+}
 /* daisyUI buttons drawn like unfold's own controls (search box, filter button): panel
    background + input border, instead of a filled base-200 block */
 .wn-toolbar .ui-btn:not(.ui-btn-primary) {
@@ -54,11 +59,6 @@
 }
 .wn-toolbar .ui-btn:not(.ui-btn-primary):hover { --ui-btn-bg: var(--mon-hover); }
 .wn-toolbar .ui-select { border-color: var(--mon-control-border); background-color: var(--mon-panel); }
-/* the soft alert's 8% tint is barely visible on unfold's dark surfaces */
-.wn-mon [data-banner] {
-    background: color-mix(in oklab, var(--ui-alert-color, var(--color-warning)) 12%, var(--mon-panel));
-    border-color: color-mix(in oklab, var(--ui-alert-color, var(--color-warning)) 30%, transparent);
-}
 [data-refresh-now].is-loading .material-symbols-outlined { animation: wn-spin 0.9s linear infinite; }
 
 /* rows */
@@ -73,7 +73,7 @@
     color: var(--mon-text);
 }
 .wn-row-head .material-symbols-outlined { transition: transform 150ms; color: var(--mon-muted); }
-.wn-row-head:focus-visible { outline: 2px solid var(--mon-accent); outline-offset: 2px; border-radius: 4px; }
+.wn-row-head:focus-visible { outline: 2px solid; outline-color: var(--mon-accent); /* invalid color-mix() -> currentColor */ outline-offset: 2px; border-radius: 4px; }
 .wn-row.is-collapsed .wn-row-head .material-symbols-outlined { transform: rotate(-90deg); }
 .wn-row.is-collapsed .wn-row-body { display: none; }
 
