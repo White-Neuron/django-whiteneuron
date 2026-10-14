@@ -1,0 +1,10 @@
+# Base images only need what `pip install .` builds (allowlist)
+*
+!pyproject.toml
+!README.md
+!LICENSE
+!whiteneuron/
+whiteneuron/**/__pycache__
+whiteneuron/**/*.pyc
+whiteneuron/db.sqlite3
+whiteneuron/media

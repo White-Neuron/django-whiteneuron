@@ -1,0 +1,40 @@
+# syntax=docker/dockerfile:1
+# ============================================================
+# django-whiteneuron base image — Alpine (used by Sense "web" targets)
+# Built from this repository by docker/build-base.sh or .github/workflows/docker-base.yml
+# Published as: ${IMAGE_NAMESPACE}/django-whiteneuron-alpine:${WHITENEURON_VERSION}
+# ============================================================
+
+ARG PYTHON_VERSION=3.13
+
+FROM python:${PYTHON_VERSION}-alpine3.23 AS base
+
+# vX.Y.Z.W — must match pyproject's version (checked below)
+ARG WHITENEURON_VERSION
+
+LABEL org.opencontainers.image.title="django-whiteneuron-alpine" \
+      org.opencontainers.image.source="https://github.com/White-Neuron/django-whiteneuron" \
+      org.opencontainers.image.version="${WHITENEURON_VERSION}" \
+      org.opencontainers.image.licenses="MIT"
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    TZ=Asia/Ho_Chi_Minh \
+    AUTOBAHN_USE_NVX=0
+
+# Build tools only live inside this RUN (packages without musl wheels compile here)
+RUN --mount=type=bind,target=/tmp/src,rw \
+    apk upgrade --no-cache && \
+    apk add --no-cache --virtual .build-deps gcc musl-dev python3-dev libffi-dev openssl-dev linux-headers && \
+    pip install --no-cache-dir /tmp/src && \
+    installed="v$(python -c 'import importlib.metadata as m; print(m.version("django-whiteneuron"))')" && \
+    if [ -n "${WHITENEURON_VERSION}" ] && [ "${installed}" != "${WHITENEURON_VERSION}" ]; then \
+        echo "WHITENEURON_VERSION=${WHITENEURON_VERSION} but the source is ${installed}" >&2; exit 1; \
+    fi && \
+    apk del .build-deps && \
+    addgroup -S appuser && \
+    adduser -S -G appuser -h /app appuser
+
+USER appuser

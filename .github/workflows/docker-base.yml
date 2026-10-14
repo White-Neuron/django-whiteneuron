@@ -1,0 +1,105 @@
+name: Docker base images
+
+# Publishes ${namespace}/django-whiteneuron-{alpine,debian}:v<version>, the base images
+# WN-Sense (and other projects) build FROM. Same images as docker/push-base.sh.
+#
+#   GitHub Release published  -> build + push (tag must equal "v" + pyproject version)
+#   Run workflow (manual)     -> build the chosen ref, push only if "push" is ticked
+#   Pull request (docker/**)  -> build only, to catch a broken Dockerfile before release
+#
+# Needs repository secrets DOCKERHUB_USERNAME and DOCKERHUB_TOKEN (a Docker Hub access
+# token with write access). Optional repository variable DOCKERHUB_NAMESPACE (default anhneuron).
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Git ref to build (tag, branch or SHA); empty = the selected branch"
+        required: false
+        default: ""
+      push:
+        description: "Push the images to Docker Hub"
+        type: boolean
+        default: false
+  pull_request:
+    paths:
+      - "docker/**"
+      - ".dockerignore"
+      - "pyproject.toml"
+      - ".github/workflows/docker-base.yml"
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  IMAGE_NAMESPACE: ${{ vars.DOCKERHUB_NAMESPACE || 'anhneuron' }}
+  PYTHON_VERSION: "3.13"
+  PLATFORMS: linux/amd64
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docker-base-${{ github.event.release.tag_name || inputs.ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: django-whiteneuron-${{ matrix.variant }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [alpine, debian]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.ref || '' }}
+
+      - name: Resolve version and push mode
+        id: meta
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          EVENT: ${{ github.event_name }}
+          PUSH_INPUT: ${{ inputs.push }}
+        run: |
+          version="v$(sed -n 's/^version *= *"\(.*\)"/\1/p' pyproject.toml | head -1)"
+          if [ "$version" = "v" ]; then echo "::error::No version in pyproject.toml"; exit 1; fi
+          if [ -n "$RELEASE_TAG" ] && [ "$RELEASE_TAG" != "$version" ]; then
+            echo "::error::Release tag $RELEASE_TAG does not match pyproject version $version"
+            exit 1
+          fi
+          push=false
+          if [ "$EVENT" = "release" ] || { [ "$EVENT" = "workflow_dispatch" ] && [ "$PUSH_INPUT" = "true" ]; }; then
+            push=true
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "push=$push" >> "$GITHUB_OUTPUT"
+          echo "image=${IMAGE_NAMESPACE}/django-whiteneuron-${{ matrix.variant }}:$version" >> "$GITHUB_OUTPUT"
+          echo "### django-whiteneuron-${{ matrix.variant }}:$version (push: $push)" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        if: steps.meta.outputs.push == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build${{ steps.meta.outputs.push == 'true' && ' and push' || '' }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.base-${{ matrix.variant }}
+          platforms: ${{ env.PLATFORMS }}
+          build-args: |
+            PYTHON_VERSION=${{ env.PYTHON_VERSION }}
+            WHITENEURON_VERSION=${{ steps.meta.outputs.version }}
+          tags: ${{ steps.meta.outputs.image }}
+          pull: true
+          push: ${{ steps.meta.outputs.push == 'true' }}
+          provenance: ${{ steps.meta.outputs.push == 'true' && 'mode=max' || 'false' }}
+          sbom: ${{ steps.meta.outputs.push == 'true' }}
+          cache-from: type=gha,scope=base-${{ matrix.variant }}
+          cache-to: type=gha,mode=max,scope=base-${{ matrix.variant }}
