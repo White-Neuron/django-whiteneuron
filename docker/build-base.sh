@@ -44,6 +44,10 @@ TAG="v${REF_VERSION}"
 dirty_docker="$(git -C "$ROOT_DIR" status --porcelain -- docker .dockerignore)"
 if [ "$PUSH" = "1" ]; then
 	# A published image must be exactly the released code
+	ref_tag="${GIT_REF#refs/tags/}"
+	if [ "$ref_tag" != "$TAG" ] && git -C "$ROOT_DIR" rev-parse --verify --quiet "refs/tags/${ref_tag}" >/dev/null; then
+		die "tag ${ref_tag} has version ${REF_VERSION} in pyproject.toml: the release tag must be ${TAG}"
+	fi
 	TAG_COMMIT="$(git -C "$ROOT_DIR" rev-parse --verify --quiet "refs/tags/${TAG}^{commit}")" \
 		|| die "tag ${TAG} does not exist: tag the release before pushing its images"
 	[ "$TAG_COMMIT" = "$COMMIT" ] \
