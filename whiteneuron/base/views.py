@@ -43,12 +43,20 @@ class GuestLoginView(View):
         return redirect('admin:index')
     
 def get_announcement_content(request):
+    """HTML for the announcement dialog. The template is project-provided
+    (ANNOUNCEMENT_CONTENT_HTML_FILE): without it the dialog stays empty instead of a 500."""
     from django.conf import settings
-    content_file= getattr(settings, 'ANNOUNCEMENT_CONTENT_HTML_FILE', None)
-    if not content_file:
-        return None
-    content = render_to_string(content_file, request=request)
     from django.http import HttpResponse
+    from django.template import TemplateDoesNotExist
+
+    content_file = getattr(settings, 'ANNOUNCEMENT_CONTENT_HTML_FILE', None)
+    if not content_file:
+        return HttpResponse("")
+    try:
+        content = render_to_string(str(content_file), request=request)
+    except TemplateDoesNotExist:
+        logger.warning("Announcement template %r not found (ANNOUNCEMENT_CONTENT_HTML_FILE)", content_file)
+        return HttpResponse("")
     return HttpResponse(content)
 
 

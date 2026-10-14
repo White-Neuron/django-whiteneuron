@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.utils.translation import gettext as _
 from django.contrib import messages
 from django.template.loader import render_to_string
+from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 import random
 import json
@@ -138,17 +139,27 @@ def dashboard_callback(request, context):
     _28_days = [_(WEEKDAYS[d]) for d in stats["weekdays"]]
 
     def render_kpi(label, object_name, value, last_value, time, success=None):
-        is_increase = value > last_value
+        # Whole translatable sentences with named placeholders (word order differs per
+        # language; makemessages can't see _() inside f-strings)
         diff = value - last_value
         diff_percent = diff / last_value * 100 if last_value else 0
-        footer = f'<strong class="text-{"green" if is_increase else "red"}-600 font-medium">{"+" if is_increase else "-"}{abs(diff)} ({diff_percent:.2f}%)</strong>&nbsp;{_("progress from last")} - {MAPTIME[time] if time != "today" else "day"}'
+        period = MAPTIME[time] if time != "today" else _("day")
+        footer = format_html(
+            '<strong class="{} font-medium">{}{} ({}%)</strong>&nbsp;{} - {}',
+            "text-green-600" if diff >= 0 else "text-red-600",
+            "+" if diff >= 0 else "-", abs(diff), f"{diff_percent:.2f}",
+            _("progress from last"), period,
+        )
         rate = round(success / value * 100, 1) if value and success else None
         return {
             "label": label,
-            "title": f"{_(object_name)} {_('in')} {_(MAPTIME[time])}",
+            "title": _("%(object)s in %(period)s") % {"object": object_name, "period": MAPTIME[time]},
             "metric_total": value,
-            "metric_success": f"{success} successful ({rate}%)" if rate is not None else None,
-            "footer": mark_safe(footer),
+            "metric_success": (
+                _("%(count)s successful (%(rate)s%%)") % {"count": success, "rate": rate}
+                if rate is not None else None
+            ),
+            "footer": footer,
         }
 
 

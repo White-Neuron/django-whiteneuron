@@ -1,6 +1,16 @@
 # Changelog
 
-### v0.4.0.0 (2026-10-13) — latest
+### v0.4.0.1 (2026-10-14) — latest
+**Patch release: Vietnamese translations lost in 0.4.0.0, daisyUI modals under Unfold, announcement endpoint**
+- **Fixed**: translations that 0.4.0.0 dropped from the Vietnamese catalog. Strings translated with `_()` *inside f-strings* are invisible to `makemessages`, so regenerating the catalog for 0.4.0.0 marked them obsolete and left them out of `django.mo`, so 0.4.0.0 showed them in English: user badges (Inactive / Admin / Bot), every "… has been updated by user …" notification, M2M change notes (added / removed) and the dashboard KPI cards ("progress from last", "in"). The `_()` calls are moved out of the f-strings and the translations restored.
+- **Fixed**: dashboard KPI cards are whole translatable sentences (`%(object)s in %(period)s`, `%(count)s successful (%(rate)s%%)`); "day" and "successful" were hard-coded English; no change now shows as a green +0 instead of a red -0; the color classes are literal so Tailwind compiles them.
+- **Fixed**: notification bodies ("… has been updated by user … with the following changes") were hard-coded English.
+- **Fixed**: an open daisyUI `ui-modal` (announcement, feedback resolve, markdown preview) rendered as a narrow white column without overlay: Unfold's unlayered `dialog { … }` rule beats daisyUI's layered `.ui-modal`. `dialog.ui-modal` now restores the full-screen modal.
+- **Fixed**: `/announcement/` returned a 500 when the project-provided `ANNOUNCEMENT_CONTENT_HTML_FILE` template is missing or the setting is empty; it now returns empty content and logs a warning.
+- **Tests**: no `_()` inside f-strings; every literal msgid in the package's Python code must be in the compiled Vietnamese catalog (catches strings dropped by `makemessages`); dashboard KPI translated; `dialog.ui-modal` override present; announcement endpoint without a template.
+- **Upgrade**: `pip install -U django-whiteneuron==0.4.0.1`, `collectstatic`. No migrations. Docker base images `v0.4.0.1` are published by the release workflow.
+
+### v0.4.0.0 (2026-10-13)
 **Feature release: daisyUI multi-theme admin, server monitoring dashboard, django-unfold 0.109, security hardening and performance work**
 - **Added**: 35 daisyUI themes selectable from the user menu (**Themes**); each theme also re-colors Unfold and drives its dark mode. `WN_ADMIN_THEMES` limits the picker (`[]` hides it); `WN_THEMES="nord,dracula" bash scripts/tailwind.sh` builds a smaller CSS bundle.
 - **Added**: `whiteneuron.monitoring` — Grafana-style **Server monitoring** dashboard (CPU, memory, disk, load, network, disk I/O, request throughput, p50/p95/p99 latency, error rate, Apdex, slowest endpoints, DB/cache latency) with time ranges, auto-refresh, host selector and shared crosshair. Collect with `manage.py monitoring_collector` or the Celery task `whiteneuron.monitoring.tasks.collect_metrics`; configure with `WN_MONITORING`. New dependency: `psutil`.

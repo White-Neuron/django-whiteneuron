@@ -529,7 +529,8 @@ class BaseModel(SoftDeleteModel):
         verbose_name = self._meta.verbose_name
         obj_link = self.path()
         if action == 'create':
-            title = f'{_("New")} {verbose_name} "{self}" {_("has been created by user")} "{self.created_by}"'
+            new_label, created_by_label = _("New"), _("has been created by user")
+            title = f'{new_label} {verbose_name} "{self}" {created_by_label} "{self.created_by}"'
             content_html = format_html(
                 '<p>{} {} <strong>{} ({})</strong> {} <strong>{}</strong></p>',
                 _('New'), verbose_name, self, self.pk, _('has been created by user'), self.created_by,
@@ -538,14 +539,15 @@ class BaseModel(SoftDeleteModel):
                 content_html += format_html('<p>{} <a href="{}">{}</a>.</p>', _('You can view it at'), obj_link, _('this link'))
             changed_data = []
         else:
-            title = f'{_("Update")} {verbose_name} "{self}" ({self.pk}) {_("has been updated by user")} "{self.updated_by}"'
+            update_label, updated_by_label = _("Update"), _("has been updated by user")
+            title = f'{update_label} {verbose_name} "{self}" ({self.pk}) {updated_by_label} "{self.updated_by}"'
             changed_data = [
                 {'field_name': name, 'old_value': old_value, 'new_value': new_value}
                 for name, old_value, new_value in fields_changed
             ]
             content_html = format_html(
-                '{} <strong>{}</strong> ({}) has been updated by user "{}" with the following changes: <ul>{}</ul>',
-                verbose_name, self, self.pk, self.updated_by,
+                '{} <strong>{}</strong> ({}) {} "{}" {}: <ul>{}</ul>',
+                verbose_name, self, self.pk, updated_by_label, self.updated_by, _('with the following changes'),
                 format_html_join('', '<li>{}: {} -> {}</li>', fields_changed),
             )
         Notification.notify_superusers(
@@ -621,12 +623,14 @@ def _base_model_m2m_changed(sender, instance, action, pk_set, model, **kwargs):
         added_set = set(pk_list)
         old_value = [lbl for lbl in current_labels if not any(f"({pk})" in lbl for pk in added_set)]
         new_value = current_labels
-        desc = f"{_('added')}: {added_labels}"
+        added_label = _('added')
+        desc = f"{added_label}: {added_labels}"
     elif action == 'post_remove':
         removed_labels = _resolve_labels(pk_list)
         old_value = current_labels + removed_labels
         new_value = current_labels
-        desc = f"{_('removed')}: {removed_labels}"
+        removed_label = _('removed')
+        desc = f"{removed_label}: {removed_labels}"
     else:  # post_clear
         old_value = '(all)'
         new_value = []
@@ -634,14 +638,15 @@ def _base_model_m2m_changed(sender, instance, action, pk_set, model, **kwargs):
 
     changed_data = [{'field_name': field_name, 'old_value': old_value, 'new_value': new_value}]
 
+    update_label, updated_by_label = _("Update"), _("has been updated by user")
     title = (
-        f'{_("Update")} {instance._meta.verbose_name} "{instance}" ({instance.pk}) '
-        f'{_("has been updated by user")} "{user}"'
+        f'{update_label} {instance._meta.verbose_name} "{instance}" ({instance.pk}) '
+        f'{updated_by_label} "{user}"'
     )
     content_html = format_html(
-        '{} <strong>{}</strong> ({}) has been updated by user "{}" with the following changes: '
-        '<ul><li>{}: {}</li></ul>',
-        instance._meta.verbose_name, instance, instance.pk, user, field_verbose, desc,
+        '{} <strong>{}</strong> ({}) {} "{}" {}: <ul><li>{}: {}</li></ul>',
+        instance._meta.verbose_name, instance, instance.pk, updated_by_label, user,
+        _('with the following changes'), field_verbose, desc,
     )
     try:
         Notification.notify_superusers(
