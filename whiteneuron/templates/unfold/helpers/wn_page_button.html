@@ -1,0 +1,7 @@
+{% load unfold %}
+{# Previous/Next pagination button: a link to `page`, or disabled without one #}
+{% if page %}
+    <a href="{% infinite_paginator_url cl page %}" class="ui-btn ui-btn-sm ui-btn-soft ui-btn-primary">{{ label }}</a>
+{% else %}
+    <a class="ui-btn ui-btn-sm ui-btn-soft ui-btn-primary ui-btn-disabled pointer-events-none opacity-60" aria-disabled="true">{{ label }}</a>
+{% endif %}

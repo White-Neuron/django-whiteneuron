@@ -113,6 +113,18 @@ class DashboardViewTests(TestCase):
         self.assertEqual(page.status_code, 200)
         self.assertTemplateUsed(page, "unfold/helpers/site_branding.html")
 
+    def test_admin_index_shows_messages_once(self):
+        from django.contrib.messages import constants
+        from django.contrib.messages.storage.base import Message
+        from django.contrib.messages.storage.cookie import CookieStorage
+        from django.http import HttpRequest
+
+        self.client.force_login(self.admin)
+        storage = CookieStorage(HttpRequest())
+        self.client.cookies["messages"] = storage._encode([Message(constants.INFO, "flash-once-marker")])
+        page = self.client.get(reverse("admin:index"))
+        self.assertContains(page, "flash-once-marker", count=1)
+
     def test_staff_without_permission_is_denied(self):
         self.client.force_login(self.staff)
         self.assertEqual(self.client.get(reverse("admin:monitoring_metricsample_api")).status_code, 403)

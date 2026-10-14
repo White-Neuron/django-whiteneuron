@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, main2.0]
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  django:
+    name: Tests and checks
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_NAME: whiteneuron.base
+      DJANGO_SETTINGS_MODULE: whiteneuron.base.settings
+      SECRET_KEY: ci-only-not-secret
+      DEBUG: "True"
+      SKIP_GUEST_LOGIN: "True"
+      DATABASE: sqlite
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Install gettext
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends gettext
+
+      - name: Django system check
+        working-directory: whiteneuron
+        run: uv run python -m django check
+
+      - name: Migrations are up to date
+        working-directory: whiteneuron
+        run: uv run python -m django makemigrations --check --dry-run
+
+      - name: Translation catalogs compile
+        run: |
+          for po in $(find whiteneuron -name django.po); do msgfmt --check -o /dev/null "$po"; done
+
+      - name: Tests
+        working-directory: whiteneuron
+        run: uv run python -m django test whiteneuron
+
+  assets:
+    name: Compiled CSS is up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Tailwind scans md2html_tailwind4 inside .venv (see styles.css @source)
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Python dependencies
+        run: uv sync --frozen
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Rebuild themes and CSS
+        run: bash scripts/tailwind.sh
+
+      - name: Committed files match the build
+        run: |
+          git diff --exit-code -- daisy-themes.css whiteneuron/base/themes.py whiteneuron/static/base/css/styles.css \
+            || { echo "::error::Run 'bash scripts/tailwind.sh' and commit the regenerated files."; exit 1; }

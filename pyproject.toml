@@ -39,7 +39,8 @@ dependencies = [
     "twisted[tls]>=26.4.0rc2",
     "django-ckeditor-5>=0.2.18",
     'django-cors-headers>=4.3.0',
-    "django-unfold>=0.109.0",
+    # template overrides are checked per Unfold release: raise the cap after re-testing
+    "django-unfold>=0.109.0,<0.111",
     "djangoql>=0.18.1",
     "pyopenssl>=26.4.0",
     "md2html-tailwind4==1.5.3",

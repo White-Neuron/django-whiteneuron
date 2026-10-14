@@ -339,4 +339,33 @@ class AdminTemplateRegressionTests(TestCase):
         page = self.client.get(url, {"p": last})
         self.assertEqual(page.status_code, 200)
         self.assertNotContains(page, f"?p={last + 1}")
-        self.assertContains(page, f"?p={last - 1}")
+        # the Previous button itself (not just the page-number link) is enabled
+        self.assertContains(page, f'href="?p={last - 1}" class="ui-btn')
+
+    def test_show_all_ignored_by_django_keeps_pagination(self):
+        # ?all is kept by search/filter links; with more rows than list_max_show_all
+        # Django ignores it and still paginates, so Next must stay usable
+        url = reverse("admin:base_user_changelist")
+        User.objects.bulk_create(User(username=f"many{i}") for i in range(210))
+        page = self.client.get(url, {"all": ""})
+        cl = page.context["cl"]
+        self.assertTrue(cl.show_all)
+        self.assertFalse(cl.can_show_all)
+        self.assertGreater(cl.paginator.num_pages, 1)
+        self.assertContains(page, 'p=2" class="ui-btn')
+
+    def test_show_all_disables_both_buttons(self):
+        url = reverse("admin:base_user_changelist")
+        User.objects.bulk_create(User(username=f"few{i}") for i in range(60))
+        page = self.client.get(url, {"all": ""})
+        cl = page.context["cl"]
+        self.assertTrue(cl.show_all and cl.can_show_all)
+        self.assertEqual(page.content.decode().count('aria-disabled="true"'), 2)
+
+    def test_previous_disabled_on_first_page(self):
+        url = reverse("admin:base_user_changelist")
+        User.objects.bulk_create(User(username=f"one{i}") for i in range(60))
+        page = self.client.get(url)
+        self.assertEqual(page.context["cl"].page_num, 1)
+        self.assertContains(page, 'aria-disabled="true">Previous', count=1)
+        self.assertContains(page, 'p=2" class="ui-btn')

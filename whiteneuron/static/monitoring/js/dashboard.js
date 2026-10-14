@@ -94,6 +94,17 @@
         const [r, g, b] = probe.getImageData(0, 0, 1, 1).data;
         return `rgba(${r}, ${g}, ${b}, ${alpha === undefined ? 1 : alpha})`;
     }
+    // computed color of a custom property defined with color-mix()/var() on the dashboard root
+    function resolved(name) {
+        const el = document.createElement("span");
+        el.style.color = `var(${name})`;
+        el.hidden = true;
+        root.appendChild(el);
+        const color = getComputedStyle(el).color;
+        el.remove();
+        // an unusable value (no color-mix() support, missing theme vars) inherits the root's text color
+        return color && color !== getComputedStyle(root).color ? color : "";
+    }
     function palette() {
         const html = getComputedStyle(document.documentElement);
         const mon = getComputedStyle(root);
@@ -101,9 +112,9 @@
         const dark = document.documentElement.classList.contains("dark");
         return {
             dark,
-            primary: v("--color-primary-500", "#0ea5e9"),
-            primaryLight: v("--color-primary-300", "#7dd3fc"),
-            primaryDark: v("--color-primary-700", "#0369a1"),
+            // theme accents mixed for contrast in dashboard.css (resolved through the DOM)
+            primary: resolved("--mon-accent") || v("--color-primary-500", "#0ea5e9"),
+            primaryLight: resolved("--mon-accent-soft") || v("--color-primary-300", "#7dd3fc"),
             accent: v("--color-accent", "#14b8a6"),
             secondary: v("--color-secondary", "#d946ef"),
             info: v("--color-info", "#38bdf8"),
@@ -625,6 +636,14 @@
         apdex.title = !isNum(score) ? "" : score >= 0.94 ? T.satisfied : score >= 0.85 ? T.good : score >= 0.7 ? T.fair : T.poor;
     }
 
+    // solid badges (soft ones use the status color as text: unreadable in some themes);
+    // full class names so Tailwind's scanner keeps them in styles.css
+    const METHOD_BADGE = {
+        GET: "ui-badge-info", HEAD: "ui-badge-info", OPTIONS: "ui-badge-info",
+        POST: "ui-badge-warning", PUT: "ui-badge-warning", PATCH: "ui-badge-warning",
+        DELETE: "ui-badge-error",
+    };
+
     function renderEndpoints(d) {
         const body = root.querySelector("[data-endpoints]");
         const rows = d.requests.top_endpoints || [];
@@ -652,16 +671,15 @@
                 const ep = document.createElement("td");
                 ep.className = "path";
                 const method = document.createElement("span");
-                method.className = "wn-method";
-                method.dataset.method = r.method;
+                method.className = `wn-method ui-badge ui-badge-sm ${METHOD_BADGE[r.method] || "ui-badge-neutral"}`;
                 method.textContent = r.method || "—";
                 ep.title = r.path;
                 ep.append(method, document.createTextNode(r.path)); // textContent only: paths are user-controlled
                 const p95 = cell(join(fmt.ms(r.p95)), `num wn-level-${level(r.p95, 300, 1000) || "ok"}`);
                 const err = cell(`${fixed(r.error_rate, 100)}%`, `num ${r.error_rate ? `wn-level-${level(r.error_rate, 1, 5)}` : ""}`);
                 const share = document.createElement("td");
-                share.innerHTML = '<div class="wn-share"><div><i></i></div><span></span></div>';
-                share.querySelector("i").style.width = `${((r.total || 0) * 100) / maxTotal}%`;
+                share.innerHTML = '<div class="wn-share"><progress class="ui-progress" max="100" aria-hidden="true"></progress><span></span></div>';
+                share.querySelector("progress").value = ((r.total || 0) * 100) / maxTotal;
                 share.querySelector("span").textContent = `${(((r.total || 0) * 100) / grandTotal).toFixed(1)}%`;
                 tr.append(ep, cell(r.count.toLocaleString(), "num"), cell(join(fmt.ms(r.avg)), "num"), p95, cell(join(fmt.ms(r.max)), "num"), err, share);
                 return tr;
@@ -673,8 +691,10 @@
     function banner(message, isError) {
         const el = root.querySelector("[data-banner]");
         el.hidden = !message;
-        el.classList.toggle("is-error", !!isError);
-        el.textContent = message || "";
+        el.classList.toggle("ui-alert-error", !!isError);
+        el.classList.toggle("ui-alert-warning", !isError);
+        // role=status: rewriting the same text would be announced again on every refresh
+        if (el.textContent !== (message || "")) el.textContent = message || "";
     }
 
     function renderToolbar(d) {
@@ -693,7 +713,11 @@
         select.value = d.host;
         root.querySelector("[data-updated]").textContent = `${T.updated} ${new Intl.DateTimeFormat(lang, { timeStyle: "medium" }).format(new Date())}`;
         root.querySelector("[data-live]").hidden = !REFRESH_MS[state.refresh];
-        root.querySelectorAll("[data-range-btn]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.rangeBtn === state.range)));
+        root.querySelectorAll("[data-range-btn]").forEach((b) => {
+            const on = b.dataset.rangeBtn === state.range;
+            b.setAttribute("aria-pressed", String(on));
+            b.classList.toggle("ui-btn-primary", on);
+        });
 
         const notes = [];
         if (d.host !== d.local_host) notes.push(T.remoteHost);
