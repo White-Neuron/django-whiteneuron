@@ -1,16 +1,17 @@
 # syntax=docker/dockerfile:1
 # ============================================================
 # django-whiteneuron base image — Debian (glibc; used by Sense "core" targets)
-# Built from this repository by docker/build-base.sh or .github/workflows/docker-base.yml
-# Published as: ${IMAGE_NAMESPACE}/django-whiteneuron-debian:${WHITENEURON_VERSION}
+# Built by docker/build-base.sh (locally and in .github/workflows/docker-base.yml)
+# Published as: ${IMAGE_NAMESPACE}/django-whiteneuron-debian:v<version>
 # ============================================================
 
 ARG PYTHON_VERSION=3.13
 
 FROM python:${PYTHON_VERSION}-slim-bookworm AS base
 
-# vX.Y.Z.W — must match pyproject's version (checked below)
+# v<version> of the source being installed (checked below)
 ARG WHITENEURON_VERSION
+ARG DEBIAN_FRONTEND=noninteractive
 
 LABEL org.opencontainers.image.title="django-whiteneuron-debian" \
       org.opencontainers.image.source="https://github.com/White-Neuron/django-whiteneuron" \
@@ -21,21 +22,19 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    DEBIAN_FRONTEND=noninteractive \
     TZ=Asia/Ho_Chi_Minh
 
-# The package is installed from the build context (bind mount: no source layer in the image)
+# Dependencies pinned from uv.lock (docker-requirements.txt, written by build-base.sh), then
+# the package itself from the build context (bind mount: no source layer in the image)
 RUN --mount=type=bind,target=/tmp/src,rw \
     apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y --no-install-recommends ca-certificates && \
-    pip install --no-cache-dir /tmp/src && \
-    installed="v$(python -c 'import importlib.metadata as m; print(m.version("django-whiteneuron"))')" && \
-    if [ -n "${WHITENEURON_VERSION}" ] && [ "${installed}" != "${WHITENEURON_VERSION}" ]; then \
-        echo "WHITENEURON_VERSION=${WHITENEURON_VERSION} but the source is ${installed}" >&2; exit 1; \
-    fi && \
+    pip install --no-cache-dir -r /tmp/src/docker-requirements.txt && \
+    pip install --no-cache-dir --no-deps /tmp/src && \
+    python -c 'import importlib.metadata as m, os, sys; from pip._vendor.packaging.version import Version as V; w = os.environ.get("WHITENEURON_VERSION", ""); i = m.version("django-whiteneuron"); sys.exit(f"WHITENEURON_VERSION={w} but the source is {i}" if w and V(w.lstrip("v")) != V(i) else 0)' && \
     rm -rf /var/lib/apt/lists/* && \
-    addgroup --system appuser && \
-    adduser --system --ingroup appuser --home /app appuser
+    addgroup --system --gid 101 appuser && \
+    adduser --system --uid 100 --ingroup appuser --home /app appuser
 
-USER appuser
+# numeric, so runAsNonRoot can verify it (same ids as earlier releases: volumes stay writable)
+USER 100:101

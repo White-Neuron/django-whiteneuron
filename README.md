@@ -416,27 +416,35 @@ the Docker base images.
 ### Docker base images
 
 `anhneuron/django-whiteneuron-alpine:v<version>` and `anhneuron/django-whiteneuron-debian:v<version>`
-contain Python 3.13 with this package and all its dependencies installed, and run as user
-`appuser` (home `/app`). Projects build `FROM` them, for example WN-Sense's web (Alpine) and
-core (Debian) images.
+contain Python 3.13 with this package installed. Its dependencies are pinned from `uv.lock`, the
+same set CI tests. The images run as `appuser` (uid 100, gid 101, home `/app`). Projects build
+`FROM` them, for example WN-Sense's web (Alpine) and core (Debian) images.
 
-- **CI/CD**: `.github/workflows/docker-base.yml` builds and pushes both images when a GitHub
-  Release is published. The release tag must match the `pyproject.toml` version. Set the
-  repository secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` (a Docker Hub access token with
-  write access). The optional repository variable `DOCKERHUB_NAMESPACE` changes the namespace
-  (default `anhneuron`). The workflow also runs from *Actions → Docker base images → Run workflow*
-  for any ref (pushing is opt-in there). Pull requests that touch `docker/` only build the images.
-- **By hand**: the scripts build from a committed git ref, never from local files:
+Every build goes through `docker/build-base.sh`:
+- The source is a `git archive` of the chosen ref, never local files.
+- Dependencies come from that ref's `uv.lock` (`uv export`).
+- The Dockerfiles come from the current checkout, so older tags can be built too.
+- Pushing is only allowed for the release tag `v<version>`, which must match `pyproject.toml`.
+  A published tag is never rebuilt from other code.
+- Each image fails to build if the installed version differs from its tag.
+
+**CI/CD**: `.github/workflows/docker-base.yml` builds and pushes both images when a GitHub
+Release is published.
+- Required repository secrets: `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` (a Docker Hub access
+  token with write access).
+- Optional repository variable: `DOCKERHUB_NAMESPACE` (default `anhneuron`).
+- *Actions → Docker base images → Run workflow* builds any ref. Pushing from there also needs a
+  release tag.
+- Pull requests that touch `docker/`, `pyproject.toml` or `uv.lock` only build the images.
+
+**By hand** (needs git, uv and docker buildx):
 
 ```bash
 bash docker/build-base.sh                     # HEAD, load into local docker
-GIT_REF=v0.4.0.0 bash docker/build-base.sh    # a tag / branch / commit
-bash docker/push-base.sh                      # build + push with provenance and SBOM
-VARIANTS=alpine IMAGE_NAMESPACE=myorg bash docker/push-base.sh
+GIT_REF=v0.3.8.0 bash docker/build-base.sh    # a tag / branch / commit
+GIT_REF=v0.4.0.0 bash docker/push-base.sh     # push a release, with provenance and SBOM
+VARIANTS=alpine IMAGE_NAMESPACE=myorg WN_PYTHON_VERSION=3.13 bash docker/build-base.sh
 ```
-
-Each image fails to build if `WHITENEURON_VERSION` doesn't match the version of the source it
-installs, so a tag can't point at different code.
 
 ## Error Pages
 
