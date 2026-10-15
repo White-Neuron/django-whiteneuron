@@ -10,11 +10,16 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.4.0.1
+v0.4.0.2
 
 ## Changelog
 
-### Latest: v0.4.0.1 (2026-10-14)
+### Latest: v0.4.0.2 (2026-10-15)
+**Patch release: dependency security updates in the locked set (and the Docker base images)**
+- **Security (dependencies)**: locked django 6.0.9, gunicorn 26.2.0, cryptography 50.0.2, hiredis 3.4.2, msgpack 1.2.3, Markdown 3.11.1 and ujson 6.0.0 (all patched releases). The Docker base images install exactly this lock, so projects building `FROM django-whiteneuron-*:v0.4.0.2` no longer need to pin these packages above the base. `django>=6.0.9` is now the minimum.
+- **Upgrade**: `pip install -U django-whiteneuron==0.4.0.2`. No code, template or migration changes. Docker base images `v0.4.0.2` are published by the release workflow.
+
+### v0.4.0.1 (2026-10-14)
 **Patch release: Vietnamese translations lost in 0.4.0.0, daisyUI modals under Unfold, announcement endpoint**
 - **Fixed**: translations that 0.4.0.0 dropped from the Vietnamese catalog. Strings translated with `_()` *inside f-strings* are invisible to `makemessages`, so regenerating the catalog for 0.4.0.0 marked them obsolete and left them out of `django.mo`, so 0.4.0.0 showed them in English: user badges (Inactive / Admin / Bot), every "… has been updated by user …" notification, M2M change notes (added / removed) and the dashboard KPI cards ("progress from last", "in"). The `_()` calls are moved out of the f-strings and the translations restored.
 - **Fixed**: dashboard KPI cards are whole translatable sentences (`%(object)s in %(period)s`, `%(count)s successful (%(rate)s%%)`); "day" and "successful" were hard-coded English; no change now shows as a green +0 instead of a red -0; the color classes are literal so Tailwind compiles them.
@@ -453,7 +458,7 @@ Release is published.
 ```bash
 bash docker/build-base.sh                     # HEAD, load into local docker
 GIT_REF=v0.3.8.0 bash docker/build-base.sh    # a tag / branch / commit
-GIT_REF=v0.4.0.1 bash docker/push-base.sh     # push a release, with provenance and SBOM
+GIT_REF=v0.4.0.2 bash docker/push-base.sh     # push a release, with provenance and SBOM
 VARIANTS=alpine IMAGE_NAMESPACE=myorg WN_PYTHON_VERSION=3.13 bash docker/build-base.sh
 ```
 
