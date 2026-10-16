@@ -1,0 +1,15 @@
+{% load i18n unfold %}
+{% component "unfold/components/card.html" %}
+    <div class="flex items-center gap-4">
+        <div class="flex items-center justify-center shrink-0 size-12 rounded-default bg-primary-50 text-primary-600 dark:bg-primary-500/20 dark:text-primary-400">
+            <span class="material-symbols-outlined text-[28px]!">{{ icon }}</span>
+        </div>
+        <div class="flex flex-col min-w-0">
+            {% component "unfold/components/text.html" %}{{ label }}{% if suffix %} <span class="text-base-500">({{ suffix }})</span>{% endif %}{% endcomponent %}
+            {% component "unfold/components/title.html" %}{{ value }}{% endcomponent %}
+            {% component "unfold/components/text.html" with class="text-xs text-base-500 mt-1" %}
+                {% trans "Release date" %}: {{ release_date }}
+            {% endcomponent %}
+        </div>
+    </div>
+{% endcomponent %}
