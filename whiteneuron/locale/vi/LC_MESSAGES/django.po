@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-14 10:26+0000\n"
+"POT-Creation-Date: 2026-10-16 03:29+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -38,6 +38,7 @@ msgid "Collapse"
 msgstr "Thu gọn"
 
 #: _unfold_src/contrib/constance/templates/admin/constance/includes/results_list.html:19
+#: base/app_info.py:96
 msgid "Name"
 msgstr "Tên"
 
@@ -691,7 +692,8 @@ msgstr "Xóa lựa chọn"
 #: _unfold_src/templates/admin/index.html:5
 #: _unfold_src/templates/admin/login.html:15
 #: _unfold_src/templates/unfold/layouts/base.html:7
-#: templates/admin/index.html:9 templates/admin/login.html:5
+#: templates/admin/about.html:6 templates/admin/index.html:9
+#: templates/admin/login.html:5
 msgid "Django site admin"
 msgstr "Quản trị trang Django"
 
@@ -1413,6 +1415,72 @@ msgstr "Nội dung"
 msgid "Dashboard"
 msgstr "Bảng điều khiển"
 
+#: base/app_info.py:57
+#, python-format
+msgid "%(count)d day"
+msgid_plural "%(count)d days"
+msgstr[0] "%(count)d ngày"
+
+#: base/app_info.py:59
+#, python-format
+msgid "%(count)d hour"
+msgid_plural "%(count)d hours"
+msgstr[0] "%(count)d giờ"
+
+#: base/app_info.py:61
+#, python-format
+msgid "%(count)d minute"
+msgid_plural "%(count)d minutes"
+msgstr[0] "%(count)d phút"
+
+#: base/app_info.py:97 base/app_info.py:104
+msgid "Version"
+msgstr "Phiên bản"
+
+#: base/app_info.py:98 base/app_info.py:105 templates/admin/about_stat.html:11
+msgid "Release date"
+msgstr "Ngày phát hành"
+
+#: base/app_info.py:99
+msgid "Build"
+msgstr "Bản build"
+
+#: base/app_info.py:103
+msgid "Package"
+msgstr "Gói"
+
+#: base/app_info.py:125 monitoring/admin.py:27
+msgid "Database"
+msgstr "Cơ sở dữ liệu"
+
+#: base/app_info.py:126
+msgid "Debug mode"
+msgstr "Chế độ debug"
+
+#: base/app_info.py:126
+msgid "On"
+msgstr "Bật"
+
+#: base/app_info.py:126 templates/admin/monitoring/dashboard.html:54
+msgid "Off"
+msgstr "Tắt"
+
+#: base/app_info.py:127
+msgid "Time zone"
+msgstr "Múi giờ"
+
+#: base/app_info.py:128
+msgid "Server time"
+msgstr "Giờ máy chủ"
+
+#: base/app_info.py:129
+msgid "Process started"
+msgstr "Tiến trình khởi động lúc"
+
+#: base/app_info.py:130 templates/admin/monitoring/dashboard.html:68
+msgid "Uptime"
+msgstr "Thời gian hoạt động"
+
 #: base/apps.py:8
 msgid "Base"
 msgstr "Cơ sở"
@@ -1960,31 +2028,35 @@ msgstr "Danh sách đen IP"
 msgid "UA Blacklist"
 msgstr "Danh sách đen UA"
 
-#: base/settings.py:730
+#: base/settings.py:729 base/sites.py:30
+msgid "About"
+msgstr "Thông tin ứng dụng"
+
+#: base/settings.py:736
 msgid "Celery Tasks"
 msgstr "Nhiệm vụ Celery"
 
-#: base/settings.py:734
+#: base/settings.py:740
 msgid "Periodic tasks"
 msgstr "Nhiệm vụ định kỳ"
 
-#: base/settings.py:743
+#: base/settings.py:749
 msgid "Schedules"
 msgstr "Lịch chạy"
 
-#: base/settings.py:750
+#: base/settings.py:756
 msgid "Clocked"
 msgstr "Khóa"
 
-#: base/settings.py:758
+#: base/settings.py:764
 msgid "Crontabs"
 msgstr "Crontabs"
 
-#: base/settings.py:766
+#: base/settings.py:772
 msgid "Intervals"
 msgstr "Khoảng thời gian"
 
-#: base/settings.py:774
+#: base/settings.py:780
 msgid "Solar events"
 msgstr "Sự kiện Solar"
 
@@ -2449,10 +2521,6 @@ msgid "p99"
 msgstr "p99"
 
 #: monitoring/admin.py:27
-msgid "Database"
-msgstr "Cơ sở dữ liệu"
-
-#: monitoring/admin.py:27
 msgid "Cache"
 msgstr "Cache"
 
@@ -2805,6 +2873,34 @@ msgstr "thông báo"
 msgid "notifications"
 msgstr "thông báo"
 
+#: templates/admin/about.html:12
+msgid "Application version"
+msgstr "Phiên bản ứng dụng"
+
+#: templates/admin/about.html:15
+msgid "Base version"
+msgstr "Phiên bản base"
+
+#: templates/admin/about.html:20 templates/admin/monitoring/dashboard.html:103
+msgid "Application"
+msgstr "Ứng dụng"
+
+#: templates/admin/about.html:25
+msgid "Base platform"
+msgstr "Nền tảng base"
+
+#: templates/admin/about.html:26
+msgid "Changelog"
+msgstr "Nhật ký thay đổi"
+
+#: templates/admin/about.html:36
+msgid "Runtime"
+msgstr "Môi trường chạy"
+
+#: templates/admin/about.html:37
+msgid "Visible to superusers only"
+msgstr "Chỉ superuser mới xem được"
+
 #: templates/admin/base.html:8
 msgid "Loading"
 msgstr "Đang tải"
@@ -2938,17 +3034,9 @@ msgstr "Làm mới ngay"
 msgid "Auto refresh"
 msgstr "Tự động làm mới"
 
-#: templates/admin/monitoring/dashboard.html:54
-msgid "Off"
-msgstr "Tắt"
-
 #: templates/admin/monitoring/dashboard.html:66
 msgid "Overview"
 msgstr "Tổng quan"
-
-#: templates/admin/monitoring/dashboard.html:68
-msgid "Uptime"
-msgstr "Thời gian hoạt động"
 
 #: templates/admin/monitoring/dashboard.html:68
 msgid "Time since the host booted"
@@ -3054,10 +3142,6 @@ msgstr "Số byte nhận và gửi mỗi giây, mọi card mạng"
 #: templates/admin/monitoring/dashboard.html:97
 msgid "Disk space"
 msgstr "Dung lượng đĩa"
-
-#: templates/admin/monitoring/dashboard.html:103
-msgid "Application"
-msgstr "Ứng dụng"
 
 #: templates/admin/monitoring/dashboard.html:105
 msgid "Requests per minute by outcome"

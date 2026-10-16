@@ -1,6 +1,14 @@
 # Changelog
 
-### v0.4.0.2 (2026-10-15) — latest
+### v0.4.1.0 (2026-10-16) — latest
+**Feature release: admin About page (application / base versions and release dates)**
+- **Added**: admin **About** page (`/admin/about/`, sidebar *System → About*, URL name `admin:about`). Every staff user sees the application name, version, release date and short build id (`VERSION`, `RELEASE_DATE`, `BUILD_ID` / `GIT_COMMIT`, cut to 12 characters) and the django-whiteneuron version and release date with a changelog link; superusers also see Python/Django/Unfold versions, database engine, debug mode, time zone, server time, process start and uptime.
+- **Added**: `APP_INFO_CALLBACK` setting (`"path.to.func"`, `func(request) -> [(label, value), ...]`) for project rows on the About page; a failing callback is logged and skipped.
+- **Added**: `whiteneuron.__version__` and `whiteneuron.__release_date__`; a test keeps them in sync with `pyproject.toml` and this changelog.
+- **Security**: the About page never shows host name, OS/kernel, IP addresses, paths, database server version, connection settings or a dependency list (fingerprinting / CVE lookup); runtime details are superuser-only.
+- **Upgrade**: `pip install -U django-whiteneuron==0.4.1.0`, `collectstatic`. No migrations. Optional settings: `RELEASE_DATE`, `BUILD_ID`, `APP_INFO_CALLBACK`. Projects that define their own `UNFOLD["SIDEBAR"]` add the link themselves (`reverse_lazy("admin:about")`). Docker base images `v0.4.1.0` are published by the release workflow.
+
+### v0.4.0.2 (2026-10-15)
 **Patch release: dependency security updates in the locked set (and the Docker base images)**
 - **Security (dependencies)**: locked django 6.0.9, gunicorn 26.2.0, cryptography 50.0.2, hiredis 3.4.2, msgpack 1.2.3, Markdown 3.11.1 and ujson 6.0.0 (all patched releases). The Docker base images install exactly this lock, so projects building `FROM django-whiteneuron-*:v0.4.0.2` no longer need to pin these packages above the base. `django>=6.0.9` is now the minimum.
 - **Upgrade**: `pip install -U django-whiteneuron==0.4.0.2`. No code, template or migration changes. Docker base images `v0.4.0.2` are published by the release workflow.

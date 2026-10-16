@@ -419,6 +419,14 @@ Read-only dashboard view that renders sidebar apps from UNFOLD settings. Filters
 - `IPBlacklistAdmin.block_ip` action on UserActivity records for quick blocking
 - Auto Redis cache sync on save/delete
 
+### About page (`/admin/about/`, URL name `admin:about`)
+
+Sidebar **System → About**, open to every staff user:
+
+- **Application**: `NAME`, `VERSION`, `RELEASE_DATE` (ISO date), `BUILD_ID` (falls back to `GIT_COMMIT`, cut to 12 characters), plus rows returned by `APP_INFO_CALLBACK` (a setting, not an environment variable: `"path.to.func"`, `func(request) -> [(label, value), ...]`). Every staff user sees these rows, so never return secrets, URLs with credentials or internal addresses from the callback.
+- **Base platform**: installed `django-whiteneuron` version and release date (`whiteneuron.__version__`, `whiteneuron.__release_date__`), link to the changelog.
+- **Runtime** (superusers only): Python, Django and Unfold versions, database engine (no server version), debug mode, time zone, server time, process start and uptime. Host name, OS/kernel, IP addresses, paths, connection settings and the full dependency list are deliberately not shown.
+
 ---
 
 ## 10. Environment Configuration

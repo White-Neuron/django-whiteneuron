@@ -1,0 +1,43 @@
+{% extends "admin/base_site.html" %}
+{% load i18n unfold %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block content %}
+    {% component "unfold/components/container.html" %}
+        {# headline numbers #}
+        <div class="grid gap-8 mb-8 lg:grid-cols-2">
+            {% trans "Application version" as label %}
+            {% include "admin/about_stat.html" with icon="rocket_launch" label=label value=app_version release_date=app_release_date %}
+
+            {% trans "Base version" as label %}
+            {% include "admin/about_stat.html" with icon="layers" label=label suffix="django-whiteneuron" value=base_version release_date=base_release_date %}
+        </div>
+
+        <div class="grid gap-8 mb-8 lg:grid-cols-2">
+            {% trans "Application" as title %}
+            {% component "unfold/components/card.html" with title=title title_icon="apps" %}
+                {% include "admin/about_rows.html" with rows=application %}
+            {% endcomponent %}
+
+            {% trans "Base platform" as title %}
+            {% trans "Changelog" as changelog %}
+            {% component "unfold/components/card.html" with title=title title_icon="deployed_code" %}
+                {% include "admin/about_rows.html" with rows=base %}
+                <a href="{{ changelog_url }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 mt-4 text-primary-600 dark:text-primary-500 hover:underline">
+                    <span class="material-symbols-outlined text-base">open_in_new</span>{{ changelog }}
+                </a>
+            {% endcomponent %}
+        </div>
+
+        {% if runtime %}
+            {% trans "Runtime" as title %}
+            {% trans "Visible to superusers only" as description %}
+            {% component "unfold/components/card.html" with class="mb-8" title=title title_icon="dns" description=description %}
+                {% include "admin/about_rows.html" with rows=runtime %}
+            {% endcomponent %}
+        {% endif %}
+    {% endcomponent %}
+{% endblock %}
