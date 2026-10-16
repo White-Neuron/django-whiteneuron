@@ -1,7 +1,7 @@
 # Changelog
 
 ### Unreleased
-- **Added**: admin **About** page (`/admin/about/`, sidebar *System → About*): application version, release date and build (`VERSION`, `RELEASE_DATE`, `BUILD_ID`, extra rows from `APP_INFO_CALLBACK`), the django-whiteneuron version and release date, and for superusers runtime details (Python, OS, host, database, cache, uptime) and dependency versions. `whiteneuron.__version__` / `__release_date__` are now defined (kept in sync with `pyproject.toml` and this changelog by a test).
+- **Added**: admin **About** page (`/admin/about/`, sidebar *System → About*): application version, release date and short build id (`VERSION`, `RELEASE_DATE`, `BUILD_ID`, extra rows from the `APP_INFO_CALLBACK` setting) and the django-whiteneuron version and release date for all staff; superusers also see Python/Django/Unfold versions, database engine, debug mode, time zone and uptime. Host name, OS/kernel, IPs, paths, connection settings and dependency lists are never shown. `whiteneuron.__version__` / `__release_date__` are now defined (kept in sync with `pyproject.toml` and this changelog by a test).
 
 ### v0.4.0.2 (2026-10-15) — latest
 **Patch release: dependency security updates in the locked set (and the Docker base images)**

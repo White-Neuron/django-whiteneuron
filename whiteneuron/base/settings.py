@@ -928,8 +928,9 @@ VERSION = environ.get("VERSION", "0.3.2")
 # Shown on the admin "About" page (/admin/about/) with VERSION
 RELEASE_DATE = environ.get("RELEASE_DATE")  # ISO date, e.g. 2026-10-15
 BUILD_ID = environ.get("BUILD_ID") or environ.get("GIT_COMMIT")
-# Extra rows for the "Application" card: "path.to.func", func(request) -> [(label, value), ...]
-APP_INFO_CALLBACK = environ.get("APP_INFO_CALLBACK")
+# Extra rows for the "Application" card, shown to every staff user (never put secrets in them):
+# APP_INFO_CALLBACK = "path.to.func", func(request) -> [(label, value), ...]
+APP_INFO_CALLBACK = None
 ANNOUNCEMENT_CALLBACK = "whiteneuron.base.utils.announcement_callback"
 # Set to an absolute Path or a template name to enable announcement content.
 # Example: ANNOUNCEMENT_CONTENT_HTML_FILE = BASE_DIR / "templates" / "announcement_content.html"

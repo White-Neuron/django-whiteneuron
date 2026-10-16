@@ -423,9 +423,9 @@ Read-only dashboard view that renders sidebar apps from UNFOLD settings. Filters
 
 Sidebar **System → About**, open to every staff user:
 
-- **Application**: `NAME`, `VERSION`, `RELEASE_DATE` (ISO date), `BUILD_ID` (falls back to `GIT_COMMIT`), debug mode, plus rows returned by `APP_INFO_CALLBACK` (`"path.to.func"`, `func(request) -> [(label, value), ...]`).
+- **Application**: `NAME`, `VERSION`, `RELEASE_DATE` (ISO date), `BUILD_ID` (falls back to `GIT_COMMIT`, cut to 12 characters), plus rows returned by `APP_INFO_CALLBACK` (a setting, not an environment variable: `"path.to.func"`, `func(request) -> [(label, value), ...]`). Every staff user sees these rows, so never return secrets, URLs with credentials or internal addresses from the callback.
 - **Base platform**: installed `django-whiteneuron` version and release date (`whiteneuron.__version__`, `whiteneuron.__release_date__`), link to the changelog.
-- **Runtime** and **Dependencies** (superusers only): Python, OS, host name, database and version, cache backend, time zone, server time, process uptime and the versions of the main dependencies.
+- **Runtime** (superusers only): Python, Django and Unfold versions, database engine (no server version), debug mode, time zone, server time, process start and uptime. Host name, OS/kernel, IP addresses, paths, connection settings and the full dependency list are deliberately not shown.
 
 ---
 
