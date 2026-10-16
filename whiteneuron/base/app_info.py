@@ -90,12 +90,13 @@ def extra_application_rows(request):
 
 
 def get_app_info(request):
-    base_version = package_version(BASE_PACKAGE) or whiteneuron.__version__
+    # the running code's version, so it always matches __release_date__ (editable installs too)
+    base_version = whiteneuron.__version__
     application = [
         (_("Name"), _(settings.NAME) if getattr(settings, "NAME", None) else None),
         (_("Version"), getattr(settings, "VERSION", None)),
         (_("Release date"), parse_date(getattr(settings, "RELEASE_DATE", None))),
-        (_("Build"), (getattr(settings, "BUILD_ID", None) or "")[:BUILD_ID_LENGTH]),
+        (_("Build"), str(getattr(settings, "BUILD_ID", None) or "")[:BUILD_ID_LENGTH]),
         *extra_application_rows(request),
     ]
     base = [
