@@ -10,22 +10,10 @@
         {# headline numbers #}
         <div class="grid gap-8 mb-8 lg:grid-cols-2">
             {% trans "Application version" as label %}
-            {% component "unfold/components/card.html" with icon="deployed_code" %}
-                {% component "unfold/components/text.html" %}{{ label }}{% endcomponent %}
-                {% component "unfold/components/title.html" %}{{ app_version }}{% endcomponent %}
-                {% component "unfold/components/text.html" with class="text-xs text-base-500 mt-1" %}
-                    {% trans "Release date" %}: {{ app_release_date }}
-                {% endcomponent %}
-            {% endcomponent %}
+            {% include "admin/about_stat.html" with icon="rocket_launch" label=label value=app_version release_date=app_release_date %}
 
             {% trans "Base version" as label %}
-            {% component "unfold/components/card.html" with icon="layers" %}
-                {% component "unfold/components/text.html" %}{{ label }} (django-whiteneuron){% endcomponent %}
-                {% component "unfold/components/title.html" %}{{ base_version }}{% endcomponent %}
-                {% component "unfold/components/text.html" with class="text-xs text-base-500 mt-1" %}
-                    {% trans "Release date" %}: {{ base_release_date }}
-                {% endcomponent %}
-            {% endcomponent %}
+            {% include "admin/about_stat.html" with icon="layers" label=label suffix="django-whiteneuron" value=base_version release_date=base_release_date %}
         </div>
 
         <div class="grid gap-8 mb-8 lg:grid-cols-2">
@@ -36,7 +24,7 @@
 
             {% trans "Base platform" as title %}
             {% trans "Changelog" as changelog %}
-            {% component "unfold/components/card.html" with title=title title_icon="layers" %}
+            {% component "unfold/components/card.html" with title=title title_icon="deployed_code" %}
                 {% include "admin/about_rows.html" with rows=base %}
                 <a href="{{ changelog_url }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 mt-4 text-primary-600 dark:text-primary-500 hover:underline">
                     <span class="material-symbols-outlined text-base">open_in_new</span>{{ changelog }}
