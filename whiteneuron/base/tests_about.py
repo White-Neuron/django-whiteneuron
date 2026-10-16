@@ -1,6 +1,8 @@
 """Admin "About" page: application / base versions and release dates."""
 import pathlib
+import platform
 import re
+import socket
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
@@ -14,7 +16,7 @@ User = get_user_model()
 ROOT = pathlib.Path(whiteneuron.__file__).resolve().parent.parent
 
 
-@package_test_settings(VERSION="2.3.4", RELEASE_DATE="2026-10-01", BUILD_ID="abc1234")
+@package_test_settings(VERSION="2.3.4", RELEASE_DATE="2026-10-01", BUILD_ID="abc1234def5678abcdef")
 class AboutPageTests(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -34,20 +36,31 @@ class AboutPageTests(TestCase):
             page = self.client.get(reverse("admin:about"))
         self.assertEqual(page.status_code, 200)
         self.assertContains(page, "2.3.4")
-        self.assertContains(page, "abc1234")
         self.assertContains(page, whiteneuron.__version__)
         self.assertEqual(page.context["app_release_date"], "Oct. 1, 2026")
         self.assertIsNone(page.context["runtime"])
-        self.assertIsNone(page.context["packages"])
-        self.assertNotContains(page, "Dependencies")
+        self.assertNotContains(page, "Debug mode")
+        self.assertNotContains(page, "Django Unfold")
 
-    def test_superuser_sees_runtime_and_dependencies(self):
+    def test_build_id_is_shortened(self):
+        self.client.force_login(self.staff)
+        page = self.client.get(reverse("admin:about"))
+        self.assertContains(page, "abc1234def56")
+        self.assertNotContains(page, "abc1234def5678")
+
+    def test_superuser_runtime_has_no_host_details(self):
         self.client.force_login(self.root)
         page = self.client.get(reverse("admin:about"))
         self.assertEqual(page.status_code, 200)
         labels = [str(label) for label, _value in page.context["runtime"]]
-        self.assertIn("Database", labels)
-        self.assertIn("django", dict(page.context["packages"]))
+        self.assertIn("Django", labels)
+        self.assertIn("Uptime", labels)
+        values = " ".join(str(value) for _label, value in page.context["runtime"])
+        self.assertNotIn(socket.gethostname(), values)
+        self.assertNotIn(platform.release(), values)  # kernel version
+        html = page.content.decode()
+        for secret in ("SECRET_KEY", "PASSWORD", str(self.root.password)):
+            self.assertNotIn(secret, html)
 
     @override_settings(RELEASE_DATE="", VERSION=None, APP_INFO_CALLBACK="whiteneuron.base.tests_about.broken_callback")
     def test_missing_values_and_broken_callback_do_not_break_the_page(self):
@@ -83,3 +96,18 @@ class PackageVersionTests(TestCase):
         )
         self.assertIsNotNone(heading, "CHANGELOG.md has no heading for this version")
         self.assertEqual(heading.group(1), whiteneuron.__release_date__)
+
+
+class UptimeFormatTests(TestCase):
+    def test_format_uptime(self):
+        import datetime
+        from django.utils import timezone
+        from whiteneuron.base.app_info import format_uptime
+
+        now = timezone.now()
+        with translation.override("en"):
+            self.assertEqual(format_uptime(now), "0 minutes")
+            self.assertEqual(format_uptime(now - datetime.timedelta(hours=1, minutes=5)), "1 hour, 5 minutes")
+            self.assertEqual(format_uptime(now - datetime.timedelta(days=2, hours=3, minutes=7)), "2 days, 3 hours")
+        with translation.override("vi"):
+            self.assertEqual(format_uptime(now - datetime.timedelta(days=2, hours=3)), "2 ngày, 3 giờ")

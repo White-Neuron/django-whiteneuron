@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-16 03:07+0000\n"
+"POT-Creation-Date: 2026-10-16 03:15+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -38,7 +38,7 @@ msgid "Collapse"
 msgstr "Thu gọn"
 
 #: _unfold_src/contrib/constance/templates/admin/constance/includes/results_list.html:19
-#: base/app_info.py:123
+#: base/app_info.py:95
 msgid "Name"
 msgstr "Tên"
 
@@ -1415,72 +1415,72 @@ msgstr "Nội dung"
 msgid "Dashboard"
 msgstr "Bảng điều khiển"
 
-#: base/app_info.py:124 base/app_info.py:132
+#: base/app_info.py:57
+#, python-format
+msgid "%(count)d day"
+msgid_plural "%(count)d days"
+msgstr[0] "%(count)d ngày"
+
+#: base/app_info.py:59
+#, fuzzy, python-format
+#, python-format
+msgid "%(count)d hour"
+msgid_plural "%(count)d hours"
+msgstr[0] "%(count)d giờ"
+
+#: base/app_info.py:61
+#, fuzzy, python-format
+#, python-format
+msgid "%(count)d minute"
+msgid_plural "%(count)d minutes"
+msgstr[0] "%(count)d phút"
+
+#: base/app_info.py:96 base/app_info.py:103
 msgid "Version"
 msgstr "Phiên bản"
 
-#: base/app_info.py:125 base/app_info.py:133 templates/admin/about.html:17
+#: base/app_info.py:97 base/app_info.py:104 templates/admin/about.html:17
 #: templates/admin/about.html:26
 msgid "Release date"
 msgstr "Ngày phát hành"
 
-#: base/app_info.py:126
+#: base/app_info.py:98
 msgid "Build"
 msgstr "Bản build"
 
-#: base/app_info.py:127
-msgid "Debug mode"
-msgstr "Chế độ debug"
-
-#: base/app_info.py:127
-msgid "On"
-msgstr "Bật"
-
-#: base/app_info.py:127 templates/admin/monitoring/dashboard.html:54
-msgid "Off"
-msgstr "Tắt"
-
-#: base/app_info.py:131
+#: base/app_info.py:102
 msgid "Package"
 msgstr "Gói"
 
-#: base/app_info.py:149
-msgid "Python"
-msgstr "Python"
-
-#: base/app_info.py:150
-msgid "Operating system"
-msgstr "Hệ điều hành"
-
-#: base/app_info.py:151
-msgid "Host name"
-msgstr "Tên máy chủ"
-
-#: base/app_info.py:152 monitoring/admin.py:27
+#: base/app_info.py:124 monitoring/admin.py:27
 msgid "Database"
 msgstr "Cơ sở dữ liệu"
 
-#: base/app_info.py:153 monitoring/admin.py:27
-msgid "Cache"
-msgstr "Cache"
+#: base/app_info.py:125
+msgid "Debug mode"
+msgstr "Chế độ debug"
 
-#: base/app_info.py:154
+#: base/app_info.py:125
+msgid "On"
+msgstr "Bật"
+
+#: base/app_info.py:125 templates/admin/monitoring/dashboard.html:54
+msgid "Off"
+msgstr "Tắt"
+
+#: base/app_info.py:126
 msgid "Time zone"
 msgstr "Múi giờ"
 
-#: base/app_info.py:155
-msgid "Default language"
-msgstr "Ngôn ngữ mặc định"
-
-#: base/app_info.py:156
+#: base/app_info.py:127
 msgid "Server time"
 msgstr "Giờ máy chủ"
 
-#: base/app_info.py:157
+#: base/app_info.py:128
 msgid "Process started"
 msgstr "Tiến trình khởi động lúc"
 
-#: base/app_info.py:158 templates/admin/monitoring/dashboard.html:68
+#: base/app_info.py:129 templates/admin/monitoring/dashboard.html:68
 msgid "Uptime"
 msgstr "Thời gian hoạt động"
 
@@ -2524,6 +2524,10 @@ msgid "p99"
 msgstr "p99"
 
 #: monitoring/admin.py:27
+msgid "Cache"
+msgstr "Cache"
+
+#: monitoring/admin.py:27
 msgid "Memory (RSS)"
 msgstr "Bộ nhớ (RSS)"
 
@@ -2892,17 +2896,13 @@ msgstr "Nền tảng base"
 msgid "Changelog"
 msgstr "Nhật ký thay đổi"
 
-#: templates/admin/about.html:49
+#: templates/admin/about.html:48
 msgid "Runtime"
 msgstr "Môi trường chạy"
 
-#: templates/admin/about.html:50
+#: templates/admin/about.html:49
 msgid "Visible to superusers only"
 msgstr "Chỉ superuser mới xem được"
-
-#: templates/admin/about.html:55
-msgid "Dependencies"
-msgstr "Thư viện phụ thuộc"
 
 #: templates/admin/base.html:8
 msgid "Loading"

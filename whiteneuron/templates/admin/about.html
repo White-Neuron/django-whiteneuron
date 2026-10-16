@@ -45,18 +45,11 @@
         </div>
 
         {% if runtime %}
-            <div class="grid gap-8 mb-8 lg:grid-cols-2">
-                {% trans "Runtime" as title %}
-                {% trans "Visible to superusers only" as description %}
-                {% component "unfold/components/card.html" with title=title title_icon="dns" description=description %}
-                    {% include "admin/about_rows.html" with rows=runtime %}
-                {% endcomponent %}
-
-                {% trans "Dependencies" as title %}
-                {% component "unfold/components/card.html" with title=title title_icon="package_2" description=description %}
-                    {% include "admin/about_rows.html" with rows=packages %}
-                {% endcomponent %}
-            </div>
+            {% trans "Runtime" as title %}
+            {% trans "Visible to superusers only" as description %}
+            {% component "unfold/components/card.html" with class="mb-8" title=title title_icon="dns" description=description %}
+                {% include "admin/about_rows.html" with rows=runtime %}
+            {% endcomponent %}
         {% endif %}
     {% endcomponent %}
 {% endblock %}

@@ -2,16 +2,15 @@
 import datetime
 import logging
 import platform
-import socket
-import sqlite3
-import time
 from importlib import metadata
 
+import psutil
 from django.conf import settings
 from django.db import connection
 from django.utils import formats, timezone
 from django.utils.module_loading import import_string
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext
 
 import whiteneuron
 
@@ -19,18 +18,7 @@ logger = logging.getLogger(__name__)
 
 BASE_PACKAGE = "django-whiteneuron"
 CHANGELOG_URL = "https://github.com/White-Neuron/django-whiteneuron/releases"
-
-# Shown in "Dependencies" (superusers only); missing packages are skipped
-KEY_PACKAGES = [
-    "django", "django-unfold", "celery", "django-celery-beat", "channels", "channels-redis",
-    "redis", "django-import-export", "django-modeltranslation", "django-simple-history",
-    "django-guardian", "django-ninja", "gunicorn", "uvicorn", "daphne", "whitenoise",
-    "pillow", "pandas", "openai", "sentry-sdk",
-]
-
-# Module import time ~ worker start: good enough for an "uptime" without psutil
-_STARTED_AT = timezone.now()
-_STARTED_MONOTONIC = time.monotonic()
+BUILD_ID_LENGTH = 12  # a short commit hash identifies the build; longer values are cut
 
 
 def package_version(name):
@@ -52,42 +40,26 @@ def parse_date(value):
         return str(value)  # free text such as "Q4 2026": shown as is
 
 
-def database_info():
-    vendor = connection.vendor
-    version = None
+def process_started():
     try:
-        if vendor == "sqlite":
-            version = sqlite3.sqlite_version
-        elif vendor == "postgresql":
-            connection.ensure_connection()
-            number = connection.pg_version  # e.g. 160004
-            version = f"{number // 10000}.{number % 10000}" if number >= 100000 else str(number)
-        elif vendor == "mysql":
-            connection.ensure_connection()
-            version = ".".join(map(str, connection.mysql_version))
-        else:
-            version = getattr(connection.Database, "version", None)
-    except Exception:  # unreachable database must not break the page
-        logger.warning("Could not read the database version", exc_info=True)
-    name = connection.display_name
-    return f"{name} {version}" if version else name
+        return datetime.datetime.fromtimestamp(psutil.Process().create_time(), tz=datetime.timezone.utc)
+    except Exception:  # restricted /proc: leave it out rather than fail
+        return None
 
 
-def cache_backend():
-    backend = settings.CACHES.get("default", {}).get("BACKEND", "")
-    return backend.rsplit(".", 1)[-1] or "-"
-
-
-def format_duration(seconds):
-    seconds = int(seconds)
+def format_uptime(started):
+    """Days/hours/minutes in the active language (Django's timesince has no Vietnamese)."""
+    seconds = max(0, int((timezone.now() - started).total_seconds()))
     days, seconds = divmod(seconds, 86400)
-    hours, seconds = divmod(seconds, 3600)
-    minutes = seconds // 60
+    hours, minutes = divmod(seconds // 60, 60)
+    parts = []
     if days:
-        return f"{days}d {hours}h {minutes}m"
+        parts.append(ngettext("%(count)d day", "%(count)d days", days) % {"count": days})
     if hours:
-        return f"{hours}h {minutes}m"
-    return f"{minutes}m"
+        parts.append(ngettext("%(count)d hour", "%(count)d hours", hours) % {"count": hours})
+    if not days:
+        parts.append(ngettext("%(count)d minute", "%(count)d minutes", minutes) % {"count": minutes})
+    return ", ".join(parts)
 
 
 def display(value):
@@ -123,8 +95,7 @@ def get_app_info(request):
         (_("Name"), _(settings.NAME) if getattr(settings, "NAME", None) else None),
         (_("Version"), getattr(settings, "VERSION", None)),
         (_("Release date"), parse_date(getattr(settings, "RELEASE_DATE", None))),
-        (_("Build"), getattr(settings, "BUILD_ID", None)),
-        (_("Debug mode"), _("On") if settings.DEBUG else _("Off")),
+        (_("Build"), (getattr(settings, "BUILD_ID", None) or "")[:BUILD_ID_LENGTH]),
         *extra_application_rows(request),
     ]
     base = [
@@ -141,21 +112,20 @@ def get_app_info(request):
         "application": _rows(application),
         "base": _rows(base),
         "runtime": None,
-        "packages": None,
     }
-    # host, database and dependency versions help attackers: superusers only
+    # Superusers only, and deliberately limited: no host name, OS/kernel, IP, paths, database
+    # server version, connection settings or full dependency list (fingerprinting / CVE lookup).
     if request.user.is_superuser:
+        started = process_started()
         info["runtime"] = _rows([
-            (_("Python"), f"{platform.python_version()} ({platform.python_implementation()})"),
-            (_("Operating system"), f"{platform.system()} {platform.release()} ({platform.machine()})"),
-            (_("Host name"), socket.gethostname()),
-            (_("Database"), database_info()),
-            (_("Cache"), cache_backend()),
+            ("Python", platform.python_version()),
+            ("Django", package_version("django")),
+            ("Django Unfold", package_version("django-unfold")),
+            (_("Database"), connection.display_name),
+            (_("Debug mode"), _("On") if settings.DEBUG else _("Off")),
             (_("Time zone"), settings.TIME_ZONE),
-            (_("Default language"), settings.LANGUAGE_CODE),
             (_("Server time"), timezone.now()),
-            (_("Process started"), _STARTED_AT),
-            (_("Uptime"), format_duration(time.monotonic() - _STARTED_MONOTONIC)),
+            (_("Process started"), started),
+            (_("Uptime"), format_uptime(started) if started else None),
         ])
-        info["packages"] = [(name, version) for name in KEY_PACKAGES if (version := package_version(name))]
     return info
