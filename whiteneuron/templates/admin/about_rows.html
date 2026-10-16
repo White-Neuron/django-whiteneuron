@@ -1,0 +1,8 @@
+<dl class="divide-y divide-base-200 dark:divide-base-800">
+    {% for label, value in rows %}
+        <div class="flex flex-col gap-1 py-2 sm:flex-row sm:gap-4">
+            <dt class="font-medium text-important sm:w-48 sm:shrink-0">{{ label }}</dt>
+            <dd class="break-all">{{ value }}</dd>
+        </div>
+    {% endfor %}
+</dl>
