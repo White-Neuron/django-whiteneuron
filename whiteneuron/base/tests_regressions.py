@@ -461,3 +461,24 @@ class AnnouncementContentTests(TestCase):
     def test_unset_setting_returns_empty_content(self):
         response = self._get()  # used to return None (500)
         self.assertEqual((response.status_code, response.content), (200, b""))
+
+
+@package_test_settings()
+class GuestLoginButtonTests(TestCase):
+    def setUp(self):
+        # AutoGuestLoginMiddleware (if enabled) would log the guest in instead of showing the form
+        self.client.cookies["skip_auto_guest"] = "1"
+
+    def test_hidden_without_guest_user(self):
+        # the button used to show even without a guest account; clicking it did nothing
+        page = self.client.get(reverse("admin:login"))
+        self.assertNotContains(page, reverse("guest_login"))
+
+    def test_shown_as_styled_button_with_guest_user(self):
+        User.objects.create(username="guest", is_staff=True)
+        page = self.client.get(reverse("admin:login"), {"next": "/admin/"})
+        self.assertContains(page, reverse("guest_login"))
+        self.assertContains(page, 'name="next" value="/admin/"')
+        # bg-secondary-600 is not compiled into any stylesheet: the button had no background
+        self.assertNotContains(page, "bg-secondary-600")
+        self.assertContains(page, "bg-base-100")
