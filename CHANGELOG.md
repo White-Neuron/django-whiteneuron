@@ -1,5 +1,8 @@
 # Changelog
 
+### Unreleased
+- **Added**: admin **About** page (`/admin/about/`, sidebar *System → About*): application version, release date and build (`VERSION`, `RELEASE_DATE`, `BUILD_ID`, extra rows from `APP_INFO_CALLBACK`), the django-whiteneuron version and release date, and for superusers runtime details (Python, OS, host, database, cache, uptime) and dependency versions. `whiteneuron.__version__` / `__release_date__` are now defined (kept in sync with `pyproject.toml` and this changelog by a test).
+
 ### v0.4.0.2 (2026-10-15) — latest
 **Patch release: dependency security updates in the locked set (and the Docker base images)**
 - **Security (dependencies)**: locked django 6.0.9, gunicorn 26.2.0, cryptography 50.0.2, hiredis 3.4.2, msgpack 1.2.3, Markdown 3.11.1 and ujson 6.0.0 (all patched releases). The Docker base images install exactly this lock, so projects building `FROM django-whiteneuron-*:v0.4.0.2` no longer need to pin these packages above the base. `django>=6.0.9` is now the minimum.

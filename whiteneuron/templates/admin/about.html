@@ -1,0 +1,62 @@
+{% extends "admin/base_site.html" %}
+{% load i18n unfold %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block content %}
+    {% component "unfold/components/container.html" %}
+        {# headline numbers #}
+        <div class="grid gap-8 mb-8 lg:grid-cols-2">
+            {% trans "Application version" as label %}
+            {% component "unfold/components/card.html" with icon="deployed_code" %}
+                {% component "unfold/components/text.html" %}{{ label }}{% endcomponent %}
+                {% component "unfold/components/title.html" %}{{ app_version }}{% endcomponent %}
+                {% component "unfold/components/text.html" with class="text-xs text-base-500 mt-1" %}
+                    {% trans "Release date" %}: {{ app_release_date }}
+                {% endcomponent %}
+            {% endcomponent %}
+
+            {% trans "Base version" as label %}
+            {% component "unfold/components/card.html" with icon="layers" %}
+                {% component "unfold/components/text.html" %}{{ label }} (django-whiteneuron){% endcomponent %}
+                {% component "unfold/components/title.html" %}{{ base_version }}{% endcomponent %}
+                {% component "unfold/components/text.html" with class="text-xs text-base-500 mt-1" %}
+                    {% trans "Release date" %}: {{ base_release_date }}
+                {% endcomponent %}
+            {% endcomponent %}
+        </div>
+
+        <div class="grid gap-8 mb-8 lg:grid-cols-2">
+            {% trans "Application" as title %}
+            {% component "unfold/components/card.html" with title=title title_icon="apps" %}
+                {% include "admin/about_rows.html" with rows=application %}
+            {% endcomponent %}
+
+            {% trans "Base platform" as title %}
+            {% trans "Changelog" as changelog %}
+            {% component "unfold/components/card.html" with title=title title_icon="layers" %}
+                {% include "admin/about_rows.html" with rows=base %}
+                <a href="{{ changelog_url }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 mt-4 text-primary-600 dark:text-primary-500 hover:underline">
+                    <span class="material-symbols-outlined text-base">open_in_new</span>{{ changelog }}
+                </a>
+            {% endcomponent %}
+        </div>
+
+        {% if runtime %}
+            <div class="grid gap-8 mb-8 lg:grid-cols-2">
+                {% trans "Runtime" as title %}
+                {% trans "Visible to superusers only" as description %}
+                {% component "unfold/components/card.html" with title=title title_icon="dns" description=description %}
+                    {% include "admin/about_rows.html" with rows=runtime %}
+                {% endcomponent %}
+
+                {% trans "Dependencies" as title %}
+                {% component "unfold/components/card.html" with title=title title_icon="package_2" description=description %}
+                    {% include "admin/about_rows.html" with rows=packages %}
+                {% endcomponent %}
+            </div>
+        {% endif %}
+    {% endcomponent %}
+{% endblock %}

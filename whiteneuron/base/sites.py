@@ -1,6 +1,8 @@
 from django.conf import settings as django_settings
 from django.shortcuts import redirect
-from django.urls import reverse
+from django.template.response import TemplateResponse
+from django.urls import path, reverse
+from django.utils.translation import gettext_lazy as _
 from unfold.sites import UnfoldAdminSite
 
 from .forms import LoginForm
@@ -13,6 +15,22 @@ class BaseAdminSite(UnfoldAdminSite):
         if request.method == "GET":
             return redirect(reverse("%s:login" % self.name))
         return super().logout(request, extra_context=extra_context)
+
+    def get_urls(self):
+        return [
+            path("about/", self.admin_view(self.about_view), name="about"),
+        ] + super().get_urls()
+
+    def about_view(self, request):
+        """Application / base package versions, release dates and (superusers) runtime info."""
+        from .app_info import get_app_info
+
+        context = {
+            **self.each_context(request),
+            "title": _("About"),
+            **get_app_info(request),
+        }
+        return TemplateResponse(request, "admin/about.html", context)
 
     def toggle_sidebar(self, request):
         return super().toggle_sidebar(request)
