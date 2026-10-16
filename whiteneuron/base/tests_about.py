@@ -70,6 +70,11 @@ class AboutPageTests(TestCase):
         self.assertEqual(page.status_code, 200)
         self.assertEqual(page.context["app_version"], "-")
 
+    @override_settings(BUILD_ID=20261016)
+    def test_numeric_build_id(self):
+        self.client.force_login(self.staff)
+        self.assertContains(self.client.get(reverse("admin:about")), "20261016")
+
     @override_settings(APP_INFO_CALLBACK="whiteneuron.base.tests_about.extra_rows")
     def test_callback_adds_rows(self):
         self.client.force_login(self.staff)
