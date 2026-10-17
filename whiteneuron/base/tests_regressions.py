@@ -526,13 +526,28 @@ class GuestLoginButtonTests(TestCase):
         self.assertRedirects(response, "/admin/", fetch_redirect_response=False)
         self.assertEqual(int(self.client.session["_auth_user_id"]), guest.pk)
 
-    def test_non_staff_user_can_switch_to_guest(self):
+    def test_logged_in_user_can_switch_to_guest(self):
+        # the login page renders for any logged-in user without admin access (and for staff after a
+        # failed password POST); the button must not just bounce them back
         guest = User.objects.create(username="guest", is_staff=True)
-        self.client.force_login(User.objects.create_user("plain", password="pw"))
+        for user in (User.objects.create_user("plain", password="pw"), User.objects.create_user("staff", is_staff=True)):
+            self.client.force_login(user)
+            response = self.client.post(reverse("guest_login"), {"next": "/admin/"})
+            self.assertRedirects(response, "/admin/", fetch_redirect_response=False)
+            self.assertEqual(int(self.client.session["_auth_user_id"]), guest.pk)
+        self.client.force_login(User.objects.get(username="plain"))
         self.assertContains(self._login_page(), self.FORM)
-        response = self.client.post(reverse("guest_login"), {"next": "/admin/"})
-        self.assertRedirects(response, "/admin/", fetch_redirect_response=False)
-        self.assertEqual(int(self.client.session["_auth_user_id"]), guest.pk)
+
+    def test_session_write_error_shows_message(self):
+        # database-backed sessions on a read-only database fail inside login(), before request.user is set
+        from django.db import OperationalError
+
+        User.objects.create(username="guest", is_staff=True)
+        with mock.patch("whiteneuron.base.utils.login", side_effect=OperationalError("readonly")):
+            with self.assertLogs("whiteneuron.base.views", level="ERROR"):
+                response = self.client.post(reverse("guest_login"), {"next": "/admin/"}, follow=True)
+        self.assertRedirects(response, f"{reverse('admin:login')}?next=/admin/")
+        self.assertContains(response, "Guest login is not available.")
 
     def test_lookup_error_does_not_break_login_page(self):
         from django.db import DatabaseError
@@ -553,14 +568,15 @@ class GuestLoginButtonTests(TestCase):
             raise OperationalError("attempt to write a readonly database")
 
         guest = User.objects.create(username="guest", is_staff=True)
-        user_logged_in.disconnect(update_last_login)
-        user_logged_in.connect(readonly)
+        # Django connects update_last_login with this dispatch_uid; swap it for a failing save
+        self.assertTrue(user_logged_in.disconnect(dispatch_uid="update_last_login"))
+        user_logged_in.connect(readonly, dispatch_uid="update_last_login")
         try:
             with self.assertLogs("whiteneuron.base.utils", level="WARNING"):
                 response = self.client.post(reverse("guest_login"), {"next": "/admin/base/user/"})
         finally:
-            user_logged_in.disconnect(readonly)
-            user_logged_in.connect(update_last_login)
+            user_logged_in.disconnect(dispatch_uid="update_last_login")
+            user_logged_in.connect(update_last_login, dispatch_uid="update_last_login")
         self.assertRedirects(response, "/admin/base/user/", fetch_redirect_response=False)
         self.assertEqual(int(self.client.session["_auth_user_id"]), guest.pk)
 

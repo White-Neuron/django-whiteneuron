@@ -4,17 +4,19 @@ import random
 from django.contrib import messages
 from django.contrib.auth.decorators import login_not_required
 from django.contrib.auth.views import redirect_to_login
+from django.db import DatabaseError
 from django.http import HttpResponseNotAllowed, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.decorators import method_decorator
-from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import RedirectView, TemplateView
 from unfold.views import UnfoldModelAdminViewMixin
+
+from .utils import get_guest_user, log_in_guest, safe_next_url
 
 import logging
 logger = logging.getLogger(__name__)
@@ -32,22 +34,20 @@ class GuestLoginView(View):
         return HttpResponseNotAllowed(['POST'])
 
     def post(self, request, *args, **kwargs):
-        # staff never see the login page; anyone else (e.g. a non-staff account) may switch to guest
-        if request.user.is_authenticated and request.user.is_staff:
-            return redirect('admin:index')
-        from .utils import get_guest_user, log_in_guest
-        next_url = request.POST.get('next', '')
-        if not url_has_allowed_host_and_scheme(
-            next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
-        ):
-            next_url = ''
+        # anyone on the login page may switch to guest; login() flushes a different user's session
+        next_url = safe_next_url(request, request.POST.get('next', ''))
         guest = get_guest_user()
+        if guest:
+            try:
+                log_in_guest(request, guest)
+            except DatabaseError:  # e.g. database-backed sessions on a read-only database
+                logger.exception("Guest login failed")
+                guest = None
         if not guest:
             messages.error(request, _("Guest login is not available."))
             if next_url:
                 return redirect_to_login(next_url, reverse('admin:login'))
             return redirect('admin:login')
-        log_in_guest(request, guest)
         return HttpResponseRedirect(next_url) if next_url else redirect('admin:index')
 
 def get_announcement_content(request):

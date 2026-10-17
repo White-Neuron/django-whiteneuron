@@ -19,6 +19,7 @@ def timeit(func):
 from django.core.exceptions import FieldDoesNotExist
 from django.contrib.auth import login
 from django.db import DatabaseError
+from django.utils.http import url_has_allowed_host_and_scheme
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -147,6 +148,15 @@ def get_guest_user():
     except DatabaseError:
         _logger.exception("Guest user lookup failed")
         return None
+
+
+def safe_next_url(request, url):
+    """``url`` if it is safe to redirect to after login (same host and scheme), else ''."""
+    if url and url_has_allowed_host_and_scheme(
+        url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
+        return url
+    return ""
 
 
 def log_in_guest(request, guest):
