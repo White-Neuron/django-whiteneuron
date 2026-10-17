@@ -640,6 +640,26 @@ class GuestLoginButtonTests(TestCase):
         self.assertEqual(int(self.client.session["_auth_user_id"]), plain.pk)
 
 
+    @override_settings(SESSION_ENGINE="django.contrib.sessions.backends.db")
+    def test_failed_login_keeps_anonymous_session_data(self):
+        # cycle_key() moves the data to a new key and deletes the old row; the new key must be saved
+        from django.db import IntegrityError
+
+        def broken(**kwargs):
+            raise IntegrityError("duplicate key")
+
+        User.objects.create(username="guest", is_staff=True)
+        session = self.client.session
+        session["cart"] = [1, 2]
+        session.save()
+        self.client.cookies["sessionid"] = session.session_key
+        self._with_logged_in_receiver(broken)
+        with self.assertLogs("whiteneuron.base.views", level="ERROR"):
+            self.client.post(reverse("guest_login"))
+        self.assertEqual(self.client.session.get("cart"), [1, 2])
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+
 @package_test_settings()
 class AutoGuestLoginMiddlewareTests(TestCase):
     def _call(self, path):

@@ -172,21 +172,22 @@ def log_in_guest(request, guest):
     set up, so that login still stands. Any other database error is re-raised with the
     previous user and session put back."""
     previous_user = getattr(request, "user", None)
+    previous_key = request.session.session_key
     previous = dict(request.session.items())
     try:
         login(request, guest, backend="django.contrib.auth.backends.ModelBackend")
     except DatabaseError as exc:
-        if request.user == guest and is_readonly_db_error(exc):
+        if getattr(request, "user", None) == guest and is_readonly_db_error(exc):
             _logger.warning("Guest logged in without saving last_login (read-only database)")
             return
         # login() may have flushed the session or set request.user to the guest. Restore both:
         # otherwise the admin login page sees a staff user, redirects, and loops.
         request.session.clear()
         request.session.update(previous)
-        # flush() completed (old row deleted, key cleared): save the data under a new key, or
-        # the user is logged out. If the old key is still there (e.g. the delete hit a read-only
-        # database), the stored session is intact: don't write anything.
-        request.session.modified = request.session.session_key is None
+        # flush() or cycle_key() got far enough to change the key (the old row may be gone):
+        # save the data under a new key, or it is lost. If the key is unchanged (e.g. a write hit
+        # a read-only database first), the stored session is intact: don't write anything.
+        request.session.modified = request.session.session_key != previous_key
         if previous_user is not None:
             request.user = previous_user
         raise
