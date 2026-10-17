@@ -3445,3 +3445,15 @@ msgstr "Trợ lý AI chưa được cấu hình."
 #: chatbot/views.py
 msgid "The AI assistant is unavailable. Please try again later."
 msgstr "Trợ lý AI đang không khả dụng. Vui lòng thử lại sau."
+
+#: templates/chatbot/panel.html
+msgid "AI can make mistakes."
+msgstr "AI có thể trả lời sai."
+
+#: templates/chatbot/panel.html
+msgid "New conversation"
+msgstr "Cuộc trò chuyện mới"
+
+#: templates/chatbot/panel.html
+msgid "Enter to send, Shift+Enter for a new line"
+msgstr "Enter để gửi, Shift+Enter để xuống dòng"

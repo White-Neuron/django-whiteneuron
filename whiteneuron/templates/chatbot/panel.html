@@ -1,37 +1,49 @@
 {% load i18n static %}
 {# AI assistant: header button + slide-in panel. Included by unfold/helpers/userlinks.html #}
 <link rel="stylesheet" href="{% static 'chatbot/chatbot.css' %}">
-<button type="button" id="wn-chatbot-toggle" aria-controls="wn-chatbot-panel" aria-expanded="false"
-        class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer bg-primary-600 text-white hover:bg-primary-600/80 transition-colors">
-    <span class="material-symbols-outlined shrink-0" style="font-size:0.95rem;line-height:1" aria-hidden="true">smart_toy</span>
-    <span class="max-xl:hidden whitespace-nowrap">{% translate "AI Assistant" %}</span>
+<button type="button" id="wn-chatbot-toggle" class="wn-chatbot-toggle" aria-controls="wn-chatbot-panel" aria-expanded="false" title="{% translate 'AI Assistant' %}">
+    <span class="material-symbols-outlined" aria-hidden="true">smart_toy</span>
+    <span class="wn-chatbot-toggle-label">{% translate "AI Assistant" %}</span>
 </button>
 
+<div class="wn-chatbot-backdrop" data-chatbot-close hidden></div>
 <aside id="wn-chatbot-panel" class="wn-chatbot-panel" hidden
-       role="dialog" aria-labelledby="wn-chatbot-title"
+       role="dialog" aria-modal="false" aria-labelledby="wn-chatbot-title"
        data-url="{{ chatbot_url }}" data-csrf="{{ csrf_token }}"
        data-thinking="{% translate 'Thinking…' %}" data-connection-error="{% translate 'Connection error. Please try again.' %}">
-    <div class="flex items-center justify-between px-4 py-3 border-b border-base-200 dark:border-base-700">
-        <h2 id="wn-chatbot-title" class="flex items-center gap-2 font-semibold text-font-important-light dark:text-font-important-dark">
-            <span class="material-symbols-outlined text-primary-600" aria-hidden="true">smart_toy</span>
-            {% translate "AI Assistant" %}
-        </h2>
-        <button type="button" data-chatbot-close class="flex items-center p-1 rounded-default cursor-pointer hover:bg-base-100 dark:hover:bg-base-800" title="{% translate 'Close' %}">
+    <header class="wn-chatbot-header">
+        <span class="wn-chatbot-avatar wn-chatbot-avatar-lg" aria-hidden="true"><span class="material-symbols-outlined">smart_toy</span></span>
+        <div class="wn-chatbot-heading">
+            <h2 id="wn-chatbot-title">{% translate "AI Assistant" %}</h2>
+            <p>{% translate "AI can make mistakes." %}</p>
+        </div>
+        <button type="button" class="wn-chatbot-icon-btn" data-chatbot-reset title="{% translate 'New conversation' %}">
+            <span class="material-symbols-outlined" aria-hidden="true">edit_square</span>
+        </button>
+        <button type="button" class="wn-chatbot-icon-btn" data-chatbot-close title="{% translate 'Close' %}">
             <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
-    </div>
+    </header>
 
     <div class="wn-chatbot-messages" aria-live="polite">
-        <div class="wn-chatbot-msg wn-chatbot-msg-bot">{% translate "Hello! I am your AI assistant. How can I help you today?" %}</div>
+        <template data-chatbot-greeting>
+            <div class="wn-chatbot-row wn-chatbot-row-bot">
+                <span class="wn-chatbot-avatar" aria-hidden="true"><span class="material-symbols-outlined">smart_toy</span></span>
+                <div class="wn-chatbot-msg wn-chatbot-msg-bot">{% translate "Hello! I am your AI assistant. How can I help you today?" %}</div>
+            </div>
+        </template>
     </div>
 
-    <form class="flex items-end gap-2 p-3 border-t border-base-200 dark:border-base-700">
-        <textarea name="message" rows="2" maxlength="4000" required
-                  placeholder="{% translate 'Type your question…' %}"
-                  class="wn-chatbot-input grow resize-none rounded-default border border-base-200 bg-white px-3 py-2 text-sm dark:border-base-700 dark:bg-base-900"></textarea>
-        <button type="submit" class="flex items-center justify-center h-10 w-10 shrink-0 rounded-default cursor-pointer bg-primary-600 text-white hover:bg-primary-600/80 disabled:opacity-50" title="{% translate 'Send' %}">
-            <span class="material-symbols-outlined" aria-hidden="true">send</span>
-        </button>
+    <form class="wn-chatbot-composer">
+        <div class="wn-chatbot-input-box">
+            <textarea name="message" rows="1" maxlength="4000" required
+                      aria-label="{% translate 'Type your question…' %}"
+                      placeholder="{% translate 'Type your question…' %}"></textarea>
+            <button type="submit" class="wn-chatbot-send" disabled title="{% translate 'Send' %}">
+                <span class="material-symbols-outlined" aria-hidden="true">arrow_upward</span>
+            </button>
+        </div>
+        <p class="wn-chatbot-hint">{% translate "Enter to send, Shift+Enter for a new line" %}</p>
     </form>
 </aside>
 <script src="{% static 'chatbot/chatbot.js' %}" defer></script>
