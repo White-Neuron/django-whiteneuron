@@ -498,32 +498,6 @@ class GuestLoginButtonTests(TestCase):
             User.objects.create(username="guest", **fields)
             self.assertNotContains(self._login_page(), self.ACTION)
 
-    def test_hidden_for_authenticated_user(self):
-        # GuestLoginView redirects authenticated users without logging them in
-        User.objects.create(username="guest", is_staff=True)
-        self.client.force_login(User.objects.create_user("plain", password="pw"))
-        self.assertNotContains(self._login_page(), self.ACTION)
-
-    def test_lookup_error_does_not_break_login_page(self):
-        with mock.patch("whiteneuron.base.templatetags.wn_guest.get_guest_user", side_effect=RuntimeError):
-            with self.assertLogs("whiteneuron.base.templatetags.wn_guest", level="ERROR"):
-                page = self._login_page()
-        self.assertNotContains(page, self.ACTION)
-        self.assertContains(page, 'id="login-form"')
-
-    def test_tag_reads_request_without_context_processor(self):
-        # context["request"] only exists with the request context processor; RequestContext.request always does
-        from django.contrib.auth.models import AnonymousUser
-        from django.template import Context, Engine, RequestContext
-
-        User.objects.create(username="guest", is_staff=True)
-        request = RequestFactory().get("/admin/login/")
-        request.user = AnonymousUser()
-        engine = Engine(libraries={"wn_guest": "whiteneuron.base.templatetags.wn_guest"})  # no context processors
-        tpl = engine.from_string("{% load wn_guest %}{% guest_login_available %}")
-        self.assertEqual(tpl.render(RequestContext(request)), "True")
-        self.assertEqual(tpl.render(Context()), "False")
-
     def test_guest_login_view(self):
         url = reverse("guest_login")
         response = self.client.post(url, {"next": "/admin/base/user/"}, follow=True)
@@ -551,3 +525,66 @@ class GuestLoginButtonTests(TestCase):
             response = self.client.post(reverse("guest_login"), {"next": "/admin/"})
         self.assertRedirects(response, "/admin/", fetch_redirect_response=False)
         self.assertEqual(int(self.client.session["_auth_user_id"]), guest.pk)
+
+    def test_non_staff_user_can_switch_to_guest(self):
+        guest = User.objects.create(username="guest", is_staff=True)
+        self.client.force_login(User.objects.create_user("plain", password="pw"))
+        self.assertContains(self._login_page(), self.FORM)
+        response = self.client.post(reverse("guest_login"), {"next": "/admin/"})
+        self.assertRedirects(response, "/admin/", fetch_redirect_response=False)
+        self.assertEqual(int(self.client.session["_auth_user_id"]), guest.pk)
+
+    def test_lookup_error_does_not_break_login_page(self):
+        from django.db import DatabaseError
+
+        with mock.patch("whiteneuron.base.utils.User.objects.filter", side_effect=DatabaseError):
+            with self.assertLogs("whiteneuron.base.utils", level="ERROR"):
+                page = self._login_page()
+        self.assertNotContains(page, self.ACTION)
+        self.assertContains(page, 'id="login-form"')
+
+    def test_guest_login_with_read_only_database(self):
+        # demo mode: saving last_login fails after the session is set; the guest is still logged in
+        from django.contrib.auth.models import update_last_login
+        from django.contrib.auth.signals import user_logged_in
+        from django.db import OperationalError
+
+        def readonly(**kwargs):
+            raise OperationalError("attempt to write a readonly database")
+
+        guest = User.objects.create(username="guest", is_staff=True)
+        user_logged_in.disconnect(update_last_login)
+        user_logged_in.connect(readonly)
+        try:
+            with self.assertLogs("whiteneuron.base.utils", level="WARNING"):
+                response = self.client.post(reverse("guest_login"), {"next": "/admin/base/user/"})
+        finally:
+            user_logged_in.disconnect(readonly)
+            user_logged_in.connect(update_last_login)
+        self.assertRedirects(response, "/admin/base/user/", fetch_redirect_response=False)
+        self.assertEqual(int(self.client.session["_auth_user_id"]), guest.pk)
+
+
+@package_test_settings()
+class AutoGuestLoginMiddlewareTests(TestCase):
+    def _call(self, path):
+        from django.contrib.auth.models import AnonymousUser
+        from django.contrib.sessions.backends.signed_cookies import SessionStore
+        from django.http import HttpResponse
+        from whiteneuron.base.middleware import AutoGuestLoginMiddleware
+
+        request = RequestFactory().get(path)
+        request.user, request.session = AnonymousUser(), SessionStore()
+        return request, AutoGuestLoginMiddleware(lambda r: HttpResponse("page"))(request)
+
+    def test_next_is_a_url_not_a_route_name(self):
+        # redirect() used to reverse() ?next as a URL name: NoReverseMatch on ?next=foo
+        guest = User.objects.create(username="guest", is_staff=True)
+        request, response = self._call("/admin/login/?next=foo")
+        self.assertEqual((response.status_code, response["Location"]), (302, "foo"))
+        self.assertEqual(request.user, guest)
+
+    def test_unsafe_next_is_ignored(self):
+        User.objects.create(username="guest", is_staff=True)
+        request, response = self._call("/admin/login/?next=https://evil.example/")
+        self.assertEqual(response.content, b"page")

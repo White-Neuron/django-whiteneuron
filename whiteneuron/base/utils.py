@@ -17,6 +17,10 @@ def timeit(func):
     return wrapper
 
 from django.core.exceptions import FieldDoesNotExist
+from django.contrib.auth import login
+from django.db import DatabaseError
+import logging
+_logger = logging.getLogger(__name__)
 
 _BADGE_CACHE_TIMEOUT = 60
 
@@ -135,8 +139,25 @@ def user_group_names(user):
 
 
 def get_guest_user():
-    """The account used by "Log in as guest" (GuestLoginView, AutoGuestLoginMiddleware), or None."""
-    return User.objects.filter(username="guest", is_active=True, is_staff=True).first()
+    """The account used by "Log in as guest" (GuestLoginView, AutoGuestLoginMiddleware), or None.
+
+    None on a database error too: guest login is optional and must never break the login page."""
+    try:
+        return User.objects.filter(username="guest", is_active=True, is_staff=True).first()
+    except DatabaseError:
+        _logger.exception("Guest user lookup failed")
+        return None
+
+
+def log_in_guest(request, guest):
+    """Log ``guest`` in without a password. In read-only database mode (demo) saving
+    last_login fails after the session is already set up, so the login still stands."""
+    try:
+        login(request, guest, backend="django.contrib.auth.backends.ModelBackend")
+    except DatabaseError:
+        if getattr(request, "user", None) != guest:
+            raise
+        _logger.warning("Guest logged in without saving last_login (read-only database?)")
 
 
 def is_guest_user(user):

@@ -8,7 +8,7 @@ import time
 import json
 import re
 from django.core.cache import cache
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.template.loader import render_to_string
 
 class RateLimitMiddleware:
@@ -603,8 +603,7 @@ class UserActivityMiddleware:
 
 
 from .thread_local import thread_local
-from django.contrib.auth import login
-from .utils import get_guest_user
+from .utils import get_guest_user, log_in_guest
 import logging
 logger = logging.getLogger(__name__)
 
@@ -645,13 +644,13 @@ class AutoGuestLoginMiddleware:
                 guest_user = get_guest_user()
                 if guest_user:
                     # Tự động đăng nhập guest user
-                    login(request, guest_user, backend='django.contrib.auth.backends.ModelBackend')
-                    # Nếu có tham số next thì redirect luôn tới đó
+                    log_in_guest(request, guest_user)
+                    # Nếu có tham số next thì redirect luôn tới đó (URL, không phải tên route)
                     next_url = request.GET.get('next')
                     if next_url and url_has_allowed_host_and_scheme(
                         next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
                     ):
-                        return redirect(next_url)
+                        return HttpResponseRedirect(next_url)
             except Exception:
                 logger.exception("Auto guest login failed")
 
