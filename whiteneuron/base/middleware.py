@@ -604,8 +604,9 @@ class UserActivityMiddleware:
 
 from .thread_local import thread_local
 from django.contrib.auth import login
-from .models import User
 from .utils import get_guest_user
+import logging
+logger = logging.getLogger(__name__)
 
 class ThreadLocalMiddleware:
     def __init__(self, get_response):
@@ -651,10 +652,8 @@ class AutoGuestLoginMiddleware:
                         next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
                     ):
                         return redirect(next_url)
-                else:
-                    pass
-            except Exception as e:
-                pass
+            except Exception:
+                logger.exception("Auto guest login failed")
 
         response = self.get_response(request)
         return response

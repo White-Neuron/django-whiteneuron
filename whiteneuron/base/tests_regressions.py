@@ -466,9 +466,9 @@ class AnnouncementContentTests(TestCase):
 @package_test_settings()
 class GuestLoginButtonTests(TestCase):
     FORM = 'id="guest-login-form"'
-    ACTION = 'action="/base/guest-login/"'
 
     def setUp(self):
+        self.ACTION = f'action="{reverse("guest_login")}"'
         # AutoGuestLoginMiddleware (if enabled) would log the guest in instead of showing the form
         self.client.cookies["skip_auto_guest"] = "1"
 
@@ -511,12 +511,43 @@ class GuestLoginButtonTests(TestCase):
         self.assertNotContains(page, self.ACTION)
         self.assertContains(page, 'id="login-form"')
 
+    def test_tag_reads_request_without_context_processor(self):
+        # context["request"] only exists with the request context processor; RequestContext.request always does
+        from django.contrib.auth.models import AnonymousUser
+        from django.template import Context, Engine, RequestContext
+
+        User.objects.create(username="guest", is_staff=True)
+        request = RequestFactory().get("/admin/login/")
+        request.user = AnonymousUser()
+        engine = Engine(libraries={"wn_guest": "whiteneuron.base.templatetags.wn_guest"})  # no context processors
+        tpl = engine.from_string("{% load wn_guest %}{% guest_login_available %}")
+        self.assertEqual(tpl.render(RequestContext(request)), "True")
+        self.assertEqual(tpl.render(Context()), "False")
+
     def test_guest_login_view(self):
-        response = self.client.post(reverse("guest_login"), {"next": "/admin/"}, follow=True)
-        self.assertRedirects(response, reverse("admin:login"))
+        url = reverse("guest_login")
+        response = self.client.post(url, {"next": "/admin/base/user/"}, follow=True)
+        # the failure keeps ?next so a password login still lands where the user was going
+        self.assertRedirects(response, f"{reverse('admin:login')}?next=/admin/base/user/")
         self.assertContains(response, "Guest login is not available.")
 
         guest = User.objects.create(username="guest", is_staff=True)
-        response = self.client.post(reverse("guest_login"), {"next": "/admin/"})
+        response = self.client.post(url, {"next": "/admin/"})
+        self.assertRedirects(response, "/admin/", fetch_redirect_response=False)
+        self.assertEqual(int(self.client.session["_auth_user_id"]), guest.pk)
+
+    def test_guest_login_view_rejects_unsafe_next(self):
+        User.objects.create(username="guest", is_staff=True)
+        for next_url in ("https://evil.example/", "http://testserver/admin/"):
+            self.client.logout()
+            response = self.client.post(reverse("guest_login"), {"next": next_url}, secure=True)
+            self.assertRedirects(response, reverse("admin:index"), fetch_redirect_response=False)
+
+    def test_guest_login_view_with_login_required_middleware(self):
+        from django.conf import settings
+        guest = User.objects.create(username="guest", is_staff=True)
+        middleware = [*settings.MIDDLEWARE, "django.contrib.auth.middleware.LoginRequiredMiddleware"]
+        with self.settings(MIDDLEWARE=middleware):
+            response = self.client.post(reverse("guest_login"), {"next": "/admin/"})
         self.assertRedirects(response, "/admin/", fetch_redirect_response=False)
         self.assertEqual(int(self.client.session["_auth_user_id"]), guest.pk)

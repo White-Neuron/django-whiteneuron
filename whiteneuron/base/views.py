@@ -3,9 +3,13 @@ import random
 
 from django.contrib import messages
 from django.contrib.auth import login
-from django.http import HttpResponseNotAllowed, JsonResponse
+from django.contrib.auth.decorators import login_not_required
+from django.contrib.auth.views import redirect_to_login
+from django.http import HttpResponseNotAllowed, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect
 from django.template.loader import render_to_string
+from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
@@ -21,6 +25,7 @@ class HomeView(RedirectView):
     pattern_name = "admin:base_app_changelist"
 
 
+@method_decorator(login_not_required, name='dispatch')
 class GuestLoginView(View):
     """POST-only view: đăng nhập guest không cần password, có CSRF protection."""
 
@@ -31,6 +36,11 @@ class GuestLoginView(View):
         if request.user.is_authenticated:
             return redirect('admin:index')
         from .utils import get_guest_user
+        next_url = request.POST.get('next', '')
+        if not url_has_allowed_host_and_scheme(
+            next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+        ):
+            next_url = ''
         try:
             guest = get_guest_user()
         except Exception:
@@ -38,13 +48,12 @@ class GuestLoginView(View):
             guest = None
         if not guest:
             messages.error(request, _("Guest login is not available."))
+            if next_url:
+                return redirect_to_login(next_url, reverse('admin:login'))
             return redirect('admin:login')
         login(request, guest, backend='django.contrib.auth.backends.ModelBackend')
-        next_url = request.POST.get('next', '')
-        if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
-            return redirect(next_url)
-        return redirect('admin:index')
-    
+        return HttpResponseRedirect(next_url) if next_url else redirect('admin:index')
+
 def get_announcement_content(request):
     """HTML for the announcement dialog. The template is project-provided
     (ANNOUNCEMENT_CONTENT_HTML_FILE): without it the dialog stays empty instead of a 500."""

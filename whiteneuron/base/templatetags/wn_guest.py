@@ -12,7 +12,8 @@ register = template.Library()
 def guest_login_available(context):
     """Whether "Log in as guest" can work here: GuestLoginView redirects authenticated
     users without logging them in, and needs an active staff ``guest`` account."""
-    request = context.get("request")
+    # RequestContext.request survives {% include ... only %} and a missing request context processor
+    request = getattr(context, "request", None) or context.get("request")
     if request is None or request.user.is_authenticated:
         return False
     try:
