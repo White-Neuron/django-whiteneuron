@@ -159,15 +159,31 @@ def safe_next_url(request, url):
     return ""
 
 
+def is_readonly_db_error(exc):
+    """A write refused because the database is read-only (SQLite file / PostgreSQL read-only transaction)."""
+    message = str(exc).lower()
+    return "readonly database" in message or "read-only transaction" in message
+
+
 def log_in_guest(request, guest):
-    """Log ``guest`` in without a password. In read-only database mode (demo) saving
-    last_login fails after the session is already set up, so the login still stands."""
+    """Log ``guest`` in without a password.
+
+    In read-only database mode (demo) saving last_login fails after the session is already
+    set up, so that login still stands. Any other database error is re-raised, and the
+    current session (e.g. a logged-in user's) is left as it was instead of half replaced."""
+    previous = dict(request.session.items())
     try:
         login(request, guest, backend="django.contrib.auth.backends.ModelBackend")
-    except DatabaseError:
-        if getattr(request, "user", None) != guest:
-            raise
-        _logger.warning("Guest logged in without saving last_login (read-only database?)")
+    except DatabaseError as exc:
+        if getattr(request, "user", None) == guest and is_readonly_db_error(exc):
+            _logger.warning("Guest logged in without saving last_login (read-only database)")
+            return
+        # login() may have flushed the session: restore it in memory and don't save it, so
+        # SessionMiddleware neither writes to the database nor drops the user's cookie
+        request.session.clear()
+        request.session.update(previous)
+        request.session.modified = False
+        raise
 
 
 def is_guest_user(user):

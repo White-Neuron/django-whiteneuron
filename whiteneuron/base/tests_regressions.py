@@ -581,6 +581,48 @@ class GuestLoginButtonTests(TestCase):
         self.assertEqual(int(self.client.session["_auth_user_id"]), guest.pk)
 
 
+    def _with_logged_in_receiver(self, receiver):
+        from django.contrib.auth.signals import user_logged_in
+
+        user_logged_in.connect(receiver, dispatch_uid="test_guest_receiver")
+        self.addCleanup(user_logged_in.disconnect, dispatch_uid="test_guest_receiver")
+
+    def test_other_database_errors_are_not_swallowed(self):
+        # only the read-only last_login failure is tolerated; e.g. an IntegrityError from a
+        # user_logged_in receiver used to be logged as "read-only database?" and the login kept
+        from django.db import IntegrityError
+
+        def broken(**kwargs):
+            raise IntegrityError("duplicate key")
+
+        User.objects.create(username="guest", is_staff=True)
+        self._with_logged_in_receiver(broken)
+        with self.assertLogs("whiteneuron.base.views", level="ERROR"):
+            response = self.client.post(reverse("guest_login"), {"next": "/admin/"}, follow=True)
+        self.assertRedirects(response, f"{reverse('admin:login')}?next=/admin/")
+        self.assertContains(response, "Guest login is not available.")
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_failed_switch_keeps_current_session(self):
+        # DB-backed sessions on a read-only DB: login() flushes, then the delete fails. The user
+        # must stay logged in (no 500 from SessionMiddleware saving the emptied session)
+        from django.db import OperationalError
+        from whiteneuron.base import utils
+
+        User.objects.create(username="guest", is_staff=True)
+        plain = User.objects.create_user("plain", password="pw")
+        self.client.force_login(plain)
+
+        def flush_then_fail(request, *args, **kwargs):
+            request.session.clear()
+            raise OperationalError("attempt to write a readonly database")
+
+        with mock.patch.object(utils, "login", flush_then_fail), self.assertLogs("whiteneuron.base.views", level="ERROR"):
+            response = self.client.post(reverse("guest_login"), {"next": "/admin/"})
+        self.assertRedirects(response, f"{reverse('admin:login')}?next=/admin/", fetch_redirect_response=False)
+        self.assertEqual(int(self.client.session["_auth_user_id"]), plain.pk)
+
+
 @package_test_settings()
 class AutoGuestLoginMiddlewareTests(TestCase):
     def _call(self, path):
