@@ -623,6 +623,23 @@ class GuestLoginButtonTests(TestCase):
         self.assertEqual(int(self.client.session["_auth_user_id"]), plain.pk)
 
 
+    @override_settings(SESSION_ENGINE="django.contrib.sessions.backends.db")
+    def test_failed_switch_with_db_sessions_keeps_user_logged_in(self):
+        # flush() deletes the old session row: the restored data must be saved under a new key
+        from django.db import IntegrityError
+
+        def broken(**kwargs):
+            raise IntegrityError("duplicate key")
+
+        User.objects.create(username="guest", is_staff=True)
+        plain = User.objects.create_user("plain", password="pw")
+        self.client.force_login(plain)
+        self._with_logged_in_receiver(broken)
+        with self.assertLogs("whiteneuron.base.views", level="ERROR"):
+            self.client.post(reverse("guest_login"), {"next": "/admin/"})
+        self.assertEqual(int(self.client.session["_auth_user_id"]), plain.pk)
+
+
 @package_test_settings()
 class AutoGuestLoginMiddlewareTests(TestCase):
     def _call(self, path):
@@ -646,3 +663,32 @@ class AutoGuestLoginMiddlewareTests(TestCase):
         User.objects.create(username="guest", is_staff=True)
         request, response = self._call("/admin/login/?next=https://evil.example/")
         self.assertEqual(response.content, b"page")
+
+    def test_failed_auto_login_does_not_loop(self):
+        # request.user stayed the guest after a failed login: the admin login view redirected to
+        # /admin/, which sent the anonymous user back to the login page, forever
+        from django.contrib.auth.signals import user_logged_in
+        from django.db import IntegrityError
+
+        def broken(**kwargs):
+            raise IntegrityError("duplicate key")
+
+        User.objects.create(username="guest", is_staff=True)
+        user_logged_in.connect(broken, dispatch_uid="test_auto_guest_receiver")
+        self.addCleanup(user_logged_in.disconnect, dispatch_uid="test_auto_guest_receiver")
+        with self.assertLogs("whiteneuron.base.middleware", level="ERROR"):
+            request, response = self._call("/admin/login/?next=/admin/")
+        self.assertEqual(response.content, b"page")
+        self.assertFalse(request.user.is_authenticated)
+
+        # end to end, with the middleware where settings put it: the login page renders
+        from django.conf import settings
+
+        middleware = [m for m in settings.MIDDLEWARE if not m.endswith("AutoGuestLoginMiddleware")]
+        middleware.insert(
+            middleware.index("django.contrib.auth.middleware.AuthenticationMiddleware") + 1,
+            "whiteneuron.base.middleware.AutoGuestLoginMiddleware",
+        )
+        with self.settings(MIDDLEWARE=middleware), self.assertLogs("whiteneuron.base.middleware", level="ERROR"):
+            page = self.client.get(reverse("admin:login"), {"next": "/admin/"})
+        self.assertEqual(page.status_code, 200)
