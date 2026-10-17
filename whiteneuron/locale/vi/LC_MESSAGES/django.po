@@ -3457,3 +3457,23 @@ msgstr "Cuộc trò chuyện mới"
 #: templates/chatbot/panel.html
 msgid "Enter to send, Shift+Enter for a new line"
 msgstr "Enter để gửi, Shift+Enter để xuống dòng"
+
+#: templates/chatbot/panel.html
+msgid "The AI assistant took too long to answer. Please try again."
+msgstr "Trợ lý AI phản hồi quá lâu. Vui lòng thử lại."
+
+#: templates/chatbot/panel.html
+msgid "Copied"
+msgstr "Đã sao chép"
+
+#: templates/chatbot/panel.html
+msgid "Could not copy"
+msgstr "Không sao chép được"
+
+#: templates/chatbot/panel.html
+msgid "Try again"
+msgstr "Thử lại"
+
+#: templates/chatbot/panel.html
+msgid "Copy"
+msgstr "Sao chép"

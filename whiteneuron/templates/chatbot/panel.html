@@ -1,16 +1,20 @@
 {% load i18n static %}
 {# AI assistant: header button + slide-in panel. Included by unfold/helpers/userlinks.html #}
 <link rel="stylesheet" href="{% static 'chatbot/chatbot.css' %}">
-<button type="button" id="wn-chatbot-toggle" class="wn-chatbot-toggle" aria-controls="wn-chatbot-panel" aria-expanded="false" title="{% translate 'AI Assistant' %}">
+<button type="button" id="wn-chatbot-toggle" class="wn-chatbot-toggle" aria-controls="wn-chatbot-panel" aria-expanded="false"
+        aria-label="{% translate 'AI Assistant' %}" title="{% translate 'AI Assistant' %}">
     <span class="material-symbols-outlined" aria-hidden="true">smart_toy</span>
     <span class="wn-chatbot-toggle-label">{% translate "AI Assistant" %}</span>
 </button>
 
 <div class="wn-chatbot-backdrop" data-chatbot-close hidden></div>
 <aside id="wn-chatbot-panel" class="wn-chatbot-panel" hidden
-       role="dialog" aria-modal="false" aria-labelledby="wn-chatbot-title"
-       data-url="{{ chatbot_url }}" data-csrf="{{ csrf_token }}"
-       data-thinking="{% translate 'Thinking…' %}" data-connection-error="{% translate 'Connection error. Please try again.' %}">
+       role="dialog" aria-modal="true" aria-labelledby="wn-chatbot-title"
+       data-url="{{ chatbot_url }}" data-csrf="{{ csrf_token }}" data-user="{{ request.user.pk }}"
+       data-thinking="{% translate 'Thinking…' %}" data-connection-error="{% translate 'Connection error. Please try again.' %}"
+       data-timeout="{% translate 'The AI assistant took too long to answer. Please try again.' %}"
+       data-copy="{% translate 'Copy' %}" data-copied="{% translate 'Copied' %}" data-copy-failed="{% translate 'Could not copy' %}"
+       data-retry="{% translate 'Try again' %}">
     <header class="wn-chatbot-header">
         <span class="wn-chatbot-avatar wn-chatbot-avatar-lg" aria-hidden="true"><span class="material-symbols-outlined">smart_toy</span></span>
         <div class="wn-chatbot-heading">
@@ -29,7 +33,7 @@
         <template data-chatbot-greeting>
             <div class="wn-chatbot-row wn-chatbot-row-bot">
                 <span class="wn-chatbot-avatar" aria-hidden="true"><span class="material-symbols-outlined">smart_toy</span></span>
-                <div class="wn-chatbot-msg wn-chatbot-msg-bot">{% translate "Hello! I am your AI assistant. How can I help you today?" %}</div>
+                <div class="wn-chatbot-col"><div class="wn-chatbot-msg wn-chatbot-msg-bot">{% translate "Hello! I am your AI assistant. How can I help you today?" %}</div></div>
             </div>
         </template>
     </div>
