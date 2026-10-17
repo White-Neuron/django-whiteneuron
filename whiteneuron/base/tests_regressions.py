@@ -461,3 +461,254 @@ class AnnouncementContentTests(TestCase):
     def test_unset_setting_returns_empty_content(self):
         response = self._get()  # used to return None (500)
         self.assertEqual((response.status_code, response.content), (200, b""))
+
+
+@package_test_settings()
+class GuestLoginButtonTests(TestCase):
+    FORM = 'id="guest-login-form"'
+
+    def setUp(self):
+        self.ACTION = f'action="{reverse("guest_login")}"'
+        # AutoGuestLoginMiddleware (if enabled) would log the guest in instead of showing the form
+        self.client.cookies["skip_auto_guest"] = "1"
+
+    def _login_page(self, **params):
+        page = self.client.get(reverse("admin:login"), params)
+        self.assertEqual(page.status_code, 200)
+        return page
+
+    def _guest_form(self, page):
+        html = page.content.decode()
+        start = html.index(self.FORM)
+        return html[start:html.index("</form>", start)]
+
+    def test_shown_as_styled_button_with_guest_user(self):
+        User.objects.create(username="guest", is_staff=True)
+        form = self._guest_form(self._login_page(next="/admin/"))
+        self.assertIn('name="next" value="/admin/"', form)
+        # the raw <button> used bg-secondary-600, which is not compiled: no background at all
+        self.assertIn("bg-base-100", form)
+        self.assertNotIn("bg-secondary-600", form)
+
+    def test_hidden_when_guest_cannot_log_in(self):
+        # the button used to show regardless; clicking it then did nothing
+        self.assertNotContains(self._login_page(), self.ACTION)
+        for fields in ({"is_staff": False}, {"is_staff": True, "is_active": False}):
+            User.objects.filter(username="guest").delete()
+            User.objects.create(username="guest", **fields)
+            self.assertNotContains(self._login_page(), self.ACTION)
+
+    def test_guest_login_view(self):
+        url = reverse("guest_login")
+        response = self.client.post(url, {"next": "/admin/base/user/"}, follow=True)
+        # the failure keeps ?next so a password login still lands where the user was going
+        self.assertRedirects(response, f"{reverse('admin:login')}?next=/admin/base/user/")
+        self.assertContains(response, "Guest login is not available.")
+
+        guest = User.objects.create(username="guest", is_staff=True)
+        response = self.client.post(url, {"next": "/admin/"})
+        self.assertRedirects(response, "/admin/", fetch_redirect_response=False)
+        self.assertEqual(int(self.client.session["_auth_user_id"]), guest.pk)
+
+    def test_guest_login_view_rejects_unsafe_next(self):
+        User.objects.create(username="guest", is_staff=True)
+        for next_url in ("https://evil.example/", "http://testserver/admin/"):
+            self.client.logout()
+            response = self.client.post(reverse("guest_login"), {"next": next_url}, secure=True)
+            self.assertRedirects(response, reverse("admin:index"), fetch_redirect_response=False)
+
+    def test_guest_login_view_with_login_required_middleware(self):
+        from django.conf import settings
+        guest = User.objects.create(username="guest", is_staff=True)
+        middleware = [*settings.MIDDLEWARE, "django.contrib.auth.middleware.LoginRequiredMiddleware"]
+        with self.settings(MIDDLEWARE=middleware):
+            response = self.client.post(reverse("guest_login"), {"next": "/admin/"})
+        self.assertRedirects(response, "/admin/", fetch_redirect_response=False)
+        self.assertEqual(int(self.client.session["_auth_user_id"]), guest.pk)
+
+    def test_logged_in_user_can_switch_to_guest(self):
+        # the login page renders for any logged-in user without admin access (and for staff after a
+        # failed password POST); the button must not just bounce them back
+        guest = User.objects.create(username="guest", is_staff=True)
+        for user in (User.objects.create_user("plain", password="pw"), User.objects.create_user("staff", is_staff=True)):
+            self.client.force_login(user)
+            response = self.client.post(reverse("guest_login"), {"next": "/admin/"})
+            self.assertRedirects(response, "/admin/", fetch_redirect_response=False)
+            self.assertEqual(int(self.client.session["_auth_user_id"]), guest.pk)
+        self.client.force_login(User.objects.get(username="plain"))
+        self.assertContains(self._login_page(), self.FORM)
+
+    def test_session_write_error_shows_message(self):
+        # database-backed sessions on a read-only database fail inside login(), before request.user is set
+        from django.db import OperationalError
+
+        User.objects.create(username="guest", is_staff=True)
+        with mock.patch("whiteneuron.base.utils.login", side_effect=OperationalError("readonly")):
+            with self.assertLogs("whiteneuron.base.views", level="ERROR"):
+                response = self.client.post(reverse("guest_login"), {"next": "/admin/"}, follow=True)
+        self.assertRedirects(response, f"{reverse('admin:login')}?next=/admin/")
+        self.assertContains(response, "Guest login is not available.")
+
+    def test_lookup_error_does_not_break_login_page(self):
+        from django.db import DatabaseError
+
+        with mock.patch("whiteneuron.base.utils.User.objects.filter", side_effect=DatabaseError):
+            with self.assertLogs("whiteneuron.base.utils", level="ERROR"):
+                page = self._login_page()
+        self.assertNotContains(page, self.ACTION)
+        self.assertContains(page, 'id="login-form"')
+
+    def test_guest_login_with_read_only_database(self):
+        # demo mode: saving last_login fails after the session is set; the guest is still logged in
+        from django.contrib.auth.models import update_last_login
+        from django.contrib.auth.signals import user_logged_in
+        from django.db import OperationalError
+
+        def readonly(**kwargs):
+            raise OperationalError("attempt to write a readonly database")
+
+        guest = User.objects.create(username="guest", is_staff=True)
+        # Django connects update_last_login with this dispatch_uid; swap it for a failing save
+        self.assertTrue(user_logged_in.disconnect(dispatch_uid="update_last_login"))
+        user_logged_in.connect(readonly, dispatch_uid="update_last_login")
+        try:
+            with self.assertLogs("whiteneuron.base.utils", level="WARNING"):
+                response = self.client.post(reverse("guest_login"), {"next": "/admin/base/user/"})
+        finally:
+            user_logged_in.disconnect(dispatch_uid="update_last_login")
+            user_logged_in.connect(update_last_login, dispatch_uid="update_last_login")
+        self.assertRedirects(response, "/admin/base/user/", fetch_redirect_response=False)
+        self.assertEqual(int(self.client.session["_auth_user_id"]), guest.pk)
+
+
+    def _with_logged_in_receiver(self, receiver):
+        from django.contrib.auth.signals import user_logged_in
+
+        user_logged_in.connect(receiver, dispatch_uid="test_guest_receiver")
+        self.addCleanup(user_logged_in.disconnect, dispatch_uid="test_guest_receiver")
+
+    def test_other_database_errors_are_not_swallowed(self):
+        # only the read-only last_login failure is tolerated; e.g. an IntegrityError from a
+        # user_logged_in receiver used to be logged as "read-only database?" and the login kept
+        from django.db import IntegrityError
+
+        def broken(**kwargs):
+            raise IntegrityError("duplicate key")
+
+        User.objects.create(username="guest", is_staff=True)
+        self._with_logged_in_receiver(broken)
+        with self.assertLogs("whiteneuron.base.views", level="ERROR"):
+            response = self.client.post(reverse("guest_login"), {"next": "/admin/"}, follow=True)
+        self.assertRedirects(response, f"{reverse('admin:login')}?next=/admin/")
+        self.assertContains(response, "Guest login is not available.")
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_failed_switch_keeps_current_session(self):
+        # DB-backed sessions on a read-only DB: login() flushes, then the delete fails. The user
+        # must stay logged in (no 500 from SessionMiddleware saving the emptied session)
+        from django.db import OperationalError
+        from whiteneuron.base import utils
+
+        User.objects.create(username="guest", is_staff=True)
+        plain = User.objects.create_user("plain", password="pw")
+        self.client.force_login(plain)
+
+        def flush_then_fail(request, *args, **kwargs):
+            request.session.clear()
+            raise OperationalError("attempt to write a readonly database")
+
+        with mock.patch.object(utils, "login", flush_then_fail), self.assertLogs("whiteneuron.base.views", level="ERROR"):
+            response = self.client.post(reverse("guest_login"), {"next": "/admin/"})
+        self.assertRedirects(response, f"{reverse('admin:login')}?next=/admin/", fetch_redirect_response=False)
+        self.assertEqual(int(self.client.session["_auth_user_id"]), plain.pk)
+
+
+    @override_settings(SESSION_ENGINE="django.contrib.sessions.backends.db")
+    def test_failed_switch_with_db_sessions_keeps_user_logged_in(self):
+        # flush() deletes the old session row: the restored data must be saved under a new key
+        from django.db import IntegrityError
+
+        def broken(**kwargs):
+            raise IntegrityError("duplicate key")
+
+        User.objects.create(username="guest", is_staff=True)
+        plain = User.objects.create_user("plain", password="pw")
+        self.client.force_login(plain)
+        self._with_logged_in_receiver(broken)
+        with self.assertLogs("whiteneuron.base.views", level="ERROR"):
+            self.client.post(reverse("guest_login"), {"next": "/admin/"})
+        self.assertEqual(int(self.client.session["_auth_user_id"]), plain.pk)
+
+
+    @override_settings(SESSION_ENGINE="django.contrib.sessions.backends.db")
+    def test_failed_login_keeps_anonymous_session_data(self):
+        # cycle_key() moves the data to a new key and deletes the old row; the new key must be saved
+        from django.db import IntegrityError
+
+        def broken(**kwargs):
+            raise IntegrityError("duplicate key")
+
+        User.objects.create(username="guest", is_staff=True)
+        session = self.client.session
+        session["cart"] = [1, 2]
+        session.save()
+        self.client.cookies["sessionid"] = session.session_key
+        self._with_logged_in_receiver(broken)
+        with self.assertLogs("whiteneuron.base.views", level="ERROR"):
+            self.client.post(reverse("guest_login"))
+        self.assertEqual(self.client.session.get("cart"), [1, 2])
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+
+@package_test_settings()
+class AutoGuestLoginMiddlewareTests(TestCase):
+    def _call(self, path):
+        from django.contrib.auth.models import AnonymousUser
+        from django.contrib.sessions.backends.signed_cookies import SessionStore
+        from django.http import HttpResponse
+        from whiteneuron.base.middleware import AutoGuestLoginMiddleware
+
+        request = RequestFactory().get(path)
+        request.user, request.session = AnonymousUser(), SessionStore()
+        return request, AutoGuestLoginMiddleware(lambda r: HttpResponse("page"))(request)
+
+    def test_next_is_a_url_not_a_route_name(self):
+        # redirect() used to reverse() ?next as a URL name: NoReverseMatch on ?next=foo
+        guest = User.objects.create(username="guest", is_staff=True)
+        request, response = self._call("/admin/login/?next=foo")
+        self.assertEqual((response.status_code, response["Location"]), (302, "foo"))
+        self.assertEqual(request.user, guest)
+
+    def test_unsafe_next_is_ignored(self):
+        User.objects.create(username="guest", is_staff=True)
+        request, response = self._call("/admin/login/?next=https://evil.example/")
+        self.assertEqual(response.content, b"page")
+
+    def test_failed_auto_login_does_not_loop(self):
+        # request.user stayed the guest after a failed login: the admin login view redirected to
+        # /admin/, which sent the anonymous user back to the login page, forever
+        from django.contrib.auth.signals import user_logged_in
+        from django.db import IntegrityError
+
+        def broken(**kwargs):
+            raise IntegrityError("duplicate key")
+
+        User.objects.create(username="guest", is_staff=True)
+        user_logged_in.connect(broken, dispatch_uid="test_auto_guest_receiver")
+        self.addCleanup(user_logged_in.disconnect, dispatch_uid="test_auto_guest_receiver")
+        with self.assertLogs("whiteneuron.base.middleware", level="ERROR"):
+            request, response = self._call("/admin/login/?next=/admin/")
+        self.assertEqual(response.content, b"page")
+        self.assertFalse(request.user.is_authenticated)
+
+        # end to end, with the middleware where settings put it: the login page renders
+        from django.conf import settings
+
+        middleware = [m for m in settings.MIDDLEWARE if not m.endswith("AutoGuestLoginMiddleware")]
+        middleware.insert(
+            middleware.index("django.contrib.auth.middleware.AuthenticationMiddleware") + 1,
+            "whiteneuron.base.middleware.AutoGuestLoginMiddleware",
+        )
+        with self.settings(MIDDLEWARE=middleware), self.assertLogs("whiteneuron.base.middleware", level="ERROR"):
+            page = self.client.get(reverse("admin:login"), {"next": "/admin/"})
+        self.assertEqual(page.status_code, 200)

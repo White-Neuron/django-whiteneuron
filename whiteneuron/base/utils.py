@@ -17,6 +17,11 @@ def timeit(func):
     return wrapper
 
 from django.core.exceptions import FieldDoesNotExist
+from django.contrib.auth import login
+from django.db import DatabaseError
+from django.utils.http import url_has_allowed_host_and_scheme
+import logging
+_logger = logging.getLogger(__name__)
 
 _BADGE_CACHE_TIMEOUT = 60
 
@@ -132,6 +137,60 @@ def user_group_names(user):
         names = frozenset(user.groups.values_list("name", flat=True))
         user._wn_group_names = names
     return names
+
+
+def get_guest_user():
+    """The account used by "Log in as guest" (GuestLoginView, AutoGuestLoginMiddleware), or None.
+
+    None on a database error too: guest login is optional and must never break the login page."""
+    try:
+        return User.objects.filter(username="guest", is_active=True, is_staff=True).first()
+    except DatabaseError:
+        _logger.exception("Guest user lookup failed")
+        return None
+
+
+def safe_next_url(request, url):
+    """``url`` if it is safe to redirect to after login (same host and scheme), else ''."""
+    if url and url_has_allowed_host_and_scheme(
+        url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
+        return url
+    return ""
+
+
+def is_readonly_db_error(exc):
+    """A write refused because the database is read-only (SQLite file / PostgreSQL read-only transaction)."""
+    message = str(exc).lower()
+    return "readonly database" in message or "read-only transaction" in message
+
+
+def log_in_guest(request, guest):
+    """Log ``guest`` in without a password.
+
+    In read-only database mode (demo) saving last_login fails after the session is already
+    set up, so that login still stands. Any other database error is re-raised with the
+    previous user and session put back."""
+    previous_user = getattr(request, "user", None)
+    previous_key = request.session.session_key
+    previous = dict(request.session.items())
+    try:
+        login(request, guest, backend="django.contrib.auth.backends.ModelBackend")
+    except DatabaseError as exc:
+        if getattr(request, "user", None) == guest and is_readonly_db_error(exc):
+            _logger.warning("Guest logged in without saving last_login (read-only database)")
+            return
+        # login() may have flushed the session or set request.user to the guest. Restore both:
+        # otherwise the admin login page sees a staff user, redirects, and loops.
+        request.session.clear()
+        request.session.update(previous)
+        # flush() or cycle_key() got far enough to change the key (the old row may be gone):
+        # save the data under a new key, or it is lost. If the key is unchanged (e.g. a write hit
+        # a read-only database first), the stored session is intact: don't write anything.
+        request.session.modified = request.session.session_key != previous_key
+        if previous_user is not None:
+            request.user = previous_user
+        raise
 
 
 def is_guest_user(user):
