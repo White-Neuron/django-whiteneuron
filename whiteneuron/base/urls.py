@@ -26,4 +26,6 @@ urlpatterns += [
     # path("file-management/", include('whiteneuron.file_management.urls')), # Để ứng dụng tự nhúng URLs khi cần tránh /admin/
     path("announcement/", get_announcement_content, name="announcement"),
     path("md-preview/", MarkdownPreviewView.as_view(), name="md_preview"),
+    # AI assistant panel; answers 403 unless whiteneuron.chatbot is installed (SHOW_CHATBOT)
+    path("chatbot/", include("whiteneuron.chatbot.urls")),
 ]

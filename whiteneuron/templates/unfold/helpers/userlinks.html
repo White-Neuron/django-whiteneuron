@@ -39,6 +39,10 @@
         {% include "base/announcement.html" %}
     {% endif %}
     
+    {% if chatbot_url %}
+        {% include "chatbot/panel.html" %}
+    {% endif %}
+
     {% if environment %}
         {% include "unfold/helpers/label.html" with text=environment.0 type=environment.1 %}
     {% endif %}

@@ -398,6 +398,16 @@ Per-model feedback collection system. Feedback entries are viewable in the admin
 
 **Integration:** Add `FeedbackBaseAdmin` as a mixin or use it directly for your model admins to show related feedback on the change form.
 
+### AI assistant panel (`whiteneuron.chatbot`)
+
+`SHOW_CHATBOT=True` installs the app and adds an "AI Assistant" button to the admin header. It opens a chat panel for active staff accounts (never the shared `guest`).
+
+- Endpoint: `POST /chatbot/api/chat/` (URL name `chatbot:chat`, mounted by `whiteneuron.base.urls`). It needs the CSRF token and answers `{"html", "markdown"}`.
+- Default model: OpenAI, using `OPENAI_API_KEY` and `CHATBOT_MODEL` (falls back to `GPT_MODEL`). Without them the panel answers "not configured" (503).
+- `CHATBOT_SYSTEM_PROMPT`: replaces the default system prompt. `CHATBOT_RATE_LIMIT`: messages per minute per user (default 20, `0` = off).
+- `CHATBOT_RESPONDER = "myproject.ai.respond"`: a callable `(messages, user) -> Markdown` that replaces OpenAI, e.g. for another provider or RAG. `messages` holds the last 10 turns plus the new message.
+- Replies are rendered server-side. Raw HTML is escaped, images are dropped and links are limited to http(s)/mailto, because an LLM reply can be steered by prompt injection.
+
 ---
 
 ## 9. Admin Customizations
@@ -490,6 +500,7 @@ UA_BLACKLIST=GPTBot,ClaudeBot,https://openai.com
 SHOW_CELERY_TASKS=True
 SHOW_FILE_MANAGEMENT=True
 SHOW_FEEDBACKS=True
+SHOW_CHATBOT=False
 IGNORE_ACCEPT_LANGUAGE_FOR_DEFAULT=True
 SKIP_GUEST_LOGIN=False
 ```

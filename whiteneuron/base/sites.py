@@ -47,7 +47,25 @@ class BaseAdminSite(UnfoldAdminSite):
             except Exception:
                 pass
         context['announcement'] = announcement
+        context['chatbot_url'] = self._chatbot_url(request)
         return context
+
+    @staticmethod
+    def _chatbot_url(request):
+        """Endpoint of the AI assistant panel, or None when it is off for this user."""
+        from django.apps import apps
+        from django.urls import NoReverseMatch
+
+        if not apps.is_installed("whiteneuron.chatbot"):
+            return None
+        from whiteneuron.chatbot.utils import chatbot_allowed
+
+        if not chatbot_allowed(request.user):
+            return None
+        try:
+            return reverse("chatbot:chat")
+        except NoReverseMatch:  # project URLconf without whiteneuron.base.urls
+            return None
 
 
 base_admin_site = BaseAdminSite()

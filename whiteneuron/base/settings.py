@@ -190,6 +190,15 @@ INSTALLED_APPS = [
 if BROWSER_RELOAD:
     INSTALLED_APPS.append("django_browser_reload")
 
+# AI assistant panel in the admin header (staff only, not the guest account)
+SHOW_CHATBOT = environ.get("SHOW_CHATBOT", "False") == "True"
+if SHOW_CHATBOT:
+    INSTALLED_APPS.append("whiteneuron.chatbot")
+CHATBOT_MODEL = environ.get("CHATBOT_MODEL", environ.get("GPT_MODEL", ""))  # uses OPENAI_API_KEY
+CHATBOT_SYSTEM_PROMPT = environ.get("CHATBOT_SYSTEM_PROMPT", "")
+CHATBOT_RATE_LIMIT = int(environ.get("CHATBOT_RATE_LIMIT", 20))  # messages per minute per user, 0 = off
+# CHATBOT_RESPONDER = "myproject.ai.respond"  # callable(messages, user) -> Markdown, instead of OpenAI
+
 INSTALLED_APPS += [
 
     "django.contrib.admin",

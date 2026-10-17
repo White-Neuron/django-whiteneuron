@@ -3393,3 +3393,55 @@ msgstr "Giao diện"
 
 #~ msgid "Last week expenses"
 #~ msgstr "Giá trị chi phí tuần trước"
+
+#: chatbot/apps.py
+msgid "Chatbot"
+msgstr "Chatbot"
+
+#: chatbot/templates/chatbot/panel.html
+msgid "AI Assistant"
+msgstr "Trợ lý AI"
+
+#: chatbot/templates/chatbot/panel.html
+msgid "Thinking…"
+msgstr "Đang suy nghĩ…"
+
+#: chatbot/templates/chatbot/panel.html
+msgid "Connection error. Please try again."
+msgstr "Lỗi kết nối. Vui lòng thử lại."
+
+#: chatbot/templates/chatbot/panel.html
+msgid "Hello! I am your AI assistant. How can I help you today?"
+msgstr "Xin chào! Mình là trợ lý AI. Mình có thể giúp gì cho bạn?"
+
+#: chatbot/templates/chatbot/panel.html
+msgid "Type your question…"
+msgstr "Nhập câu hỏi…"
+
+#: chatbot/views.py
+msgid "You do not have permission to use the AI assistant."
+msgstr "Bạn không có quyền sử dụng trợ lý AI."
+
+#: chatbot/views.py
+msgid "Invalid request."
+msgstr "Yêu cầu không hợp lệ."
+
+#: chatbot/views.py
+msgid "Please enter a message."
+msgstr "Vui lòng nhập tin nhắn."
+
+#: chatbot/views.py
+msgid "The message is too long."
+msgstr "Tin nhắn quá dài."
+
+#: chatbot/views.py
+msgid "Too many messages. Please wait a minute."
+msgstr "Bạn gửi quá nhiều tin nhắn. Vui lòng chờ một phút."
+
+#: chatbot/views.py
+msgid "The AI assistant is not configured."
+msgstr "Trợ lý AI chưa được cấu hình."
+
+#: chatbot/views.py
+msgid "The AI assistant is unavailable. Please try again later."
+msgstr "Trợ lý AI đang không khả dụng. Vui lòng thử lại sau."
