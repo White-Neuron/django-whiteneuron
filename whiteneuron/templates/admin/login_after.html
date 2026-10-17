@@ -1,11 +1,12 @@
-{% load i18n unfold %}
+{% load i18n unfold wn_guest %}
 
-{% if guest_login_available %}
-<form method="post" action="{% url 'guest_login' %}" class="mt-3">
+{% guest_login_available as show_guest_login %}
+{% if show_guest_login %}
+<form method="post" action="{% url 'guest_login' %}" class="mt-3" id="guest-login-form">
     {% csrf_token %}
     {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
     {% component "unfold/components/button.html" with submit=1 variant="secondary" class="w-full" %}
-        {% translate "Log in as guest" %} <span class="material-symbols-outlined text-sm">person</span>
+        {% translate "Log in as guest" %} <span class="material-symbols-outlined text-sm" aria-hidden="true">person</span>
     {% endcomponent %}
 </form>
 {% endif %}

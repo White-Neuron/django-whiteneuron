@@ -30,13 +30,16 @@ class GuestLoginView(View):
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             return redirect('admin:index')
+        from .utils import get_guest_user
         try:
-            from .models import User
-            guest = User.objects.filter(username='guest', is_active=True, is_staff=True).first()
-            if guest:
-                login(request, guest, backend='django.contrib.auth.backends.ModelBackend')
+            guest = get_guest_user()
         except Exception:
-            pass
+            logger.exception("Guest login failed")
+            guest = None
+        if not guest:
+            messages.error(request, _("Guest login is not available."))
+            return redirect('admin:login')
+        login(request, guest, backend='django.contrib.auth.backends.ModelBackend')
         next_url = request.POST.get('next', '')
         if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
             return redirect(next_url)

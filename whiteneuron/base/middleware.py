@@ -605,6 +605,7 @@ class UserActivityMiddleware:
 from .thread_local import thread_local
 from django.contrib.auth import login
 from .models import User
+from .utils import get_guest_user
 
 class ThreadLocalMiddleware:
     def __init__(self, get_response):
@@ -640,7 +641,7 @@ class AutoGuestLoginMiddleware:
         ):
             try:
                 # Kiểm tra xem guest user có tồn tại, đang active và có quyền staff không
-                guest_user = User.objects.filter(username='guest', is_active=True, is_staff=True).first()
+                guest_user = get_guest_user()
                 if guest_user:
                     # Tự động đăng nhập guest user
                     login(request, guest_user, backend='django.contrib.auth.backends.ModelBackend')

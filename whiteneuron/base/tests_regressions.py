@@ -465,20 +465,58 @@ class AnnouncementContentTests(TestCase):
 
 @package_test_settings()
 class GuestLoginButtonTests(TestCase):
+    FORM = 'id="guest-login-form"'
+    ACTION = 'action="/base/guest-login/"'
+
     def setUp(self):
         # AutoGuestLoginMiddleware (if enabled) would log the guest in instead of showing the form
         self.client.cookies["skip_auto_guest"] = "1"
 
-    def test_hidden_without_guest_user(self):
-        # the button used to show even without a guest account; clicking it did nothing
-        page = self.client.get(reverse("admin:login"))
-        self.assertNotContains(page, reverse("guest_login"))
+    def _login_page(self, **params):
+        page = self.client.get(reverse("admin:login"), params)
+        self.assertEqual(page.status_code, 200)
+        return page
+
+    def _guest_form(self, page):
+        html = page.content.decode()
+        start = html.index(self.FORM)
+        return html[start:html.index("</form>", start)]
 
     def test_shown_as_styled_button_with_guest_user(self):
         User.objects.create(username="guest", is_staff=True)
-        page = self.client.get(reverse("admin:login"), {"next": "/admin/"})
-        self.assertContains(page, reverse("guest_login"))
-        self.assertContains(page, 'name="next" value="/admin/"')
-        # bg-secondary-600 is not compiled into any stylesheet: the button had no background
-        self.assertNotContains(page, "bg-secondary-600")
-        self.assertContains(page, "bg-base-100")
+        form = self._guest_form(self._login_page(next="/admin/"))
+        self.assertIn('name="next" value="/admin/"', form)
+        # the raw <button> used bg-secondary-600, which is not compiled: no background at all
+        self.assertIn("bg-base-100", form)
+        self.assertNotIn("bg-secondary-600", form)
+
+    def test_hidden_when_guest_cannot_log_in(self):
+        # the button used to show regardless; clicking it then did nothing
+        self.assertNotContains(self._login_page(), self.ACTION)
+        for fields in ({"is_staff": False}, {"is_staff": True, "is_active": False}):
+            User.objects.filter(username="guest").delete()
+            User.objects.create(username="guest", **fields)
+            self.assertNotContains(self._login_page(), self.ACTION)
+
+    def test_hidden_for_authenticated_user(self):
+        # GuestLoginView redirects authenticated users without logging them in
+        User.objects.create(username="guest", is_staff=True)
+        self.client.force_login(User.objects.create_user("plain", password="pw"))
+        self.assertNotContains(self._login_page(), self.ACTION)
+
+    def test_lookup_error_does_not_break_login_page(self):
+        with mock.patch("whiteneuron.base.templatetags.wn_guest.get_guest_user", side_effect=RuntimeError):
+            with self.assertLogs("whiteneuron.base.templatetags.wn_guest", level="ERROR"):
+                page = self._login_page()
+        self.assertNotContains(page, self.ACTION)
+        self.assertContains(page, 'id="login-form"')
+
+    def test_guest_login_view(self):
+        response = self.client.post(reverse("guest_login"), {"next": "/admin/"}, follow=True)
+        self.assertRedirects(response, reverse("admin:login"))
+        self.assertContains(response, "Guest login is not available.")
+
+        guest = User.objects.create(username="guest", is_staff=True)
+        response = self.client.post(reverse("guest_login"), {"next": "/admin/"})
+        self.assertRedirects(response, "/admin/", fetch_redirect_response=False)
+        self.assertEqual(int(self.client.session["_auth_user_id"]), guest.pk)

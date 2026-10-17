@@ -3010,6 +3010,10 @@ msgstr ""
 msgid "Log in as guest"
 msgstr "Đăng nhập với tư cách khách"
 
+#: base/views.py
+msgid "Guest login is not available."
+msgstr "Không thể đăng nhập với tư cách khách."
+
 #: templates/admin/monitoring/dashboard.html:32
 msgid "Host"
 msgstr "Máy chủ"

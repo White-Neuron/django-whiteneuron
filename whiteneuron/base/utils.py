@@ -134,6 +134,11 @@ def user_group_names(user):
     return names
 
 
+def get_guest_user():
+    """The account used by "Log in as guest" (GuestLoginView, AutoGuestLoginMiddleware), or None."""
+    return User.objects.filter(username="guest", is_active=True, is_staff=True).first()
+
+
 def is_guest_user(user):
     if not user or not user.is_authenticated:
         return True

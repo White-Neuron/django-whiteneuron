@@ -16,18 +16,6 @@ class BaseAdminSite(UnfoldAdminSite):
             return redirect(reverse("%s:login" % self.name))
         return super().logout(request, extra_context=extra_context)
 
-    def login(self, request, extra_context=None):
-        from .models import User
-
-        # Only offer "Log in as guest" when GuestLoginView can actually log someone in
-        extra_context = {
-            "guest_login_available": User.objects.filter(
-                username="guest", is_active=True, is_staff=True
-            ).exists(),
-            **(extra_context or {}),
-        }
-        return super().login(request, extra_context=extra_context)
-
     def get_urls(self):
         return [
             path("about/", self.admin_view(self.about_view), name="about"),
