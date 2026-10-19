@@ -712,3 +712,17 @@ class AutoGuestLoginMiddlewareTests(TestCase):
         with self.settings(MIDDLEWARE=middleware), self.assertLogs("whiteneuron.base.middleware", level="ERROR"):
             page = self.client.get(reverse("admin:login"), {"next": "/admin/"})
         self.assertEqual(page.status_code, 200)
+
+
+class CKEditorCustomCssTests(TestCase):
+    def test_served_css_is_compiled(self):
+        # django-ckeditor-5 links CKEDITOR_5_CUSTOM_CSS as-is: the file used to be Tailwind source, so
+        # browsers dropped every @apply rule and theme() left the editor transparent (unreadable in dark mode)
+        from django.conf import settings
+        from django.contrib.staticfiles import finders
+
+        with open(finders.find(settings.CKEDITOR_5_CUSTOM_CSS), encoding="utf-8") as f:
+            css = f.read()
+        for source_only in ("@apply", "theme(", "@custom-variant"):
+            self.assertNotIn(source_only, css)
+        self.assertIn(".ck.ck-editor{", css)

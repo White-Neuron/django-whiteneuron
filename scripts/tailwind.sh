@@ -10,3 +10,5 @@ ln -sfn "$MD2HTML" .tw-md2html
 trap 'rm -f .tw-md2html' EXIT
 
 npx @tailwindcss/cli -i styles.css -o whiteneuron/static/base/css/styles.css --minify
+# CKEDITOR_5_CUSTOM_CSS: served as-is by django-ckeditor-5, so its @apply must be compiled here
+npx @tailwindcss/cli -i ckeditor5.css -o whiteneuron/static/base/css/ckeditor5.css --minify
