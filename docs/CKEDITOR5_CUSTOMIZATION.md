@@ -1,247 +1,77 @@
-# CKEditor5 Unfold Theme Integration
+# CKEditor 5 in the Unfold admin
 
-This implementation provides a comprehensive customization of CKEditor5 to seamlessly integrate with the Unfold admin theme, utilizing Tailwind CSS 3 and DaisyUI 4 with the `ui-` prefix.
+django-whiteneuron ships [django-ckeditor-5](https://github.com/hvlads/django-ckeditor-5) configured
+for the admin, plus a small stylesheet that themes the editor with Unfold's colors in light and dark
+mode.
 
-## Features
+## Enabling the editor
 
-### 🎨 **Visual Design**
-- **Modern UI**: Clean, minimalist design matching Unfold's aesthetic
-- **Dark Mode Support**: Automatic theme detection and switching
-- **Responsive Design**: Mobile-first approach with adaptive toolbars
-- **DaisyUI Integration**: Uses `ui-` prefixed components for consistency
+The default `TextField` widget of `whiteneuron.base.modeladmin.ModelAdmin` is `wysiwyg`. To use
+CKEditor in a model admin:
 
-### 🛠 **Enhanced Functionality**
-- **Auto-save**: Automatic content preservation with localStorage
-- **Accessibility**: WCAG 2.1 compliant with proper ARIA labels
-- **Word Count**: Real-time statistics display
-- **Responsive Toolbar**: Simplified mobile interface
-- **Theme Synchronization**: Automatic dark/light mode switching
-
-### 🎯 **User Experience**
-- **Smooth Animations**: Subtle transitions and hover effects
-- **Focus Management**: Enhanced keyboard navigation
-- **Error States**: Visual feedback for form validation
-- **Loading States**: Progressive enhancement indicators
-
-## File Structure
-
-```
-whiteneuron/static/base/
-├── css/
-│   └── ckeditor5.css          # Main styling with Tailwind classes
-└── js/
-    └── ckeditor5-unfold.js    # Enhanced functionality and configuration
+```python
+class ArticleAdmin(ModelAdmin):
+    text_field_widget = "ckeditor"  # options: 'wysiwyg', 'ckeditor', 'mdeditor', ''
 ```
 
-## Implementation Details
+Or use `django_ckeditor_5.fields.CKEditor5Field` / `django_ckeditor_5.widgets.CKEditor5Widget` directly.
 
-### CSS Architecture (`ckeditor5.css`)
+The package settings (`whiteneuron/base/settings.py`) define `CKEDITOR_5_CONFIGS` (toolbars),
+`CKEDITOR_5_FILE_STORAGE`, `CKEDITOR_5_FILE_UPLOAD_PERMISSION` and:
 
-The CSS file uses Tailwind's `@apply` directive to leverage the existing design system:
-
-- **Container Styling**: Matches Django form field appearance
-- **Toolbar Design**: Uses DaisyUI button components with `ui-` prefix
-- **Content Area**: Styled with typography utilities
-- **Dark Mode**: Automatic color scheme adaptation
-- **Responsive Breakpoints**: Mobile-optimized layouts
-
-### JavaScript Enhancements (`ckeditor5-unfold.js`)
-
-The JavaScript file provides advanced functionality:
-
-- **Theme Management**: Detects and responds to theme changes
-- **Configuration**: Comprehensive CKEditor setup optimized for content editing
-- **Auto-save**: Background content preservation
-- **Accessibility**: Enhanced keyboard and screen reader support
-- **Mobile Optimization**: Responsive toolbar configuration
-
-## Configuration Options
-
-### Default Toolbar Configuration
-
-```javascript
-toolbar: {
-    items: [
-        'heading', '|',
-        'bold', 'italic', 'link', '|',
-        'bulletedList', 'numberedList', 'blockQuote', '|',
-        'uploadImage', 'insertTable', '|',
-        'code', 'codeBlock', '|',
-        'subscript', 'superscript', 'highlight', '|',
-        'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', '|',
-        'mediaEmbed', 'removeFormat', '|',
-        'sourceEditing'
-    ]
-}
+```python
+CKEDITOR_5_CUSTOM_CSS = "base/css/ckeditor5.css"
 ```
 
-### Color Palette Integration
+django-ckeditor-5 adds that file to the widget's media after CKEditor's own CSS.
 
-The color picker integrates with your theme's primary colors:
+## The theme stylesheet
 
-```javascript
-fontColor: {
-    colors: [
-        // Standard colors
-        { color: 'hsl(0, 0%, 0%)', label: 'Black' },
-        // ... other colors
-        // Theme integration
-        { color: 'rgb(var(--color-sky-500))', label: 'Primary' },
-        { color: 'rgb(var(--color-sky-600))', label: 'Primary Dark' },
-        { color: 'rgb(var(--color-sky-400))', label: 'Primary Light' }
-    ]
-}
-```
+`whiteneuron/static/base/css/ckeditor5.css` is **plain CSS with no build step**. Browsers get the
+file exactly as committed, so it must not contain Tailwind syntax (`@apply`, `theme()`,
+`@custom-variant`); a regression test checks this.
 
-## Usage
+It only overrides CKEditor's `--ck-*` CSS variables, which is
+[CKEditor's documented theming method](https://ckeditor.com/docs/ckeditor5/latest/framework/deep-dive/ui/theme-customization.html).
+Layout, sizes and feature styles (colour pickers, highlights, image styles, tables, code blocks,
+todo lists) stay CKEditor's own.
 
-### Basic Implementation
+- **Colors** come from Unfold: `--color-base-*`, `--color-primary-*` and `--color-font-*`
+  (`UNFOLD["COLORS"]`, remapped per theme by `daisy-themes.css`). Every `var()` has CKEditor's
+  default as its fallback.
+- **Dark mode** follows Unfold's `dark` class on `<html>`, which daisyUI dark themes also set.
+  CKEditor's light defaults that are not derived from its base variables (button and input states,
+  placeholders, selection, content text, captions) are overridden one by one.
+- **Code blocks** are the one exception: CKEditor gives `pre` a fixed `#353535` text color with no
+  variable, so a single dark-mode rule recolors it.
 
-```html
-<!-- Include the CSS and JS files -->
-<link rel="stylesheet" href="{% static 'base/css/ckeditor5.css' %}">
-<script src="{% static 'base/js/ckeditor5-unfold.js' %}"></script>
+## Customizing in a project
 
-<!-- Your CKEditor textarea -->
-<div class="ck-editor-container">
-    <textarea class="django_ckeditor_5" name="content"></textarea>
-</div>
-```
-
-### Django Template Integration
-
-```html
-{% load static %}
-
-<div class="field-box">
-    <label for="id_content">Content:</label>
-    <div class="ck-editor-container">
-        {{ form.content }}
-    </div>
-</div>
-
-<!-- Include styles and scripts -->
-<link rel="stylesheet" href="{% static 'base/css/ckeditor5.css' %}">
-<script src="{% static 'base/js/ckeditor5-unfold.js' %}"></script>
-```
-
-### Custom Configuration
-
-```javascript
-// Initialize with custom configuration
-window.initUnfoldCKEditor(document.querySelector('#my-editor'), {
-    toolbar: ['bold', 'italic', 'link'],
-    placeholder: 'Custom placeholder text...',
-    // Other custom options
-});
-```
-
-## Customization
-
-### Adding New Toolbar Items
-
-```javascript
-// Extend the default configuration
-window.UnfoldCKEditorConfig.toolbar.items.push('specialCharacters');
-```
-
-### Custom Color Themes
-
-```javascript
-// Add custom colors to the palette
-window.UnfoldCKEditorConfig.fontColor.colors.push({
-    color: '#your-color',
-    label: 'Custom Color'
-});
-```
-
-### Styling Overrides
+Point `CKEDITOR_5_CUSTOM_CSS` at your own static file and override variables there. Start from the
+packaged file, or keep it and load yours after it:
 
 ```css
-/* Add custom styles in your CSS file */
-.ck.ck-editor.my-custom-editor {
-    @apply border-2 border-blue-500;
+:root {
+  --ck-color-focus-border: #7c3aed;
+  --ck-content-font-family: "Inter", system-ui, sans-serif;
 }
 
-.ck.ck-editor.my-custom-editor .ck-toolbar {
-    @apply bg-blue-50 dark:bg-blue-900;
+.dark {
+  --ck-color-base-background: #0b1020;
 }
 ```
 
-## Browser Support
+CKEditor declares its variables on `:root` and derives most of them from a few base ones
+(`--ck-color-base-background`, `-foreground`, `-border`, `-text`). Override them on `<html>` (`:root`,
+`.dark`) so the derived variables follow. The full list is in CKEditor's CSS
+(`django_ckeditor_5/static/django_ckeditor_5/dist/styles.css`).
 
-- **Modern Browsers**: Chrome 63+, Firefox 60+, Safari 12+, Edge 79+
-- **Mobile Support**: iOS Safari 12+, Chrome Mobile 63+
-- **Accessibility**: WCAG 2.1 AA compliant
-- **RTL Support**: Full right-to-left text direction support
-
-## Performance Considerations
-
-- **Lazy Loading**: CKEditor initializes only when needed
-- **Asset Optimization**: Minified CSS and JavaScript
-- **Memory Management**: Proper cleanup on navigation
-- **Auto-save Throttling**: Configurable save intervals
-
-## Accessibility Features
-
-- **Keyboard Navigation**: Full keyboard support for all features
-- **Screen Reader Support**: Comprehensive ARIA labels and descriptions
-- **High Contrast Mode**: Enhanced visibility in high contrast environments
-- **Focus Management**: Proper focus indicators and tab order
-
-## Error Handling
-
-The implementation includes robust error handling:
-
-- **Initialization Errors**: Graceful fallback to plain textarea
-- **Network Issues**: Local storage backup for content
-- **Browser Compatibility**: Feature detection and polyfills
-
-## Development Notes
-
-### CSS Processing
-
-The CSS file uses Tailwind's `@apply` directive and requires processing through your build pipeline:
-
-```bash
-# Process through Tailwind
-npx tailwindcss -i ./static/base/css/ckeditor5.css -o ./dist/ckeditor5.css
-```
-
-### JavaScript Dependencies
-
-The JavaScript file depends on:
-- CKEditor5 Classic Editor build
-- Modern browser APIs (MutationObserver, localStorage)
-- CSS custom properties support
-
-### Testing Considerations
-
-Test the implementation across:
-- Different screen sizes (mobile, tablet, desktop)
-- Theme switching (light/dark modes)
-- Form validation states
-- Content restoration from auto-save
+If you need Tailwind utilities, compile your stylesheet in your own build and point
+`CKEDITOR_5_CUSTOM_CSS` at the output, never at the source.
 
 ## Troubleshooting
 
-### Common Issues
-
-1. **Styles not applying**: Ensure Tailwind CSS is processing the `@apply` directives
-2. **Theme not switching**: Check that `data-theme` attribute changes are detected
-3. **Auto-save not working**: Verify localStorage availability and permissions
-4. **Mobile toolbar issues**: Check responsive breakpoints and toolbar configuration
-
-### Debug Mode
-
-Enable debug logging by setting:
-
-```javascript
-window.CKEditorDebug = true;
-```
-
-This will log initialization steps and theme changes to the console.
-
-## License
-
-This implementation follows the same license as your Django project and includes integration code compatible with CKEditor5's GPL license.
+- **Transparent editor or black text in dark mode**: the stylesheet has invalid values, usually
+  Tailwind source served without a build. Check the file in the browser's network tab.
+- **Theme does not switch**: the variables follow the `dark` class on `<html>`. Check that Unfold's
+  theme switch sets it.

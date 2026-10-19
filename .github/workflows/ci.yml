@@ -86,5 +86,5 @@ jobs:
 
       - name: Committed files match the build
         run: |
-          git diff --exit-code -- daisy-themes.css whiteneuron/base/themes.py whiteneuron/static/base/css/styles.css whiteneuron/static/base/css/ckeditor5.css \
+          git diff --exit-code -- daisy-themes.css whiteneuron/base/themes.py whiteneuron/static/base/css/styles.css \
             || { echo "::error::Run 'bash scripts/tailwind.sh' and commit the regenerated files."; exit 1; }

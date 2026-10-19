@@ -4,7 +4,7 @@ from unittest import mock
 
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth import get_user_model
-from django.test import RequestFactory, TestCase, override_settings
+from django.test import RequestFactory, SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 from django.utils import translation
 
@@ -714,15 +714,14 @@ class AutoGuestLoginMiddlewareTests(TestCase):
         self.assertEqual(page.status_code, 200)
 
 
-class CKEditorCustomCssTests(TestCase):
-    def test_served_css_is_compiled(self):
+class CKEditorCustomCssTests(SimpleTestCase):
+    def test_packaged_css_is_plain_css(self):
         # django-ckeditor-5 links CKEDITOR_5_CUSTOM_CSS as-is: the file used to be Tailwind source, so
         # browsers dropped every @apply rule and theme() left the editor transparent (unreadable in dark mode)
-        from django.conf import settings
         from django.contrib.staticfiles import finders
 
-        with open(finders.find(settings.CKEDITOR_5_CUSTOM_CSS), encoding="utf-8") as f:
+        with open(finders.find("base/css/ckeditor5.css"), encoding="utf-8") as f:
             css = f.read()
-        for source_only in ("@apply", "theme(", "@custom-variant"):
+        for source_only in ("@apply", "theme(", "@custom-variant", "@tailwind"):
             self.assertNotIn(source_only, css)
-        self.assertIn(".ck.ck-editor{", css)
+        self.assertIn("--ck-color-base-background", css)
