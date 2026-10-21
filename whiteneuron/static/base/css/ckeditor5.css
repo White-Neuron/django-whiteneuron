@@ -4,17 +4,24 @@
  * Plain CSS, no build step: django-ckeditor-5 links this file as-is after CKEditor's own CSS.
  * It only overrides CKEditor's --ck-* variables (its documented theming method), so the editor's
  * layout and features keep CKEditor's own styles. Colors come from unfold (UNFOLD["COLORS"],
- * daisy-themes.css); each var() falls back to CKEditor's default.
+ * daisy-themes.css); the var() fallbacks only apply without them: CKEditor's defaults in light
+ * mode, Tailwind grays in dark mode.
  *
  * CKEditor declares its variables on :root and derives most of them from a few base ones
  * (--ck-color-base-*), so overriding those on <html> recolors the whole UI. The others are
- * fixed light values and are overridden one by one for dark mode.
+ * fixed light values and are overridden one by one for dark mode; tests_regressions.py fails
+ * when a CKEditor upgrade adds one that is neither overridden nor reviewed.
  */
 
 :root {
+  /* unfold's font, written out: Tailwind scans this file, and referencing its font theme variable
+     makes styles.css emit Tailwind's default font, overriding unfold's */
+  --ck-content-font-family: "Inter", system-ui, -apple-system, sans-serif;
+
   --ck-color-base-border: var(--color-base-200, #ccced1);
   --ck-color-base-text: var(--color-font-important-light, #333);
   --ck-color-focus-border: var(--color-primary-600, hsl(218, 81.8%, 56.9%));
+  --ck-color-focus-outer-shadow: var(--color-primary-200, #cae1fc);
   --ck-color-link-default: var(--color-primary-600, #0000f0);
 
   --ck-color-button-on-color: var(--color-primary-600, #2977ff);
@@ -24,16 +31,15 @@
 }
 
 /* unfold's dark mode: the "dark" class on <html>, also set for daisyUI dark themes */
-.dark,
-[data-theme="dark"] {
-  color-scheme: dark;
+html.dark {
+  --wn-ck-primary: var(--color-primary-500, #0ea5e9);
 
   --ck-color-base-background: var(--color-base-900, #111827);
   --ck-color-base-foreground: var(--color-base-800, #1f2937);
   --ck-color-base-border: var(--color-base-700, #374151);
   --ck-color-base-text: var(--color-font-important-dark, #f9fafb);
-  --ck-color-focus-border: var(--color-primary-500, #0ea5e9);
-  --ck-color-focus-outer-shadow: color-mix(in srgb, var(--color-primary-500, #0ea5e9) 35%, transparent);
+  --ck-color-focus-border: var(--wn-ck-primary);
+  --ck-color-focus-outer-shadow: color-mix(in srgb, var(--wn-ck-primary) 35%, transparent);
   --ck-color-shadow-drop: rgba(0, 0, 0, 0.4);
   --ck-color-shadow-drop-active: rgba(0, 0, 0, 0.5);
   --ck-color-shadow-inner: rgba(0, 0, 0, 0.3);
@@ -42,9 +48,9 @@
   --ck-color-button-default-hover-background: var(--color-base-800, #1f2937);
   --ck-color-button-default-active-background: var(--color-base-700, #374151);
   --ck-color-button-on-color: var(--color-primary-400, #38bdf8);
-  --ck-color-button-on-background: color-mix(in srgb, var(--color-primary-500, #0ea5e9) 20%, transparent);
-  --ck-color-button-on-hover-background: color-mix(in srgb, var(--color-primary-500, #0ea5e9) 30%, transparent);
-  --ck-color-button-on-active-background: color-mix(in srgb, var(--color-primary-500, #0ea5e9) 35%, transparent);
+  --ck-color-button-on-background: color-mix(in srgb, var(--wn-ck-primary) 20%, transparent);
+  --ck-color-button-on-hover-background: color-mix(in srgb, var(--wn-ck-primary) 30%, transparent);
+  --ck-color-button-on-active-background: color-mix(in srgb, var(--wn-ck-primary) 35%, transparent);
   --ck-color-button-on-disabled-background: var(--color-base-800, #1f2937);
   --ck-color-button-action-text: #fff;
   --ck-color-split-button-hover-background: var(--color-base-700, #374151);
@@ -60,8 +66,18 @@
   --ck-color-editable-blur-selection: var(--color-base-700, #374151);
   --ck-color-widget-blurred-border: var(--color-base-600, #4b5563);
   --ck-color-link-default: var(--color-primary-400, #38bdf8);
-  --ck-color-link-selected-background: color-mix(in srgb, var(--color-primary-500, #0ea5e9) 20%, transparent);
+  --ck-color-link-selected-background: color-mix(in srgb, var(--wn-ck-primary) 20%, transparent);
   --ck-color-code-block-label-background: var(--color-base-600, #4b5563);
+  --ck-color-image-caption-highlighted-background: var(--color-base-600, #4b5563);
+  --ck-color-table-caption-highlighted-background: var(--color-base-600, #4b5563);
+
+  /* panels: keyboard shortcuts dialog (Alt+0), style grid */
+  --ck-accessibility-help-dialog-border-color: var(--color-base-700, #374151);
+  --ck-accessibility-help-dialog-code-background-color: var(--color-base-700, #374151);
+  --ck-accessibility-help-dialog-kbd-shadow-color: var(--color-base-950, #030712);
+  --ck-style-panel-button-label-background: var(--color-base-800, #1f2937);
+  --ck-style-panel-button-hover-label-background: var(--color-base-700, #374151);
+  --ck-style-panel-button-hover-border-color: var(--color-base-600, #4b5563);
 
   /* editing area: CKEditor's content text is #000 by default */
   --ck-content-font-color: var(--color-font-important-dark, #f9fafb);
@@ -70,11 +86,31 @@
   --ck-content-color-table-caption-background: var(--color-base-800, #1f2937);
   --ck-content-color-table-caption-text: var(--color-font-default-dark, #d1d5db);
   --ck-content-color-mention-text: #f472b6;
+  --ck-table-content-default-border-color: var(--color-base-600, #4b5563);
+  --ck-table-layout-default-border-color: var(--color-base-600, #4b5563);
+  --ck-table-border-none-helper-line-color: var(--color-base-600, #4b5563);
 }
 
-/* the one fixed content color without a variable: code blocks are #353535 text */
-.dark .ck-content pre,
-[data-theme="dark"] .ck-content pre {
+/* native scrollbars and controls inside the editor; the page's color-scheme is unfold's */
+html.dark .ck {
+  color-scheme: dark;
+}
+
+/* fixed content colors without a variable */
+
+/* code blocks: #353535 text */
+html.dark .ck-content pre {
   color: var(--color-font-default-dark, #d1d5db);
   border-color: var(--color-base-700, #374151);
+}
+
+/* todo list checkboxes: #333 border (checked ones keep CKEditor's green) */
+html.dark .ck-content .todo-list .todo-list__label > input::before,
+html.dark .ck-content .todo-list .todo-list__label > span[contenteditable="false"] > input::before {
+  border-color: var(--color-base-400, #9ca3af);
+}
+
+/* find & replace matches: --ck-color-text (light in dark mode) on yellow / #ff9633 */
+html.dark .ck-find-result {
+  color: var(--color-base-900, #111827);
 }
