@@ -1,10 +1,12 @@
 """Regression tests for the hardening / performance changes."""
 import asyncio
+import re
+from pathlib import Path
 from unittest import mock
 
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth import get_user_model
-from django.test import RequestFactory, TestCase, override_settings
+from django.test import RequestFactory, SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 from django.utils import translation
 
@@ -712,3 +714,71 @@ class AutoGuestLoginMiddlewareTests(TestCase):
         with self.settings(MIDDLEWARE=middleware), self.assertLogs("whiteneuron.base.middleware", level="ERROR"):
             page = self.client.get(reverse("admin:login"), {"next": "/admin/"})
         self.assertEqual(page.status_code, 200)
+
+
+class CKEditorCustomCssTests(SimpleTestCase):
+    # CKEditor's fixed light colors that stay readable in dark mode: accents, translucent overlays,
+    # self-contained badges and tooltips; <mark> highlights get dark text from the browser (MarkText)
+    READABLE_IN_DARK = {
+        "--ck-color-base-action", "--ck-color-base-active", "--ck-color-base-active-focus",
+        "--ck-color-base-error", "--ck-color-base-focus", "--ck-color-button-action-active-background",
+        "--ck-color-button-action-disabled-background", "--ck-color-button-action-hover-background",
+        "--ck-color-button-cancel", "--ck-color-button-save", "--ck-color-color-grid-check-icon",
+        "--ck-color-image-upload-icon", "--ck-color-image-upload-icon-background", "--ck-color-light-red",
+        "--ck-color-switch-button-off-background", "--ck-color-switch-button-off-hover-background",
+        "--ck-color-switch-button-on-hover-background", "--ck-color-upload-bar-background",
+        "--ck-color-upload-placeholder-loader", "--ck-color-widget-hover-border",
+        "--ck-html-embed-source-disabled-color", "--ck-show-blocks-border-color",
+        # translucent
+        "--ck-color-focus-disabled-shadow", "--ck-color-focus-error-shadow", "--ck-color-link-fake-selection",
+        "--ck-color-switch-button-inner-shadow", "--ck-color-table-focused-cell-background",
+        "--ck-content-color-mention-background", "--ck-dialog-overlay-background-color",
+        "--ck-table-selected-cell-background",
+        # badges and tooltips with their own background
+        "--ck-color-resizer-tooltip-background", "--ck-color-resizer-tooltip-text",
+        "--ck-evaluation-badge-background", "--ck-evaluation-badge-text-color",
+        "--ck-powered-by-background", "--ck-powered-by-text-color",
+        # highlights: find results get dark text from a rule, markers from the browser
+        "--ck-color-highlight-background", "--ck-content-highlight-marker-blue",
+        "--ck-content-highlight-marker-green", "--ck-content-highlight-marker-pink",
+        "--ck-content-highlight-marker-yellow", "--ck-content-highlight-pen-green",
+        "--ck-content-highlight-pen-red",
+    }
+
+    @staticmethod
+    def _read(package, path):
+        return (Path(package.__file__).parent / path).read_text(encoding="utf-8")
+
+    def setUp(self):
+        import whiteneuron
+
+        # the packaged file itself: staticfiles finders may return a project's file of the same name
+        self.css = self._read(whiteneuron, "static/base/css/ckeditor5.css")
+
+    def test_packaged_css_is_plain_css(self):
+        # django-ckeditor-5 links CKEDITOR_5_CUSTOM_CSS as-is: the file used to be Tailwind source, so
+        # browsers dropped every @apply rule and theme() left the editor transparent (unreadable in dark mode)
+        source_only = (
+            "@apply", "theme(", "@custom-variant", "@tailwind", "@theme", "@utility", "@variant",
+            "@source", "@plugin", "@reference", "--alpha(", "--spacing(",
+        )
+        for token in source_only:
+            self.assertNotIn(token, self.css)
+        self.assertIn("--ck-color-base-background", self.css)
+
+    def test_dark_mode_covers_ckeditor_light_colors(self):
+        # CKEditor's fixed light colors (not derived from --ck-color-base-*) must be overridden for dark
+        # mode or reviewed above, so a django-ckeditor-5 upgrade that adds one fails here
+        import django_ckeditor_5
+
+        ckeditor_css = self._read(django_ckeditor_5, "static/django_ckeditor_5/dist/styles.css")
+        fixed = {
+            name
+            for block in re.findall(r":root\{([^}]*)\}", ckeditor_css)
+            for name, value in re.findall(r"(--ck-[\w-]+):([^;]+)", block)
+            if re.match(r"\s*(#[0-9a-f]{3,8}\b|rgba?\(|hsla?\()", value, re.I) and "var(" not in value
+        }
+        self.assertGreater(len(fixed), 50)  # the parse still finds CKEditor's variables
+        dark = re.search(r"html\.dark \{([^}]*)\}", self.css).group(1)
+        overridden = set(re.findall(r"(--ck-[\w-]+):", dark))
+        self.assertEqual(sorted(fixed - overridden - self.READABLE_IN_DARK), [])
