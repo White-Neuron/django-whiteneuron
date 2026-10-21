@@ -1,6 +1,17 @@
 # Changelog
 
-### v0.4.1.0 (2026-10-16) — latest
+### v0.4.1.1 (2026-10-21) — latest
+**Patch release: CKEditor readable in light and dark mode, working "Log in as guest" button**
+- **Fixed**: CKEditor fields (`text_field_widget = "ckeditor"`, `CKEditor5Widget`) had a transparent editor and toolbar, and in dark mode black text on the dark background. `base/css/ckeditor5.css` was Tailwind source served without a build, so browsers dropped its rules. It is now plain CSS that only overrides CKEditor's `--ck-*` variables with Unfold's colors, in light mode and in Unfold's dark mode (`html.dark`, also set by dark daisyUI themes). This covers the toolbar, dialogs, captions, todo checkboxes, code blocks and find & replace matches. Editor content uses Inter.
+- **Fixed**: the login page's "Log in as guest" button had no background (`bg-secondary-600` was never compiled). It now uses Unfold's secondary button and appears only when an active staff `guest` account exists (new `{% guest_login_available %}` tag in the `wn_guest` library).
+- **Fixed**: a failed guest login silently returned to the login page. `GuestLoginView` now shows "Guest login is not available." and keeps `?next`. It also works under Django's `LoginRequiredMiddleware` and lets any logged-in user switch to guest. A failed switch restores the previous session instead of returning a 500 (read-only database with DB-backed sessions). `?next` must have the same host and scheme.
+- **Fixed**: `AutoGuestLoginMiddleware` raised `NoReverseMatch` for `?next=<path>` (it was resolved as a URL name) and hid errors. It now redirects to the URL and logs failures.
+- **Changed**: Tailwind no longer scans its own output (`styles.css`), so rebuilds are reproducible.
+- **Docs**: `docs/CKEDITOR5_CUSTOMIZATION.md` rewritten: there is no build step, and a project extends the packaged theme by `@import`ing it from its own `CKEDITOR_5_CUSTOM_CSS`.
+- **Tests**: guest login button, view and middleware (13 tests); `ckeditor5.css` contains no Tailwind syntax and overrides every fixed CKEditor light color for dark mode, or lists it as reviewed, so a django-ckeditor-5 upgrade that adds one fails the suite.
+- **Upgrade**: `pip install -U django-whiteneuron==0.4.1.1`, `collectstatic`. No migrations or new settings. Projects with their own `CKEDITOR_5_CUSTOM_CSS` are unaffected. Docker base images `v0.4.1.1` are published by the release workflow.
+
+### v0.4.1.0 (2026-10-16)
 **Feature release: admin About page (application / base versions and release dates)**
 - **Added**: admin **About** page (`/admin/about/`, sidebar *System → About*, URL name `admin:about`). Every staff user sees the application name, version, release date and short build id (`VERSION`, `RELEASE_DATE`, `BUILD_ID` / `GIT_COMMIT`, cut to 12 characters) and the django-whiteneuron version and release date with a changelog link; superusers also see Python/Django/Unfold versions, database engine, debug mode, time zone, server time, process start and uptime.
 - **Added**: `APP_INFO_CALLBACK` setting (`"path.to.func"`, `func(request) -> [(label, value), ...]`) for project rows on the About page; a failing callback is logged and skipped.
