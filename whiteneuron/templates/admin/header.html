@@ -15,7 +15,8 @@
                     {% trans stats.label as label %}
                     {% component "unfold/components/card.html" with class="" label=label footer=stats.footer %}
                         {% component "unfold/components/text.html" %}
-                            {{ stats.title }}
+                            {# Room for the label in the card's corner (Unfold's CSS has no pr-32): a narrow card put the title under it #}
+                            <span style="display: block; padding-inline-end: 8rem">{{ stats.title }}</span>
                         {% endcomponent %}   
                         {% component "unfold/components/title.html" %}
                             {{ stats.metric_total }}

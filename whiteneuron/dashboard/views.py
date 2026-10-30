@@ -58,7 +58,7 @@ def _dashboard_stats(time):
     ranges = _period_ranges(time, today)
     if ranges is None:
         return None
-    cache_key = f"wn:dashboard:{time}:{today.isoformat()}"
+    cache_key = f"wn:dashboard:v2:{time}:{today.isoformat()}"  # v2: with "dates"
     cached = cache.get(cache_key)
     if cached is not None:
         return cached
@@ -100,7 +100,7 @@ def _dashboard_stats(time):
             "average": [(a + b) / 2 for a, b in zip(user_success, user_error)],
             "anonymous_average": [(a + b) / 2 for a, b in zip(anon_success, anon_error)],
         },
-        "weekdays": [d.weekday() for d in days],
+        "dates": [d.strftime("%d/%m") for d in days],
     }
     cache.set(cache_key, stats, timeout=_STATS_CACHE_TIMEOUT)
     return stats
@@ -121,34 +121,33 @@ def dashboard_callback(request, context):
         'year': _('year'),
     }
 
-    WEEKDAYS = [
-        "Mon",
-        "Tue",
-        "Wed",
-        "Thu",
-        "Fri",
-        "Sat",
-        "Sun",
-    ]
-
     stats = _dashboard_stats(time)  # `time` is validated above
     (total_activities, total_activities_success, total_activities_last,
      total_anonymous_activities, total_anonymous_activities_success,
      total_anonymous_activities_last) = stats["kpi"]
     user_activities_28_days = stats["chart"]
-    _28_days = [_(WEEKDAYS[d]) for d in stats["weekdays"]]
+    # The days' dates: weekday names alone repeated four times over 28 days
+    _28_days = stats["dates"]
+
+    # What a period is compared with, as a whole phrase ("progress from last - week" read badly)
+    COMPARED_WITH = {
+        'today': _('vs. yesterday'),
+        '7days': _('vs. the 7 days before'),
+        'week': _('vs. last week'),
+        'month': _('vs. last month'),
+        'year': _('vs. last year'),
+    }
 
     def render_kpi(label, object_name, value, last_value, time, success=None):
         # Whole translatable sentences with named placeholders (word order differs per
         # language; makemessages can't see _() inside f-strings)
         diff = value - last_value
         diff_percent = diff / last_value * 100 if last_value else 0
-        period = MAPTIME[time] if time != "today" else _("day")
         footer = format_html(
-            '<strong class="{} font-medium">{}{} ({}%)</strong>&nbsp;{} - {}',
+            '<strong class="{} font-medium">{}{} ({}%)</strong>&nbsp;{}',
             "text-green-600" if diff >= 0 else "text-red-600",
             "+" if diff >= 0 else "-", abs(diff), f"{diff_percent:.2f}",
-            _("progress from last"), period,
+            COMPARED_WITH[time],
         )
         rate = round(success / value * 100, 1) if value and success else None
         return {

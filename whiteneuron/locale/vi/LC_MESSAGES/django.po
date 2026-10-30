@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-16 03:29+0000\n"
+"POT-Creation-Date: 2026-10-30 21:13+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -95,10 +95,12 @@ msgstr "Tất cả"
 msgid " By %(filter_title)s "
 msgstr " Theo %(filter_title)s "
 
+#: _unfold_src/contrib/filters/admin/choice_filters.py:80
 #: _unfold_src/contrib/filters/admin/choice_filters.py:88
 msgid "Yes"
 msgstr "Có"
 
+#: _unfold_src/contrib/filters/admin/choice_filters.py:81
 #: _unfold_src/contrib/filters/admin/choice_filters.py:89
 msgid "No"
 msgstr "Không"
@@ -248,7 +250,7 @@ msgstr "Quyền"
 #: _unfold_src/contrib/reversion/templates/reversion/object_history.html:18
 #: _unfold_src/contrib/reversion_compare/templates/reversion-compare/action_list_partial.html:36
 #: _unfold_src/templates/admin/object_history.html:15 base/admin.py:338
-#: dashboard/views.py:207 feedbacks/models.py:15
+#: dashboard/views.py:206 feedbacks/models.py:15
 msgid "User"
 msgstr "Người dùng"
 
@@ -340,8 +342,8 @@ msgid ""
 "Below is a preview of data to be imported. If you are satisfied with the "
 "results, click 'Confirm import'"
 msgstr ""
-"Dưới đây là bản xem trước của dữ liệu sẽ được nhập. Nếu bạn hài lòng với kết "
-"quả, hãy nhấp vào 'Xác nhận nhập'"
+"Dưới đây là bản xem trước của dữ liệu sẽ được nhập. Nếu bạn hài lòng với kết"
+" quả, hãy nhấp vào 'Xác nhận nhập'"
 
 #: _unfold_src/contrib/import_export/templates/admin/import_export/import_confirm.html:16
 msgid "Confirm import"
@@ -447,15 +449,16 @@ msgid "Date/time"
 msgstr "Ngày/giờ"
 
 #: _unfold_src/contrib/reversion/templates/reversion/object_history.html:22
-#: _unfold_src/templates/admin/object_history.html:19 notification/admin.py:155
+#: _unfold_src/templates/admin/object_history.html:19
+#: notification/admin.py:155
 msgid "Action"
 msgstr "Hành động"
 
 #: _unfold_src/contrib/reversion/templates/reversion/object_history.html:54
 #: _unfold_src/contrib/reversion_compare/templates/reversion-compare/object_history.html:8
 msgid ""
-"This object doesn't have a change history. It probably wasn't added via this "
-"admin site."
+"This object doesn't have a change history. It probably wasn't added via this"
+" admin site."
 msgstr ""
 "Đối tượng này không có lịch sử thay đổi. Có lẽ nó không được thêm qua trang "
 "quản trị này."
@@ -499,13 +502,11 @@ msgstr "DATETIME_FORMAT"
 #, python-format
 msgid ""
 "\n"
-"            Compare <strong class=\"font-semibold underline\">%(date1)s</"
-"strong> with <strong class=\"font-semibold underline\">%(date2)s</strong>\n"
+"            Compare <strong class=\"font-semibold underline\">%(date1)s</strong> with <strong class=\"font-semibold underline\">%(date2)s</strong>\n"
 "        "
 msgstr ""
 "\n"
-"            So sánh <strong class=\"font-semibold underline\">%(date1)s</"
-"strong> với <strong class=\"font-semibold underline\">%(date2)s</strong>\n"
+"            So sánh <strong class=\"font-semibold underline\">%(date1)s</strong> với <strong class=\"font-semibold underline\">%(date2)s</strong>\n"
 "        "
 
 #: _unfold_src/contrib/reversion_compare/templates/reversion-compare/compare.html:19
@@ -519,14 +520,12 @@ msgstr "Quay lại phiên bản này"
 #: _unfold_src/contrib/reversion_compare/templates/reversion-compare/compare.html:30
 msgid ""
 "\n"
-"                Fields/entries marked with <sup class=\"follow\">*</sup> are "
-"not under reversion control.\n"
+"                Fields/entries marked with <sup class=\"follow\">*</sup> are not under reversion control.\n"
 "                It may be that not all marked information are correct.\n"
 "            "
 msgstr ""
 "\n"
-"                Các trường/mục được đánh dấu <sup class=\"follow\">*</sup> "
-"không được theo dõi phiên bản.\n"
+"                Các trường/mục được đánh dấu <sup class=\"follow\">*</sup> không được theo dõi phiên bản.\n"
 "                Thông tin được đánh dấu có thể không hoàn toàn chính xác.\n"
 "            "
 
@@ -620,6 +619,7 @@ msgid "Select action to run"
 msgstr "Chọn hành động để thực hiện"
 
 #: _unfold_src/forms.py:132
+#, python-brace-format
 msgid ""
 "Raw passwords are not stored, so there is no way to see this user’s "
 "password, but you can change the password using <a href=\"{}\" class=\"text-"
@@ -627,8 +627,8 @@ msgid ""
 msgstr ""
 "Mật khẩu dạng văn bản không được lưu, vì vậy không có cách nào để xem mật "
 "khẩu của người dùng này, nhưng bạn có thể thay đổi mật khẩu bằng <a "
-"href=\"{}\" class=\"text-primary-600 dark:text-primary-500\">biểu mẫu này</"
-"a>."
+"href=\"{}\" class=\"text-primary-600 dark:text-primary-500\">biểu mẫu "
+"này</a>."
 
 #: _unfold_src/mixins/dataset_model_admin.py:56
 msgid ""
@@ -749,8 +749,8 @@ msgstr ""
 #: _unfold_src/templates/admin/delete_confirmation.html:32
 #, python-format
 msgid ""
-"Deleting the %(object_name)s '%(escaped_object)s' would require deleting the "
-"following protected related objects:"
+"Deleting the %(object_name)s '%(escaped_object)s' would require deleting the"
+" following protected related objects:"
 msgstr ""
 "Xóa %(object_name)s '%(escaped_object)s' sẽ yêu cầu xóa các đối tượng liên "
 "quan được bảo vệ sau:"
@@ -785,8 +785,8 @@ msgid ""
 "Deleting the selected %(objects_name)s would require deleting the following "
 "protected related objects:"
 msgstr ""
-"Xóa %(objects_name)s đã chọn sẽ yêu cầu xóa các đối tượng liên quan được bảo "
-"vệ sau:"
+"Xóa %(objects_name)s đã chọn sẽ yêu cầu xóa các đối tượng liên quan được bảo"
+" vệ sau:"
 
 #: _unfold_src/templates/admin/delete_selected_confirmation.html:42
 #, python-format
@@ -808,8 +808,8 @@ msgstr "Chào mừng trở lại với"
 #: _unfold_src/templates/admin/login.html:26 templates/admin/login.html:16
 #, python-format
 msgid ""
-"You are authenticated as %(username)s, but are not authorized to access this "
-"page. Would you like to login to a different account?"
+"You are authenticated as %(username)s, but are not authorized to access this"
+" page. Would you like to login to a different account?"
 msgstr ""
 "Bạn đã xác thực với tư cách %(username)s, nhưng không được phép truy cập "
 "trang này. Bạn có muốn đăng nhập vào tài khoản khác không?"
@@ -824,8 +824,8 @@ msgstr "Quên mật khẩu hoặc tên người dùng?"
 
 #: _unfold_src/templates/admin/object_history.html:62
 msgid ""
-"This object doesn’t have a change history. It probably wasn’t added via this "
-"admin site."
+"This object doesn’t have a change history. It probably wasn’t added via this"
+" admin site."
 msgstr ""
 "Đối tượng này không có lịch sử thay đổi. Có lẽ nó đã không được thêm vào "
 "thông qua trang quản trị này."
@@ -875,11 +875,11 @@ msgstr "Mật khẩu của bạn đã được thay đổi."
 
 #: _unfold_src/templates/registration/password_change_form.html:19
 msgid ""
-"Please enter your old password, for security’s sake, and then enter your new "
-"password twice so we can verify you typed it in correctly."
+"Please enter your old password, for security’s sake, and then enter your new"
+" password twice so we can verify you typed it in correctly."
 msgstr ""
-"Hãy nhập mật khẩu cũ của bạn, vì lý do bảo mật, sau đó nhập mật khẩu mới hai "
-"lần để chúng tôi có thể xác nhận bạn đã nhập đúng."
+"Hãy nhập mật khẩu cũ của bạn, vì lý do bảo mật, sau đó nhập mật khẩu mới hai"
+" lần để chúng tôi có thể xác nhận bạn đã nhập đúng."
 
 #: _unfold_src/templates/unfold/components/table.html:113
 #: monitoring/admin.py:28
@@ -996,13 +996,11 @@ msgstr "Không có kết quả nào khớp với tìm kiếm của bạn"
 #, python-format
 msgid ""
 "\n"
-"            Found <span class=\"font-medium text-important\">%(counter)s</"
-"span> result in %(time)s seconds\n"
+"            Found <span class=\"font-medium text-important\">%(counter)s</span> result in %(time)s seconds\n"
 "        "
 msgid_plural ""
 "\n"
-"            Found <span class=\"font-medium text-important\">%(counter)s</"
-"span> results in %(time)s seconds\n"
+"            Found <span class=\"font-medium text-important\">%(counter)s</span> results in %(time)s seconds\n"
 "        "
 msgstr[0] ""
 "\n"
@@ -1230,6 +1228,10 @@ msgstr "Xóa %(model)s đã chọn"
 msgid "Add row"
 msgstr "Thêm hàng"
 
+#: _unfold_src/templatetags/unfold.py:805
+msgid "Welcome"
+msgstr "Chào mừng"
+
 #: _unfold_src/templatetags/unfold_list.py:100
 msgid "Select all objects on this page for an action"
 msgstr "Chọn tất cả các đối tượng trên trang này để thực hiện hành động"
@@ -1341,8 +1343,8 @@ msgstr "Đã chặn %(count)d IP: %(ips)s"
 msgid "%(count)d activity records had no IP address."
 msgstr "%(count)d bản ghi hoạt động không có địa chỉ IP."
 
-#: base/admin.py:518 base/admin.py:580 base/admin.py:627 base/modeladmin.py:447
-#: file_management/admin.py:92
+#: base/admin.py:518 base/admin.py:580 base/admin.py:627
+#: base/modeladmin.py:447 file_management/admin.py:92
 msgid "Meta"
 msgstr "Meta"
 
@@ -1411,7 +1413,7 @@ msgid "Content"
 msgstr "Nội dung"
 
 #: base/admin.py:835 base/settings.py:611 dashboard/apps.py:8
-#: dashboard/views.py:175 templates/admin/index.html:9
+#: dashboard/views.py:174 templates/admin/index.html:9
 msgid "Dashboard"
 msgstr "Bảng điều khiển"
 
@@ -1492,6 +1494,10 @@ msgstr "Trường hiển thị"
 #: base/filters.py:40
 msgid "Default fields"
 msgstr "Trường mặc định"
+
+#: base/forms.py:9
+msgid "Password"
+msgstr "Mật khẩu"
 
 #: base/middleware.py:197
 msgid "Database is operating in readonly mode. Not possible to save any data."
@@ -1693,7 +1699,8 @@ msgstr "hoạt động ẩn danh"
 #: base/models.py:276
 msgid "Single IPv4 or IPv6 address. Use IP_BLACKLIST in .env for CIDR ranges."
 msgstr ""
-"Địa chỉ IPv4 hoặc IPv6 đơn. Sử dụng IP_BLACKLIST trong .env cho các dải CIDR."
+"Địa chỉ IPv4 hoặc IPv6 đơn. Sử dụng IP_BLACKLIST trong .env cho các dải "
+"CIDR."
 
 #: base/models.py:278 base/models.py:382
 msgid "reason"
@@ -1829,6 +1836,7 @@ msgid "Thumbnail"
 msgstr "Hình thu nhỏ"
 
 #: base/models.py:717 base/models.py:814 file_management/admin.py:213
+#: templates/base/forms/mdeditor.html:3 templates/base/forms/mdeditor.html:16
 msgid "Preview"
 msgstr "Xem trước"
 
@@ -1860,7 +1868,8 @@ msgstr "Chủ đề"
 msgid "Receiver"
 msgstr "Người nhận"
 
-#: base/models.py:894 file_management/models.py:40 file_management/models.py:55
+#: base/models.py:894 file_management/models.py:40
+#: file_management/models.py:55
 #: templates/admin/feedbacks/change_form_feedback_list.html:38
 msgid "Pending"
 msgstr "Đang chờ"
@@ -2060,14 +2069,18 @@ msgstr "Khoảng thời gian"
 msgid "Solar events"
 msgstr "Sự kiện Solar"
 
-#: base/utils.py:236
+#: base/utils.py:295
 #, python-brace-format
 msgid "New announcement for {NAME} - version {VERSION}!"
 msgstr "Thông báo mới cho {NAME} - phiên bản {VERSION}!"
 
-#: base/utils.py:241
+#: base/utils.py:300
 msgid "NEW"
 msgstr "MỚI"
+
+#: base/views.py:47
+msgid "Guest login is not available."
+msgstr "Không thể đăng nhập với tư cách khách."
 
 #: contrib/wn_import_export/admin.py:38
 msgid "Export selected records"
@@ -2114,7 +2127,7 @@ msgstr "Dịch thành công"
 msgid "today"
 msgstr "hôm nay"
 
-#: dashboard/views.py:118 dashboard/views.py:186
+#: dashboard/views.py:118 dashboard/views.py:185
 msgid "7 days"
 msgstr "7 ngày"
 
@@ -2130,81 +2143,93 @@ msgstr "tháng"
 msgid "year"
 msgstr "năm"
 
-#: dashboard/views.py:146
-msgid "day"
-msgstr "ngày"
+#: dashboard/views.py:134
+msgid "vs. yesterday"
+msgstr "so với hôm qua"
 
-#: dashboard/views.py:151
-msgid "progress from last"
-msgstr "tiến trình từ lần cuối"
+#: dashboard/views.py:135
+msgid "vs. the 7 days before"
+msgstr "so với 7 ngày trước đó"
 
-#: dashboard/views.py:156
+#: dashboard/views.py:136
+msgid "vs. last week"
+msgstr "so với tuần trước"
+
+#: dashboard/views.py:137
+msgid "vs. last month"
+msgstr "so với tháng trước"
+
+#: dashboard/views.py:138
+msgid "vs. last year"
+msgstr "so với năm trước"
+
+#: dashboard/views.py:155
 #, python-format
 msgid "%(object)s in %(period)s"
 msgstr "%(object)s trong %(period)s"
 
-#: dashboard/views.py:159
+#: dashboard/views.py:158
 #, python-format
 msgid "%(count)s successful (%(rate)s%%)"
 msgstr "%(count)s thành công (%(rate)s%%)"
 
-#: dashboard/views.py:176
+#: dashboard/views.py:175
 msgid "Analytics"
 msgstr "Phân tích"
 
-#: dashboard/views.py:177
+#: dashboard/views.py:176
 msgid "Settings"
 msgstr "Cài đặt"
 
-#: dashboard/views.py:181
+#: dashboard/views.py:180
 msgid "Today"
 msgstr "Hôm nay"
 
-#: dashboard/views.py:191
+#: dashboard/views.py:190
 msgid "Week"
 msgstr "Tuần"
 
-#: dashboard/views.py:196
+#: dashboard/views.py:195
 msgid "Month"
 msgstr "Tháng"
 
-#: dashboard/views.py:201
+#: dashboard/views.py:200
 msgid "Year"
 msgstr "Năm"
 
-#: dashboard/views.py:207
+#: dashboard/views.py:206
 msgid "Activities"
 msgstr "Hoạt động"
 
-#: dashboard/views.py:208
+#: dashboard/views.py:207
 msgid "Anonymous"
 msgstr "Ẩn danh"
 
-#: dashboard/views.py:208
+#: dashboard/views.py:207
 msgid "Visits"
 msgstr "Lượt truy cập"
 
-#: dashboard/views.py:257
+#: dashboard/views.py:256
 msgid "User average"
 msgstr "Trung bình người dùng"
 
-#: dashboard/views.py:264
+#: dashboard/views.py:263
 msgid "Anonymous average"
 msgstr "Trung bình ẩn danh"
 
-#: dashboard/views.py:271
+#: dashboard/views.py:270
 msgid "User success"
 msgstr "Thành công của người dùng"
 
-#: dashboard/views.py:276
+#: dashboard/views.py:275
 msgid "Anonymous success"
 msgstr "Thành công của ẩn danh"
 
-#: dashboard/views.py:281
+#: dashboard/views.py:280
 msgid "User error"
 msgstr "Lỗi của người dùng"
 
-#: dashboard/views.py:286
+#: dashboard/views.py:285
 msgid "Anonymous error"
 msgstr "Lỗi của ẩn danh"
 
@@ -2357,7 +2382,8 @@ msgid "Current hash (live)"
 msgstr "Hash hiện tại (thực tế)"
 
 #: file_management/admin.py:146
-msgid "Cannot read the file from storage. It may have been deleted externally."
+msgid ""
+"Cannot read the file from storage. It may have been deleted externally."
 msgstr ""
 "Không đọc được file từ storage. File có thể đã bị xóa bên ngoài hệ thống."
 
@@ -2550,8 +2576,8 @@ msgid ""
 "dashboard is open. Run \"manage.py monitoring_collector\" (or schedule the "
 "Celery task) to keep collecting."
 msgstr ""
-"Chưa có collector nào chạy cho máy chủ này: lịch sử chỉ được ghi khi đang mở "
-"dashboard. Hãy chạy \"manage.py monitoring_collector\" (hoặc lên lịch task "
+"Chưa có collector nào chạy cho máy chủ này: lịch sử chỉ được ghi khi đang mở"
+" dashboard. Hãy chạy \"manage.py monitoring_collector\" (hoặc lên lịch task "
 "Celery) để thu thập liên tục."
 
 #: monitoring/admin.py:30
@@ -3006,13 +3032,9 @@ msgid "Successful vs failed requests per day, users and anonymous visitors"
 msgstr ""
 "Số request thành công và lỗi mỗi ngày, của người dùng và khách vãng lai"
 
-#: templates/admin/login_after.html:10
+#: templates/admin/login_after.html:9
 msgid "Log in as guest"
 msgstr "Đăng nhập với tư cách khách"
-
-#: base/views.py
-msgid "Guest login is not available."
-msgstr "Không thể đăng nhập với tư cách khách."
 
 #: templates/admin/monitoring/dashboard.html:32
 msgid "Host"
@@ -3283,6 +3305,22 @@ msgstr "Đã hiểu"
 msgid "HTML Editor"
 msgstr "Biên soạn HTML"
 
+#: templates/base/forms/mdeditor.html:3
+msgid "Markdown preview"
+msgstr "Xem trước Markdown"
+
+#: templates/base/forms/mdeditor.html:11
+msgid "Preview markdown"
+msgstr "Xem trước Markdown"
+
+#: templates/base/forms/mdeditor.html:26
+msgid "Write your markdown here..."
+msgstr "Viết nội dung Markdown tại đây..."
+
+#: templates/base/forms/mdeditor.html:28
+msgid "Markdown editor"
+msgstr "Trình soạn Markdown"
+
 #: templates/unfold/helpers/account_links.html:13
 msgid "User profile"
 msgstr "Hồ sơ người dùng"
@@ -3290,6 +3328,12 @@ msgstr "Hồ sơ người dùng"
 #: templates/unfold/helpers/theme_switch.html:38
 msgid "Themes"
 msgstr "Giao diện"
+
+#~ msgid "day"
+#~ msgstr "ngày"
+
+#~ msgid "progress from last"
+#~ msgstr "tiến trình từ lần cuối"
 
 #~ msgid "Expand row"
 #~ msgstr "Mở rộng hàng"
@@ -3302,9 +3346,6 @@ msgstr "Giao diện"
 
 #~ msgid "Remove"
 #~ msgstr "Xóa bỏ"
-
-#~ msgid "Welcome"
-#~ msgstr "Chào mừng"
 
 #~ msgid ", "
 #~ msgstr ", "
@@ -3357,8 +3398,8 @@ msgstr "Giao diện"
 #, python-brace-format
 #~ msgid ""
 #~ "Raw passwords are not stored, so there is no way to see this user's "
-#~ "password, but you can change the password using <a href=\"{}\" "
-#~ "class=\"text-primary-600 dark:text-primary-500\">this form</a>."
+#~ "password, but you can change the password using <a href=\"{}\" class=\"text-"
+#~ "primary-600 dark:text-primary-500\">this form</a>."
 #~ msgstr ""
 #~ "Mật khẩu dạng văn bản không được lưu, vì vậy không có cách nào để xem mật "
 #~ "khẩu của người dùng này, nhưng bạn có thể thay đổi mật khẩu bằng <a "
