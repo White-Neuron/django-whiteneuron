@@ -450,6 +450,15 @@ class I18nCatalogRegressionTests(TestCase):
             self.assertEqual(str(LoginForm().fields["password"].label), "Mật khẩu")
 
 
+@package_test_settings()
+class LoginFormRegressionTests(TestCase):
+    def test_a_failed_sign_in_does_not_echo_the_password(self):
+        response = self.client.post(reverse("admin:login"), {"username": "nobody", "password": "Typed-S3cret"})
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Typed-S3cret")
+        self.assertContains(response, 'autocomplete="current-password"')
+
+
 class UiModalCssRegressionTests(TestCase):
     def test_ui_modal_overrides_unfold_dialog_rule(self):
         # Unfold's unlayered `dialog {...}` beat daisyUI's layered .ui-modal (narrow white
