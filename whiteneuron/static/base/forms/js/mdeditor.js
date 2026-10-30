@@ -16,7 +16,7 @@
         return cookieValue;
     }
 
-    function createModal(targetId) {
+    function createModal(targetId, title) {
         var editorId = targetId.replace('mdeditor-hidden-', '');
         
         // Check if modal already exists in body
@@ -37,7 +37,7 @@
 
         var titleH3 = document.createElement('h3');
         titleH3.className = 'text-lg font-semibold text-base-content';
-        titleH3.textContent = 'Markdown Preview';
+        titleH3.textContent = title || 'Markdown Preview';
 
         // Close button — use modal.close() directly to avoid loading.js interception
         var closeButton = document.createElement('button');
@@ -105,7 +105,9 @@
         }
 
         // Create modal in body (not nested in container to avoid inert issue)
-        var modal = createModal(targetId);
+        // The page's language, from the widget template
+        var previewLabel = container.dataset.mdPreviewLabel || 'Preview';
+        var modal = createModal(targetId, container.dataset.mdPreviewTitle);
         var previewContent = document.getElementById('md-preview-content-' + editorId);
         var previewLoading = container.querySelector('.preview-loading');
         var previewText = container.querySelector('.preview-text');
@@ -139,7 +141,7 @@
                 isFetching = false;
                 previewBtn.disabled = false;
                 if (previewLoading) previewLoading.classList.add('hidden');
-                if (previewText) previewText.textContent = 'Preview';
+                if (previewText) previewText.textContent = previewLabel;
             }
 
             var clickHandler = function(e) {

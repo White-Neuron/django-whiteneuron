@@ -431,8 +431,32 @@ class I18nCatalogRegressionTests(TestCase):
         with translation.override("vi"):
             kpi = dashboard_callback(request, {})["kpi"][0]
         self.assertIn("trong", kpi["title"])
-        self.assertIn("tiến trình từ lần cuối", str(kpi["footer"]))
-        self.assertIn("ngày", str(kpi["footer"]))
+        self.assertIn("so với hôm qua", str(kpi["footer"]))
+
+    def test_dashboard_chart_is_labelled_with_dates(self):
+        import json
+        from django.utils import timezone
+        from whiteneuron.dashboard.views import dashboard_callback
+
+        request = RequestFactory().get("/admin/", {"time": "week"})
+        labels = json.loads(dashboard_callback(request, {})["chart"])["labels"]
+        self.assertEqual(len(labels), 28)
+        self.assertEqual(labels[-1], timezone.localdate().strftime("%d/%m"))
+
+    def test_login_password_label_is_translated(self):
+        from whiteneuron.base.forms import LoginForm
+
+        with translation.override("vi"):
+            self.assertEqual(str(LoginForm().fields["password"].label), "Mật khẩu")
+
+
+@package_test_settings()
+class LoginFormRegressionTests(TestCase):
+    def test_a_failed_sign_in_does_not_echo_the_password(self):
+        response = self.client.post(reverse("admin:login"), {"username": "nobody", "password": "Typed-S3cret"})
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Typed-S3cret")
+        self.assertContains(response, 'autocomplete="current-password"')
 
 
 class UiModalCssRegressionTests(TestCase):
