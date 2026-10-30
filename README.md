@@ -10,11 +10,22 @@ A modern Django Admin extension focused on UI/UX, dashboard, feedback, file mana
 ![django-whiteneuron](https://raw.githubusercontent.com/White-Neuron/django-whiteneuron/main2.0/docs/images/main.png)
 
 ## Current Version
-v0.4.1.1
+v0.4.1.2
 
 ## Changelog
 
-### Latest: v0.4.1.1 (2026-10-21)
+### Latest: v0.4.1.2 (2026-10-30)
+**Patch release: admin reads properly in Vietnamese (login password label, KPI comparisons, dated 28-day chart, Markdown editor)**
+- **Fixed**: the login page's password field read "Password" in every language: `LoginForm` redefined it without a label. It now has `label=_("Password")` and `strip=False`, like `AuthenticationForm`'s own field.
+- **Security**: a failed sign-in no longer writes the password typed back into the page's HTML (`render_value=True` removed from `LoginForm`'s password widget). The field has `autocomplete="current-password"`.
+- **Fixed**: home KPI card footers compare with a whole translatable phrase ("+1646 (137.6%) vs. last week", "so với tuần trước") instead of "progress from last - week".
+- **Fixed**: KPI card titles keep clear of the label in the card's corner, so "Lượt truy cập trong tuần" no longer runs under "KHÁCH ẨN DANH".
+- **Changed**: the 28-day activity chart is labelled with dates (`03/10` … `30/10`) instead of weekday names repeated four times. The dashboard stats cache key moves to `v2`, so entries cached by 0.4.1.1 are not reused.
+- **Fixed**: the Markdown editor's header button, placeholder, aria labels and preview dialog title are translated (the script reads them from data attributes on the widget).
+- **Tests**: chart labelled with 28 dates ending today; password label translated; a failed sign-in does not echo the password and sets `autocomplete="current-password"`.
+- **Upgrade**: `pip install -U django-whiteneuron==0.4.1.2`, `collectstatic` (`mdeditor.js`). No migrations or new settings. Translators: new msgids for the KPI comparisons ("vs. yesterday", "vs. the 7 days before", "vs. last week", "vs. last month", "vs. last year"), "Password" and the Markdown editor labels (Vietnamese included); "progress from last" and the weekday names are no longer used. Docker base images `v0.4.1.2` are published by the release workflow.
+
+### v0.4.1.1 (2026-10-21)
 **Patch release: CKEditor readable in light and dark mode, working "Log in as guest" button**
 - **Fixed**: CKEditor fields (`text_field_widget = "ckeditor"`, `CKEditor5Widget`) had a transparent editor and toolbar, and in dark mode black text on the dark background. `base/css/ckeditor5.css` was Tailwind source served without a build, so browsers dropped its rules. It is now plain CSS that only overrides CKEditor's `--ck-*` variables with Unfold's colors, in light mode and in Unfold's dark mode (`html.dark`, also set by dark daisyUI themes). This covers the toolbar, dialogs, captions, todo checkboxes, code blocks and find & replace matches. Editor content uses Inter.
 - **Fixed**: the login page's "Log in as guest" button had no background (`bg-secondary-600` was never compiled). It now uses Unfold's secondary button and appears only when an active staff `guest` account exists (new `{% guest_login_available %}` tag in the `wn_guest` library).
