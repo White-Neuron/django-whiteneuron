@@ -154,3 +154,22 @@ class Notification(models.Model):
                                 user_ids=user_ids or [self.user_id])
         except Exception:  # channel layer down: the notification row is still stored
             logger.warning("Notification broadcast failed", exc_info=True)
+
+class AnnouncementReceipt(models.Model):
+    """A user has seen the announcement (release notes) of ``version``.
+
+    Lets the announcement API tell clients whether to pop up "what's new" for the
+    current version, once per user, across devices.
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="announcement_receipts")
+    version = models.CharField(max_length=100)
+    seen_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "announcement_receipts"
+        constraints = [
+            models.UniqueConstraint(fields=["user", "version"], name="announcement_receipt_user_version_uniq"),
+        ]
+
+    def __str__(self):
+        return f"{self.user_id} - {self.version}"

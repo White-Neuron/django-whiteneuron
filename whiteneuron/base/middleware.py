@@ -11,6 +11,33 @@ from django.core.cache import cache
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.template.loader import render_to_string
 
+
+# URL names of the package's probe / polling endpoints. They are resolved with reverse()
+# (cached per URLconf), so the exemptions below hold wherever a project mounts them.
+PROBE_URL_NAMES = ("wn_system:health", "wn_system:ready")
+UNTRACKED_URL_NAMES = PROBE_URL_NAMES + ("wn_system:version", "wn_system:info", "wn_notifications:unread_count")
+_named_paths_cache = {}
+
+
+def named_paths(names):
+    """Paths of the given URL names in the active URLconf; names that are not mounted are skipped."""
+    from django.conf import settings
+    from django.urls import NoReverseMatch, get_urlconf, reverse
+
+    key = (get_urlconf() or settings.ROOT_URLCONF, names)
+    paths = _named_paths_cache.get(key)
+    if paths is None:
+        found = set()
+        for name in names:
+            try:
+                found.add(reverse(name))
+            except NoReverseMatch:
+                pass
+            except Exception:  # URLconf not importable yet: try again on the next request
+                return frozenset()
+        paths = _named_paths_cache[key] = frozenset(found)
+    return paths
+
 class RateLimitMiddleware:
     """
     Global rate limiting dựa trên IP.
@@ -141,7 +168,8 @@ class RateLimitMiddleware:
         IPBlacklist.ensure_cache_loaded()
 
     def __call__(self, request):
-        if not any(request.path.startswith(p) for p in self.EXEMPT_PATHS):
+        if not (any(request.path.startswith(p) for p in self.EXEMPT_PATHS)
+                or request.path in named_paths(PROBE_URL_NAMES)):
             ip, _ = get_client_ip(request)
             if ip and self._is_blacklisted(ip):
                 if request.path.startswith('/api/') or request.headers.get('Accept') == 'application/json':
@@ -364,6 +392,8 @@ class UserActivityMiddleware:
         self._MAX_BODY_SIZE = 1024 * 1024  # 1MB
 
     def do_not_track(self, request):
+        if request.path in named_paths(UNTRACKED_URL_NAMES):
+            return True
         for path, condition in self.exclude_paths:
             if condition == 'startswith' and request.path.startswith(path):
                 return True

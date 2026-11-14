@@ -163,6 +163,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 - [Quick Start](#quick-start)
 - [Configuration](#configuration)
 - [Modules](#modules)
+- [JSON API](#json-api)
 - [Middleware & Security](#middleware--security)
 - [Frontend](#frontend)
 - [Environment Variables](#environment-variables)
@@ -369,9 +370,65 @@ To ship a smaller CSS bundle, compile only some themes: `WN_THEMES="nord,dracula
 |---|---|---|
 | `whiteneuron.base` | Core models, admin, middleware, utilities | `User`, `BaseModel`, `Image`, `Mail`, `App`, `IPBlacklist`, `UABlacklist` |
 | `whiteneuron.dashboard` | Dashboard callback and badge system | — |
-| `whiteneuron.notification` | WebSocket real-time notifications | `Notification`, `NotificationConfig` |
+| `whiteneuron.notification` | WebSocket real-time notifications, notification & announcement API | `Notification`, `NotificationConfig`, `AnnouncementReceipt` |
 | `whiteneuron.file_management` | File upload with integrity verification | `ExcelFile`, `PDFFile` |
 | `whiteneuron.feedbacks` | Per-model feedback collection | — |
+
+## JSON API
+
+Small JSON endpoints to check a deployment quickly and to read the logged-in user's notifications and release notes from a frontend or mobile app. Mount them once in the project `urls.py` (they are not part of `whiteneuron.base.urls`, which projects often mount under `/admin/`):
+
+```python
+path("api/", include("whiteneuron.api_urls")),
+```
+
+Each group can also be mounted on its own: `whiteneuron.base.system_urls`, `whiteneuron.notification.api_urls`, `whiteneuron.notification.announcement_urls`.
+
+### System
+
+| Endpoint | Access | Response |
+|---|---|---|
+| `GET /api/system/version/` | public | `name`, `version`, `release_date`, `build` (`NAME`, `VERSION`, `RELEASE_DATE`, `BUILD_ID` cut to 12 chars, as on the About page) |
+| `GET /api/system/health/` | public | liveness, `{"status": "ok"}`; touches neither the database nor the cache |
+| `GET /api/system/ready/` | public | readiness: `database`, `cache` (and optionally `celery`) checks with latency; `200`, or `503` when one fails. Error messages only for superusers / token |
+| `GET /api/system/info/` | superuser or `SYSTEM_API_TOKEN` | package version, Python / Django / Unfold versions, database engine, debug, time zone, uptime, pending migrations, checks |
+
+Like the About page, nothing exposes host names, OS, IP addresses, paths or connection settings, and package / runtime versions are not public. `health/` and `ready/` skip the IP rate limit, and the system endpoints are not written to User Activity. Both follow the URL names, so they hold wherever the URLs are mounted.
+
+```bash
+curl https://example.com/api/system/ready/
+curl -H "Authorization: Bearer $SYSTEM_API_TOKEN" https://example.com/api/system/info/
+```
+
+With `DEBUG=False` the package settings set `SECURE_REDIRECT_EXEMPT = [r"^api/system/(health|ready)/$"]`, so internal probes can use plain HTTP; change it if you mount the API under another prefix.
+
+### Notifications (logged-in user)
+
+| Endpoint | Description |
+|---|---|
+| `GET /api/notifications/` | own notifications, newest first: `?page`, `?page_size` (≤ 100), `?unread=1`, `?flag=info\|success\|warning\|error\|danger`; includes `unread_count` |
+| `GET /api/notifications/unread-count/` | `{"unread_count": n}` (all unread, not only today's) — for polling; not logged in User Activity |
+| `GET /api/notifications/<id>/` | detail, with `changed_data` |
+| `POST /api/notifications/<id>/read/` · `<id>/unread/` · `read-all/` | mark as read / unread / all read; the sidebar badge cache is cleared |
+
+### Announcement (release notes)
+
+The same announcement as the admin header button (`ANNOUNCEMENT_CALLBACK` + `ANNOUNCEMENT_CONTENT_HTML_FILE`), plus whether the user has already seen this version, so a client shows "what's new" once per user and version, on every device.
+
+| Endpoint | Description |
+|---|---|
+| `GET /api/announcement/` | `{"announcement": {"title", "version", "badge", "html", "is_seen"}}`, or `{"announcement": null}` |
+| `POST /api/announcement/seen/` | record that the user has seen the current version |
+
+```js
+const { announcement } = await (await fetch("/api/announcement/")).json();
+if (announcement && !announcement.is_seen) {
+  showWhatsNew(announcement.html);  // your UI
+  await fetch("/api/announcement/seen/", { method: "POST", headers: { "X-CSRFToken": getCookie("csrftoken") } });
+}
+```
+
+Notifications and announcement need a logged-in user (`401` otherwise); a user only reaches their own notifications (`404` for others); `POST` needs the CSRF token.
 
 ## Middleware & Security
 
@@ -434,6 +491,8 @@ Copy `env.example` to `.env` and configure. Key variables:
 | `RATE_LIMIT_REQUESTS` | IP rate limit count | `60` |
 | `IP_BLACKLIST` | Static IP blocks (CIDR) | — |
 | `UA_BLACKLIST` | Static UA blocks | — |
+| `SYSTEM_API_TOKEN` | Token for `/api/system/info/` and readiness error details | — |
+| `SYSTEM_API_READY_CHECKS` | Readiness checks (`database`, `cache`, `celery`) | `database,cache` |
 
 See `env.example` for the full list.
 

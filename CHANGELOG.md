@@ -1,5 +1,16 @@
 # Changelog
 
+### Unreleased
+**Feature: JSON API for system status, user notifications and the announcement (release notes)**
+- **Added**: `whiteneuron.api_urls` — one include (`path("api/", include("whiteneuron.api_urls"))`) for the package's JSON endpoints; each group can be mounted alone. Not added to `whiteneuron.base.urls`, which projects mount under `/admin/`.
+- **Added**: `system/version/` (public: `NAME`, `VERSION`, `RELEASE_DATE`, `BUILD_ID`), `system/health/` (liveness), `system/ready/` (database / cache / optional celery checks with latency, `503` on failure), `system/info/` (package and runtime versions, uptime, pending migrations; superuser or `SYSTEM_API_TOKEN`). Same exposure rules as the About page: no host, OS, IP, paths or connection settings; runtime versions and check error messages are never public.
+- **Added**: `notifications/` — the logged-in user's notifications: list (pagination, `unread`, `flag`), unread count, detail, mark read / unread / all read. Scoped to `request.user` (`404` for others), `401` when anonymous, CSRF on `POST`; clears the cached sidebar badge.
+- **Added**: `announcement/` — the `ANNOUNCEMENT_CALLBACK` announcement with its rendered `ANNOUNCEMENT_CONTENT_HTML_FILE` and `is_seen`; `announcement/seen/` records it per user and version (new model `AnnouncementReceipt`), so "what's new" shows once per release on every device.
+- **Changed**: `RateLimitMiddleware` skips `system/health/` and `system/ready/`; `UserActivityMiddleware` does not log the system endpoints or `notifications/unread-count/`. Both match by URL name (`reverse()`, cached per URLconf), so they hold wherever the URLs are mounted.
+- **Settings**: `SYSTEM_API_TOKEN` (optional), `SYSTEM_API_READY_CHECKS` (default `database,cache`); with `DEBUG=False`, `SECURE_REDIRECT_EXEMPT` lets `api/system/health|ready/` answer over plain HTTP.
+- **Tests**: 20 API tests (`base/tests_api.py`): public fields, `503` and hidden errors, superuser / token access (staff denied), probe exemptions, notification ownership / filters / paging / CSRF / badge cache, announcement seen per version.
+- **Upgrade**: `migrate` (`notification.0014_announcement_receipt`), then add `path("api/", include("whiteneuron.api_urls"))` to the project URLconf.
+
 ### v0.4.1.2 (2026-10-30) — latest
 **Patch release: admin reads properly in Vietnamese (login password label, KPI comparisons, dated 28-day chart, Markdown editor)**
 - **Fixed**: the login page's password field read "Password" in every language: `LoginForm` redefined it without a label. It now has `label=_("Password")` and `strip=False`, like `AuthenticationForm`'s own field.

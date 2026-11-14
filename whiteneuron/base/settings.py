@@ -150,6 +150,9 @@ CORS_ALLOWED_ORIGINS = environ.get(
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_SSL_REDIRECT = True
+    # internal probes (Docker / k8s / load balancer) call these over plain HTTP; matches
+    # path("api/", include("whiteneuron.api_urls")) — adjust if mounted elsewhere
+    SECURE_REDIRECT_EXEMPT = [r"^api/system/(health|ready)/$"]
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
@@ -935,3 +938,13 @@ ANNOUNCEMENT_CALLBACK = "whiteneuron.base.utils.announcement_callback"
 # Set to an absolute Path or a template name to enable announcement content.
 # Example: ANNOUNCEMENT_CONTENT_HTML_FILE = BASE_DIR / "templates" / "announcement_content.html"
 ANNOUNCEMENT_CONTENT_HTML_FILE = "announcement_content.html"
+
+######################################################################
+# JSON API (whiteneuron.api_urls: system / notifications / announcement)
+######################################################################
+# Grants access to /system/info/ and readiness error details (X-System-Token or Bearer)
+SYSTEM_API_TOKEN = environ.get("SYSTEM_API_TOKEN") or None
+# Readiness checks run by /system/ready/: database, cache, celery
+SYSTEM_API_READY_CHECKS = [
+    c.strip() for c in environ.get("SYSTEM_API_READY_CHECKS", "database,cache").split(",") if c.strip()
+]
