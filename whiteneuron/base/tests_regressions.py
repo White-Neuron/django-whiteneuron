@@ -806,3 +806,38 @@ class CKEditorCustomCssTests(SimpleTestCase):
         dark = re.search(r"html\.dark \{([^}]*)\}", self.css).group(1)
         overridden = set(re.findall(r"(--ck-[\w-]+):", dark))
         self.assertEqual(sorted(fixed - overridden - self.READABLE_IN_DARK), [])
+
+
+@package_test_settings()
+class NotificationsWebSocketSwitchTests(TestCase):
+    """#51: pages opened /ws/notifications/ even under WSGI, where no route serves it."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.root = User.objects.create_superuser("root", "r@example.com", "pw")
+
+    def _admin_page(self):
+        self.client.force_login(self.root)
+        return self.client.get(reverse("admin:index"))
+
+    @override_settings(WN_NOTIFICATIONS_WEBSOCKET=None, ASGI_APPLICATION=None)
+    def test_off_under_wsgi_by_default(self):
+        self.assertNotContains(self._admin_page(), 'data-wn-ws="1"')
+
+    @override_settings(WN_NOTIFICATIONS_WEBSOCKET=None, ASGI_APPLICATION="project.asgi.application")
+    def test_on_by_default_under_asgi(self):
+        self.assertContains(self._admin_page(), 'data-wn-ws="1"')
+
+    @override_settings(ASGI_APPLICATION="project.asgi.application")
+    def test_setting_overrides_detection(self):
+        for value, expected in (("False", False), ("True", True), (False, False), (True, True)):
+            with self.settings(WN_NOTIFICATIONS_WEBSOCKET=value):
+                self.assertEqual('data-wn-ws="1"' in self._admin_page().content.decode(), expected, value)
+
+    @override_settings(WN_NOTIFICATIONS_WEBSOCKET=True)
+    def test_never_for_anonymous_pages(self):
+        self.assertNotContains(self.client.get(reverse("admin:login")), 'data-wn-ws="1"')
+
+    def test_script_connects_only_when_asked(self):
+        js = (Path(__file__).resolve().parent.parent / "static/base/js/whiteneuron.js").read_text()
+        self.assertIn('container.dataset.wnWs !== "1"', js)

@@ -128,6 +128,10 @@ if USE_CACHE:
             },
         }
 
+# Real-time notification toasts over /ws/notifications/: True / False; unset = on only when
+# ASGI_APPLICATION is set (under WSGI there is no WebSocket route to connect to)
+WN_NOTIFICATIONS_WEBSOCKET = environ.get("WN_NOTIFICATIONS_WEBSOCKET") or None
+
 
 
 ######################################################################

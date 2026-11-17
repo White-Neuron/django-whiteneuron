@@ -212,9 +212,12 @@ function toast_(message, type = "info", title = "Notification") {
     });
 }
 
-// WebSocket notifications — only on authenticated admin pages (they render #toast-container).
+// WebSocket notifications — only where the page asks for them: admin/base.html sets
+// data-wn-ws on #toast-container for a logged-in user when the project serves the
+// WebSocket route (WN_NOTIFICATIONS_WEBSOCKET, or ASGI_APPLICATION when unset).
 document.addEventListener("DOMContentLoaded", function () {
-    if (!document.getElementById("toast-container") || !("WebSocket" in window)) {
+    const container = document.getElementById("toast-container");
+    if (!container || container.dataset.wnWs !== "1" || !("WebSocket" in window)) {
         return;
     }
 
