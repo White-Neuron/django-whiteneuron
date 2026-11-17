@@ -110,6 +110,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 ######################################################################
 # Channels
 ######################################################################
+# Real-time notification toasts over /ws/notifications/: True / False; unset = on only when
+# ASGI_APPLICATION is set (under WSGI there is no WebSocket route to connect to).
+# `manage.py check` warns (whiteneuron.W001) when a Redis channel layer is set but this is off.
+WN_NOTIFICATIONS_WEBSOCKET = environ.get("WN_NOTIFICATIONS_WEBSOCKET") or None
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer"
