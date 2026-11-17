@@ -3,7 +3,7 @@ from unittest import mock
 
 from django.contrib.auth import get_user_model
 from django.core.cache import caches
-from django.test import Client, TestCase, override_settings
+from django.test import Client, SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 
 from whiteneuron.notification.models import AnnouncementReceipt, Notification
@@ -50,8 +50,9 @@ class SystemApiTests(CleanCacheTestCase):
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.json()["version"], "2.5.0")
         self.assertEqual(r.json()["release_date"], "2026-11-01")
+        self.assertEqual(set(r.json()), {"name", "version", "release_date"})  # no runtime versions, no build
+        r = self.client.get(reverse("wn_system:version"), HTTP_X_SYSTEM_TOKEN="s3cret")
         self.assertEqual(r.json()["build"], "0123456789ab")
-        self.assertEqual(set(r.json()), {"name", "version", "release_date", "build"})  # no runtime versions
 
     def test_health(self):
         r = self.client.get(reverse("wn_system:health"))
@@ -70,7 +71,7 @@ class SystemApiTests(CleanCacheTestCase):
             self.assertEqual(r.status_code, 503)
             self.assertNotIn("error", r.json()["checks"]["cache"])
             r = self.client.get(reverse("wn_system:ready"), HTTP_X_SYSTEM_TOKEN="s3cret")
-            self.assertIn("redis down", r.json()["checks"]["cache"]["error"])
+            self.assertEqual(r.json()["checks"]["cache"]["error"], "RuntimeError")  # never the message
 
     def test_public_ready_reuses_recent_results_privileged_gets_fresh_ones(self):
         check = mock.Mock()
@@ -141,6 +142,7 @@ class ProbeMiddlewareTests(CleanCacheTestCase):
         self.assertTrue(ua.do_not_track(factory.get(reverse("wn_system:health"))))
         self.assertTrue(ua.do_not_track(factory.get(reverse("wn_notifications:unread_count"))))
         self.assertFalse(ua.do_not_track(factory.get(reverse("wn_notifications:list"))))
+        self.assertFalse(ua.do_not_track(factory.get(reverse("wn_system:info"))))  # privileged: logged
 
 
 @package_test_settings(CACHES=LOCMEM)
@@ -276,3 +278,12 @@ class AnnouncementApiTests(CleanCacheTestCase):
     @override_settings(ANNOUNCEMENT_CALLBACK="no.such.callback")
     def test_broken_callback_is_no_announcement(self):
         self.assertEqual(self.client.get(reverse("wn_announcement:detail")).json(), {"announcement": None})
+
+
+class ChangedDataParsingTests(SimpleTestCase):
+    def test_unparsable_nesting_is_returned_as_text(self):
+        from whiteneuron.notification.api import _changed_data
+
+        for exc in (RecursionError, MemoryError):
+            with mock.patch("ast.literal_eval", side_effect=exc):
+                self.assertEqual(_changed_data("{'a': [[[...]]]}"), "{'a': [[[...]]]}")

@@ -1,13 +1,21 @@
 from os import environ
 import sys
 from pathlib import Path
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 from django.core.management.utils import get_random_secret_key
 from django.templatetags.static import static
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.utils.text import format_lazy
-load_dotenv()
+# The project's .env: WN_ENV_FILE, else the nearest .env from the working directory up.
+# Without usecwd, python-dotenv searches up from this file, i.e. the installed package.
+# Variables already in the environment are not overridden.
+_WN_ENV_FILE = environ.get("WN_ENV_FILE")
+if _WN_ENV_FILE and not Path(_WN_ENV_FILE).is_file():
+    # set on purpose but missing: running on defaults (DEBUG, SECRET_KEY, …) would go unnoticed
+    from django.core.exceptions import ImproperlyConfigured
+    raise ImproperlyConfigured(f"WN_ENV_FILE is set but there is no file at {_WN_ENV_FILE!r}")
+load_dotenv(_WN_ENV_FILE or find_dotenv(usecwd=True))
 
 import sentry_sdk
 
@@ -110,23 +118,31 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 ######################################################################
 # Channels
 ######################################################################
+# Real-time notification toasts over /ws/notifications/: True / False; unset = on only when
+# ASGI_APPLICATION is set (under WSGI there is no WebSocket route to connect to).
+# `manage.py check` warns (whiteneuron.W001) when a Redis channel layer is set but this is off.
+WN_NOTIFICATIONS_WEBSOCKET = environ.get("WN_NOTIFICATIONS_WEBSOCKET") or None
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer"
     }
 }
-if USE_CACHE:
-    if CACHENAME == "redis":
-        host= CACHE_REDIS_LOCATION.split("://")[-1].split(":")[0]
-        port= int(CACHE_REDIS_LOCATION.split(":")[-1].split("/")[0])
-        CHANNEL_LAYERS = {
-            "default": {
-                "BACKEND": "channels_redis.core.RedisChannelLayer",
-                "CONFIG": {
-                    "hosts": [(host, port)],
-                },
+# The whole URL goes to channels_redis: splitting it by hand lost the password, the DB
+# number and rediss:// (TLS), and crashed on a URL without a port.
+# CHANNEL_REDIS_URL uses another Redis than the cache's.
+CHANNEL_REDIS_URL = environ.get("CHANNEL_REDIS_URL") or (
+    CACHE_REDIS_LOCATION if USE_CACHE and CACHENAME == "redis" else None
+)
+if CHANNEL_REDIS_URL:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [CHANNEL_REDIS_URL],
             },
-        }
+        },
+    }
 
 
 
@@ -245,6 +261,7 @@ MIDDLEWARE = [
     "whiteneuron.base.middleware.DownloadResponseFlagMiddleware",
     "whiteneuron.base.middleware.UserActivityMiddleware",
     'whiteneuron.base.middleware.ThreadLocalMiddleware',
+    "whiteneuron.base.middleware.AdminDialogRedirectMiddleware",
 ]
 
 if SKIP_GUEST_LOGIN:
@@ -307,7 +324,9 @@ SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [Path.joinpath(BASE_DIR, 'templates')],
+        # whiteneuron/templates is found by APP_DIRS ("whiteneuron" is an installed app). Also in
+        # DIRS, a template extending its own name (admin/base.html, …) was rendered twice.
+        "DIRS": [],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -410,6 +429,13 @@ LOCALE_PATHS = [
     BASE_DIR / 'locale',
 ]
 
+# Day-first date input and short dates for Vietnamese (whiteneuron/formats/vi/formats.py);
+# the *_INPUT_FORMATS below only apply to languages whose locale defines none
+FORMAT_MODULE_PATH = ["whiteneuron.formats"]
+
+# Keep the language a user picked across browser restarts (Django's default is a session cookie)
+LANGUAGE_COOKIE_AGE = 365 * 24 * 60 * 60
+
 # https://docs.djangoproject.com/en/5.1/ref/settings/#date-input-formats
 DATE_INPUT_FORMATS = [
     "%d.%m.%Y",  # Custom input
@@ -447,10 +473,9 @@ STATIC_URL = "static/"
 
 import whiteneuron
 WHITENEURON_PATH = Path(whiteneuron.__file__).parent
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-    WHITENEURON_PATH / "static",
-]
+# whiteneuron/static is found by AppDirectoriesFinder ("whiteneuron" is an installed app);
+# listing it here too (BASE_DIR is the package) made collectstatic find every file twice
+STATICFILES_DIRS = []
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
@@ -538,7 +563,9 @@ UNFOLD = {
     "SHOW_LANGUAGES": True,
     "SHOW_VIEW_ON_SITE": True, # show/hide "View on site" button, default: True
     "SHOW_BACK_BUTTON": True, # show/hide "Back" button on changeform in header, default: False
-    "ENVIRONMENT": f"{PROJECT_NAME}.utils.environment_callback",
+    # Development / Production, or WN_ENVIRONMENT_LABEL; a project's own
+    # <PROJECT_NAME>.utils.environment_callback still wins when it exists
+    "ENVIRONMENT": "whiteneuron.base.utils.environment_callback",
     "DASHBOARD_CALLBACK": "whiteneuron.dashboard.views.dashboard_callback",
     "LOGIN": {
         "image": lambda request: static("base/images/login-bg.jpg"),
@@ -931,6 +958,8 @@ VERSION = environ.get("VERSION", "0.3.2")
 # Shown on the admin "About" page (/admin/about/) with VERSION
 RELEASE_DATE = environ.get("RELEASE_DATE")  # ISO date, e.g. 2026-10-15
 BUILD_ID = environ.get("BUILD_ID") or environ.get("GIT_COMMIT")
+# Header label instead of Development / Production, e.g. "Staging"
+WN_ENVIRONMENT_LABEL = environ.get("WN_ENVIRONMENT_LABEL") or None
 # Extra rows for the "Application" card, shown to every staff user (never put secrets in them):
 # APP_INFO_CALLBACK = "path.to.func", func(request) -> [(label, value), ...]
 APP_INFO_CALLBACK = None

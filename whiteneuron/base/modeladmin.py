@@ -4,7 +4,12 @@ from django.http import HttpRequest, HttpResponseRedirect
 from django.http.response import HttpResponseRedirectBase
 from django.db.models.query import QuerySet
 from urllib.parse import parse_qsl, urlencode, urlparse
+from django.contrib import messages
+from django.contrib.admin import helpers
+from django.contrib.admin.actions import delete_selected as django_delete_selected
+from django.contrib.admin.utils import model_ngettext
 from django.contrib.admin.views.main import ChangeList
+from django.template.response import TemplateResponse
 from collections import OrderedDict
 from typing import Any, Sequence
 
@@ -173,11 +178,11 @@ class ModelAdmin(UnfoldAdmin):
     # Soft delete
     def get_actions(self, request: HttpRequest) -> OrderedDict[Any, Any]:
         actions = super().get_actions(request)
+        # For everyone allowed to delete: on BaseModel records it confirms a move to the trash
+        # (Django's page said everything related would be deleted)
+        if 'delete_selected' in actions:
+            actions['delete_selected'] = (self.soft_delete, 'delete_selected', self.soft_delete.short_description)
         if request.user.is_superuser:
-            
-            if 'delete_selected' in actions:
-                actions['delete_selected'] = (self.soft_delete, 'delete_selected', self.soft_delete.short_description)
-            
             # hard delete and restore actions only for superuser
             actions['hard_delete'] = (self.hard_delete, 'hard_delete', self.hard_delete.short_description)
             actions['restore'] = (self.restore, 'restore', self.restore.short_description)
@@ -222,21 +227,87 @@ class ModelAdmin(UnfoldAdmin):
             obj.restore()
         return False
 
+    DELETE_CONFIRMATION_LISTED = 50  # records listed on the trash confirmation page
+
+    def _soft_deletable(self):
+        """Whether deleting this model's records moves them to the trash (see _soft_delete_obj)."""
+        return issubclass(self.model, BaseModel) and self.model.delete is BaseModel.delete
+
+    def _delete_confirmation(self, request, queryset, mode, action):
+        """The page a delete action shows before acting: "soft" (to the trash) or "hard"."""
+        if mode == "hard":
+            deletable_objects, model_count, perms_needed, protected = self.get_deleted_objects(queryset, request)
+        else:  # nothing related is touched
+            deletable_objects, model_count, perms_needed, protected = [], {}, set(), []
+        context = {
+            **self.admin_site.each_context(request),
+            "title": _("Delete permanently") if mode == "hard" else _("Move to trash"),
+            "subtitle": None,
+            "objects_name": str(model_ngettext(queryset)),
+            "deletable_objects": [deletable_objects],
+            "model_count": dict(model_count).items(),
+            "queryset": queryset,
+            "perms_lacking": perms_needed,
+            "protected": protected,
+            "opts": self.model._meta,
+            "action_checkbox_name": helpers.ACTION_CHECKBOX_NAME,
+            "media": self.media,
+            "wn_mode": mode,
+            "wn_bulk": True,
+            "wn_action": action,
+            # the trash page lists the records, not a cascade: a long selection is cut short
+            "wn_listed": queryset[:self.DELETE_CONFIRMATION_LISTED],
+            "wn_more": max(len(queryset) - self.DELETE_CONFIRMATION_LISTED, 0),
+        }
+        request.current_app = self.admin_site.name
+        return TemplateResponse(request, "admin/wn_delete_confirmation.html", context)
+
+    def render_delete_form(self, request, context):
+        # The change form's Delete button on a BaseModel record: same "to the trash" wording
+        if not self._soft_deletable():
+            return super().render_delete_form(request, context)
+        obj = context["object"]
+        context.update(
+            objects_name=f'{context["object_name"]} "{obj}"', queryset=[obj],
+            perms_lacking=context.get("perms_lacking"), protected=context.get("protected"),
+            wn_mode="soft", wn_bulk=False,
+        )
+        request.current_app = self.admin_site.name
+        return TemplateResponse(request, "admin/wn_delete_confirmation.html", context)
+
     def soft_delete(self, cl, request, queryset):
+        if not self._soft_deletable():
+            # a real delete (User, Group, …): Django's page, which lists the cascade
+            return django_delete_selected(self, request, queryset)
+        if not request.POST.get("post"):
+            return self._delete_confirmation(request, queryset, "soft", "delete_selected")
         objs = list(queryset)
         recorded = [obj for obj in objs if self._soft_delete_obj(request, obj, True)]
         others = [obj for obj in objs if obj not in recorded]
         self._notify_bulk(request, others, _('%(name)s %(obj)s has been soft-deleted by user "%(user)s"'), 'delete', 'danger')
+        self.message_user(request, _("%(count)d %(items)s moved to the trash.") % {
+            "count": len(objs), "items": model_ngettext(self.opts, len(objs))})
     soft_delete.short_description = _('Delete selected records')
 
     def hard_delete(self, cl, request, queryset):
+        # Irreversible: the first POST only shows the cascade; acting needs "DELETE" typed
+        if not (request.POST.get("post") and request.POST.get("wn_confirm") == "DELETE"):
+            if request.POST.get("post"):  # the browser's pattern check was bypassed
+                self.message_user(request, _('Type DELETE to confirm.'), messages.ERROR)
+            return self._delete_confirmation(request, queryset, "hard", "hard_delete")
+        _deletable, _count, perms_needed, protected = self.get_deleted_objects(queryset, request)
+        if perms_needed or protected:
+            return self._delete_confirmation(request, queryset, "hard", "hard_delete")
         objs = list(queryset)
+        self.log_deletions(request, objs)  # the admin log records who confirmed it
         for obj in objs:
             if hasattr(obj, 'hard_delete'):
                 obj.hard_delete()
             else:
                 obj.delete()
         self._notify_bulk(request, objs, _('%(name)s %(obj)s has been hard-deleted by user "%(user)s"'), 'delete', 'danger')
+        self.message_user(request, _("%(count)d %(items)s permanently deleted.") % {
+            "count": len(objs), "items": model_ngettext(self.opts, len(objs))})
     hard_delete.short_description = _('Hard delete selected records')
 
     def restore(self, cl, request, queryset):
