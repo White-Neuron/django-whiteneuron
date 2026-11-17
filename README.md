@@ -390,10 +390,10 @@ Each group can also be mounted on its own: `whiteneuron.base.system_urls`, `whit
 |---|---|---|
 | `GET /api/system/version/` | public | `name`, `version`, `release_date`, `build` (`NAME`, `VERSION`, `RELEASE_DATE`, `BUILD_ID` cut to 12 chars, as on the About page) |
 | `GET /api/system/health/` | public | liveness, `{"status": "ok"}`; touches neither the database nor the cache |
-| `GET /api/system/ready/` | public | readiness: `database`, `cache` (and optionally `celery`) checks with latency; `200`, or `503` when one fails. Error messages only for superusers / token |
+| `GET /api/system/ready/` | public | readiness: `database`, `cache` (and optionally `celery`) checks with latency; `200`, or `503` when one fails. Public calls reuse the process's last results for 2 seconds; error messages and fresh results only for superusers / token |
 | `GET /api/system/info/` | superuser or `SYSTEM_API_TOKEN` | package version, Python / Django / Unfold versions, database engine, debug, time zone, uptime, pending migrations, checks |
 
-Like the About page, nothing exposes host names, OS, IP addresses, paths or connection settings, and package / runtime versions are not public. `health/` and `ready/` skip the IP rate limit, and the system endpoints are not written to User Activity. Both follow the URL names, so they hold wherever the URLs are mounted.
+Like the About page, nothing exposes host names, OS, IP addresses, paths or connection settings, and package / runtime versions are not public. `health/` and `ready/` skip the IP rate limit (the IP / user agent blacklist still applies), and the system endpoints are not written to User Activity. Both follow the URL names, so they hold wherever the URLs are mounted.
 
 ```bash
 curl https://example.com/api/system/ready/
