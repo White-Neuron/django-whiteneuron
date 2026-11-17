@@ -125,10 +125,10 @@ class User(AbstractUser):
 
     @property
     def avatar_badge_count(self):
-        """Unread notifications today, shown as a badge on the sidebar avatar."""
+        """Unread notifications ("99+" above 99), shown as a badge on the sidebar avatar."""
         if not hasattr(self, '_wn_badge_count'):  # read 3x per render by avatar.html
-            from whiteneuron.notification.utils import unread_today_count
-            self._wn_badge_count = unread_today_count(self) or None
+            from whiteneuron.notification.utils import badge_text, unread_count
+            self._wn_badge_count = badge_text(unread_count(self))
         return self._wn_badge_count
 
     @property

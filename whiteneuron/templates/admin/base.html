@@ -10,7 +10,7 @@
 
     <!-- toast -->
     {% notifications_websocket as ws_enabled %}
-    <div class="ui-toast ui-toast-top ui-toast-end z-50" id="toast-container" aria-live="polite"{% if ws_enabled and request.user.is_authenticated %} data-wn-ws="1"{% endif %}>
+    <div class="ui-toast ui-toast-top ui-toast-end z-50" id="toast-container" aria-live="polite" data-wn-toast-title="{% translate 'Notification' %}" data-wn-toast-dismiss="{% translate 'Click to dismiss' %}"{% if ws_enabled and request.user.is_authenticated %} data-wn-ws="1"{% endif %}>
     </div>
     {{ block.super }}
 {% endblock %}
