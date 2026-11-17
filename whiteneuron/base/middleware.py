@@ -735,3 +735,37 @@ class DownloadResponseFlagMiddleware:
             )
 
         return response
+
+
+class AdminDialogRedirectMiddleware:
+    """Close Unfold action dialogs that redirect.
+
+    ``@action(dialog=…)`` posts its form with htmx and swaps only ``#dialog-form``: a 30x
+    answer left the dialog open and empty, with no sign the action ran. Under the admin, an
+    htmx POST answered with a redirect becomes ``200`` + ``HX-Redirect``, which htmx follows
+    with a full page load; cookies (the messages cookie) are kept.
+    """
+
+    REDIRECT_CODES = (301, 302, 303, 307, 308)
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        if (request.method != "POST" or request.headers.get("HX-Request") != "true"
+                or response.status_code not in self.REDIRECT_CODES or not self._under_admin(request)):
+            return response
+        converted = HttpResponse(status=200)
+        converted["HX-Redirect"] = response["Location"]
+        converted.cookies = response.cookies
+        return converted
+
+    @staticmethod
+    def _under_admin(request):
+        from django.urls import NoReverseMatch, reverse
+
+        try:
+            return request.path.startswith(reverse("admin:index"))
+        except NoReverseMatch:
+            return False
