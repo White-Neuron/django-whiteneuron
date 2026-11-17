@@ -15,7 +15,8 @@ from django.template.loader import render_to_string
 # URL names of the package's probe / polling endpoints. They are resolved with reverse()
 # (cached per URLconf), so the exemptions below hold wherever a project mounts them.
 PROBE_URL_NAMES = ("wn_system:health", "wn_system:ready")
-UNTRACKED_URL_NAMES = PROBE_URL_NAMES + ("wn_system:version", "wn_system:info", "wn_notifications:unread_count")
+# not system/info/: a privileged call, even with SYSTEM_API_TOKEN, stays in the activity log
+UNTRACKED_URL_NAMES = PROBE_URL_NAMES + ("wn_system:version", "wn_notifications:unread_count")
 _named_paths_cache = {}
 
 

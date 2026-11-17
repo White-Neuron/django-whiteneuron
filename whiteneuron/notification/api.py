@@ -76,7 +76,7 @@ def _changed_data(value):
     except (TypeError, ValueError):
         try:
             return ast.literal_eval(value)
-        except (ValueError, SyntaxError):
+        except (ValueError, SyntaxError, RecursionError, MemoryError):  # deeply nested junk
             return value
 
 

@@ -388,12 +388,12 @@ Each group can also be mounted on its own: `whiteneuron.base.system_urls`, `whit
 
 | Endpoint | Access | Response |
 |---|---|---|
-| `GET /api/system/version/` | public | `name`, `version`, `release_date`, `build` (`NAME`, `VERSION`, `RELEASE_DATE`, `BUILD_ID` cut to 12 chars, as on the About page) |
+| `GET /api/system/version/` | public | `name`, `version`, `release_date` (`NAME`, `VERSION`, `RELEASE_DATE`); `build` (`BUILD_ID` cut to 12 chars) only for superusers / `SYSTEM_API_TOKEN` |
 | `GET /api/system/health/` | public | liveness, `{"status": "ok"}`; touches neither the database nor the cache |
 | `GET /api/system/ready/` | public | readiness: `database`, `cache` (and optionally `celery`) checks with latency; `200`, or `503` when one fails. Public calls reuse the process's last results for 2 seconds; error messages and fresh results only for superusers / token |
 | `GET /api/system/info/` | superuser or `SYSTEM_API_TOKEN` | package version, Python / Django / Unfold versions, database engine, debug, time zone, uptime, pending migrations, checks |
 
-Like the About page, nothing exposes host names, OS, IP addresses, paths or connection settings, and package / runtime versions are not public. `health/` and `ready/` skip the IP rate limit (the IP / user agent blacklist still applies), and the system endpoints are not written to User Activity. Both follow the URL names, so they hold wherever the URLs are mounted.
+Like the About page, nothing exposes host names, OS, IP addresses, paths or connection settings, and package / runtime versions are not public. `health/` and `ready/` skip the IP rate limit (the IP / user agent blacklist still applies), and the probes, `version/` and `notifications/unread-count/` are not written to User Activity (`info/`, a privileged call, is). Readiness errors give the exception class only; the details are in the log. Both follow the URL names, so they hold wherever the URLs are mounted.
 
 ```bash
 curl https://example.com/api/system/ready/
@@ -493,7 +493,7 @@ Copy `env.example` to `.env` and configure. Key variables:
 | `RATE_LIMIT_REQUESTS` | IP rate limit count | `60` |
 | `IP_BLACKLIST` | Static IP blocks (CIDR) | — |
 | `UA_BLACKLIST` | Static UA blocks | — |
-| `SYSTEM_API_TOKEN` | Token for `/api/system/info/` and readiness error details | — |
+| `SYSTEM_API_TOKEN` | Token for `/api/system/info/`, the build id in `version/` and readiness error classes | — |
 | `SYSTEM_API_READY_CHECKS` | Readiness checks (`database`, `cache`, `celery`) | `database,cache` |
 
 See `env.example` for the full list.
