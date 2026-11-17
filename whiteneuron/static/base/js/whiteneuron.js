@@ -188,7 +188,7 @@ function toast_(message, type = "info", title = "Notification") {
     const toastItem = document.createElement("div");
     toastItem.setAttribute("role", type === "error" ? "alert" : "status");
     toastItem.className = "ui-alert shadow-lg cursor-pointer max-w-sm " + (TOAST_CLASSES[type] || TOAST_CLASSES.info);
-    toastItem.title = "Click to dismiss";
+    toastItem.title = toastContainer.dataset.wnToastDismiss || "Click to dismiss";
 
     const body = document.createElement("div");
     const heading = document.createElement("div");
@@ -237,7 +237,8 @@ document.addEventListener("DOMContentLoaded", function () {
         socket.onmessage = function (event) {
             try {
                 const data = JSON.parse(event.data);
-                toast_(data.content, data.type, data.title);
+                // the server sends no title: the page's own language names it
+                toast_(data.content, data.type, data.title || container.dataset.wnToastTitle);
             } catch (e) {
                 // ignore malformed messages
             }

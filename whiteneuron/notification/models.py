@@ -1,6 +1,8 @@
 import logging
 
 from django.db import models, transaction
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from whiteneuron.base.models import User, Group
 from django.utils.translation import gettext_lazy as _
 
@@ -111,11 +113,15 @@ class Notification(models.Model):
 
     @classmethod
     def mark_as_read_all(cls, user):
-        cls.objects.filter(user=user).update(is_read=True)
+        updated = cls.objects.filter(user=user, is_read=False).update(is_read=True)
+        _clear_unread_cache(user.pk)
+        return updated
 
     @classmethod
     def mark_as_unread_all(cls, user):
-        cls.objects.filter(user=user).update(is_read=False)
+        updated = cls.objects.filter(user=user, is_read=True).update(is_read=False)
+        _clear_unread_cache(user.pk)
+        return updated
 
     # def get_changed_data(self):
         
@@ -141,6 +147,7 @@ class Notification(models.Model):
                 flag=flag, obj_link=obj_link, changed_data=data, action_by=action_by)
             for user_id in user_ids
         ])
+        _clear_unread_cache(*user_ids)  # bulk_create sends no post_save
         transaction.on_commit(lambda: objs[0].alert(user_ids=user_ids))
         return objs
 
@@ -154,6 +161,21 @@ class Notification(models.Model):
                                 user_ids=user_ids or [self.user_id])
         except Exception:  # channel layer down: the notification row is still stored
             logger.warning("Notification broadcast failed", exc_info=True)
+
+def _clear_unread_cache(*user_ids):
+    from .utils import clear_unread_cache
+
+    clear_unread_cache(*user_ids)
+    # and again once committed: a page rendered in between would cache the old count
+    transaction.on_commit(lambda: clear_unread_cache(*user_ids))
+
+
+@receiver(post_save, sender=Notification, dispatch_uid="wn_notification_unread_cache")
+def _notification_saved(sender, instance, **kwargs):
+    # .save() and .create(). Bulk writes and deletes clear it where they happen: a post_delete
+    # receiver would make deleting a user load every one of their notifications.
+    _clear_unread_cache(instance.user_id)
+
 
 class AnnouncementReceipt(models.Model):
     """A user has seen the announcement (release notes) of ``version``.

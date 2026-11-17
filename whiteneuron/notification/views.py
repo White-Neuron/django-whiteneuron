@@ -16,7 +16,7 @@ def notify_admin(message, type="info", obj_link=None, action=None, changed_data=
     event = {
         "type": "send_notification",
         "message": {
-            "title": "🔔",
+            "title": "",  # each page shows its own translated title (admin/base.html)
             "content": message,
             "type": type,
             "obj_link": obj_link,
