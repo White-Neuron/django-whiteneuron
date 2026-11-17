@@ -286,16 +286,37 @@ def make_random_password(length=12):
 
 from django.utils.safestring import mark_safe
 def announcement_callback(request):
+    # Short, so the header's breadcrumb keeps its room: "<NAME>" with a "v<VERSION>" badge
     from django.conf import settings
     if not getattr(settings, 'ANNOUNCEMENT_CONTENT_HTML_FILE', None):
         return None
     version = getattr(settings, 'VERSION', '0.1.0')
     return {
-        "title": format_lazy(
-            _("New announcement for {NAME} - version {VERSION}!"),
-            NAME=_(settings.NAME),
-            VERSION=version,
-        ),
+        "title": _(settings.NAME),
         "version": version,
-        "badge": _("NEW"),
+        "badge": f"v{version}",
     }
+
+
+def environment_callback(request):
+    """Unfold's ENVIRONMENT label, ``[text, kind]``: Development with DEBUG, else Production;
+    ``WN_ENVIRONMENT_LABEL`` (e.g. "Staging") replaces the text.
+
+    A project's own ``<PROJECT_NAME>.utils.environment_callback`` (the former default) still
+    wins when it exists.
+    """
+    from django.conf import settings
+    from django.utils.module_loading import import_string
+
+    project_callback = f"{getattr(settings, 'PROJECT_NAME', '')}.utils.environment_callback"
+    if project_callback != f"{__name__}.environment_callback":
+        try:
+            return import_string(project_callback)(request)
+        except ImportError:
+            pass
+    label = getattr(settings, "WN_ENVIRONMENT_LABEL", None)
+    if label:
+        return [label, "warning"]
+    if settings.DEBUG:
+        return [_("Development"), "info"]
+    return [_("Production"), "danger"]

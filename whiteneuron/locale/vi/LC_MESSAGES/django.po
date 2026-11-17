@@ -3394,6 +3394,12 @@ msgid "and %(counter)s more"
 msgid_plural "and %(counter)s more"
 msgstr[0] "và %(counter)s mục khác"
 
+msgid "Development"
+msgstr "Phát triển"
+
+msgid "Production"
+msgstr "Chính thức"
+
 #~ msgid "day"
 #~ msgstr "ngày"
 
