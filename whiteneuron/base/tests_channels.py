@@ -56,6 +56,12 @@ class ChannelLayerUrlTests(SimpleTestCase):
                                 CHANNEL_REDIS_URL="redis://channels:6379/3")
         self.assertEqual(layers["default"]["CONFIG"]["hosts"], ["redis://channels:6379/3"])
 
+    def test_channel_redis_url_without_a_redis_cache(self):
+        # WebSockets over Redis while the cache stays local
+        layers = channel_layers(USE_CACHE="False", CHANNEL_REDIS_URL="redis://channels:6379/3")
+        self.assertEqual(layers["default"]["BACKEND"], "channels_redis.core.RedisChannelLayer")
+        self.assertEqual(layers["default"]["CONFIG"]["hosts"], ["redis://channels:6379/3"])
+
     def test_in_memory_without_redis(self):
         layers = channel_layers(USE_CACHE="False")
         self.assertEqual(layers["default"]["BACKEND"], "channels.layers.InMemoryChannelLayer")
