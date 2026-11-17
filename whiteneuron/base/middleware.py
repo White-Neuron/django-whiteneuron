@@ -168,8 +168,9 @@ class RateLimitMiddleware:
         IPBlacklist.ensure_cache_loaded()
 
     def __call__(self, request):
-        if not (any(request.path.startswith(p) for p in self.EXEMPT_PATHS)
-                or request.path in named_paths(PROBE_URL_NAMES)):
+        # Probes (health / ready) skip only the rate limit, which load balancers and
+        # orchestrators would hit; blocked IPs and user agents are still refused.
+        if not any(request.path.startswith(p) for p in self.EXEMPT_PATHS):
             ip, _ = get_client_ip(request)
             if ip and self._is_blacklisted(ip):
                 if request.path.startswith('/api/') or request.headers.get('Accept') == 'application/json':
@@ -188,7 +189,7 @@ class RateLimitMiddleware:
                     )
                 html = render_to_string('403.html', {}, request=request)
                 return HttpResponse(html, status=403)
-            if ip and self._is_rate_limited(ip):
+            if ip and request.path not in named_paths(PROBE_URL_NAMES) and self._is_rate_limited(ip):
                 if request.path.startswith('/api/') or request.headers.get('Accept') == 'application/json':
                     return JsonResponse(
                         {'detail': 'Too many requests. Please slow down.'},

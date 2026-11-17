@@ -30,11 +30,11 @@ from django.views.decorators.http import require_GET, require_POST
 from whiteneuron.base.api_utils import api_login_required, json_response, paginate
 
 from .models import AnnouncementReceipt, Notification
+from .utils import BADGE_CACHE_KEY
 
 logger = logging.getLogger(__name__)
 
 FLAGS = {value for value, _label in Notification._meta.get_field("flag").choices}
-BADGE_CACHE_KEY = "badge:notification:{}:unread_today"
 
 
 def _own(request):
@@ -162,7 +162,9 @@ def announcement_html(request):
 
 
 def _announcement_version(data):
-    return str(data.get("version") or getattr(settings, "VERSION", "") or "")
+    """The version receipts are stored under, cut to the column's length once for both reads and writes."""
+    max_length = AnnouncementReceipt._meta.get_field("version").max_length
+    return str(data.get("version") or getattr(settings, "VERSION", "") or "")[:max_length]
 
 
 @never_cache
@@ -189,5 +191,5 @@ def announcement_seen(request):
     version = _announcement_version(data) if data else ""
     if not version:
         return json_response({"detail": "No announcement."}, status=404)
-    AnnouncementReceipt.objects.get_or_create(user=request.user, version=version[:100])
+    AnnouncementReceipt.objects.get_or_create(user=request.user, version=version)
     return json_response({"version": version, "is_seen": True})

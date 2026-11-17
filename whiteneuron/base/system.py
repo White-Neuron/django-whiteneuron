@@ -9,12 +9,21 @@
 Like the admin About page, nothing here exposes host names, OS, IPs, paths or connection
 settings, and package/runtime versions are not public (fingerprinting / CVE lookup).
 
+``ready/`` is public and not rate limited, so public calls reuse this process's last
+results for ``READY_CACHE_SECONDS`` and run at most one set of checks at a time; callers
+with system access always get fresh results. The memo is per process on purpose:
+readiness is a property of each replica, and a result shared through the cache would
+let one replica answer for another.
+
 Settings: ``SYSTEM_API_TOKEN`` (optional), ``SYSTEM_API_READY_CHECKS`` (default
 ``["database", "cache"]``; add ``"celery"`` to ping the broker).
 """
+import copy
 import logging
 import platform
+import threading
 import time
+import uuid
 
 from django.conf import settings
 from django.core.cache import caches
@@ -32,6 +41,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_READY_CHECKS = ("database", "cache")
 BROKER_TIMEOUT_SECONDS = 2
+READY_CACHE_SECONDS = 2
 
 
 def application_info():
@@ -53,12 +63,16 @@ def check_database():
 
 
 def check_cache():
+    # A key of its own per call: replicas sharing one cache must not overwrite each other.
     cache = caches["default"]
-    key = "wn:system:ready"
-    token = str(time.time_ns())
+    token = uuid.uuid4().hex
+    key = f"wn:system:ready:{token}"
     cache.set(key, token, timeout=10)
-    if cache.get(key) != token:
-        raise RuntimeError("cache read-back mismatch")
+    try:
+        if cache.get(key) != token:
+            raise RuntimeError("cache read-back mismatch")
+    finally:
+        cache.delete(key)
 
 
 def check_celery():
@@ -67,8 +81,9 @@ def check_celery():
         raise RuntimeError("CELERY_BROKER_URL is not set")
     from kombu import Connection
 
+    # One attempt, no retry sleep: a slow or dead broker costs at most the timeout.
     with Connection(broker_url, connect_timeout=BROKER_TIMEOUT_SECONDS) as conn:
-        conn.ensure_connection(max_retries=1)
+        conn.ensure_connection(max_retries=0, timeout=BROKER_TIMEOUT_SECONDS)
 
 
 CHECKS = {
@@ -95,6 +110,30 @@ def run_checks():
         result["latency_ms"] = round((time.perf_counter() - start) * 1000, 2)
         results[name] = result
     return results
+
+
+_ready_lock = threading.Lock()
+_ready_memo = None  # (time.monotonic(), results)
+
+
+def cached_checks(max_age=READY_CACHE_SECONDS):
+    """``run_checks()``, reused for ``max_age`` seconds within this process.
+
+    The lock lets one request run the checks while concurrent ones wait and reuse its
+    results, so a burst of calls does not run a burst of checks.
+    """
+    global _ready_memo
+    with _ready_lock:
+        memo = _ready_memo
+        if memo is None or time.monotonic() - memo[0] >= max_age:
+            memo = _ready_memo = (time.monotonic(), run_checks())
+        return copy.deepcopy(memo[1])
+
+
+def reset_ready_cache():
+    global _ready_memo
+    with _ready_lock:
+        _ready_memo = None
 
 
 def pending_migrations():
@@ -125,9 +164,10 @@ def health_view(request):
 @never_cache
 @require_GET
 def ready_view(request):
-    checks = run_checks()
+    privileged = has_system_access(request)
+    checks = run_checks() if privileged else cached_checks()
     ok = all(c["status"] == "ok" for c in checks.values())
-    if not has_system_access(request):
+    if not privileged:
         for c in checks.values():
             c.pop("error", None)
     return json_response({"status": "ok" if ok else "error", "checks": checks}, status=200 if ok else 503)

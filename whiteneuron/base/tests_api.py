@@ -7,7 +7,9 @@ from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from whiteneuron.notification.models import AnnouncementReceipt, Notification
+from whiteneuron.notification.utils import BADGE_CACHE_KEY
 
+from . import system
 from .middleware import RateLimitMiddleware, UserActivityMiddleware
 from .testing import package_test_settings
 
@@ -33,6 +35,10 @@ def failing(message):
 @package_test_settings(CACHES=LOCMEM, SYSTEM_API_TOKEN="s3cret", SYSTEM_API_READY_CHECKS=["database", "cache"],
                        VERSION="2.5.0", RELEASE_DATE="2026-11-01", BUILD_ID="0123456789abcdef")
 class SystemApiTests(CleanCacheTestCase):
+    def setUp(self):
+        super().setUp()
+        system.reset_ready_cache()
+
     @classmethod
     def setUpTestData(cls):
         User = get_user_model()
@@ -65,6 +71,35 @@ class SystemApiTests(CleanCacheTestCase):
             self.assertNotIn("error", r.json()["checks"]["cache"])
             r = self.client.get(reverse("wn_system:ready"), HTTP_X_SYSTEM_TOKEN="s3cret")
             self.assertIn("redis down", r.json()["checks"]["cache"]["error"])
+
+    def test_public_ready_reuses_recent_results_privileged_gets_fresh_ones(self):
+        check = mock.Mock()
+        with mock.patch.dict("whiteneuron.base.system.CHECKS", {"database": check, "cache": check}):
+            for _ in range(3):
+                self.assertEqual(self.client.get(reverse("wn_system:ready")).status_code, 200)
+            self.assertEqual(check.call_count, 2)  # one run of both checks for the three public calls
+            check.side_effect = RuntimeError("down")
+            self.assertEqual(self.client.get(reverse("wn_system:ready"), HTTP_X_SYSTEM_TOKEN="s3cret").status_code, 503)
+            self.assertEqual(self.client.get(reverse("wn_system:ready")).status_code, 200)  # still the memo
+            system.reset_ready_cache()
+            self.assertEqual(self.client.get(reverse("wn_system:ready")).status_code, 503)
+
+    def test_cache_check_uses_a_key_per_call_and_removes_it(self):
+        cache = caches["default"]
+        with mock.patch.object(cache, "set", wraps=cache.set) as set_:
+            system.check_cache()
+            system.check_cache()
+        keys = [c.args[0] for c in set_.call_args_list]
+        self.assertEqual(len(set(keys)), 2)
+        self.assertTrue(all(k.startswith("wn:system:ready:") for k in keys))
+        self.assertTrue(all(cache.get(k) is None for k in keys))
+
+    @override_settings(CELERY_BROKER_URL="memory://")
+    def test_celery_check_makes_one_attempt_without_retry_sleep(self):
+        with mock.patch("kombu.Connection") as connection:
+            system.check_celery()
+        conn = connection.return_value.__enter__.return_value
+        conn.ensure_connection.assert_called_once_with(max_retries=0, timeout=system.BROKER_TIMEOUT_SECONDS)
 
     def test_info_needs_superuser_or_token(self):
         url = reverse("wn_system:info")
@@ -99,6 +134,8 @@ class ProbeMiddlewareTests(CleanCacheTestCase):
             self.assertEqual(rl(factory.get(reverse("wn_system:health"))), "passed")
             self.assertEqual(rl(factory.get(reverse("wn_system:ready"))), "passed")
             self.assertNotEqual(rl(factory.get(reverse("wn_system:version"))), "passed")
+        with mock.patch.object(RateLimitMiddleware, "_is_blacklisted", return_value=True):
+            self.assertEqual(rl(factory.get(reverse("wn_system:ready"))).status_code, 403)  # still blocked
 
         ua = UserActivityMiddleware(ok)
         self.assertTrue(ua.do_not_track(factory.get(reverse("wn_system:health"))))
@@ -157,10 +194,10 @@ class NotificationApiTests(CleanCacheTestCase):
         self.assertFalse(self.other.is_read)
 
     def test_read_unread_and_badge_cache(self):
-        caches["default"].set(f"badge:notification:{self.alice.pk}:unread_today", 7)
+        caches["default"].set(BADGE_CACHE_KEY.format(self.alice.pk), 7)
         r = self.client.post(reverse("wn_notifications:read", args=[self.n1.pk]))
         self.assertEqual(r.json(), {"id": self.n1.pk, "is_read": True, "unread_count": 1})
-        self.assertIsNone(caches["default"].get(f"badge:notification:{self.alice.pk}:unread_today"))
+        self.assertIsNone(caches["default"].get(BADGE_CACHE_KEY.format(self.alice.pk)))
         self.assertEqual(self.client.post(reverse("wn_notifications:unread", args=[self.n1.pk])).json()["unread_count"], 2)
         self.assertEqual(self.client.get(reverse("wn_notifications:read", args=[self.n1.pk])).status_code, 405)
 
@@ -207,6 +244,13 @@ class AnnouncementApiTests(CleanCacheTestCase):
     def test_new_version_is_unseen_again(self):
         AnnouncementReceipt.objects.create(user=self.user, version="2.53.0")
         self.assertFalse(self.client.get(reverse("wn_announcement:detail")).json()["announcement"]["is_seen"])
+
+    def test_long_version_is_seen_after_seen(self):
+        with mock.patch(f"{__name__}.announcement_cb", return_value={"title": "Sense", "version": "9" * 150}):
+            self.client.post(reverse("wn_announcement:seen"))
+            data = self.client.get(reverse("wn_announcement:detail")).json()["announcement"]
+        self.assertEqual(len(data["version"]), 100)
+        self.assertTrue(data["is_seen"])
 
     @override_settings(ANNOUNCEMENT_CALLBACK=None)
     def test_no_announcement(self):
