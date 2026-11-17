@@ -294,8 +294,37 @@ def announcement_callback(request):
     return {
         "title": _(settings.NAME),
         "version": version,
-        "badge": f"v{version}",
+        "badge": f"v{str(version).removeprefix('v')}",  # VERSION may already read "v1.2.0"
     }
+
+
+_project_environment_callbacks = {}  # PROJECT_NAME -> callback or None, looked up once
+
+
+def _project_environment_callback(project_name):
+    """``<project_name>.utils.environment_callback`` (the former default), or None.
+
+    Only a missing module or function means "none": any other import error inside the
+    project's module is logged, since the header would otherwise silently show the default.
+    """
+    if project_name in _project_environment_callbacks:
+        return _project_environment_callbacks[project_name]
+    import importlib
+
+    module_name = f"{project_name}.utils"
+    callback = None
+    if project_name and module_name != __name__:
+        try:
+            module = importlib.import_module(module_name)
+        except ModuleNotFoundError as exc:
+            if exc.name not in (project_name, module_name):
+                _logger.warning("Could not import %s for the environment label", module_name, exc_info=True)
+        except Exception:
+            _logger.warning("Could not import %s for the environment label", module_name, exc_info=True)
+        else:
+            callback = getattr(module, "environment_callback", None)
+    _project_environment_callbacks[project_name] = callback
+    return callback
 
 
 def environment_callback(request):
@@ -306,17 +335,15 @@ def environment_callback(request):
     wins when it exists.
     """
     from django.conf import settings
-    from django.utils.module_loading import import_string
+    from django.utils.translation import pgettext_lazy
 
-    project_callback = f"{getattr(settings, 'PROJECT_NAME', '')}.utils.environment_callback"
-    if project_callback != f"{__name__}.environment_callback":
-        try:
-            return import_string(project_callback)(request)
-        except ImportError:
-            pass
+    project_callback = _project_environment_callback(getattr(settings, "PROJECT_NAME", ""))
+    if project_callback is not None:
+        return project_callback(request)
     label = getattr(settings, "WN_ENVIRONMENT_LABEL", None)
     if label:
         return [label, "warning"]
     if settings.DEBUG:
-        return [_("Development"), "info"]
-    return [_("Production"), "danger"]
+        return [pgettext_lazy("environment", "Development"), "info"]
+    # warning, not danger: a red label on every page would make red mean nothing
+    return [pgettext_lazy("environment", "Production"), "warning"]

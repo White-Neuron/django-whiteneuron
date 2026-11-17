@@ -3394,9 +3394,11 @@ msgid "and %(counter)s more"
 msgid_plural "and %(counter)s more"
 msgstr[0] "và %(counter)s mục khác"
 
+msgctxt "environment"
 msgid "Development"
 msgstr "Phát triển"
 
+msgctxt "environment"
 msgid "Production"
 msgstr "Chính thức"
 
