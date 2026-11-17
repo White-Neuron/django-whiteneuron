@@ -1372,6 +1372,38 @@ msgstr "Kích hoạt các IP đã chọn"
 msgid "Selected IPs have been activated."
 msgstr "Các IP đã chọn đã được kích hoạt."
 
+#: base/admin.py:360
+msgid "Deactivate selected users"
+msgstr "Vô hiệu hoá những người dùng đã chọn"
+
+#: base/admin.py:368
+msgid "You cannot deactivate your own account."
+msgstr "Bạn không thể vô hiệu hoá tài khoản của chính mình."
+
+#: base/admin.py:369
+#, python-format
+msgid "%(count)d user(s) deactivated."
+msgstr "Đã vô hiệu hoá %(count)d người dùng."
+
+msgid "Only a superuser can deactivate a superuser."
+msgstr "Chỉ superuser mới vô hiệu hoá được superuser."
+
+msgid "No user was deactivated."
+msgstr "Không có người dùng nào bị vô hiệu hoá."
+
+msgid "Reactivate selected users"
+msgstr "Kích hoạt lại những người dùng đã chọn"
+
+msgid "Only a superuser can reactivate a superuser."
+msgstr "Chỉ superuser mới kích hoạt lại được superuser."
+
+#, python-format
+msgid "%(count)d user(s) reactivated."
+msgstr "Đã kích hoạt lại %(count)d người dùng."
+
+msgid "No user was reactivated."
+msgstr "Không có người dùng nào được kích hoạt lại."
+
 #: base/admin.py:601
 msgid "Deactivate selected IPs"
 msgstr "Hủy kích hoạt các IP đã chọn"
