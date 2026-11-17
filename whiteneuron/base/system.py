@@ -1,6 +1,7 @@
 """System endpoints: version, liveness, readiness and runtime info.
 
-    GET version/  public              application name, version, release date, build
+    GET version/  public              application name, version, release date; build id only for
+                                      superusers / SYSTEM_API_TOKEN (often a commit hash)
     GET health/   public              liveness: the process answers (no DB / cache access)
     GET ready/    public              readiness: database / cache (/ celery) checks, 503 on failure;
                                       error messages only for superusers / SYSTEM_API_TOKEN
@@ -106,7 +107,8 @@ def run_checks():
                 result = {"status": "ok"}
             except Exception as exc:  # any failure makes the instance not ready
                 logger.warning("Readiness check %s failed", name, exc_info=True)
-                result = {"status": "error", "error": f"{exc.__class__.__name__}: {exc}"}
+                # the class only: driver messages carry host names, IPs and ports (they are logged)
+                result = {"status": "error", "error": exc.__class__.__name__}
         result["latency_ms"] = round((time.perf_counter() - start) * 1000, 2)
         results[name] = result
     return results
@@ -152,7 +154,10 @@ def pending_migrations():
 @never_cache
 @require_GET
 def version_view(request):
-    return json_response(application_info())
+    data = application_info()
+    if not has_system_access(request):
+        data.pop("build")  # a commit hash pins the exact code for anyone looking up issues
+    return json_response(data)
 
 
 @never_cache
