@@ -115,18 +115,21 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels.layers.InMemoryChannelLayer"
     }
 }
-if USE_CACHE:
-    if CACHENAME == "redis":
-        host= CACHE_REDIS_LOCATION.split("://")[-1].split(":")[0]
-        port= int(CACHE_REDIS_LOCATION.split(":")[-1].split("/")[0])
-        CHANNEL_LAYERS = {
-            "default": {
-                "BACKEND": "channels_redis.core.RedisChannelLayer",
-                "CONFIG": {
-                    "hosts": [(host, port)],
-                },
+# The whole URL goes to channels_redis: splitting it by hand lost the password, the DB
+# number and rediss:// (TLS), and crashed on a URL without a port.
+# CHANNEL_REDIS_URL uses another Redis than the cache's.
+CHANNEL_REDIS_URL = environ.get("CHANNEL_REDIS_URL") or (
+    CACHE_REDIS_LOCATION if USE_CACHE and CACHENAME == "redis" else None
+)
+if CHANNEL_REDIS_URL:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [CHANNEL_REDIS_URL],
             },
-        }
+        },
+    }
 
 
 
