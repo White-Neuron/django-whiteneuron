@@ -255,6 +255,7 @@ MIDDLEWARE = [
     "whiteneuron.base.middleware.DownloadResponseFlagMiddleware",
     "whiteneuron.base.middleware.UserActivityMiddleware",
     'whiteneuron.base.middleware.ThreadLocalMiddleware',
+    "whiteneuron.base.middleware.AdminDialogRedirectMiddleware",
 ]
 
 if SKIP_GUEST_LOGIN:
@@ -556,7 +557,9 @@ UNFOLD = {
     "SHOW_LANGUAGES": True,
     "SHOW_VIEW_ON_SITE": True, # show/hide "View on site" button, default: True
     "SHOW_BACK_BUTTON": True, # show/hide "Back" button on changeform in header, default: False
-    "ENVIRONMENT": f"{PROJECT_NAME}.utils.environment_callback",
+    # Development / Production, or WN_ENVIRONMENT_LABEL; a project's own
+    # <PROJECT_NAME>.utils.environment_callback still wins when it exists
+    "ENVIRONMENT": "whiteneuron.base.utils.environment_callback",
     "DASHBOARD_CALLBACK": "whiteneuron.dashboard.views.dashboard_callback",
     "LOGIN": {
         "image": lambda request: static("base/images/login-bg.jpg"),
@@ -949,6 +952,8 @@ VERSION = environ.get("VERSION", "0.3.2")
 # Shown on the admin "About" page (/admin/about/) with VERSION
 RELEASE_DATE = environ.get("RELEASE_DATE")  # ISO date, e.g. 2026-10-15
 BUILD_ID = environ.get("BUILD_ID") or environ.get("GIT_COMMIT")
+# Header label instead of Development / Production, e.g. "Staging"
+WN_ENVIRONMENT_LABEL = environ.get("WN_ENVIRONMENT_LABEL") or None
 # Extra rows for the "Application" card, shown to every staff user (never put secrets in them):
 # APP_INFO_CALLBACK = "path.to.func", func(request) -> [(label, value), ...]
 APP_INFO_CALLBACK = None

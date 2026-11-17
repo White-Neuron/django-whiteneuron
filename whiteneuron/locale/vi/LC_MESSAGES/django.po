@@ -3361,6 +3361,12 @@ msgstr "Hồ sơ người dùng"
 msgid "Themes"
 msgstr "Giao diện"
 
+msgid "Development"
+msgstr "Phát triển"
+
+msgid "Production"
+msgstr "Chính thức"
+
 #~ msgid "day"
 #~ msgstr "ngày"
 
