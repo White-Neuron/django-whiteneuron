@@ -184,8 +184,24 @@ class NotificationApiTests(CleanCacheTestCase):
 
     def test_detail_and_unread_count(self):
         data = self.client.get(reverse("wn_notifications:detail", args=[self.n1.pk])).json()
-        self.assertEqual((data["changed_data"], data["action_by"]), ('{"x": 1}', "bob"))
+        self.assertEqual((data["changed_data"], data["action_by"]), ({"x": 1}, "bob"))
         self.assertEqual(self.client.get(reverse("wn_notifications:unread_count")).json(), {"unread_count": 2})
+
+    def test_content_is_sanitized_and_links_stay_on_site(self):
+        Notification.objects.filter(pk=self.n1.pk).update(
+            content='<p onclick="x()">hi</p><script>alert(1)</script><img src=x onerror=alert(1)>',
+            obj_link="javascript:alert(1)", changed_data="{'x': {'old': 1, 'new': 2}}")
+        Notification.objects.filter(pk=self.n2.pk).update(obj_link="/admin/auth/user/1/")
+        Notification.objects.filter(pk=self.n3.pk).update(obj_link="https://evil.example/")
+        data = self.client.get(reverse("wn_notifications:detail", args=[self.n1.pk])).json()
+        for bad in ("<script", "onerror", "onclick"):
+            self.assertNotIn(bad, data["content"])
+        self.assertIn("hi", data["content"])
+        self.assertIsNone(data["obj_link"])
+        self.assertEqual(data["changed_data"], {"x": {"old": 1, "new": 2}})  # Python repr of older rows
+        links = {n["id"]: n["obj_link"] for n in self.client.get(reverse("wn_notifications:list")).json()["results"]}
+        self.assertEqual(links[self.n2.pk], "/admin/auth/user/1/")
+        self.assertIsNone(links[self.n3.pk])
 
     def test_other_users_notifications_are_404(self):
         self.assertEqual(self.client.get(reverse("wn_notifications:detail", args=[self.other.pk])).status_code, 404)

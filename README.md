@@ -408,8 +408,10 @@ With `DEBUG=False` the package settings set `SECURE_REDIRECT_EXEMPT = [r"^api/sy
 |---|---|
 | `GET /api/notifications/` | own notifications, newest first: `?page`, `?page_size` (≤ 100), `?unread=1`, `?flag=info\|success\|warning\|error\|danger`; includes `unread_count` |
 | `GET /api/notifications/unread-count/` | `{"unread_count": n}` (all unread, not only today's) — for polling; not logged in User Activity |
-| `GET /api/notifications/<id>/` | detail, with `changed_data` |
+| `GET /api/notifications/<id>/` | detail, with `changed_data` parsed into an object |
 | `POST /api/notifications/<id>/read/` · `<id>/unread/` · `read-all/` | mark as read / unread / all read; the sidebar badge cache is cleared |
+
+`content` is HTML sanitized as in the admin, and `obj_link` is `null` unless it points to this site.
 
 ### Announcement (release notes)
 

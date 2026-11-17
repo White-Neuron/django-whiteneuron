@@ -18,16 +18,20 @@ Announcement (``announcement/``), built from ``ANNOUNCEMENT_CALLBACK`` and
 Every endpoint needs a logged-in user (401 otherwise); a user only reaches their own
 notifications (404 for others). POST needs the CSRF token (``X-CSRFToken``).
 """
+import ast
+import json
 import logging
 
 from django.conf import settings
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.module_loading import import_string
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_POST
 
 from whiteneuron.base.api_utils import api_login_required, json_response, paginate
+from whiteneuron.base.html_sanitize import sanitize_html
 
 from .models import AnnouncementReceipt, Notification
 from .utils import BADGE_CACHE_KEY
@@ -55,20 +59,41 @@ def _changed(request):
         logger.warning("Could not clear the notification badge cache", exc_info=True)
 
 
-def serialize_notification(n, detail=False):
+def _safe_link(request, link):
+    """The link only when it stays on this site, as the admin's "View Linked Object" requires."""
+    if link and url_has_allowed_host_and_scheme(link, allowed_hosts={request.get_host()},
+                                                require_https=request.is_secure()):
+        return link
+    return None
+
+
+def _changed_data(value):
+    """``changed_data`` as an object: JSON, or the Python repr older rows were saved with."""
+    if not value:
+        return None
+    try:
+        return json.loads(value)
+    except (TypeError, ValueError):
+        try:
+            return ast.literal_eval(value)
+        except (ValueError, SyntaxError):
+            return value
+
+
+def serialize_notification(n, request, detail=False):
     data = {
         "id": n.pk,
         "title": n.title,
-        "content": n.content,
+        "content": sanitize_html(n.content or ""),  # stored HTML may predate escaping, as in the admin
         "flag": n.flag,
         "action": n.action,
-        "obj_link": n.obj_link,
+        "obj_link": _safe_link(request, n.obj_link),
         "is_read": n.is_read,
         "created_at": n.created_at.isoformat() if n.created_at else None,
         "action_by": n.action_by.get_username() if n.action_by_id else None,
     }
     if detail:
-        data["changed_data"] = n.changed_data
+        data["changed_data"] = _changed_data(n.changed_data)
     return data
 
 
@@ -86,7 +111,7 @@ def notification_list(request):
         if flag not in FLAGS:
             return json_response({"detail": "Invalid flag.", "allowed": sorted(FLAGS)}, status=400)
         qs = qs.filter(flag=flag)
-    data = paginate(request, qs, serialize_notification)
+    data = paginate(request, qs, lambda n: serialize_notification(n, request))
     data["unread_count"] = _unread_count(request)
     return json_response(data)
 
@@ -105,7 +130,7 @@ def notification_detail(request, pk):
     n = _own(request).select_related("action_by").filter(pk=pk).first()
     if n is None:
         return json_response({"detail": "Not found."}, status=404)
-    return json_response(serialize_notification(n, detail=True))
+    return json_response(serialize_notification(n, request, detail=True))
 
 
 def _set_read(request, pk, value):
