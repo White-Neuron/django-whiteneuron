@@ -407,6 +407,13 @@ LOCALE_PATHS = [
     BASE_DIR / 'locale',
 ]
 
+# Day-first date input and short dates for Vietnamese (whiteneuron/formats/vi/formats.py);
+# the *_INPUT_FORMATS below only apply to languages whose locale defines none
+FORMAT_MODULE_PATH = ["whiteneuron.formats"]
+
+# Keep the language a user picked across browser restarts (Django's default is a session cookie)
+LANGUAGE_COOKIE_AGE = 365 * 24 * 60 * 60
+
 # https://docs.djangoproject.com/en/5.1/ref/settings/#date-input-formats
 DATE_INPUT_FORMATS = [
     "%d.%m.%Y",  # Custom input
