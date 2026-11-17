@@ -977,3 +977,6 @@ SYSTEM_API_TOKEN = environ.get("SYSTEM_API_TOKEN") or None
 SYSTEM_API_READY_CHECKS = [
     c.strip() for c in environ.get("SYSTEM_API_READY_CHECKS", "database,cache").split(",") if c.strip()
 ]
+# URL names of a project's own polling endpoints (dashboards, badges): not written to User
+# Activity and not counted by the per-user rate limit, like the package's own
+WN_UNTRACKED_URL_NAMES = []

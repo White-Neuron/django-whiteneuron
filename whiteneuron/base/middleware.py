@@ -16,7 +16,13 @@ from django.template.loader import render_to_string
 # (cached per URLconf), so the exemptions below hold wherever a project mounts them.
 PROBE_URL_NAMES = ("wn_system:health", "wn_system:ready")
 # not system/info/: a privileged call, even with SYSTEM_API_TOKEN, stays in the activity log
-UNTRACKED_URL_NAMES = PROBE_URL_NAMES + ("wn_system:version", "wn_notifications:unread_count")
+UNTRACKED_URL_NAMES = PROBE_URL_NAMES + (
+    "wn_system:version", "wn_notifications:unread_count",
+    # polled by open pages: logging them made the monitoring dashboard and the home KPIs count
+    # their own refreshes as traffic (and pulled the latency percentiles down)
+    "admin:monitoring_metricsample_api",
+    "announcement",
+)
 _named_paths_cache = {}
 
 
@@ -394,7 +400,11 @@ class UserActivityMiddleware:
         self._MAX_BODY_SIZE = 1024 * 1024  # 1MB
 
     def do_not_track(self, request):
-        if request.path in named_paths(UNTRACKED_URL_NAMES):
+        from django.conf import settings
+
+        # WN_UNTRACKED_URL_NAMES: a project's own polling endpoints, by URL name
+        names = UNTRACKED_URL_NAMES + tuple(getattr(settings, "WN_UNTRACKED_URL_NAMES", None) or ())
+        if request.path in named_paths(names):
             return True
         for path, condition in self.exclude_paths:
             if condition == 'startswith' and request.path.startswith(path):
