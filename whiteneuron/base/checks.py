@@ -21,7 +21,8 @@ def untracked_url_names_check(app_configs=None, **kwargs):
         return []
     return [checks.Warning(
         f"WN_UNTRACKED_URL_NAMES lists URL names that are not in the URLconf: {', '.join(missing)}.",
-        hint="Check the spelling and the namespace (e.g. \"app:name\"); requests to these "
-             "endpoints are still logged and rate limited per user.",
+        hint="Check the spelling and the namespace (e.g. \"app:name\"). The name must be a URL "
+             "without arguments: matching is by fixed path, so a pattern like <int:pk> never "
+             "applies. Requests to these endpoints are still logged and rate limited per user.",
         id="whiteneuron.W002",
     )]
