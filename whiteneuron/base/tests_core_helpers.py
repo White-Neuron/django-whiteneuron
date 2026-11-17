@@ -49,13 +49,20 @@ class AdminDialogRedirectMiddlewareTests(SimpleTestCase):
 class EnvironmentCallbackTests(SimpleTestCase):
     request = RequestFactory().get("/")
 
+    def setUp(self):
+        from . import utils
+
+        cache = mock_dict(utils._project_environment_callbacks, clear=True)  # looked up once per name
+        cache.start()
+        self.addCleanup(cache.stop)
+
     @override_settings(PROJECT_NAME="no_such_project", DEBUG=True, WN_ENVIRONMENT_LABEL=None)
     def test_development_with_debug(self):
         self.assertEqual([str(v) for v in environment_callback(self.request)], ["Development", "info"])
 
     @override_settings(PROJECT_NAME="no_such_project", DEBUG=False, WN_ENVIRONMENT_LABEL=None)
     def test_production_without_debug(self):
-        self.assertEqual([str(v) for v in environment_callback(self.request)], ["Production", "danger"])
+        self.assertEqual([str(v) for v in environment_callback(self.request)], ["Production", "warning"])
 
     @override_settings(PROJECT_NAME="no_such_project", DEBUG=False, WN_ENVIRONMENT_LABEL="Staging")
     def test_label_override(self):
@@ -70,6 +77,35 @@ class EnvironmentCallbackTests(SimpleTestCase):
                 mock_modules({"fakeproj": package, "fakeproj.utils": module}):
             self.assertEqual(environment_callback(self.request), ["Mine", "success"])
 
+    def test_a_broken_project_module_is_logged_not_hidden(self):
+        # brokenproj/utils.py exists but imports something missing
+        def broken_import(name, *args, **kwargs):
+            if name == "brokenproj.utils":
+                raise ModuleNotFoundError("No module named 'requets'", name="requets")
+            return real_import(name, *args, **kwargs)
+
+        import importlib
+        real_import = importlib.import_module
+        with self.settings(PROJECT_NAME="brokenproj", DEBUG=True, WN_ENVIRONMENT_LABEL=None), \
+                mock_patch("importlib.import_module", side_effect=broken_import), \
+                self.assertLogs("whiteneuron.base.utils", "WARNING"):
+            self.assertEqual(str(environment_callback(self.request)[0]), "Development")
+
+    def test_the_project_lookup_happens_once(self):
+        import importlib
+        with self.settings(PROJECT_NAME="no_such_project", DEBUG=True), \
+                mock_patch("importlib.import_module", wraps=importlib.import_module) as imported:
+            environment_callback(self.request)
+            environment_callback(self.request)
+        self.assertEqual(imported.call_count, 1)
+
+    @override_settings(PROJECT_NAME="no_such_project", DEBUG=False, WN_ENVIRONMENT_LABEL=None)
+    def test_label_has_a_translation_context(self):
+        from django.utils import translation
+
+        with translation.override("vi"):
+            self.assertEqual(str(environment_callback(self.request)[0]), "Chính thức")
+
     def test_default_is_the_core_callback(self):
         self.assertEqual(settings.UNFOLD["ENVIRONMENT"], "whiteneuron.base.utils.environment_callback")
 
@@ -78,6 +114,18 @@ def mock_modules(modules):
     from unittest import mock
 
     return mock.patch.dict(sys.modules, modules)
+
+
+def mock_dict(target, **kwargs):
+    from unittest import mock
+
+    return mock.patch.dict(target, **kwargs)
+
+
+def mock_patch(target, **kwargs):
+    from unittest import mock
+
+    return mock.patch(target, **kwargs)
 
 
 @package_test_settings(PROJECT_NAME="no_such_project", WN_ENVIRONMENT_LABEL=None)  # tests run with DEBUG=False
@@ -95,6 +143,10 @@ class AnnouncementCallbackTests(SimpleTestCase):
     def test_short_title_and_version_badge(self):
         data = announcement_callback(RequestFactory().get("/"))
         self.assertEqual((str(data["title"]), data["version"], data["badge"]), ("Sense", "2.54.0", "v2.54.0"))
+
+    @override_settings(ANNOUNCEMENT_CONTENT_HTML_FILE="announcement_content.html", NAME="Sense", VERSION="v2.54.0")
+    def test_badge_does_not_double_the_v(self):
+        self.assertEqual(announcement_callback(RequestFactory().get("/"))["badge"], "v2.54.0")
 
     @override_settings(ANNOUNCEMENT_CONTENT_HTML_FILE=None)
     def test_none_without_content(self):
