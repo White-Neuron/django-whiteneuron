@@ -4,6 +4,7 @@ from django.http import HttpRequest, HttpResponseRedirect
 from django.http.response import HttpResponseRedirectBase
 from django.db.models.query import QuerySet
 from urllib.parse import parse_qsl, urlencode, urlparse
+from django.contrib import messages
 from django.contrib.admin import helpers
 from django.contrib.admin.actions import delete_selected as django_delete_selected
 from django.contrib.admin.utils import model_ngettext
@@ -226,6 +227,8 @@ class ModelAdmin(UnfoldAdmin):
             obj.restore()
         return False
 
+    DELETE_CONFIRMATION_LISTED = 50  # records listed on the trash confirmation page
+
     def _soft_deletable(self):
         """Whether deleting this model's records moves them to the trash (see _soft_delete_obj)."""
         return issubclass(self.model, BaseModel) and self.model.delete is BaseModel.delete
@@ -252,6 +255,9 @@ class ModelAdmin(UnfoldAdmin):
             "wn_mode": mode,
             "wn_bulk": True,
             "wn_action": action,
+            # the trash page lists the records, not a cascade: a long selection is cut short
+            "wn_listed": queryset[:self.DELETE_CONFIRMATION_LISTED],
+            "wn_more": max(len(queryset) - self.DELETE_CONFIRMATION_LISTED, 0),
         }
         request.current_app = self.admin_site.name
         return TemplateResponse(request, "admin/wn_delete_confirmation.html", context)
@@ -286,6 +292,8 @@ class ModelAdmin(UnfoldAdmin):
     def hard_delete(self, cl, request, queryset):
         # Irreversible: the first POST only shows the cascade; acting needs "DELETE" typed
         if not (request.POST.get("post") and request.POST.get("wn_confirm") == "DELETE"):
+            if request.POST.get("post"):  # the browser's pattern check was bypassed
+                self.message_user(request, _('Type DELETE to confirm.'), messages.ERROR)
             return self._delete_confirmation(request, queryset, "hard", "hard_delete")
         _deletable, _count, perms_needed, protected = self.get_deleted_objects(queryset, request)
         if perms_needed or protected:

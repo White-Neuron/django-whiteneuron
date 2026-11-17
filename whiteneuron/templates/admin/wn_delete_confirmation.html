@@ -65,7 +65,10 @@ its own delete URL.
 
                 <div class="border-t border-base-200 p-4 dark:border-base-800">
                     <ul class="leading-relaxed">
-                        {% for obj in queryset %}<li>{{ obj }}</li>{% endfor %}
+                        {% for obj in wn_listed|default:queryset %}<li>{{ obj }}</li>{% endfor %}
+                        {% if wn_more %}
+                            <li class="text-font-subtle-light dark:text-font-subtle-dark">{% blocktranslate count counter=wn_more %}and {{ counter }} more{% plural %}and {{ counter }} more{% endblocktranslate %}</li>
+                        {% endif %}
                     </ul>
                 </div>
             {% endif %}
@@ -86,7 +89,7 @@ its own delete URL.
                 {% if wn_mode == "hard" %}
                     <label class="block mb-3 text-sm">
                         {% blocktranslate %}Type <strong>DELETE</strong> to confirm:{% endblocktranslate %}
-                        <input type="text" name="wn_confirm" required autocomplete="off" pattern="DELETE"
+                        <input type="text" name="wn_confirm" required autofocus autocomplete="off" pattern="DELETE"
                                class="border border-base-200 rounded-default px-3 py-2 mt-1 block w-full max-w-xs bg-white dark:bg-base-900 dark:border-base-700">
                     </label>
                 {% endif %}

@@ -110,3 +110,35 @@ class DeleteActionConfirmationTests(TestCase):
         with translation.override("vi"):
             self.assertContains(self._act("delete_selected"), "vào thùng rác")
             self.assertContains(self._act("hard_delete"), "không thể hoàn tác")
+
+    def test_wrong_confirmation_word_is_explained(self):
+        request = self._request({"post": "yes", "wn_confirm": "delete"})
+        func = self.admin.get_actions(request)["hard_delete"][0]
+        func(self.admin, request, FeedbackData.objects_all.filter(pk=self.record.pk)).render()
+        self.assertIn("Type DELETE to confirm.", [str(m) for m in request._messages])
+        self.assertContains(self._act("hard_delete"), "autofocus")
+
+    def test_a_long_selection_is_listed_short_but_fully_submitted(self):
+        for i in range(54):
+            FeedbackData.objects.create(user=self.root, content_type=self.record.content_type,
+                                        object_id=str(i), message=f"m{i}")
+        request = self._request()
+        func = self.admin.get_actions(request)["delete_selected"][0]
+        response = func(self.admin, request, FeedbackData.objects_all.all())
+        response.render()
+        html = response.content.decode()
+        self.assertIn("and 5 more", html)
+        self.assertEqual(html.count('name="_selected_action"'), 55)  # every record is still deleted
+
+    def test_list_cap_is_translated(self):
+        from django.utils import translation
+
+        for i in range(51):
+            FeedbackData.objects.create(user=self.root, content_type=self.record.content_type,
+                                        object_id=str(i), message=f"m{i}")
+        request = self._request()
+        with translation.override("vi"):
+            response = self.admin.get_actions(request)["delete_selected"][0](
+                self.admin, request, FeedbackData.objects_all.all())
+            response.render()
+        self.assertContains(response, "và 2 mục khác")
