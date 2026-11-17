@@ -806,3 +806,44 @@ class CKEditorCustomCssTests(SimpleTestCase):
         dark = re.search(r"html\.dark \{([^}]*)\}", self.css).group(1)
         overridden = set(re.findall(r"(--ck-[\w-]+):", dark))
         self.assertEqual(sorted(fixed - overridden - self.READABLE_IN_DARK), [])
+
+
+@package_test_settings()
+class UserDeletionKeepsRecordsTests(TestCase):
+    """#32: created_by / updated_by were CASCADE, so deleting a user deleted their records."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.root = User.objects.create_superuser("root", "r@example.com", "pw")
+        cls.alice = User.objects.create_user("alice", password="pw")
+        cls.bob = User.objects.create_user("bob", password="pw")
+
+    def test_deleting_a_user_keeps_what_they_created_or_edited(self):
+        app = App.objects.create(name="kept")
+        App.objects_all.filter(pk=app.pk).update(created_by=self.alice, updated_by=self.alice)
+        self.alice.delete()
+        app = App.objects_all.get(pk=app.pk)
+        self.assertEqual((app.created_by_id, app.updated_by_id), (None, None))
+
+    def test_only_superusers_may_delete_users(self):
+        from whiteneuron.base.sites import base_admin_site
+
+        user_admin = base_admin_site._registry[User]
+        request = RequestFactory().get("/")
+        request.user = self.alice
+        with mock.patch.object(type(self.alice), "has_perm", return_value=True):  # full model permissions
+            self.assertFalse(user_admin.has_delete_permission(request))
+        request.user = self.root
+        self.assertTrue(user_admin.has_delete_permission(request))
+
+    def test_deactivate_action_keeps_the_account_and_skips_yourself(self):
+        self.client.force_login(self.root)
+        url = reverse(f"admin:{User._meta.app_label}_{User._meta.model_name}_changelist")
+        response = self.client.post(url, {
+            "action": "deactivate_users",
+            "_selected_action": [self.alice.pk, self.bob.pk, self.root.pk],
+        })
+        self.assertEqual(response.status_code, 302)
+        actives = dict(User.objects.filter(pk__in=[self.alice.pk, self.bob.pk, self.root.pk])
+                       .values_list("username", "is_active"))
+        self.assertEqual(actives, {"alice": False, "bob": False, "root": True})

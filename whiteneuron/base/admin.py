@@ -354,7 +354,24 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
     @display(description=_("Created"))
     def display_created(self, instance: User):
         return instance.date_joined
-    
+
+    actions = ["deactivate_users"]
+
+    @admin.action(description=_("Deactivate selected users"), permissions=["change"])
+    def deactivate_users(self, request: HttpRequest, queryset):
+        # The everyday way to remove someone: their records and history stay intact
+        users = list(queryset.filter(is_active=True).exclude(pk=request.user.pk))
+        for user in users:
+            user.is_active = False
+            user.save(update_fields=["is_active"])
+        if queryset.filter(pk=request.user.pk).exists():
+            messages.warning(request, _("You cannot deactivate your own account."))
+        messages.success(request, _("%(count)d user(s) deactivated.") % {"count": len(users)})
+
+    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
+        # Deleting an account is irreversible: superusers only, others deactivate
+        return request.user.is_superuser and super().has_delete_permission(request, obj)
+
     # tự tạo mật khẩu mặc định cho user mới và gửi email thông báo
     def save_model(self, request: HttpRequest, obj, form, change: bool) -> None:
         is_new = not obj.pk
