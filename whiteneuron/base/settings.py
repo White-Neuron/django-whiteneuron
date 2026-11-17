@@ -1,13 +1,21 @@
 from os import environ
 import sys
 from pathlib import Path
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 from django.core.management.utils import get_random_secret_key
 from django.templatetags.static import static
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.utils.text import format_lazy
-load_dotenv()
+# The project's .env: WN_ENV_FILE, else the nearest .env from the working directory up.
+# Without usecwd, python-dotenv searches up from this file, i.e. the installed package.
+# Variables already in the environment are not overridden.
+_WN_ENV_FILE = environ.get("WN_ENV_FILE")
+if _WN_ENV_FILE and not Path(_WN_ENV_FILE).is_file():
+    # set on purpose but missing: running on defaults (DEBUG, SECRET_KEY, …) would go unnoticed
+    from django.core.exceptions import ImproperlyConfigured
+    raise ImproperlyConfigured(f"WN_ENV_FILE is set but there is no file at {_WN_ENV_FILE!r}")
+load_dotenv(_WN_ENV_FILE or find_dotenv(usecwd=True))
 
 import sentry_sdk
 
@@ -309,7 +317,9 @@ SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [Path.joinpath(BASE_DIR, 'templates')],
+        # whiteneuron/templates is found by APP_DIRS ("whiteneuron" is an installed app). Also in
+        # DIRS, a template extending its own name (admin/base.html, …) was rendered twice.
+        "DIRS": [],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -456,10 +466,9 @@ STATIC_URL = "static/"
 
 import whiteneuron
 WHITENEURON_PATH = Path(whiteneuron.__file__).parent
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-    WHITENEURON_PATH / "static",
-]
+# whiteneuron/static is found by AppDirectoriesFinder ("whiteneuron" is an installed app);
+# listing it here too (BASE_DIR is the package) made collectstatic find every file twice
+STATICFILES_DIRS = []
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
