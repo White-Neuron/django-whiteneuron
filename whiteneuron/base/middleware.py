@@ -21,6 +21,8 @@ UNTRACKED_URL_NAMES = PROBE_URL_NAMES + (
     # their own refreshes as traffic (and pulled the latency percentiles down)
     "admin:monitoring_metricsample_api",
     "announcement",
+    # a request per keystroke while typing in an autocomplete field
+    "admin:autocomplete",
 )
 _named_paths_cache = {}
 
@@ -49,8 +51,11 @@ class RateLimitMiddleware:
     Global rate limiting dựa trên IP.
     Mặc định: 300 request/phút per IP.
     Cấu hình qua settings:
-        RATE_LIMIT_REQUESTS  (int, default 300)
-        RATE_LIMIT_WINDOW    (int seconds, default 60)
+        RATE_LIMIT_REQUESTS     (int, default 300)
+        RATE_LIMIT_WINDOW       (int seconds, default 60)
+        RATE_LIMIT_EXEMPT_STAFF (bool, default True): a logged-in staff user over the IP limit
+            (an office behind one NAT IP) is let through; UserActivityMiddleware still limits
+            them per user
     """
 
     EXEMPT_PATHS = (
@@ -76,6 +81,7 @@ class RateLimitMiddleware:
         from django.conf import settings
         self.rate = getattr(settings, 'RATE_LIMIT_REQUESTS', 300)
         self.window = getattr(settings, 'RATE_LIMIT_WINDOW', 60)
+        self.exempt_staff = getattr(settings, 'RATE_LIMIT_EXEMPT_STAFF', True)
         # IP Blacklist: parse từ settings (comma-separated IPs và/hoặc CIDR)
         raw_blacklist = getattr(settings, 'IP_BLACKLIST', '')
         self._blacklist_ips: set = set()
@@ -195,7 +201,8 @@ class RateLimitMiddleware:
                     )
                 html = render_to_string('403.html', {}, request=request)
                 return HttpResponse(html, status=403)
-            if ip and request.path not in named_paths(PROBE_URL_NAMES) and self._is_rate_limited(ip):
+            if (ip and request.path not in named_paths(PROBE_URL_NAMES) and self._is_rate_limited(ip)
+                    and not (self.exempt_staff and self._is_staff_session(request))):
                 if request.path.startswith('/api/') or request.headers.get('Accept') == 'application/json':
                     return JsonResponse(
                         {'detail': 'Too many requests. Please slow down.'},
@@ -210,6 +217,29 @@ class RateLimitMiddleware:
     def _is_rate_limited(self, ip: str) -> bool:
         count = hit_counter(f'rl:global:{ip}', self.window)
         return count is not None and count > self.rate
+
+    @staticmethod
+    def _is_staff_session(request) -> bool:
+        """Whether the request carries the session of an active staff user.
+
+        This middleware runs before the session and auth middlewares, so the session is read
+        here, and only for a request already over the IP limit. A forged cookie has no session.
+        """
+        from importlib import import_module
+        from types import SimpleNamespace
+
+        from django.conf import settings
+        from django.contrib.auth import get_user
+
+        key = request.COOKIES.get(settings.SESSION_COOKIE_NAME)
+        if not key:
+            return False
+        try:
+            store = import_module(settings.SESSION_ENGINE).SessionStore(key)
+            user = get_user(SimpleNamespace(session=store))  # checks the session hash too
+        except Exception:  # session backend down: no exemption
+            return False
+        return bool(user.is_authenticated and user.is_active and user.is_staff)
 
 
 class ReadonlyExceptionHandlerMiddleware:
@@ -357,7 +387,7 @@ class UserActivityMiddleware:
     """
     Ghi log hoạt động user và rate limit per-user cho authenticated requests.
     Cấu hình qua settings:
-        USER_RATE_LIMIT_REQUESTS  (int, default 200) — số request per window per user
+        USER_RATE_LIMIT_REQUESTS  (int, default 600) — số request per window per user
         USER_RATE_LIMIT_WINDOW    (int seconds, default 60)
     """
 
@@ -394,7 +424,7 @@ class UserActivityMiddleware:
 
         self._get_response = get_response
         from django.conf import settings
-        self.user_rate = getattr(settings, 'USER_RATE_LIMIT_REQUESTS', 200)
+        self.user_rate = getattr(settings, 'USER_RATE_LIMIT_REQUESTS', 600)
         self.user_window = getattr(settings, 'USER_RATE_LIMIT_WINDOW', 60)
         self._MAX_BODY_SIZE = 1024 * 1024  # 1MB
 

@@ -437,9 +437,10 @@ Notifications and announcement need a logged-in user (`401` otherwise); a user o
 ### Rate Limiting
 
 ```python
-RATE_LIMIT_REQUESTS = 60   # max requests per window (by IP)
+RATE_LIMIT_REQUESTS = 300  # max requests per window (by IP)
 RATE_LIMIT_WINDOW     = 60  # in seconds
-USER_RATE_LIMIT_REQUESTS = 60  # by authenticated user
+USER_RATE_LIMIT_REQUESTS = 600  # by authenticated user
+RATE_LIMIT_EXEMPT_STAFF = True  # logged-in staff over the IP limit are let through
 USER_RATE_LIMIT_WINDOW   = 60
 ```
 
@@ -490,7 +491,7 @@ Copy `env.example` to `.env` and configure. Key variables:
 | `DATABASE` | Database type (`sqlite`/`postgres`) | `sqlite` |
 | `REDIS` / `CACHE_REDIS_LOCATION` | Redis connection | `redis://127.0.0.1:6379` |
 | `CELERY_BROKER_URL` | Celery broker URL | `redis://localhost:6379/0` |
-| `RATE_LIMIT_REQUESTS` | IP rate limit count | `60` |
+| `RATE_LIMIT_REQUESTS` | IP rate limit count | `300` |
 | `IP_BLACKLIST` | Static IP blocks (CIDR) | — |
 | `UA_BLACKLIST` | Static UA blocks | — |
 | `SYSTEM_API_TOKEN` | Token for `/api/system/info/` and readiness error details | — |
