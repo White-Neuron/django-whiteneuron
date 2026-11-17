@@ -6,9 +6,9 @@
 
 # Short, one line in a table cell (Django's default is "Ngày 05 tháng 11 năm 2026")
 DATE_FORMAT = "d/m/Y"
-DATETIME_FORMAT = "H:i d/m/Y"
+DATETIME_FORMAT = "d/m/Y H:i"  # date first, as typed in DATETIME_INPUT_FORMATS
 SHORT_DATE_FORMAT = "d/m/Y"
-SHORT_DATETIME_FORMAT = "H:i d/m/Y"
+SHORT_DATETIME_FORMAT = "d/m/Y H:i"
 FIRST_DAY_OF_WEEK = 1  # Monday
 
 # Day first; ISO (2026-11-05) is always accepted as well
