@@ -26,3 +26,9 @@ class UntrackedUrlNamesCheckTests(SimpleTestCase):
     @override_settings(WN_UNTRACKED_URL_NAMES=[])
     def test_quiet_by_default(self):
         self.assertEqual(self._ids(), [])
+
+    @override_settings(WN_UNTRACKED_URL_NAMES=["admin:base_app_change"])
+    def test_a_name_with_arguments_is_reported_with_the_reason(self):
+        messages = untracked_url_names_check()
+        self.assertEqual([m.id for m in messages], ["whiteneuron.W002"])
+        self.assertIn("without arguments", messages[0].hint)
