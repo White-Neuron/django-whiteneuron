@@ -2,18 +2,17 @@ from django.contrib import admin
 import ast
 import json
 import re
-from typing import Sequence
 from django.contrib.contenttypes.models import ContentType
 
 from whiteneuron.base.admin import base_admin_site
 from whiteneuron.base.admin import ModelAdmin
 from .models import NotificationConfig, Notification
 from .utils import clear_unread_cache
+from whiteneuron.base.utils import is_guest_user
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _, ngettext
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
-from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 from django.utils.html import format_html
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -157,6 +156,18 @@ class NotificationAdmin(ModelAdmin):
         #     return True
         return False
     
+    # The inbox is everyone's own, like the avatar badge that links to it: no model permission
+    # needed (before, a user without view_notification saw a count they could never clear).
+    # Guests keep needing it, as the sidebar hides the item from them.
+    def has_view_permission(self, request, obj=None):
+        user = request.user
+        if not user.is_authenticated or (obj is not None and obj.user_id != user.pk):
+            return False
+        return not is_guest_user(user) or super().has_view_permission(request, obj)
+
+    def has_module_permission(self, request):
+        return self.has_view_permission(request)
+
     def has_delete_permission(self, request, obj=None):
         # anyone may delete their own notifications (get_queryset shows no others)
         if not request.user.is_authenticated:
@@ -193,12 +204,6 @@ class NotificationAdmin(ModelAdmin):
             if Notification.objects.filter(pk=object_id, user=request.user, is_read=False).update(is_read=True):
                 clear_unread_cache(request.user.pk)
         return super().changeform_view(request, object_id=object_id, form_url=form_url, extra_context=extra_context)
-    
-    def get_list_filter(self, request: HttpRequest) -> Sequence[str]:
-        list_filter = super().get_list_filter(request)
-        if request.user.is_superuser:
-            return list(list_filter) + [('user', AutocompleteSelectFilter)]
-        return list_filter
     
     @display(description=_("Content"), header=True)
     def display_content(self, instance: Notification):
