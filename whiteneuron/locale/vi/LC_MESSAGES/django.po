@@ -3386,6 +3386,14 @@ msgstr "Hồ sơ người dùng"
 msgid "Themes"
 msgstr "Giao diện"
 
+msgid "Type DELETE to confirm."
+msgstr "Hãy gõ DELETE để xác nhận."
+
+#, python-format
+msgid "and %(counter)s more"
+msgid_plural "and %(counter)s more"
+msgstr[0] "và %(counter)s mục khác"
+
 #~ msgid "day"
 #~ msgstr "ngày"
 
