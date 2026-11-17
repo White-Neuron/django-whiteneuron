@@ -806,3 +806,39 @@ class CKEditorCustomCssTests(SimpleTestCase):
         dark = re.search(r"html\.dark \{([^}]*)\}", self.css).group(1)
         overridden = set(re.findall(r"(--ck-[\w-]+):", dark))
         self.assertEqual(sorted(fixed - overridden - self.READABLE_IN_DARK), [])
+
+
+class VietnameseDateFormatTests(SimpleTestCase):
+    """#52: Django's vi locale has no input formats, so "05/11/2026" was read month-first."""
+
+    def test_vietnamese_input_is_day_first(self):
+        import datetime
+
+        from django import forms
+
+        with translation.override("vi"):
+            for value in ("05/11/2026", "05-11-2026", "05.11.2026", "2026-11-05"):
+                self.assertEqual(forms.DateField().clean(value), datetime.date(2026, 11, 5), value)
+            self.assertEqual(forms.DateTimeField().clean("05/11/2026 14:30").date(), datetime.date(2026, 11, 5))
+
+    def test_english_input_is_unchanged(self):
+        import datetime
+
+        from django import forms
+
+        with translation.override("en"):
+            self.assertEqual(forms.DateField().clean("05/11/2026"), datetime.date(2026, 5, 11))
+
+    def test_vietnamese_dates_display_short(self):
+        import datetime
+
+        from django.utils import formats
+
+        with translation.override("vi"):
+            self.assertEqual(formats.date_format(datetime.date(2026, 11, 5)), "05/11/2026")
+            self.assertEqual(formats.number_format(1234567.5, decimal_pos=1, force_grouping=True), "1.234.567,5")
+
+    def test_language_choice_outlives_the_browser_session(self):
+        from django.conf import settings
+
+        self.assertGreaterEqual(settings.LANGUAGE_COOKIE_AGE, 30 * 24 * 60 * 60)
