@@ -355,18 +355,42 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
     def display_created(self, instance: User):
         return instance.date_joined
 
-    actions = ["deactivate_users"]
+    actions = ["deactivate_users", "activate_users"]
+
+    def _set_active(self, request: HttpRequest, users, active: bool):
+        for user in users:
+            user.is_active = active
+            user.save(update_fields=["is_active"])
 
     @admin.action(description=_("Deactivate selected users"), permissions=["change"])
     def deactivate_users(self, request: HttpRequest, queryset):
-        # The everyday way to remove someone: their records and history stay intact
-        users = list(queryset.filter(is_active=True).exclude(pk=request.user.pk))
-        for user in users:
-            user.is_active = False
-            user.save(update_fields=["is_active"])
-        if queryset.filter(pk=request.user.pk).exists():
+        # The everyday way to remove someone: their records and history stay intact.
+        # Never your own account, nor a superuser unless you are one: so an active superuser
+        # always remains (the one acting).
+        selected = queryset.filter(is_active=True)
+        users = list(selected.exclude(pk=request.user.pk))
+        if selected.filter(pk=request.user.pk).exists():
             messages.warning(request, _("You cannot deactivate your own account."))
-        messages.success(request, _("%(count)d user(s) deactivated.") % {"count": len(users)})
+        if not request.user.is_superuser and any(u.is_superuser for u in users):
+            users = [u for u in users if not u.is_superuser]
+            messages.warning(request, _("Only a superuser can deactivate a superuser."))
+        self._set_active(request, users, False)
+        if users:
+            messages.success(request, _("%(count)d user(s) deactivated.") % {"count": len(users)})
+        else:
+            messages.info(request, _("No user was deactivated."))
+
+    @admin.action(description=_("Reactivate selected users"), permissions=["change"])
+    def activate_users(self, request: HttpRequest, queryset):
+        users = list(queryset.filter(is_active=False))
+        if not request.user.is_superuser and any(u.is_superuser for u in users):
+            users = [u for u in users if not u.is_superuser]
+            messages.warning(request, _("Only a superuser can reactivate a superuser."))
+        self._set_active(request, users, True)
+        if users:
+            messages.success(request, _("%(count)d user(s) reactivated.") % {"count": len(users)})
+        else:
+            messages.info(request, _("No user was reactivated."))
 
     def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
         # Deleting an account is irreversible: superusers only, others deactivate
