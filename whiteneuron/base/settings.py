@@ -7,9 +7,15 @@ from django.templatetags.static import static
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.utils.text import format_lazy
-# The project's .env: WN_ENV_FILE, else searched up from the working directory. Without
-# usecwd, python-dotenv searches up from this file, i.e. the installed package.
-load_dotenv(environ.get("WN_ENV_FILE") or find_dotenv(usecwd=True))
+# The project's .env: WN_ENV_FILE, else the nearest .env from the working directory up.
+# Without usecwd, python-dotenv searches up from this file, i.e. the installed package.
+# Variables already in the environment are not overridden.
+_WN_ENV_FILE = environ.get("WN_ENV_FILE")
+if _WN_ENV_FILE and not Path(_WN_ENV_FILE).is_file():
+    # set on purpose but missing: running on defaults (DEBUG, SECRET_KEY, …) would go unnoticed
+    from django.core.exceptions import ImproperlyConfigured
+    raise ImproperlyConfigured(f"WN_ENV_FILE is set but there is no file at {_WN_ENV_FILE!r}")
+load_dotenv(_WN_ENV_FILE or find_dotenv(usecwd=True))
 
 import sentry_sdk
 
