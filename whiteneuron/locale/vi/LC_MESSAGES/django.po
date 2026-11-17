@@ -1404,6 +1404,31 @@ msgstr "Đã kích hoạt lại %(count)d người dùng."
 msgid "No user was reactivated."
 msgstr "Không có người dùng nào được kích hoạt lại."
 
+msgid "Delete permanently"
+msgstr "Xoá vĩnh viễn"
+
+msgid "Move to trash"
+msgstr "Chuyển vào thùng rác"
+
+#, python-format
+msgid "%(count)d %(items)s moved to the trash."
+msgstr "Đã chuyển %(count)d %(items)s vào thùng rác."
+
+#, python-format
+msgid "%(count)d %(items)s permanently deleted."
+msgstr "Đã xoá vĩnh viễn %(count)d %(items)s."
+
+#, python-format
+msgid "Permanently delete the selected %(objects_name)s? This cannot be undone: they cannot be restored from the trash. All of the following objects and their related items will be deleted:"
+msgstr "Xoá vĩnh viễn %(objects_name)s đã chọn? Thao tác này không thể hoàn tác: dữ liệu sẽ không khôi phục được từ thùng rác. Tất cả các đối tượng sau và các mục liên quan của chúng sẽ bị xoá:"
+
+#, python-format
+msgid "Move the selected %(objects_name)s to the trash? An administrator can restore them later, and nothing related is deleted."
+msgstr "Chuyển %(objects_name)s đã chọn vào thùng rác? Quản trị viên có thể khôi phục sau, và không có dữ liệu liên quan nào bị xoá."
+
+msgid "Type <strong>DELETE</strong> to confirm:"
+msgstr "Gõ <strong>DELETE</strong> để xác nhận:"
+
 #: base/admin.py:601
 msgid "Deactivate selected IPs"
 msgstr "Hủy kích hoạt các IP đã chọn"
