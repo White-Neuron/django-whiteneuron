@@ -3,12 +3,13 @@ from .models import Notification
 from django.core.cache import caches
 
 _NOTIFICATION_BADGE_TIMEOUT = 60
+BADGE_CACHE_KEY = "badge:notification:{}:unread_today"
 
 def unread_today_count(user):
     """Unread notifications received today by ``user`` (cached 60s)."""
     if not user or not user.is_authenticated:
         return 0
-    cache_key = f"badge:notification:{user.id}:unread_today"
+    cache_key = BADGE_CACHE_KEY.format(user.id)
     cached = caches["default"].get(cache_key)
     if cached is not None:
         return cached

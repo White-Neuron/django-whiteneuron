@@ -9,5 +9,6 @@ urlpatterns = [
     path("admin/", base_admin_site.urls),
     path("feedbacks/", include("whiteneuron.feedbacks.urls")),
     path("files/", include("whiteneuron.file_management.urls")),
+    path("api/", include("whiteneuron.api_urls")),
     *base_urlpatterns,
 ]
