@@ -437,11 +437,14 @@ Notifications and announcement need a logged-in user (`401` otherwise); a user o
 ### Rate Limiting
 
 ```python
-RATE_LIMIT_REQUESTS = 60   # max requests per window (by IP)
+RATE_LIMIT_REQUESTS = 300  # max requests per window (by IP)
 RATE_LIMIT_WINDOW     = 60  # in seconds
-USER_RATE_LIMIT_REQUESTS = 60  # by authenticated user
+USER_RATE_LIMIT_REQUESTS = 600  # by authenticated user
+RATE_LIMIT_EXEMPT_STAFF = True  # logged-in staff over the IP limit are let through
 USER_RATE_LIMIT_WINDOW   = 60
 ```
+
+- `RATE_LIMIT_EXEMPT_STAFF`: a whole office behind one NAT address shares the IP limit. Signed-in staff over it are let through and stay under the per-user limit, which covers every URL except the health/ready probes (the untracked URLs of `WN_UNTRACKED_URL_NAMES` are only kept out of the activity log). Guest accounts are never exempt. With `False`, open pages that poll (the monitoring dashboard, the unread badge) count toward the IP limit like any request.
 
 When limit exceeded:
 - API (`/api/` or `Accept: application/json`) → JSON `{"detail": "Too many requests."}` (429)
@@ -490,7 +493,7 @@ Copy `env.example` to `.env` and configure. Key variables:
 | `DATABASE` | Database type (`sqlite`/`postgres`) | `sqlite` |
 | `REDIS` / `CACHE_REDIS_LOCATION` | Redis connection | `redis://127.0.0.1:6379` |
 | `CELERY_BROKER_URL` | Celery broker URL | `redis://localhost:6379/0` |
-| `RATE_LIMIT_REQUESTS` | IP rate limit count | `60` |
+| `RATE_LIMIT_REQUESTS` | IP rate limit count | `300` |
 | `IP_BLACKLIST` | Static IP blocks (CIDR) | — |
 | `UA_BLACKLIST` | Static UA blocks | — |
 | `SYSTEM_API_TOKEN` | Token for `/api/system/info/`, the build id in `version/` and readiness error classes | — |

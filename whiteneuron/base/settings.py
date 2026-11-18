@@ -68,8 +68,13 @@ CACHENAME = environ.get("CACHENAME", "default")
 CACHE_REDIS_LOCATION=environ.get("CACHE_REDIS_LOCATION", "redis://localhost:6379")
 
 # Rate limiting (RateLimitMiddleware)
-RATE_LIMIT_REQUESTS = int(environ.get("RATE_LIMIT_REQUESTS", 60))    # requests per window per IP
+# 60/min blocked ordinary admin work (autocomplete, jsi18n, polling) and a whole office behind
+# one NAT IP; the defaults here and in the middlewares are the same
+RATE_LIMIT_REQUESTS = int(environ.get("RATE_LIMIT_REQUESTS", 300))   # requests per window per IP
 RATE_LIMIT_WINDOW = int(environ.get("RATE_LIMIT_WINDOW", 60))        # window in seconds
+# A logged-in staff user over the IP limit is let through: still limited per user below, on
+# every URL but the health/ready probes. Guest accounts are never let through.
+RATE_LIMIT_EXEMPT_STAFF = environ.get("RATE_LIMIT_EXEMPT_STAFF", "True") == "True"
 
 # IP Blacklist: danh sách IP/CIDR ngăn chặn vĩnh viễn (comma-separated)
 # Ví dụ: IP_BLACKLIST=1.2.3.4,5.6.7.0/24,::1
@@ -80,7 +85,7 @@ IP_BLACKLIST = environ.get("IP_BLACKLIST", "")
 UA_BLACKLIST = environ.get("UA_BLACKLIST", "")
 
 # Rate limiting (UserActivityMiddleware — authenticated users)
-USER_RATE_LIMIT_REQUESTS = int(environ.get("USER_RATE_LIMIT_REQUESTS", 60))   # requests per window per user
+USER_RATE_LIMIT_REQUESTS = int(environ.get("USER_RATE_LIMIT_REQUESTS", 600))  # requests per window per user
 USER_RATE_LIMIT_WINDOW = int(environ.get("USER_RATE_LIMIT_WINDOW", 60))       # window in seconds
 
 # Chỉ bật khi deploy sau Cloudflare — tin tưởng CF-Connecting-IP / True-Client-IP header.
@@ -981,7 +986,7 @@ SYSTEM_API_READY_CHECKS = [
     c.strip() for c in environ.get("SYSTEM_API_READY_CHECKS", "database,cache").split(",") if c.strip()
 ]
 # URL names of a project's own polling endpoints (dashboards, badges), like the package's own.
-# Two effects: requests to them are NOT written to User Activity, and they are NOT counted by
-# the per-user rate limit, so only list cheap, frequent endpoints, never a heavy one.
+# Requests to them are NOT written to User Activity. They still count toward the per-user
+# rate limit (USER_RATE_LIMIT_REQUESTS), which also covers staff let past the IP limit.
 # `manage.py check` warns (whiteneuron.W002) about a name that is not in the URLconf.
 WN_UNTRACKED_URL_NAMES = []
