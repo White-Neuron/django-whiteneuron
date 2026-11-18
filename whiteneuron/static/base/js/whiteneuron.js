@@ -239,6 +239,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 const data = JSON.parse(event.data);
                 // the server sends no title: the page's own language names it
                 toast_(data.content, data.type, data.title || container.dataset.wnToastTitle);
+                if (window.wnRefreshUnreadBadge) {
+                    window.wnRefreshUnreadBadge();  // the new notification changes the count
+                }
             } catch (e) {
                 // ignore malformed messages
             }
@@ -273,6 +276,82 @@ document.addEventListener("DOMContentLoaded", function () {
             closedByPage = false;
             retries = 0;
             connect();
+        }
+    });
+});
+
+// Unread badge (sidebar "wn-unread-badge" and the avatar's) without a reload.
+// admin/base.html sets data-wn-unread-url when the JSON API is mounted. Without the
+// WebSocket the page asks every data-wn-unread-poll seconds, never while the tab is
+// hidden; with it, each incoming notification triggers one refresh instead.
+document.addEventListener("DOMContentLoaded", function () {
+    const container = document.getElementById("toast-container");
+    const url = container && container.dataset.wnUnreadUrl;
+    if (!url || !window.fetch) {
+        return;
+    }
+
+    const sidebarText = function (count) {
+        return count > 99 ? "99+" : "+" + count;  // as app_list_badge.html renders it
+    };
+    const avatarText = function (count) {
+        return count > 99 ? "99+" : String(count);
+    };
+
+    const render = function (count) {
+        document.querySelectorAll(".wn-unread-badge").forEach(function (badge) {
+            badge.textContent = count ? sidebarText(count) : "";
+            badge.classList.toggle("hidden", !count);
+        });
+        // The avatar's badge exists only if the page had unread notifications: update or
+        // remove it (a new one appears on the next page load).
+        document.querySelectorAll('a[href$="#wn-unread"]').forEach(function (badge) {
+            if (count) {
+                badge.textContent = avatarText(count);
+            } else {
+                badge.remove();
+            }
+        });
+    };
+
+    let stopped = false;
+    let inFlight = false;
+    const refresh = function () {
+        if (stopped || inFlight || document.hidden) {
+            return;
+        }
+        inFlight = true;
+        fetch(url, { credentials: "same-origin", headers: { Accept: "application/json" } })
+            .then(function (response) {
+                if (response.status === 401 || response.status === 403 || response.status === 404) {
+                    stopped = true;  // signed out or no API: asking again won't help
+                    return null;
+                }
+                return response.ok ? response.json() : null;
+            })
+            .then(function (data) {
+                if (data && typeof data.unread_count === "number") {
+                    render(data.unread_count);
+                }
+            })
+            .catch(function () {
+                // offline for a moment: the next tick tries again
+            })
+            .finally(function () {
+                inFlight = false;
+            });
+    };
+    window.wnRefreshUnreadBadge = refresh;
+
+    const seconds = parseInt(container.dataset.wnUnreadPoll || "0", 10);
+    if (container.dataset.wnWs === "1" || !(seconds > 0)) {
+        return;
+    }
+    setInterval(refresh, seconds * 1000);
+    // back on the tab: catch up at once rather than waiting for the next tick
+    document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) {
+            refresh();
         }
     });
 });
