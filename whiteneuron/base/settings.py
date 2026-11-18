@@ -122,6 +122,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # ASGI_APPLICATION is set (under WSGI there is no WebSocket route to connect to).
 # `manage.py check` warns (whiteneuron.W001) when a Redis channel layer is set but this is off.
 WN_NOTIFICATIONS_WEBSOCKET = environ.get("WN_NOTIFICATIONS_WEBSOCKET") or None
+# Without the WebSocket, admin pages refresh the unread badge every N seconds through
+# the JSON API's notifications/unread-count/ (when the API is mounted); 0 turns it off.
+WN_NOTIFICATIONS_POLL_SECONDS = environ.get("WN_NOTIFICATIONS_POLL_SECONDS") or 60
 
 CHANNEL_LAYERS = {
     "default": {

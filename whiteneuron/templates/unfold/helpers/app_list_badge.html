@@ -1,11 +1,16 @@
-{% load unfold %}
+{% load unfold wn_notifications %}
 
 {% comment %}
     Unfold's sidebar badge (badge helper, badge_class, "badge" key) with WhiteNeuron
-    tweaks: numeric counters show as "+N" and a 0 count is hidden.
+    tweaks: numeric counters show as "+N" and a 0 count is hidden. The unread-notifications
+    badge is always rendered (hidden at 0) with "wn-unread-badge", so whiteneuron.js can
+    update it without a reload.
 {% endcomment %}
 {% if "badge" in item %}
-    {% if "badge_callback" in item %}
+    {% if "badge_callback" in item and item|is_notification_badge %}
+        {% capture as badge_result silent %}{{ item.badge_callback }}{% endcapture %}
+        {% include "unfold/helpers/badge.html" with value=badge_result|wn_badge_value style=item.badge_style variant=item.badge_variant class=item|wn_unread_badge_class:badge_result %}
+    {% elif "badge_callback" in item %}
         {% capture as badge_result silent %}{{ item.badge_callback }}{% endcapture %}
 
         {% if badge_result and badge_result != "None" and badge_result != "0" %}
