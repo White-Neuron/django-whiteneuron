@@ -40,3 +40,24 @@ class LoginErrorTests(TestCase):
     def test_missing_field_still_points_at_it(self):
         response = self.client.post(reverse("admin:login"), {"username": "alice", "password": ""})
         self.assertContains(response, "Please correct the error")
+
+
+class KpiNoChangeTests(TestCase):
+    def test_no_change_is_neutral(self):
+        from django.test import RequestFactory
+        from unittest import mock
+
+        from whiteneuron.dashboard import views
+
+        from collections import defaultdict
+
+        chart = defaultdict(list)  # no activity on any day
+        stats = {"kpi": (5, 5, 5, 0, 0, 0), "chart": chart, "dates": []}
+        with mock.patch.object(views, "_dashboard_stats", return_value=stats):
+            kpi = views.dashboard_callback(RequestFactory().get("/admin/", {"time": "week"}), {})["kpi"]
+        unchanged, empty = str(kpi[0]["footer"]), str(kpi[1]["footer"])
+        self.assertIn("text-base-500", unchanged)
+        self.assertNotIn("+0", unchanged)
+        self.assertIn(">0 (0.00%)<", unchanged.replace("</strong>", "<"))
+        self.assertIn("text-base-500", empty)  # 0 now, 0 before
+        self.assertNotIn("text-green-600", empty)

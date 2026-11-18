@@ -142,8 +142,9 @@ def dashboard_callback(request, context):
         # Whole translatable sentences with named placeholders (word order differs per
         # language; makemessages can't see _() inside f-strings)
         diff = value - last_value
-        colour = "text-green-600" if diff >= 0 else "text-red-600"
-        sign = "+" if diff >= 0 else "-"
+        # no change is neither good nor bad: a green "+0" read as growth (#86 review)
+        colour = "text-green-600" if diff > 0 else "text-red-600" if diff < 0 else "text-base-500"
+        sign = "+" if diff > 0 else "-" if diff < 0 else ""
         if last_value:
             footer = format_html(
                 '<strong class="{} font-medium">{}{} ({}%)</strong>&nbsp;{}',
