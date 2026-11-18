@@ -314,20 +314,42 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     };
 
+    const seconds = parseInt(container.dataset.wnUnreadPoll || "0", 10);
+    const baseDelay = (seconds > 0 ? seconds : 60) * 1000;
+    const maxDelay = 15 * 60 * 1000;
+    let delay = baseDelay;
+    let pausedUntil = 0;  // after a 429: no request at all before this time
     let stopped = false;
     let inFlight = false;
+
+    // Rate limited: wait what the server asks (Retry-After), and at least twice as long
+    // as before, so polling never keeps a shared office IP over the limit (#38).
+    const backOff = function (response) {
+        const retryAfter = parseInt(response.headers.get("Retry-After") || "0", 10) * 1000;
+        delay = Math.min(maxDelay, Math.max(delay * 2, retryAfter || 0));
+        pausedUntil = Date.now() + delay;
+    };
+
     const refresh = function () {
-        if (stopped || inFlight || document.hidden) {
-            return;
+        if (stopped || inFlight || document.hidden || Date.now() < pausedUntil) {
+            return Promise.resolve();
         }
         inFlight = true;
-        fetch(url, { credentials: "same-origin", headers: { Accept: "application/json" } })
+        return fetch(url, { credentials: "same-origin", headers: { Accept: "application/json" } })
             .then(function (response) {
                 if (response.status === 401 || response.status === 403 || response.status === 404) {
                     stopped = true;  // signed out or no API: asking again won't help
                     return null;
                 }
-                return response.ok ? response.json() : null;
+                if (response.status === 429) {
+                    backOff(response);
+                    return null;
+                }
+                if (response.ok) {
+                    delay = baseDelay;
+                    return response.json();
+                }
+                return null;
             })
             .then(function (data) {
                 if (data && typeof data.unread_count === "number") {
@@ -343,12 +365,19 @@ document.addEventListener("DOMContentLoaded", function () {
     };
     window.wnRefreshUnreadBadge = refresh;
 
-    const seconds = parseInt(container.dataset.wnUnreadPoll || "0", 10);
     if (container.dataset.wnWs === "1" || !(seconds > 0)) {
         return;
     }
-    setInterval(refresh, seconds * 1000);
-    // back on the tab: catch up at once rather than waiting for the next tick
+    // one timer, re-armed after each answer: the wait grows while rate limited
+    const tick = function () {
+        refresh().then(function () {
+            if (!stopped) {
+                setTimeout(tick, delay);
+            }
+        });
+    };
+    setTimeout(tick, delay);
+    // back on the tab: catch up at once (not while backing off) rather than waiting
     document.addEventListener("visibilitychange", function () {
         if (!document.hidden) {
             refresh();
