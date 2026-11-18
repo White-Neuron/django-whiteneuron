@@ -3446,6 +3446,10 @@ msgstr "Đánh dấu thông báo này là chưa đọc?"
 msgid "Unread"
 msgstr "Chưa đọc"
 
+#: whiteneuron/dashboard/views.py
+msgid "(no data for the previous period)"
+msgstr "(kỳ trước chưa có dữ liệu)"
+
 #~ msgid "day"
 #~ msgstr "ngày"
 

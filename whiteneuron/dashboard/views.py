@@ -142,13 +142,19 @@ def dashboard_callback(request, context):
         # Whole translatable sentences with named placeholders (word order differs per
         # language; makemessages can't see _() inside f-strings)
         diff = value - last_value
-        diff_percent = diff / last_value * 100 if last_value else 0
-        footer = format_html(
-            '<strong class="{} font-medium">{}{} ({}%)</strong>&nbsp;{}',
-            "text-green-600" if diff >= 0 else "text-red-600",
-            "+" if diff >= 0 else "-", abs(diff), f"{diff_percent:.2f}",
-            COMPARED_WITH[time],
-        )
+        colour = "text-green-600" if diff >= 0 else "text-red-600"
+        sign = "+" if diff >= 0 else "-"
+        if last_value:
+            footer = format_html(
+                '<strong class="{} font-medium">{}{} ({}%)</strong>&nbsp;{}',
+                colour, sign, abs(diff), f"{diff / last_value * 100:.2f}", COMPARED_WITH[time],
+            )
+        else:
+            # nothing to compare with: "+57 (0.00%)" read as no change (#82)
+            footer = format_html(
+                '<strong class="{} font-medium">{}{}</strong>&nbsp;{} {}',
+                colour, sign, abs(diff), COMPARED_WITH[time], _("(no data for the previous period)"),
+            )
         rate = round(success / value * 100, 1) if value and success else None
         return {
             "label": label,
