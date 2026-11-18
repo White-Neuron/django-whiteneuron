@@ -7,7 +7,7 @@ import ipaddress
 import time
 import json
 import re
-from django.core.cache import cache
+from django.core.cache import cache, caches
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.template.loader import render_to_string
 
@@ -205,10 +205,12 @@ class RateLimitMiddleware:
             if (ip and request.path not in named_paths(PROBE_URL_NAMES) and self._is_rate_limited(ip)
                     and not (self.exempt_staff and self._is_staff_session(request))):
                 if request.path.startswith('/api/') or request.headers.get('Accept') == 'application/json':
-                    return JsonResponse(
+                    response = JsonResponse(
                         {'detail': 'Too many requests. Please slow down.'},
                         status=429,
                     )
+                    response['Retry-After'] = str(self.window)  # scripts wait this long (#85)
+                    return response
                 html = render_to_string('429.html', {'retry_after': self.window}, request=request)
                 response = HttpResponse(html, status=429)
                 response['Retry-After'] = str(self.window)
@@ -219,13 +221,18 @@ class RateLimitMiddleware:
         count = hit_counter(f'rl:global:{ip}', self.window)
         return count is not None and count > self.rate
 
-    @staticmethod
-    def _is_staff_session(request) -> bool:
-        """Whether the request carries the session of an active staff user.
+    STAFF_SESSION_CACHE_SECONDS = 30
+
+    @classmethod
+    def _is_staff_session(cls, request) -> bool:
+        """Whether the request carries the session of an active staff user who is not a guest.
 
         This middleware runs before the session and auth middlewares, so the session is read
         here, and only for a request already over the IP limit. A forged cookie has no session.
+        The answer (yes or no) is cached per session key for a few seconds: with database
+        sessions a flood of refused requests would otherwise cost a query each.
         """
+        import hashlib
         from importlib import import_module
         from types import SimpleNamespace
 
@@ -235,12 +242,27 @@ class RateLimitMiddleware:
         key = request.COOKIES.get(settings.SESSION_COOKIE_NAME)
         if not key:
             return False
+        cache_key = "rl:staff:" + hashlib.sha256(key.encode()).hexdigest()[:32]
+        try:
+            cached = caches["default"].get(cache_key)
+        except Exception:
+            cached = None
+        if cached is not None:
+            return cached == 1
         try:
             store = import_module(settings.SESSION_ENGINE).SessionStore(key)
             user = get_user(SimpleNamespace(session=store))  # checks the session hash too
         except Exception:  # session backend down: no exemption
             return False
-        return bool(user.is_authenticated and user.is_active and user.is_staff)
+        from .utils import is_guest_user
+
+        # a guest is a shared, public account: it stays under the IP limit
+        allowed = bool(user.is_authenticated and user.is_active and user.is_staff and not is_guest_user(user))
+        try:
+            caches["default"].set(cache_key, 1 if allowed else 0, cls.STAFF_SESSION_CACHE_SECONDS)
+        except Exception:
+            pass
+        return allowed
 
 
 class ReadonlyExceptionHandlerMiddleware:
@@ -457,14 +479,18 @@ class UserActivityMiddleware:
 
         skip = self.do_not_track(request)
 
-        # Per-user rate limit cho authenticated users
-        if not skip and request.user.is_authenticated:
+        # Per-user limit on every URL but the probes: "untracked" only means "not logged".
+        # Staff over the IP limit are let through by RateLimitMiddleware on the strength of
+        # this limit, so it must not have holes (autocomplete, polled APIs).
+        if request.user.is_authenticated and request.path not in named_paths(PROBE_URL_NAMES):
             if self._is_user_rate_limited(request.user.id):
                 if request.path.startswith('/api/') or request.headers.get('Accept') == 'application/json':
-                    return JsonResponse(
+                    response = JsonResponse(
                         {'detail': 'Too many requests. Please slow down.'},
                         status=429,
                     )
+                    response['Retry-After'] = str(self.user_window)
+                    return response
                 html = render_to_string('429.html', {'retry_after': self.user_window}, request=request)
                 response = HttpResponse(html, status=429)
                 response['Retry-After'] = str(self.user_window)

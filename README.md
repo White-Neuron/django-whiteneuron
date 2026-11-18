@@ -444,6 +444,8 @@ RATE_LIMIT_EXEMPT_STAFF = True  # logged-in staff over the IP limit are let thro
 USER_RATE_LIMIT_WINDOW   = 60
 ```
 
+- `RATE_LIMIT_EXEMPT_STAFF`: a whole office behind one NAT address shares the IP limit. Signed-in staff over it are let through and stay under the per-user limit, which covers every URL except the health/ready probes (the untracked URLs of `WN_UNTRACKED_URL_NAMES` are only kept out of the activity log). Guest accounts are never exempt. With `False`, open pages that poll (the monitoring dashboard, the unread badge) count toward the IP limit like any request.
+
 When limit exceeded:
 - API (`/api/` or `Accept: application/json`) → JSON `{"detail": "Too many requests."}` (429)
 - Browser → renders `429.html` with `Retry-After` header

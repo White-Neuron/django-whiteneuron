@@ -45,11 +45,12 @@ class PollingIsNotTrafficTests(TestCase):
         self.client.get(url)
         self.assertEqual(self._logged(url), 1)
 
-    def test_polling_is_not_rate_limited_per_user(self):
+    def test_polling_still_counts_toward_the_user_limit(self):
+        # Not logged, but limited: staff skip the IP limit on the strength of this one (#74).
+        # A 5-second refresh is 12 of the 600 requests a minute.
         with mock.patch.object(UserActivityMiddleware, "_is_user_rate_limited", return_value=True):
             url = reverse("admin:monitoring_metricsample_api")
-            self.assertEqual(self.client.get(url, {"range": "15m"}).status_code, 200)
-            self.assertEqual(self.client.get(reverse("admin:base_app_changelist")).status_code, 429)
+            self.assertEqual(self.client.get(url, {"range": "15m"}).status_code, 429)
 
     def test_projects_add_their_own_polling_endpoints_by_name(self):
         url = reverse("admin:base_app_changelist")
