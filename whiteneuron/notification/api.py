@@ -34,7 +34,7 @@ from whiteneuron.base.api_utils import api_login_required, json_response, pagina
 from whiteneuron.base.html_sanitize import sanitize_html
 
 from .models import AnnouncementReceipt, Notification
-from .utils import BADGE_CACHE_KEY
+from .utils import clear_unread_cache, count_unread
 
 logger = logging.getLogger(__name__)
 
@@ -46,17 +46,13 @@ def _own(request):
 
 
 def _unread_count(request):
-    return _own(request).filter(is_read=False).count()
+    # same count as the admin badge, uncached: the API answers right after a write
+    return count_unread(request.user)
 
 
 def _changed(request):
     """Keep the sidebar avatar badge (cached 60s) in step with the change."""
-    from django.core.cache import caches
-
-    try:
-        caches["default"].delete(BADGE_CACHE_KEY.format(request.user.pk))
-    except Exception:
-        logger.warning("Could not clear the notification badge cache", exc_info=True)
+    clear_unread_cache(request.user.pk)
 
 
 def _safe_link(request, link):

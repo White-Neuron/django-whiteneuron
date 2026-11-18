@@ -2,16 +2,17 @@ from django.contrib import admin
 import ast
 import json
 import re
-from typing import Sequence
 from django.contrib.contenttypes.models import ContentType
 
 from whiteneuron.base.admin import base_admin_site
 from whiteneuron.base.admin import ModelAdmin
 from .models import NotificationConfig, Notification
-from django.utils.translation import gettext_lazy as _
+from .utils import clear_unread_cache
+from whiteneuron.base.utils import is_guest_user
+from django.contrib import messages
+from django.utils.translation import gettext_lazy as _, ngettext
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
-from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 from django.utils.html import format_html
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -52,10 +53,8 @@ class NotificationAdmin(ModelAdmin):
     list_display = [
         # "user",
         "display_title",
-        # "action_by",
-        # "display_action",
-        # "display_flag",
-        "is_read",
+        "display_flag",
+        "display_read",
         "created_at",
     ]
     autocomplete_fields = [ "user", "action_by"]
@@ -67,8 +66,10 @@ class NotificationAdmin(ModelAdmin):
     ]
     list_select_related = ["action_by"]
     list_filter = [
-        ("action_by", AutocompleteSelectFilter),
         "is_read",
+        "action",
+        "flag",
+        ("action_by", AutocompleteSelectFilter),
         "created_at",
     ]
     date_hierarchy = "created_at"
@@ -93,7 +94,9 @@ class NotificationAdmin(ModelAdmin):
         ),
     )
 
-    actions_detail = ["view_obj_link"]
+    actions = ["mark_selected_read", "mark_selected_unread"]
+    actions_list = ["mark_all_read"]
+    actions_detail = ["view_obj_link", "mark_unread"]
 
     using_grid_view= False
 
@@ -107,6 +110,37 @@ class NotificationAdmin(ModelAdmin):
         self.message_user(request, _("No object link available for this notification."))
         return redirect(reverse('admin:notification_notification_changeform', args=[object_id]))
     
+    # Read state. Each changes only the user's own rows (get_queryset) and clears the badge cache.
+    @admin.action(description=_("Mark selected notifications as read"))
+    def mark_selected_read(self, request, queryset):
+        self._set_read(request, queryset, True)
+
+    @admin.action(description=_("Mark selected notifications as unread"))
+    def mark_selected_unread(self, request, queryset):
+        self._set_read(request, queryset, False)
+
+    def _set_read(self, request, queryset, value):
+        updated = queryset.filter(user=request.user).exclude(is_read=value).update(is_read=value)
+        clear_unread_cache(request.user.pk)
+        message = (ngettext("%(count)d notification marked as read.", "%(count)d notifications marked as read.", updated)
+                   if value else
+                   ngettext("%(count)d notification marked as unread.", "%(count)d notifications marked as unread.", updated))
+        self.message_user(request, message % {"count": updated}, messages.SUCCESS)
+
+    # A dialog, so the change is a POST (a plain list action is a GET link)
+    @action(description=_("Mark all as read"), url_path="mark-all-read", icon="done_all",
+            dialog={"title": _("Mark all notifications as read?"), "form_submit_text": _("Mark all as read")})
+    def mark_all_read(self, request, form):
+        self._set_read(request, Notification.objects.filter(user=request.user), True)
+        return redirect(reverse("admin:notification_notification_changelist"))
+
+    # Opening a notification marks it read; this puts it back
+    @action(description=_("Mark as unread"), url_path="mark-unread", icon="mark_email_unread",
+            dialog={"title": _("Mark this notification as unread?"), "form_submit_text": _("Mark as unread")})
+    def mark_unread(self, request, form, object_id):
+        self._set_read(request, Notification.objects.filter(pk=object_id, user=request.user), False)
+        return redirect(reverse("admin:notification_notification_changelist"))
+
     def has_view_obj_link_permission(self, request, object_id: int):
         if object_id is not None and str(object_id).isdigit():
             return Notification.objects.filter(pk=object_id, user=request.user, obj_link__isnull=False).exclude(obj_link='').exists()
@@ -122,10 +156,39 @@ class NotificationAdmin(ModelAdmin):
         #     return True
         return False
     
+    # The inbox is everyone's own, like the avatar badge that links to it: no model permission
+    # needed (before, a user without view_notification saw a count they could never clear).
+    # Guests keep needing it, as the sidebar hides the item from them.
+    def has_view_permission(self, request, obj=None):
+        user = request.user
+        if not user.is_authenticated or (obj is not None and obj.user_id != user.pk):
+            return False
+        return not is_guest_user(user) or super().has_view_permission(request, obj)
+
+    def has_module_permission(self, request):
+        return self.has_view_permission(request)
+
     def has_delete_permission(self, request, obj=None):
-        # if request.user.is_superuser:
-        #     return True
-        return False
+        # anyone may delete their own notifications (get_queryset shows no others)
+        if not request.user.is_authenticated:
+            return False
+        return obj is None or obj.user_id == request.user.pk
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        # a notification is the user's own copy: no trash, restore or duplicate
+        for name in ("hard_delete", "restore", "duplicate_objects"):
+            actions.pop(name, None)
+        return actions
+
+    # Deleting one's own notification is not news for the superusers: no _notify_bulk here
+    def delete_model(self, request, obj):
+        obj.delete()
+        clear_unread_cache(obj.user_id)
+
+    def delete_queryset(self, request, queryset):
+        queryset.filter(user=request.user).delete()
+        clear_unread_cache(request.user.pk)
     
     # Chỉ hiện thông báo của user đang đăng nhập
     def get_queryset(self, request):
@@ -138,27 +201,28 @@ class NotificationAdmin(ModelAdmin):
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
         if object_id and str(object_id).isdigit():
             # mark as read with a single UPDATE (non-numeric ids fall through to the admin's 404 handling)
-            Notification.objects.filter(pk=object_id, user=request.user, is_read=False).update(is_read=True)
+            if Notification.objects.filter(pk=object_id, user=request.user, is_read=False).update(is_read=True):
+                clear_unread_cache(request.user.pk)
         return super().changeform_view(request, object_id=object_id, form_url=form_url, extra_context=extra_context)
-    
-    def get_list_filter(self, request: HttpRequest) -> Sequence[str]:
-        list_filter = super().get_list_filter(request)
-        if request.user.is_superuser:
-            return list(list_filter) + [('user', AutocompleteSelectFilter)]
-        return list_filter
     
     @display(description=_("Content"), header=True)
     def display_content(self, instance: Notification):
         # stored HTML may predate escaping: keep only simple formatting tags
         return mark_safe(sanitize_html(instance.content))
 
+    # A label, not the boolean icon: a red ✗ on every unread row read as "error" (#81)
+    @display(description=_("Status"), ordering="is_read", label={"unread": "info", "read": "default"})  # read: neutral grey
+    def display_read(self, instance: Notification):
+        return ("read", _("Read")) if instance.is_read else ("unread", _("Unread"))
+
     @display(description=_("Action"), label=True)
     def display_action(self, instance: Notification):
         return instance.action
     
-    @display(description=_("Flag"), label=True)
+    @display(description=_("Flag"), label={"info": "info", "success": "success", "warning": "warning",
+                                            "error": "danger", "danger": "danger"})
     def display_flag(self, instance: Notification):
-        return instance.flag
+        return instance.flag, instance.get_flag_display()  # colour by value, translated text
     
     _OBJ_LINK_RE = re.compile(r'/([^/]+)/([^/]+)/(\d+)/change/')
 

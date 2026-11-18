@@ -188,7 +188,7 @@ function toast_(message, type = "info", title = "Notification") {
     const toastItem = document.createElement("div");
     toastItem.setAttribute("role", type === "error" ? "alert" : "status");
     toastItem.className = "ui-alert shadow-lg cursor-pointer max-w-sm " + (TOAST_CLASSES[type] || TOAST_CLASSES.info);
-    toastItem.title = "Click to dismiss";
+    toastItem.title = toastContainer.dataset.wnToastDismiss || "Click to dismiss";
 
     const body = document.createElement("div");
     const heading = document.createElement("div");
@@ -237,7 +237,11 @@ document.addEventListener("DOMContentLoaded", function () {
         socket.onmessage = function (event) {
             try {
                 const data = JSON.parse(event.data);
-                toast_(data.content, data.type, data.title);
+                // the server sends no title: the page's own language names it
+                toast_(data.content, data.type, data.title || container.dataset.wnToastTitle);
+                if (window.wnRefreshUnreadBadge) {
+                    window.wnRefreshUnreadBadge();  // the new notification changes the count
+                }
             } catch (e) {
                 // ignore malformed messages
             }
@@ -272,6 +276,111 @@ document.addEventListener("DOMContentLoaded", function () {
             closedByPage = false;
             retries = 0;
             connect();
+        }
+    });
+});
+
+// Unread badge (sidebar "wn-unread-badge" and the avatar's) without a reload.
+// admin/base.html sets data-wn-unread-url when the JSON API is mounted. Without the
+// WebSocket the page asks every data-wn-unread-poll seconds, never while the tab is
+// hidden; with it, each incoming notification triggers one refresh instead.
+document.addEventListener("DOMContentLoaded", function () {
+    const container = document.getElementById("toast-container");
+    const url = container && container.dataset.wnUnreadUrl;
+    if (!url || !window.fetch) {
+        return;
+    }
+
+    const sidebarText = function (count) {
+        return count > 99 ? "99+" : "+" + count;  // as app_list_badge.html renders it
+    };
+    const avatarText = function (count) {
+        return count > 99 ? "99+" : String(count);
+    };
+
+    const render = function (count) {
+        document.querySelectorAll(".wn-unread-badge").forEach(function (badge) {
+            badge.textContent = count ? sidebarText(count) : "";
+            badge.classList.toggle("hidden", !count);
+        });
+        // The avatar's badge exists only if the page had unread notifications: update or
+        // remove it (a new one appears on the next page load).
+        document.querySelectorAll('a[href$="#wn-unread"]').forEach(function (badge) {
+            if (count) {
+                badge.textContent = avatarText(count);
+            } else {
+                badge.remove();
+            }
+        });
+    };
+
+    const seconds = parseInt(container.dataset.wnUnreadPoll || "0", 10);
+    const baseDelay = (seconds > 0 ? seconds : 60) * 1000;
+    const maxDelay = 15 * 60 * 1000;
+    let delay = baseDelay;
+    let pausedUntil = 0;  // after a 429: no request at all before this time
+    let stopped = false;
+    let inFlight = false;
+
+    // Rate limited: wait what the server asks (Retry-After), and at least twice as long
+    // as before, so polling never keeps a shared office IP over the limit (#38).
+    const backOff = function (response) {
+        const retryAfter = parseInt(response.headers.get("Retry-After") || "0", 10) * 1000;
+        delay = Math.min(maxDelay, Math.max(delay * 2, retryAfter || 0));
+        pausedUntil = Date.now() + delay;
+    };
+
+    const refresh = function () {
+        if (stopped || inFlight || document.hidden || Date.now() < pausedUntil) {
+            return Promise.resolve();
+        }
+        inFlight = true;
+        return fetch(url, { credentials: "same-origin", headers: { Accept: "application/json" } })
+            .then(function (response) {
+                if (response.status === 401 || response.status === 403 || response.status === 404) {
+                    stopped = true;  // signed out or no API: asking again won't help
+                    return null;
+                }
+                if (response.status === 429) {
+                    backOff(response);
+                    return null;
+                }
+                if (response.ok) {
+                    delay = baseDelay;
+                    return response.json();
+                }
+                return null;
+            })
+            .then(function (data) {
+                if (data && typeof data.unread_count === "number") {
+                    render(data.unread_count);
+                }
+            })
+            .catch(function () {
+                // offline for a moment: the next tick tries again
+            })
+            .finally(function () {
+                inFlight = false;
+            });
+    };
+    window.wnRefreshUnreadBadge = refresh;
+
+    if (container.dataset.wnWs === "1" || !(seconds > 0)) {
+        return;
+    }
+    // one timer, re-armed after each answer: the wait grows while rate limited
+    const tick = function () {
+        refresh().then(function () {
+            if (!stopped) {
+                setTimeout(tick, delay);
+            }
+        });
+    };
+    setTimeout(tick, delay);
+    // back on the tab: catch up at once (not while backing off) rather than waiting
+    document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) {
+            refresh();
         }
     });
 });

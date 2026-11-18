@@ -126,6 +126,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # ASGI_APPLICATION is set (under WSGI there is no WebSocket route to connect to).
 # `manage.py check` warns (whiteneuron.W001) when a Redis channel layer is set but this is off.
 WN_NOTIFICATIONS_WEBSOCKET = environ.get("WN_NOTIFICATIONS_WEBSOCKET") or None
+# Without the WebSocket, admin pages refresh the unread badge every N seconds through
+# the JSON API's notifications/unread-count/ (when the API is mounted); 0 turns it off.
+WN_NOTIFICATIONS_POLL_SECONDS = environ.get("WN_NOTIFICATIONS_POLL_SECONDS") or 60
 
 CHANNEL_LAYERS = {
     "default": {
@@ -981,6 +984,8 @@ SYSTEM_API_TOKEN = environ.get("SYSTEM_API_TOKEN") or None
 SYSTEM_API_READY_CHECKS = [
     c.strip() for c in environ.get("SYSTEM_API_READY_CHECKS", "database,cache").split(",") if c.strip()
 ]
-# URL names of a project's own polling endpoints (dashboards, badges): not written to User
-# Activity and not counted by the per-user rate limit, like the package's own
+# URL names of a project's own polling endpoints (dashboards, badges), like the package's own.
+# Two effects: requests to them are NOT written to User Activity, and they are NOT counted by
+# the per-user rate limit, so only list cheap, frequent endpoints, never a heavy one.
+# `manage.py check` warns (whiteneuron.W002) about a name that is not in the URLconf.
 WN_UNTRACKED_URL_NAMES = []

@@ -3394,11 +3394,61 @@ msgid "and %(counter)s more"
 msgid_plural "and %(counter)s more"
 msgstr[0] "và %(counter)s mục khác"
 
+msgctxt "environment"
 msgid "Development"
 msgstr "Phát triển"
 
+msgctxt "environment"
 msgid "Production"
 msgstr "Chính thức"
+
+#: whiteneuron/templates/admin/base.html
+msgid "Click to dismiss"
+msgstr "Bấm để đóng"
+
+#: whiteneuron/notification/admin.py
+msgid "Mark selected notifications as read"
+msgstr "Đánh dấu các thông báo đã chọn là đã đọc"
+
+#: whiteneuron/notification/admin.py
+msgid "Mark selected notifications as unread"
+msgstr "Đánh dấu các thông báo đã chọn là chưa đọc"
+
+#: whiteneuron/notification/admin.py
+#, python-format
+msgid "%(count)d notification marked as read."
+msgid_plural "%(count)d notifications marked as read."
+msgstr[0] "Đã đánh dấu %(count)d thông báo là đã đọc."
+
+#: whiteneuron/notification/admin.py
+#, python-format
+msgid "%(count)d notification marked as unread."
+msgid_plural "%(count)d notifications marked as unread."
+msgstr[0] "Đã đánh dấu %(count)d thông báo là chưa đọc."
+
+#: whiteneuron/notification/admin.py
+msgid "Mark all as read"
+msgstr "Đánh dấu tất cả đã đọc"
+
+#: whiteneuron/notification/admin.py
+msgid "Mark all notifications as read?"
+msgstr "Đánh dấu tất cả thông báo là đã đọc?"
+
+#: whiteneuron/notification/admin.py
+msgid "Mark as unread"
+msgstr "Đánh dấu chưa đọc"
+
+#: whiteneuron/notification/admin.py
+msgid "Mark this notification as unread?"
+msgstr "Đánh dấu thông báo này là chưa đọc?"
+
+#: whiteneuron/notification/admin.py
+msgid "Unread"
+msgstr "Chưa đọc"
+
+#: whiteneuron/dashboard/views.py
+msgid "(no data for the previous period)"
+msgstr "(kỳ trước chưa có dữ liệu)"
 
 #~ msgid "day"
 #~ msgstr "ngày"
