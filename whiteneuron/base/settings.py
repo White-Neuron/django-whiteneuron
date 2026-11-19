@@ -97,6 +97,12 @@ WN_MONITORING = {
     "RETENTION_DAYS": int(environ.get("MONITORING_RETENTION_DAYS", 7)),
     "DISK_PATH": environ.get("MONITORING_DISK_PATH", "/"),
 }
+# Background jobs whose heartbeat is watched (whiteneuron.monitoring.beat): shown on the
+# monitoring page, a critical late one warns on the admin home. Empty = nothing changes.
+# {"backup": {"label": _("Daily backup"), "max_age": 26 * 3600,
+#             "consequence": _("No new backup since then."), "critical": True}}
+# The core reports "monitoring_collector" and "celery" (monitoring.tasks.worker_heartbeat).
+WN_HEARTBEATS = {}
 # Client IP behind reverse proxies (rate limiting, IP blacklist, activity logs):
 # number of proxies that append to X-Forwarded-For (0 = auto: right-most public IP)
 TRUSTED_PROXY_COUNT = int(environ.get("TRUSTED_PROXY_COUNT", "0"))

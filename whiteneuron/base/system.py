@@ -174,7 +174,18 @@ def ready_view(request):
     if not privileged:
         for c in checks.values():
             c.pop("error", None)
-    return json_response({"status": "ok" if ok else "error", "checks": checks}, status=200 if ok else 503)
+    data = {"status": "ok" if ok else "error", "checks": checks}
+    if privileged:
+        # background jobs past their max_age (WN_HEARTBEATS), for external monitoring; they do
+        # not turn the probe red: the web process is ready even when a backup is late (#91)
+        from whiteneuron.monitoring.heartbeats import late
+
+        data["late_jobs"] = [
+            {"name": j["name"], "critical": j["critical"],
+             "last_run": j["last_beat_at"].isoformat() if j["last_beat_at"] else None}
+            for j in late()
+        ]
+    return json_response(data, status=200 if ok else 503)
 
 
 @never_cache
