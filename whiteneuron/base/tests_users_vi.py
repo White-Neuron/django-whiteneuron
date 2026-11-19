@@ -12,12 +12,27 @@ User = get_user_model()
 
 
 class FullNameOrderTests(TestCase):
-    def test_family_name_first_in_vietnamese_given_name_first_in_english(self):
+    def test_package_default_keeps_the_family_name_first(self):
         user = User(username="u1", first_name="Văn 1", last_name="Nguyễn")
-        with translation.override("vi"):
+        for viewer in ("vi", "en"):
+            with translation.override(viewer):
+                self.assertEqual(user.full_name, "Nguyễn Văn 1")
+
+    def test_order_follows_the_site_language_not_the_viewer(self):
+        user = User(username="u1", first_name="Văn 1", last_name="Nguyễn")
+        with self.settings(LANGUAGE_CODE="vi", WN_NAME_ORDER=None):
+            for viewer in ("vi", "en"):
+                with translation.override(viewer):
+                    self.assertEqual(user.full_name, "Nguyễn Văn 1")
+        with self.settings(LANGUAGE_CODE="en", WN_NAME_ORDER=None):
+            with translation.override("vi"):
+                self.assertEqual(user.get_full_name(), "Văn 1 Nguyễn")
+
+    def test_wn_name_order_overrides_the_language(self):
+        user = User(username="u1", first_name="Văn 1", last_name="Nguyễn")
+        with self.settings(LANGUAGE_CODE="en", WN_NAME_ORDER="family_first"):
             self.assertEqual(user.get_full_name(), "Nguyễn Văn 1")
-            self.assertEqual(user.full_name, "Nguyễn Văn 1")
-        with translation.override("en"):
+        with self.settings(LANGUAGE_CODE="vi", WN_NAME_ORDER="given_first"):
             self.assertEqual(user.get_full_name(), "Văn 1 Nguyễn")
 
     def test_one_part_alone_is_kept(self):
