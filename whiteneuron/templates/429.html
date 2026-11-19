@@ -9,9 +9,10 @@
     {% if retry_after %}<br><strong id="wn-retry-note">{% blocktranslate with seconds=retry_after %}You can try again in <span id="wn-retry-seconds">{{ seconds }}</span> seconds.{% endblocktranslate %}</strong>{% endif %}
 {% endblock %}
 {% block actions %}
-    <button type="button" class="error-btn primary" id="wn-retry" onclick="location.reload()"{% if retry_after %} disabled{% endif %}>{% translate "Try again" %}</button>
+    <button type="button" class="error-btn primary" id="wn-retry" onclick="location.replace(location.href)"{% if retry_after %} disabled{% endif %}>{% translate "Try again" %}</button>
     {{ block.super }}
 {% endblock %}
+{% block home_variant %}{% endblock %}
 {% block extra_scripts %}
 {% if retry_after %}
 <script>

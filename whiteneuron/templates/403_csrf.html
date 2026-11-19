@@ -10,6 +10,7 @@
 {% block heading %}{% translate "Your session has expired" %}{% endblock %}
 {% block text %}{% translate "The page was open for too long, or you signed in again in another tab. Reload the page, then try again." %}{% endblock %}
 {% block actions %}
-    <button type="button" class="error-btn primary" onclick="location.reload()">{% translate "Reload the page" %}</button>
+    <button type="button" class="error-btn primary" onclick="location.replace(location.href)">{% translate "Reload the page" %}</button>
     {{ block.super }}
 {% endblock %}
+{% block home_variant %}{% endblock %}

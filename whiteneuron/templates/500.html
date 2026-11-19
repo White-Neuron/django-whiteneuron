@@ -6,6 +6,7 @@
 {% block heading %}{% translate "Something went wrong" %}{% endblock %}
 {% block text %}{% translate "The error has been recorded. Try again in a moment; if it keeps happening, contact your administrator." %}{% endblock %}
 {% block actions %}
-    <button type="button" class="error-btn primary" onclick="location.reload()">{% translate "Try again" %}</button>
+    <button type="button" class="error-btn primary" onclick="location.replace(location.href)">{% translate "Try again" %}</button>
     {{ block.super }}
 {% endblock %}
+{% block home_variant %}{% endblock %}

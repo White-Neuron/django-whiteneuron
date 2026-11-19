@@ -71,3 +71,34 @@ class ErrorPageTests(TestCase):
         response = server_error(RequestFactory().get("/"))
         self.assertEqual(response.status_code, 500)
         self.assertIn(b"Something went wrong", response.content)
+
+
+@package_test_settings(NAME="Acme Portal", UNFOLD={"SITE_TITLE": "Acme Portal"})
+class ErrorPageReviewTests(TestCase):
+    """Review of #96."""
+
+    def test_a_project_base_html_does_not_reach_the_error_pages(self):
+        from django.conf import settings
+
+        templates = [{**settings.TEMPLATES[0], "APP_DIRS": False, "OPTIONS": {
+            **settings.TEMPLATES[0]["OPTIONS"],
+            "loaders": [
+                ("django.template.loaders.locmem.Loader", {"base.html": "PROJECT SITE LAYOUT"}),
+                "django.template.loaders.app_directories.Loader",
+            ],
+        }}]
+        with override_settings(TEMPLATES=templates):
+            html = render_to_string("404.html", {}, request=RequestFactory().get("/"))
+        self.assertNotIn("PROJECT SITE LAYOUT", html)
+        self.assertIn("error-section", html)
+
+    def test_retry_buttons_reopen_the_page_with_get(self):
+        for name in ("403_csrf.html", "429.html", "500.html"):
+            html = render_to_string(name, {"retry_after": 1}, request=RequestFactory().get("/"))
+            self.assertNotIn("location.reload()", html, name)
+            self.assertIn("location.replace(location.href)", html, name)
+
+    def test_one_primary_action_per_page(self):
+        for name in PAGES:
+            html = render_to_string(name, {}, request=RequestFactory().get("/"))
+            self.assertEqual(html.count("error-btn primary"), 1, name)
