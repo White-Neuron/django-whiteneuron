@@ -134,3 +134,25 @@ class HistoryWithManyRecipientsTests(TestCase):
         self.client.force_login(root)
         titles = [n.title for n in self.client.get(url).context["history_notifications"]]
         self.assertEqual(sorted(titles), sorted(f"change {i}" for i in range(10)))
+
+
+class OneEventOneTimestampTests(TestCase):
+    """A flaky failure of the history test (1 in 11 runs): the copies of one event got their
+    own timestamps and could straddle a second."""
+
+    def test_every_copy_of_an_event_has_the_same_timestamp(self):
+        from unittest import mock
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        users = User.objects.bulk_create([User(username=f"s{i}", email=f"s{i}@example.com", is_superuser=True)
+                                          for i in range(5)])
+        base = timezone.now().replace(microsecond=999_000)
+        ticks = iter(base + timedelta(milliseconds=i) for i in range(100))   # crosses a second
+        with mock.patch("django.utils.timezone.now", side_effect=lambda: next(ticks)), \
+                self.captureOnCommitCallbacks(execute=False):
+            objs = Notification.notify_superusers(title="t", action="update")
+        stamps = set(Notification.objects.filter(pk__in=[o.pk for o in objs]).values_list("created_at", flat=True))
+        self.assertEqual(len(objs), len(users))
+        self.assertEqual(len(stamps), 1)

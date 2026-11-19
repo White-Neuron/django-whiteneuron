@@ -150,6 +150,14 @@ class Notification(models.Model):
                 flag=flag, obj_link=obj_link, changed_data=data, action_by=action_by)
             for user_id in user_ids
         ])
+        # One event, one timestamp: auto_now_add stamped each copy on its own, so the copies of a
+        # big batch could straddle a second and the history panel (which groups copies by
+        # second) showed one event twice. One UPDATE for the whole batch.
+        if len(objs) > 1 and all(o.pk for o in objs):
+            stamp = objs[0].created_at
+            cls.objects.filter(pk__in=[o.pk for o in objs]).exclude(created_at=stamp).update(created_at=stamp)
+            for o in objs:
+                o.created_at = stamp
         _clear_unread_cache(*user_ids)  # bulk_create sends no post_save
         transaction.on_commit(lambda: objs[0].alert(user_ids=user_ids))
         return objs
