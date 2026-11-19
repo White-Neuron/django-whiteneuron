@@ -3718,6 +3718,63 @@ msgstr "Bản ghi sẽ hiện ở đây sau khi được thêm."
 msgid "Records will be listed here once there are some."
 msgstr "Bản ghi sẽ hiện ở đây khi có dữ liệu."
 
+#: whiteneuron/feedbacks
+msgid "Open"
+msgstr "Đang mở"
+
+#: whiteneuron/feedbacks
+msgid "In progress"
+msgstr "Đang xử lý"
+
+#: whiteneuron/feedbacks
+msgid "Rejected"
+msgstr "Đã từ chối"
+
+#: whiteneuron/feedbacks
+msgid "Assignee"
+msgstr "Người phụ trách"
+
+#: whiteneuron/feedbacks
+msgid "Feedback rejected"
+msgstr "Phản hồi bị từ chối"
+
+#: whiteneuron/feedbacks
+msgid "Your feedback has been rejected."
+msgstr "Phản hồi của bạn đã bị từ chối."
+
+#: whiteneuron/feedbacks
+msgid "Feedback in progress"
+msgstr "Phản hồi đang được xử lý"
+
+#: whiteneuron/feedbacks
+msgid "Your feedback is being handled."
+msgstr "Phản hồi của bạn đang được xử lý."
+
+#: whiteneuron/feedbacks
+msgid "Feedback reopened"
+msgstr "Phản hồi được mở lại"
+
+#: whiteneuron/feedbacks
+msgid "Your feedback has been reopened."
+msgstr "Phản hồi của bạn đã được mở lại."
+
+#: whiteneuron/feedbacks
+msgid "Mark selected feedbacks as in progress"
+msgstr "Đánh dấu các phản hồi đã chọn là đang xử lý"
+
+#: whiteneuron/feedbacks
+msgid "Reject selected feedbacks"
+msgstr "Từ chối các phản hồi đã chọn"
+
+#: whiteneuron/feedbacks
+msgid "Reopen selected feedbacks"
+msgstr "Mở lại các phản hồi đã chọn"
+
+#: whiteneuron/feedbacks/admin.py
+#, python-format
+msgid "%(count)d feedback changed to %(status)s."
+msgid_plural "%(count)d feedbacks changed to %(status)s."
+msgstr[0] "Đã chuyển %(count)d phản hồi sang %(status)s."
 #: whiteneuron/notification/admin.py
 msgid "These notifications are also the change history of the records. When the choices below reach nobody, the superusers still receive them. Recipients without permission to view this model get the changes but cannot open the record."
 msgstr "Thông báo cũng là lịch sử thay đổi của bản ghi. Nếu các lựa chọn bên dưới không tới được ai, superuser vẫn nhận. Người nhận không có quyền xem model này vẫn thấy nội dung thay đổi nhưng không mở được bản ghi."
@@ -3742,6 +3799,57 @@ msgstr "Tệp này lớn hơn %(size)s MB. Hãy chọn tệp nhỏ hơn."
 #: whiteneuron/base/sealed.py
 msgid "This record cannot be found."
 msgstr "Không tìm thấy bản ghi này."
+#: whiteneuron/feedbacks
+msgid "Reject"
+msgstr "Từ chối"
+
+#: whiteneuron/feedbacks
+msgid "Reopen"
+msgstr "Mở lại"
+
+#: whiteneuron/feedbacks
+msgid "Mark this feedback as in progress?"
+msgstr "Chuyển phản hồi này sang đang xử lý?"
+
+#: whiteneuron/feedbacks
+msgid "Reject this feedback?"
+msgstr "Từ chối phản hồi này?"
+
+#: whiteneuron/feedbacks
+msgid "Reopen this feedback?"
+msgstr "Mở lại phản hồi này?"
+
+#: whiteneuron/feedbacks
+msgid "Note for the sender"
+msgstr "Ghi chú gửi người phản hồi"
+
+#: whiteneuron/feedbacks
+msgid "You wrote"
+msgstr "Bạn đã viết"
+
+#: whiteneuron/feedbacks/admin.py
+#, python-format
+msgid "Feedback changed to %(status)s."
+msgstr "Đã chuyển phản hồi sang %(status)s."
+
+#: whiteneuron/feedbacks/services.py
+#, python-format
+msgid "%(count)d feedback: %(title)s"
+msgid_plural "%(count)d feedbacks: %(title)s"
+msgstr[0] "%(count)d phản hồi: %(title)s"
+
+#: whiteneuron/feedbacks/services.py
+msgctxt "feedback about a record"
+msgid "About"
+msgstr "Về bản ghi"
+
+#: whiteneuron/feedbacks/admin.py
+msgid "Resolve"
+msgstr "Giải quyết"
+
+#: whiteneuron/feedbacks/admin.py
+msgid "Resolve this feedback?"
+msgstr "Giải quyết phản hồi này?"
 
 #~ msgid "day"
 #~ msgstr "ngày"
