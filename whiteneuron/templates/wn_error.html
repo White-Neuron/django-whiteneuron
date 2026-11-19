@@ -1,0 +1,31 @@
+{% extends "whiteneuron/error_base.html" %}
+{% load i18n wn_errors %}
+{% comment %}
+    One layout for the error pages: {% block code %}, {% block heading %}, {% block text %},
+    {% block actions %}, and {% block accent %} (an "r, g, b" colour). It extends a template
+    with the package's own name, not "base.html", which projects often have for their site.
+{% endcomment %}
+{% block title %}{% block code_title %}{% endblock %} – {% wn_site_name %}{% endblock %}
+{% block styles %}<style>:root { --accent: {% block accent %}120, 119, 198{% endblock %}; }</style>{% endblock %}
+{% block content %}
+{% wn_home_url as home_url %}{% wn_support_url as support_url %}
+<section class="error-section" id="error">
+    <div class="error-box">
+        <div class="error-icon" aria-hidden="true">{% block icon %}
+            <svg width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5"/><circle cx="12" cy="16" r=".75"/></svg>
+        {% endblock %}</div>
+        <h1 class="error-code">{% block code %}{% endblock %}</h1>
+        <h2 class="error-title">{% block heading %}{% endblock %}</h2>
+        <p class="error-text">{% block text %}{% endblock %}</p>
+        <div class="error-actions">
+            {% block actions %}
+                <a href="{{ home_url }}" class="error-btn {% block home_variant %}primary{% endblock %}">{% translate "Back to home" %}</a>
+            {% endblock %}
+            {% if support_url %}
+                <a href="{{ support_url }}" class="error-btn">{% translate "Contact support" %}</a>
+            {% endif %}
+        </div>
+        <p class="error-site">{% wn_site_name %}</p>
+    </div>
+</section>
+{% endblock %}

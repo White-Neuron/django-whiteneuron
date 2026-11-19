@@ -966,6 +966,11 @@ VERSION = environ.get("VERSION", "0.3.2")
 # Shown on the admin "About" page (/admin/about/) with VERSION
 RELEASE_DATE = environ.get("RELEASE_DATE")  # ISO date, e.g. 2026-10-15
 BUILD_ID = environ.get("BUILD_ID") or environ.get("GIT_COMMIT")
+# Error pages (400/403/404/429/500, CSRF): "Back to home" goes to WN_HOME_URL (default: the
+# admin index); a "Contact support" button appears only when WN_SUPPORT_URL is set
+# (a page or a mailto: link)
+WN_HOME_URL = environ.get("WN_HOME_URL") or None
+WN_SUPPORT_URL = environ.get("WN_SUPPORT_URL") or None
 # Header label instead of Development / Production, e.g. "Staging"
 WN_ENVIRONMENT_LABEL = environ.get("WN_ENVIRONMENT_LABEL") or None
 # How User.get_full_name() orders names, for every viewer: "family_first" (Nguyễn Văn An,
