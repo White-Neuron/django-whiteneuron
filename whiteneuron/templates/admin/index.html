@@ -1,6 +1,6 @@
 {% extends 'admin/base_site.html' %}
 
-{% load i18n unfold %}
+{% load i18n unfold wn_heartbeats %}
 
 {% block breadcrumbs %}{% endblock %}
 
@@ -18,6 +18,19 @@
 
 {% block content %}
     {% component "unfold/components/container.html" %}
+        {# A critical background job has stopped: say so first, to those who can act (#91) #}
+        {% wn_late_critical_heartbeats as late_jobs %}
+        {% if late_jobs %}
+            <div class="ui-alert ui-alert-error mb-4" role="alert" id="wn-late-jobs">
+                <span class="material-symbols-outlined">heart_broken</span>
+                <div>
+                    {% for job in late_jobs %}
+                        <div><strong>{{ job.label }}</strong>: {% if job.last_beat_at %}{% blocktranslate with since=job.last_beat_at|timesince %}has not run for {{ since }}.{% endblocktranslate %}{% else %}{% translate "has not run since the server started." %}{% endif %} {{ job.consequence }}</div>
+                    {% endfor %}
+                    <a class="underline" href="{% url 'admin:monitoring_metricsample_changelist' %}#heartbeats">{% translate "Open server monitoring" %}</a>
+                </div>
+            </div>
+        {% endif %}
         {# Phones: the two tab rows stack, and each scrolls inside its own strip instead of #}
         {# pushing the page sideways (#80) #}
         {% component "unfold/components/flex.html" with col=1 class="gap-3 mb-2 sm:flex-row sm:items-center" %}

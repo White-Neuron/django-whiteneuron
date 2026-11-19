@@ -3,7 +3,7 @@ import time
 
 from django.core.management.base import BaseCommand
 
-from whiteneuron.monitoring import collector
+from whiteneuron.monitoring import collector, heartbeats
 
 
 class Command(BaseCommand):
@@ -30,6 +30,7 @@ class Command(BaseCommand):
                 # cpu_interval=1 measures CPU over one second instead of since the last call
                 collector.record(collector.snapshot(cpu_interval=1), force=True, interval=interval)
                 collector.beat(interval=interval)
+                heartbeats.beat("monitoring_collector")
             except Exception as exc:  # keep the collector alive (DB restart, etc.)
                 self.stderr.write(f"collect failed: {exc}")
             if once:

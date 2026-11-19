@@ -12,7 +12,7 @@ from unfold.admin import ModelAdmin
 
 from whiteneuron.base.sites import base_admin_site
 
-from . import collector, stats
+from . import collector, heartbeats, stats
 from .models import MetricSample
 
 REFRESH_CHOICES = ["off", "5s", "10s", "30s", "1m", "5m"]
@@ -75,6 +75,7 @@ class MetricSampleAdmin(ModelAdmin):
             "host": request.GET.get("host") or collector.host_name(),
             "interval": int(collector.conf("INTERVAL")),
             "i18n_strings": {k: str(v) for k, v in JS_STRINGS.items()},
+            "heartbeats": heartbeats.statuses(),  # [] unless the project lists jobs (WN_HEARTBEATS)
             **(extra_context or {}),
         }
         return TemplateResponse(request, "admin/monitoring/dashboard.html", context)
