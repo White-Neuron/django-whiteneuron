@@ -58,9 +58,36 @@ class JsonApiErrorTests(TestCase):
 
     def test_unknown_paths_are_json_404(self):
         for path in ("/api/notifications/abc/", "/api/notifications/1/nope/", "/api/system/nope/",
-                     "/api/announcement/x/", "/api/nothing-here/"):
+                     "/api/announcement/x/"):
             self.assertJsonError(self.client.get(path), 404)
+
+    def test_project_routes_after_the_api_include_are_reached(self):
+        # a project's own api/… URL declared after include("whiteneuron.api_urls")
+        with self.settings(ROOT_URLCONF=__name__):
+            response = self.client.get("/api/project-endpoint/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b"project")
+
+    def test_anonymous_post_is_401_not_a_csrf_403(self):
+        client = Client(enforce_csrf_checks=True)
+        self.assertJsonError(client.post(reverse("wn_notifications:read", args=[self.note.pk])), 401)
 
     def test_paths_outside_the_api_keep_the_html_404(self):
         response = self.client.get("/admin/nothing-here-at-all/")
         self.assertNotEqual(response.get("Content-Type"), "application/json")
+
+
+def _urlpatterns():
+    from django.http import HttpResponse
+    from django.urls import include, path
+
+    from .sites import base_admin_site
+
+    return [
+        path("admin/", base_admin_site.urls),
+        path("api/", include("whiteneuron.api_urls")),
+        path("api/project-endpoint/", lambda request: HttpResponse("project")),
+    ]
+
+
+urlpatterns = _urlpatterns()

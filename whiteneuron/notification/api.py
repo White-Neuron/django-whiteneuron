@@ -136,23 +136,26 @@ def _set_read(request, pk, value):
     return json_response({"id": pk, "is_read": value, "unread_count": _unread_count(request)})
 
 
+# login first: an anonymous POST is a 401, not a CSRF 403
+@api_login_required
 @api_csrf_protect
 @require_POST
-@api_login_required
 def notification_read(request, pk):
     return _set_read(request, pk, True)
 
 
+# login first: an anonymous POST is a 401, not a CSRF 403
+@api_login_required
 @api_csrf_protect
 @require_POST
-@api_login_required
 def notification_unread(request, pk):
     return _set_read(request, pk, False)
 
 
+# login first: an anonymous POST is a 401, not a CSRF 403
+@api_login_required
 @api_csrf_protect
 @require_POST
-@api_login_required
 def notification_read_all(request):
     updated = _own(request).filter(is_read=False).update(is_read=True)
     _changed(request)
@@ -208,9 +211,10 @@ def announcement(request):
     }})
 
 
+# login first: an anonymous POST is a 401, not a CSRF 403
+@api_login_required
 @api_csrf_protect
 @require_POST
-@api_login_required
 def announcement_seen(request):
     data = current_announcement(request)
     version = _announcement_version(data) if data else ""

@@ -175,8 +175,8 @@ if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_SSL_REDIRECT = True
     # internal probes (Docker / k8s / load balancer) call these over plain HTTP; matches
-    # path("api/", include("whiteneuron.api_urls")) — adjust if mounted elsewhere
-    SECURE_REDIRECT_EXEMPT = [r"^api/system/(health|ready)/$"]
+    # path("api/v1/", include("whiteneuron.api_urls")) or "api/" — adjust if mounted elsewhere
+    SECURE_REDIRECT_EXEMPT = [r"^api/(v\d+/)?system/(health|ready)/$"]
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True

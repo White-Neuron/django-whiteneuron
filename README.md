@@ -379,7 +379,7 @@ To ship a smaller CSS bundle, compile only some themes: `WN_THEMES="nord,dracula
 Small JSON endpoints to check a deployment quickly and to read the logged-in user's notifications and release notes from a frontend or mobile app. Mount them once in the project `urls.py` (they are not part of `whiteneuron.base.urls`, which projects often mount under `/admin/`):
 
 ```python
-path("api/", include("whiteneuron.api_urls")),
+path("api/v1/", include("whiteneuron.api_urls")),
 ```
 
 Each group can also be mounted on its own: `whiteneuron.base.system_urls`, `whiteneuron.notification.api_urls`, `whiteneuron.notification.announcement_urls`.
@@ -396,11 +396,11 @@ Each group can also be mounted on its own: `whiteneuron.base.system_urls`, `whit
 Like the About page, nothing exposes host names, OS, IP addresses, paths or connection settings, and package / runtime versions are not public. `health/` and `ready/` skip the IP rate limit (the IP / user agent blacklist still applies), and the probes, `version/` and `notifications/unread-count/` are not written to User Activity (`info/`, a privileged call, is). Readiness errors give the exception class only; the details are in the log. Both follow the URL names, so they hold wherever the URLs are mounted.
 
 ```bash
-curl https://example.com/api/system/ready/
-curl -H "Authorization: Bearer $SYSTEM_API_TOKEN" https://example.com/api/system/info/
+curl https://example.com/api/v1/system/ready/
+curl -H "Authorization: Bearer $SYSTEM_API_TOKEN" https://example.com/api/v1/system/info/
 ```
 
-With `DEBUG=False` the package settings set `SECURE_REDIRECT_EXEMPT = [r"^api/system/(health|ready)/$"]`, so internal probes can use plain HTTP; change it if you mount the API under another prefix.
+With `DEBUG=False` the package settings set `SECURE_REDIRECT_EXEMPT = [r"^api/(v\d+/)?system/(health|ready)/$"]`, so internal probes can use plain HTTP under `api/` or `api/v1/`; change it if you mount the API under another prefix.
 
 ### Notifications (logged-in user)
 
@@ -412,6 +412,8 @@ With `DEBUG=False` the package settings set `SECURE_REDIRECT_EXEMPT = [r"^api/sy
 | `POST /api/notifications/<id>/read/` · `<id>/unread/` · `read-all/` | mark as read / unread / all read; the sidebar badge cache is cleared |
 
 `content` is HTML sanitized as in the admin, and `obj_link` is `null` unless it points to this site.
+
+Lists are paginated: `count`, `page`, `page_size`, `num_pages`, `results`, plus `next` and `previous`, the absolute URLs of the neighbouring pages (other query parameters kept), or `null` at either end. Follow them rather than building page URLs.
 
 ### Announcement (release notes)
 
@@ -432,6 +434,10 @@ if (announcement && !announcement.is_seen) {
 
 Notifications and announcement need a logged-in user (`401` otherwise); a user only reaches their own notifications (`404` for others); `POST` needs the CSRF token.
 
+### Versioning
+
+The version is the prefix the project mounts the API under: mount it at `api/v1/` (above), and `/api/v1/…` is version 1 for as long as this package keeps it compatible. Within v1, fields may be added but none is removed or changes meaning; a breaking change would come as a separate URLconf for `api/v2/`, mounted next to v1 for a transition period. Projects that already mount it at `api/` can keep doing so (the URL names, used by the package itself, are the same), and move to `api/v1/` before their first external client. Move rather than mount both: the same URLconf mounted twice makes Django warn `urls.W005` (non-unique namespaces) and `reverse()` returns only one of the two addresses.
+
 ### Errors
 
 Every error under the API is JSON, `{"detail": "..."}`, with the matching status:
@@ -439,12 +445,12 @@ Every error under the API is JSON, `{"detail": "..."}`, with the matching status
 | Status | When |
 |---|---|
 | `401` | not logged in |
-| `403` | CSRF check failed on a `POST` (`"CSRF failed: <reason>"`) |
+| `403` | CSRF check failed on a `POST` by a logged-in user (`"CSRF failed: <reason>"`) |
 | `404` | no such object, or a path that matches no endpoint (e.g. a non-numeric id) |
-| `405` | wrong method; `Allow` lists the right ones (`GET` endpoints also answer `HEAD`) |
+| `405` | wrong method; the body adds `"allowed": [...]` and the `Allow` header lists the same methods (`GET` endpoints also answer `HEAD`) |
 | `429` | rate limited; `Retry-After` says how many seconds to wait |
 
-A path without its trailing slash is a `404` too (no redirect), so call the URLs exactly as listed.
+A path under `system/`, `notifications/` or `announcement/` that matches no endpoint, or lacks its trailing slash, is a JSON `404` too (no redirect), so call the URLs exactly as listed. Other paths under the mount prefix are left to the project's own URLs.
 
 ## Middleware & Security
 
