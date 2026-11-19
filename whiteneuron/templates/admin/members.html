@@ -1,0 +1,59 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% block breadcrumbs %}{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-6">
+    {% if not roles %}
+        <div class="ui-alert ui-alert-info">{% translate "No roles are declared. List them in WN_ROLES (see the README, Roles declared in code)." %}</div>
+    {% else %}
+        <section>
+            <h2 class="font-semibold text-lg mb-3">{% translate "Roles" %}</h2>
+            <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {% for item in roles %}
+                    <div class="border border-base-200 dark:border-base-700 rounded-default p-4" id="role-{{ item.role.key }}">
+                        <div class="font-semibold">{{ item.role.name|default:item.role.key }}</div>
+                        {% if item.role.summary %}<p class="text-sm mt-1 opacity-80">{{ item.role.summary }}</p>{% endif %}
+                        <p class="text-xs mt-2 opacity-60">{% blocktranslate count counter=item.count %}{{ counter }} permission{% plural %}{{ counter }} permissions{% endblocktranslate %}{% if not item.allowed %} · {% translate "more than you have: you cannot give it" %}{% endif %}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section>
+            <h2 class="font-semibold text-lg mb-3">{% translate "Members" %}</h2>
+            <div class="overflow-x-auto">
+                <table class="ui-table w-full">
+                    <thead><tr><th>{% translate "Member" %}</th><th>{% translate "Role" %}</th></tr></thead>
+                    <tbody>
+                    {% for row in rows %}
+                        <tr id="member-{{ row.member.pk }}">
+                            <td>
+                                <div class="font-medium">{{ row.member.full_name|default:row.member.username }}</div>
+                                <div class="text-xs opacity-60">@{{ row.member.username }}</div>
+                            </td>
+                            <td>
+                                {% if row.locked or row.above %}
+                                    <span class="text-sm opacity-60">{% if row.member.is_superuser %}{% translate "Full system access" %}{% elif row.locked %}{% translate "Service account" %}{% else %}{% for item in roles %}{% if item.role.key == row.role %}{{ item.role.name|default:item.role.key }}{% endif %}{% endfor %} · {% translate "more than you have" %}{% endif %}</span>
+                                {% else %}
+                                    <form method="post" class="flex flex-wrap items-center gap-2">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="member" value="{{ row.member.pk }}">
+                                        <select name="role" class="ui-select ui-select-sm" aria-label="{% translate 'Role' %}">
+                                            <option value="">{% translate "No role" %}</option>
+                                            {% for item in roles %}
+                                                <option value="{{ item.role.key }}"{% if item.role.key == row.role %} selected{% endif %}{% if not item.allowed and item.role.key != row.role %} disabled{% endif %}>{{ item.role.name|default:item.role.key }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <button type="submit" class="ui-btn ui-btn-sm">{% translate "Save" %}</button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    {% endif %}
+</div>
+{% endblock %}
