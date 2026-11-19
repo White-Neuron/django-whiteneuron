@@ -31,11 +31,10 @@ from django.core.cache import caches
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.utils import timezone
 from django.views.decorators.cache import never_cache
-from django.views.decorators.http import require_GET
 
 import whiteneuron
 
-from .api_utils import has_system_access, json_response
+from .api_utils import has_system_access, json_response, require_GET
 from .app_info import BUILD_ID_LENGTH, package_version, process_started
 
 logger = logging.getLogger(__name__)

@@ -13,4 +13,6 @@ urlpatterns = [
     path("system/", include("whiteneuron.base.system_urls")),
     path("notifications/", include("whiteneuron.notification.api_urls")),
     path("announcement/", include("whiteneuron.notification.announcement_urls")),
+    # No catch-all here: projects mount their own api/… routes next to this one, and a
+    # catch-all would answer them with a 404. Each group above ends with its own (#88 review).
 ]
