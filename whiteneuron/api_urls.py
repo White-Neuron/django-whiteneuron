@@ -1,8 +1,9 @@
 """All of the package's JSON endpoints, for a project to mount under one prefix:
 
-    path("api/", include("whiteneuron.api_urls")),
+    path("api/v1/", include("whiteneuron.api_urls")),
 
-gives /api/system/…, /api/notifications/… and /api/announcement/…. Each part can
+gives /api/v1/system/…, /api/v1/notifications/… and /api/v1/announcement/… (the version
+is the mount prefix, see the README's "Versioning"). Each part can
 also be mounted on its own (whiteneuron.base.system_urls,
 whiteneuron.notification.api_urls, whiteneuron.notification.announcement_urls).
 """

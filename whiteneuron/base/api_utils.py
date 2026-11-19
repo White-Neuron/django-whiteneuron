@@ -54,8 +54,19 @@ def int_param(request, name, default, minimum=1, maximum=None):
     return min(value, maximum) if maximum is not None else value
 
 
+def _page_url(request, page_number):
+    """This request's absolute URL with ``page`` set (other query parameters kept)."""
+    query = request.GET.copy()
+    query["page"] = page_number
+    return request.build_absolute_uri(f"{request.path}?{query.urlencode()}")
+
+
 def paginate(request, queryset, serialize):
-    """Page a queryset with ``?page`` / ``?page_size`` (max ``MAX_PAGE_SIZE``)."""
+    """Page a queryset with ``?page`` / ``?page_size`` (max ``MAX_PAGE_SIZE``).
+
+    ``next`` / ``previous`` are absolute URLs (filters kept), or ``None`` at either end, so
+    a client follows them instead of building page URLs itself.
+    """
     from django.core.paginator import EmptyPage, Paginator
 
     page_size = int_param(request, "page_size", DEFAULT_PAGE_SIZE, maximum=MAX_PAGE_SIZE)
@@ -65,10 +76,16 @@ def paginate(request, queryset, serialize):
         results = [serialize(obj) for obj in paginator.page(page_number).object_list]
     except EmptyPage:
         results = []
+    num_pages = paginator.num_pages if paginator.count else 0
+    has_next = page_number < num_pages
+    # past the end: "previous" points at the last page that has results
+    previous = min(page_number - 1, num_pages) if page_number > 1 else 0
     return {
         "count": paginator.count,
         "page": page_number,
         "page_size": page_size,
         "num_pages": paginator.num_pages,
+        "next": _page_url(request, page_number + 1) if has_next else None,
+        "previous": _page_url(request, previous) if previous >= 1 else None,
         "results": results,
     }
