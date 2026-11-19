@@ -53,3 +53,25 @@
         order: -1;
     }
 }
+
+/* Dashboard tab strips (admin/index.html): one line per tab, the strip scrolls on a phone
+   instead of the page (#80) */
+.wn-nav-scroll > a {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* Change forms on a phone (#80): a fieldset is min-width: min-content by default, so one
+   long unbreakable value (the password hash) widened the whole form to ~850px. The read-only
+   password line shrinks and cuts its text, and "Reset password" goes under it. */
+fieldset.module {
+    min-width: 0;
+}
+div:has(> #id_password.readonly) {
+    flex-wrap: wrap;
+    min-width: 0;
+}
+#id_password.readonly {
+    min-width: 0;
+    flex: 1 1 16rem;
+}

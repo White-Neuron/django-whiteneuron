@@ -18,16 +18,21 @@
 
 {% block content %}
     {% component "unfold/components/container.html" %}
-        {% component "unfold/components/flex.html" with class="gap-4" %}
-            {% component "unfold/components/navigation.html" with items=navigation %}{% endcomponent %}
+        {# Phones: the two tab rows stack, and each scrolls inside its own strip instead of #}
+        {# pushing the page sideways (#80) #}
+        {% component "unfold/components/flex.html" with col=1 class="gap-3 mb-2 sm:flex-row sm:items-center" %}
+            {% component "unfold/components/navigation.html" with class="wn-nav-scroll max-w-full overflow-x-auto" items=navigation %}{% endcomponent %}
 
-            {% component "unfold/components/navigation.html" with class="ml-auto" items=filters %}{% endcomponent %}
+            {% component "unfold/components/navigation.html" with class="wn-nav-scroll max-w-full overflow-x-auto sm:ml-auto" items=filters %}{% endcomponent %}
         {% endcomponent %}
 
-        {% component "unfold/components/flex.html" with class="gap-8 mb-8 flex-col lg:flex-row" %}
+        {# col=1: the flex component adds flex-row otherwise, and the cards stayed side by side #}
+        {# on a phone; the label sits on its own line, it covered the card title (#80) #}
+        {% component "unfold/components/flex.html" with col=1 class="gap-8 mb-8 lg:flex-row" %}
                 {% for stats in kpi %}
                     {% trans stats.label as label %}
-                    {% component "unfold/components/card.html" with class="" label=label footer=stats.footer %}
+                    {% component "unfold/components/card.html" with class="min-w-0" footer=stats.footer %}
+                        <div class="mb-2">{% component "unfold/helpers/label.html" with variant="primary" text=label %}{% endcomponent %}</div>
                         {% component "unfold/components/text.html" %}
                             {{ stats.title }}
                         {% endcomponent %}   
