@@ -3779,6 +3779,26 @@ msgstr[0] "Đã chuyển %(count)d phản hồi sang %(status)s."
 msgid "These notifications are also the change history of the records. When the choices below reach nobody, the superusers still receive them. Recipients without permission to view this model get the changes but cannot open the record."
 msgstr "Thông báo cũng là lịch sử thay đổi của bản ghi. Nếu các lựa chọn bên dưới không tới được ai, superuser vẫn nhận. Người nhận không có quyền xem model này vẫn thấy nội dung thay đổi nhưng không mở được bản ghi."
 
+#: whiteneuron/base/sealed.py
+msgid "The page was open too long. Reload it, then decide again."
+msgstr "Trang đã mở quá lâu. Hãy tải lại trang rồi quyết định lại."
+
+#: whiteneuron/base/sealed.py
+msgid "This action needs the page it was opened from. Reload the page, then decide again."
+msgstr "Hành động này cần được mở từ trang của bản ghi. Hãy tải lại trang rồi quyết định lại."
+
+#: whiteneuron/base/sealed.py
+msgid "The content has changed since you opened the page. Review it, then decide again."
+msgstr "Nội dung đã thay đổi từ lúc bạn mở trang. Hãy xem lại rồi quyết định."
+
+#: whiteneuron/base/modeladmin.py
+#, python-format
+msgid "This file is larger than %(size)s MB. Choose a smaller file."
+msgstr "Tệp này lớn hơn %(size)s MB. Hãy chọn tệp nhỏ hơn."
+
+#: whiteneuron/base/sealed.py
+msgid "This record cannot be found."
+msgstr "Không tìm thấy bản ghi này."
 #: whiteneuron/feedbacks
 msgid "Reject"
 msgstr "Từ chối"

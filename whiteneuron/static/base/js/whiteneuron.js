@@ -384,3 +384,32 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
+
+// File size checked before upload (#93): ModelAdmin.upload_max_mb / WN_UPLOAD_MAX_MB put the
+// limit on the input. A file over it is dropped at once with a message at the field, so no
+// request goes out and nothing typed in the form is lost to a 413 page.
+document.addEventListener("change", function (event) {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement) || input.type !== "file" || !input.dataset.wnMaxBytes) {
+        return;
+    }
+    const max = parseInt(input.dataset.wnMaxBytes, 10);
+    const tooBig = Array.prototype.some.call(input.files || [], function (file) {
+        return file.size > max;
+    });
+    let note = input.parentElement && input.parentElement.querySelector(".wn-file-too-big");
+    if (!tooBig) {
+        if (note) {
+            note.remove();
+        }
+        return;
+    }
+    input.value = "";
+    if (!note) {
+        note = document.createElement("p");
+        note.className = "wn-file-too-big text-red-600 dark:text-red-400 text-sm mt-1";
+        note.setAttribute("role", "alert");
+        input.insertAdjacentElement("afterend", note);
+    }
+    note.textContent = input.dataset.wnMaxMessage || "File too large.";
+});
