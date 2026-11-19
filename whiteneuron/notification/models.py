@@ -128,15 +128,18 @@ class Notification(models.Model):
 
     @classmethod
     def notify_superusers(cls, *, title, content="", action=None, flag="info",
-                          obj_link=None, changed_data=None, action_by=None):
-        """Create one notification per active superuser and broadcast it once.
+                          obj_link=None, changed_data=None, action_by=None, model=None):
+        """Create one notification per recipient and broadcast it once.
+
+        Recipients: ``recipients_for(model, action)`` - the "Notifications config" rows of
+        that model and event, or every active superuser when there is none (or no ``model``).
 
         ``title`` is plain text (escaped wherever it is rendered); ``content`` must
         already be safe HTML (build it with ``format_html``). Rows are inserted with
         a single ``bulk_create`` and the websocket broadcast runs after the
         transaction commits, so a failing channel layer never breaks the save.
         """
-        user_ids = list(User.objects.filter(is_superuser=True, is_active=True).values_list("id", flat=True))
+        user_ids = sorted(recipients_for(model, action))
         if not user_ids:
             return []
         if action_by is not None and not getattr(action_by, "pk", None):
@@ -161,6 +164,91 @@ class Notification(models.Model):
                                 user_ids=user_ids or [self.user_id])
         except Exception:  # channel layer down: the notification row is still stored
             logger.warning("Notification broadcast failed", exc_info=True)
+
+# ── Recipients from "Notifications config" (#36) ───────────────────────────
+# A config row's event_type is create / update / delete / all; "restore" counts as update.
+_EVENT_FOR_ACTION = {"create": "create", "update": "update", "delete": "delete", "restore": "update"}
+_CONFIG_CACHE_VERSION_KEY = "wn:notification_config:version"
+_CONFIG_CACHE_TIMEOUT = 300
+
+
+def _superuser_ids():
+    return set(User.objects.filter(is_superuser=True, is_active=True).values_list("id", flat=True))
+
+
+def _config_version():
+    from django.core.cache import caches
+
+    try:
+        return caches["default"].get_or_set(_CONFIG_CACHE_VERSION_KEY, 1, None)
+    except Exception:
+        return None
+
+
+def recipients_for(model, action):
+    """User ids to notify about ``action`` on ``model`` (a class or instance).
+
+    With "Notifications config" rows for that model and event (or "all"): the union of the
+    active superusers (send_to_admin), the listed users (send_to_user) and the members of the
+    listed groups (send_to_group_user). Without any: every active superuser, as before.
+    Superusers always come from the database; the config part is cached until a config changes.
+    """
+    event = _EVENT_FOR_ACTION.get(action or "")
+    if model is None or event is None:
+        return _superuser_ids()
+    from django.contrib.contenttypes.models import ContentType
+    from django.core.cache import caches
+
+    try:
+        content_type = ContentType.objects.get_for_model(model, for_concrete_model=True)
+    except Exception:
+        return _superuser_ids()
+    version = _config_version()
+    cache_key = f"wn:notification_config:{version}:{content_type.pk}:{event}"
+    cached = caches["default"].get(cache_key) if version is not None else None
+    if cached is None:
+        configs = list(NotificationConfig.objects.filter(model=content_type, event_type__in=[event, "all"])
+                       .prefetch_related("users", "group_users"))
+        if not configs:
+            cached = {"configured": False}
+        else:
+            to_admin, users = False, set()
+            for config in configs:
+                to_admin = to_admin or config.send_to_admin
+                if config.send_to_user:
+                    users.update(u.pk for u in config.users.all())
+                if config.send_to_group_user:
+                    users.update(User.objects.filter(groups__in=config.group_users.all()).values_list("id", flat=True))
+            cached = {"configured": True, "admin": to_admin, "users": sorted(users)}
+        if version is not None:
+            caches["default"].set(cache_key, cached, _CONFIG_CACHE_TIMEOUT)
+    if not cached["configured"]:
+        return _superuser_ids()
+    ids = set(User.objects.filter(pk__in=cached["users"], is_active=True).values_list("id", flat=True))
+    if cached["admin"]:
+        ids |= _superuser_ids()
+    return ids
+
+
+def _config_changed(**kwargs):
+    from django.core.cache import caches
+
+    try:
+        caches["default"].incr(_CONFIG_CACHE_VERSION_KEY)
+    except Exception:  # not set yet, or a cache without incr: start a new version
+        try:
+            caches["default"].set(_CONFIG_CACHE_VERSION_KEY, 2, None)
+        except Exception:
+            pass
+
+
+from django.db.models.signals import m2m_changed, post_delete  # noqa: E402
+
+post_save.connect(_config_changed, sender=NotificationConfig, dispatch_uid="wn_notification_config_saved")
+post_delete.connect(_config_changed, sender=NotificationConfig, dispatch_uid="wn_notification_config_deleted")
+m2m_changed.connect(_config_changed, sender=NotificationConfig.users.through, dispatch_uid="wn_notification_config_users")
+m2m_changed.connect(_config_changed, sender=NotificationConfig.group_users.through, dispatch_uid="wn_notification_config_groups")
+
 
 def _clear_unread_cache(*user_ids):
     from .utils import clear_unread_cache
