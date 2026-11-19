@@ -4,6 +4,7 @@ import hmac
 
 from django.conf import settings
 from django.http import JsonResponse
+from django.middleware.csrf import CsrfViewMiddleware
 
 DEFAULT_PAGE_SIZE = 20
 MAX_PAGE_SIZE = 100
@@ -23,6 +24,59 @@ def api_login_required(view):
         return view(request, *args, **kwargs)
 
     return wrapper
+
+
+def require_methods(*methods):
+    """``require_http_methods`` that answers JSON: 405 ``{"detail": ...}`` with ``Allow``.
+
+    Django's own decorator returns an empty body, a third error shape for JSON clients (#76).
+    """
+    allowed = [m.upper() for m in methods]
+
+    def decorator(view):
+        @functools.wraps(view)
+        def wrapper(request, *args, **kwargs):
+            if request.method not in allowed:
+                response = json_response(
+                    {"detail": f'Method "{request.method}" not allowed.', "allowed": allowed}, status=405)
+                response["Allow"] = ", ".join(allowed)
+                return response
+            return view(request, *args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
+# GET also answers HEAD, as Django's require_GET does not but probes and caches expect
+require_GET = require_methods("GET", "HEAD")
+require_POST = require_methods("POST")
+
+
+class _JsonCsrfCheck(CsrfViewMiddleware):
+    def _reject(self, request, reason):
+        return json_response({"detail": f"CSRF failed: {reason}"}, status=403)
+
+
+def api_csrf_protect(view):
+    """The CSRF check of ``CsrfViewMiddleware``, failing with JSON 403 instead of Django's
+    HTML page. The view is marked exempt so the middleware leaves it to this check."""
+    check = _JsonCsrfCheck(lambda request: None)
+
+    @functools.wraps(view)
+    def wrapper(request, *args, **kwargs):
+        rejected = check.process_view(request, None, args, kwargs)
+        if rejected is not None:
+            return rejected
+        return view(request, *args, **kwargs)
+
+    wrapper.csrf_exempt = True
+    return wrapper
+
+
+def not_found(request, *args, **kwargs):
+    """JSON 404 for any path under the API that matches no endpoint (e.g. a non-numeric id)."""
+    return json_response({"detail": "Not found."}, status=404)
 
 
 def has_system_access(request):

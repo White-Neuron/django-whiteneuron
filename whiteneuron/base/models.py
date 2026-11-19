@@ -108,14 +108,36 @@ class User(AbstractUser):
             s+= ' (bot)'
         return s
 
+    # Languages that write the family name first ("Nguyễn Văn An"); others: given name first
+    FAMILY_NAME_FIRST_LANGUAGES = ("vi", "zh", "ja", "ko", "hu")
+
+    @classmethod
+    def family_name_first(cls):
+        """Whether names are written family name first on this site: ``WN_NAME_ORDER``
+        ("family_first" / "given_first"), else the site's ``LANGUAGE_CODE``. A property of the
+        organisation, not of the viewer: the same person reads the same everywhere, and the
+        names stored in notifications and history all follow one order (#92 review)."""
+        from django.conf import settings
+
+        order = getattr(settings, "WN_NAME_ORDER", None)
+        if order in ("family_first", "given_first"):
+            return order == "family_first"
+        language = (getattr(settings, "LANGUAGE_CODE", "") or "").split("-")[0]
+        return language in cls.FAMILY_NAME_FIRST_LANGUAGES
+
+    def get_full_name(self):
+        """"Nguyễn Văn An" on a Vietnamese site, "Văn An Nguyễn" on an English one (see
+        ``family_name_first``). One part alone is returned as it is. Used by Unfold's header
+        and avatar, the user cards, notifications and e-mails (#82)."""
+        first, last = (self.first_name or "").strip(), (self.last_name or "").strip()
+        parts = (last, first) if self.family_name_first() else (first, last)
+        return " ".join(p for p in parts if p)
+
     @property
     def full_name(self):
-        s= ''
-        if self.first_name and self.last_name:
-            s= f"{self.last_name} {self.first_name}"
-        if s:
-            if self.is_bot:
-                s+= ' (bot)'
+        s = self.get_full_name()
+        if s and self.is_bot:
+            s += ' (bot)'
         return s
     
     # ── Unfold avatar helper (unfold/helpers/avatar.html, unfold >= 0.105) ──

@@ -44,3 +44,12 @@
 .dark .btn-delete img {
     filter: invert(1) brightness(1.1);
 }
+
+/* Change form on a phone: Unfold stacks the submit row bottom-up, so Close / Delete came
+   first, a full-width red button above Save. Put that group last, under the save buttons
+   (#82). From lg the row is horizontal and unchanged. */
+@media (max-width: 1023.98px) {
+    #submit-row div.mr-auto {
+        order: -1;
+    }
+}

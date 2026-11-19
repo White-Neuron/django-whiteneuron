@@ -28,9 +28,9 @@ from django.template.loader import render_to_string
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.module_loading import import_string
 from django.views.decorators.cache import never_cache
-from django.views.decorators.http import require_GET, require_POST
-
-from whiteneuron.base.api_utils import api_login_required, json_response, paginate
+from whiteneuron.base.api_utils import (
+    api_csrf_protect, api_login_required, json_response, paginate, require_GET, require_POST,
+)
 from whiteneuron.base.html_sanitize import sanitize_html
 
 from .models import AnnouncementReceipt, Notification
@@ -136,20 +136,26 @@ def _set_read(request, pk, value):
     return json_response({"id": pk, "is_read": value, "unread_count": _unread_count(request)})
 
 
-@require_POST
+# login first: an anonymous POST is a 401, not a CSRF 403
 @api_login_required
+@api_csrf_protect
+@require_POST
 def notification_read(request, pk):
     return _set_read(request, pk, True)
 
 
-@require_POST
+# login first: an anonymous POST is a 401, not a CSRF 403
 @api_login_required
+@api_csrf_protect
+@require_POST
 def notification_unread(request, pk):
     return _set_read(request, pk, False)
 
 
-@require_POST
+# login first: an anonymous POST is a 401, not a CSRF 403
 @api_login_required
+@api_csrf_protect
+@require_POST
 def notification_read_all(request):
     updated = _own(request).filter(is_read=False).update(is_read=True)
     _changed(request)
@@ -205,8 +211,10 @@ def announcement(request):
     }})
 
 
-@require_POST
+# login first: an anonymous POST is a 401, not a CSRF 403
 @api_login_required
+@api_csrf_protect
+@require_POST
 def announcement_seen(request):
     data = current_announcement(request)
     version = _announcement_version(data) if data else ""

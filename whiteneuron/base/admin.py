@@ -110,7 +110,7 @@ class ClockedScheduleAdmin(BaseClockedScheduleAdmin, ModelAdmin):
 class TagGenericTabularInline(TabularInline, GenericTabularInline):
     model = Tag
 
-from .utils import send_email_login, make_random_password
+from .utils import anonymous_user_name, send_email_login, make_random_password
 class UserCreationForm(UserCreationForm):
     # password is not required
     def __init__(self, *args, **kwargs):
@@ -205,8 +205,12 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
         badges_html = ' '.join(badges)
         
         # Tên đầy đủ hoặc fallback
-        display_name = escape(obj.full_name or obj.username or _('Unknown User'))
-        username_display = escape(obj.username) if obj.username else _('No username')
+        # Name, then "@username"; without a name the username once, then the e-mail (#82: "root / root")
+        if obj.full_name:
+            display_name, username_display = escape(obj.full_name), escape(f"@{obj.username}")
+        else:
+            display_name = escape(obj.username or _('Unknown User'))
+            username_display = escape(obj.email or "")
 
         role= ""
         if obj.is_superuser:
@@ -243,6 +247,11 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
 """
         return mark_safe(string)
     grid_item_header.short_description = "Header"
+
+    def get_queryset(self, request):
+        # django-guardian's AnonymousUser is a system row, not a person: hidden from the list,
+        # the count, autocomplete and the bulk actions (#82)
+        return super().get_queryset(request).exclude(username=anonymous_user_name())
 
     form = UserChangeForm
     add_form = UserCreationForm

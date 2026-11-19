@@ -3526,6 +3526,17 @@ msgstr "Đã có lỗi xảy ra"
 #: whiteneuron/templates (error pages)
 msgid "The error has been recorded. Try again in a moment; if it keeps happening, contact your administrator."
 msgstr "Lỗi đã được ghi lại. Hãy thử lại sau ít phút; nếu vẫn gặp lỗi, hãy liên hệ quản trị viên."
+#: django/contrib/auth/forms.py (Django 6, not in its Vietnamese catalog)
+msgid "Reset password"
+msgstr "Đặt lại mật khẩu"
+
+#: django/contrib/auth/forms.py (Django 6, not in its Vietnamese catalog)
+msgid "Set password"
+msgstr "Đặt mật khẩu"
+
+#: django/contrib/auth/forms.py (Django 6, not in its Vietnamese catalog)
+msgid "Raw passwords are not stored, so there is no way to see the user’s password."
+msgstr "Mật khẩu không được lưu ở dạng đọc được, nên không thể xem mật khẩu của người dùng."
 
 #~ msgid "day"
 #~ msgstr "ngày"
