@@ -3450,6 +3450,18 @@ msgstr "Chưa đọc"
 msgid "(no data for the previous period)"
 msgstr "(kỳ trước chưa có dữ liệu)"
 
+#: django/contrib/auth/forms.py (Django 6, not in its Vietnamese catalog)
+msgid "Reset password"
+msgstr "Đặt lại mật khẩu"
+
+#: django/contrib/auth/forms.py (Django 6, not in its Vietnamese catalog)
+msgid "Set password"
+msgstr "Đặt mật khẩu"
+
+#: django/contrib/auth/forms.py (Django 6, not in its Vietnamese catalog)
+msgid "Raw passwords are not stored, so there is no way to see the user’s password."
+msgstr "Mật khẩu không được lưu ở dạng đọc được, nên không thể xem mật khẩu của người dùng."
+
 #~ msgid "day"
 #~ msgstr "ngày"
 
