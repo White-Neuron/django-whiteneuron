@@ -51,7 +51,7 @@ class ListPresentationTests(TestCase):
         FeedbackData.objects.create(user=self.root, content_type=ContentType.objects.get_for_model(Group),
                                     object_id="1", message="please check")
         html = self.client.get(reverse("admin:feedbacks_feedbackdata_changelist")).content.decode()
-        self.assertIn("Đang chờ", html)
+        self.assertIn("Đang mở", html)  # status label since #47 (was "Đang chờ")
         self.assertNotIn("icon-no.svg", html)
 
     def test_search_box_has_no_field_paths(self):

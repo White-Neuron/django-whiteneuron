@@ -1,3 +1,220 @@
-from django.test import TestCase
+"""#47: feedback workflow - statuses, one service for single and bulk changes, the badge."""
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
+from django.contrib.contenttypes.models import ContentType
+from django.core.cache import caches
+from django.test import RequestFactory, TestCase
+from django.urls import reverse
 
-# Create your tests here.
+from whiteneuron.base.testing import package_test_settings
+from whiteneuron.notification.models import Notification
+
+from . import services
+from .models import FeedbackData
+from .utils import feedback_data_badge_callback
+
+User = get_user_model()
+
+
+class FeedbackTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.root = User.objects.create_superuser("root", "r@example.com", "pw")
+        cls.alice = User.objects.create_user("alice", "a@example.com", "pw", is_staff=True)
+        cls.bob = User.objects.create_user("bob", "b@example.com", "pw", is_staff=True)
+        cls.ct = ContentType.objects.get_for_model(Group)
+
+    def setUp(self):
+        caches["default"].clear()
+        self.addCleanup(caches["default"].clear)
+
+    def _feedback(self, user, message="please check"):
+        return FeedbackData.objects.create(user=user, content_type=self.ct, object_id="1", message=message)
+
+    def _sender_notes(self, user):
+        return Notification.objects.filter(user=user, title__startswith="Feedback")
+
+
+class ServiceTests(FeedbackTestCase):
+    def test_resolve_saves_notifies_the_sender_and_reopen_works(self):
+        fb = self._feedback(self.alice)
+        from unittest import mock
+
+        with mock.patch.object(Notification, "alert") as alert, self.captureOnCommitCallbacks(execute=True):
+            self.assertTrue(services.resolve(fb, note="fixed"))
+        fb.refresh_from_db()
+        self.assertEqual((fb.status, fb.is_resolved, fb.note), ("resolved", True, "fixed"))
+        self.assertEqual(self._sender_notes(self.alice).count(), 1)
+        # the WebSocket toast goes to the sender, after commit
+        self.assertIn(mock.call(user_ids=[self.alice.pk]), alert.call_args_list)
+        self.assertTrue(services.reopen(fb))
+        fb.refresh_from_db()
+        self.assertEqual((fb.status, fb.is_resolved), ("open", False))
+        self.assertEqual(self._sender_notes(self.alice).count(), 2)
+
+    def test_no_change_no_notification(self):
+        fb = self._feedback(self.alice)
+        self.assertFalse(services.reopen(fb))
+        self.assertFalse(self._sender_notes(self.alice).exists())
+
+    def test_unknown_status_is_refused(self):
+        with self.assertRaises(ValueError):
+            services.set_status(self._feedback(self.alice), "done")
+
+
+@package_test_settings()
+class AdminWorkflowTests(FeedbackTestCase):
+    def test_bulk_resolve_notifies_every_sender_and_records_each(self):
+        feedbacks = [self._feedback(self.alice), self._feedback(self.bob), self._feedback(self.alice)]
+        history_before = Notification.objects.filter(user=self.root, action="update").count()
+        self.client.force_login(self.root)
+        self.client.post(reverse("admin:feedbacks_feedbackdata_changelist"),
+                         {"action": "mark_as_resolved", "_selected_action": [f.pk for f in feedbacks]})
+        self.assertEqual(FeedbackData.objects.filter(status="resolved").count(), 3)
+        # one message per sender, listing their feedbacks (#103 review)
+        self.assertEqual(self._sender_notes(self.alice).count(), 0)
+        alice_notes = Notification.objects.filter(user=self.alice, flag="success")
+        self.assertEqual(alice_notes.count(), 1)
+        self.assertTrue(alice_notes.get().title.startswith("2 feedbacks"))
+        self.assertEqual(self._sender_notes(self.bob).count(), 1)
+        # one history ("update") entry per record, from BaseModel.save
+        self.assertEqual(Notification.objects.filter(user=self.root, action="update").count() - history_before, 3)
+
+    def test_resolved_feedback_can_be_reopened(self):
+        fb = self._feedback(self.alice)
+        services.resolve(fb)
+        self.client.force_login(self.root)
+        self.client.post(reverse("admin:feedbacks_feedbackdata_changelist"),
+                         {"action": "reopen", "_selected_action": [fb.pk]})
+        fb.refresh_from_db()
+        self.assertEqual(fb.status, "open")
+
+    def test_single_resolve_from_the_change_form(self):
+        fb = self._feedback(self.alice)
+        self.client.force_login(self.root)
+        url = reverse("admin:feedbacks_feedbackdata_detail_resolve", args=[fb.pk])
+        self.client.post(url, {"_form_submitted": "True", "note": "done"})
+        fb.refresh_from_db()
+        self.assertEqual(fb.status, "resolved")
+        self.assertEqual(self._sender_notes(self.alice).count(), 1)
+
+    def test_only_superusers_change_the_status(self):
+        fb = self._feedback(self.alice)
+        self.client.force_login(self.alice)
+        self.client.post(reverse("admin:feedbacks_feedbackdata_changelist"),
+                         {"action": "mark_as_resolved", "_selected_action": [fb.pk]})
+        fb.refresh_from_db()
+        self.assertEqual(fb.status, "open")
+
+
+class BadgeTests(FeedbackTestCase):
+    def _badge(self, user):
+        request = RequestFactory().get("/")
+        request.user = user
+        return feedback_data_badge_callback(request)
+
+    def test_badge_counts_open_feedbacks(self):
+        a1, a2 = self._feedback(self.alice), self._feedback(self.alice)
+        self._feedback(self.bob)
+        self.assertEqual(self._badge(self.root), 3)
+        self.assertEqual(self._badge(self.alice), 2)
+        services.resolve(a1)
+        self.assertEqual(self._badge(self.root), 2)   # the change clears the cached count
+        self.assertEqual(self._badge(self.alice), 1)
+        services.set_status(a2, FeedbackData.IN_PROGRESS)
+        self.assertEqual(self._badge(self.alice), 0)
+
+
+class MigrationTests(TestCase):
+    def test_existing_resolved_rows_become_resolved(self):
+        from importlib import import_module
+
+        migration = import_module("whiteneuron.feedbacks.migrations.0008_status")
+        root = User.objects.create_superuser("root", "r@example.com", "pw")
+        ct = ContentType.objects.get_for_model(Group)
+        fb = FeedbackData.objects.create(user=root, content_type=ct, object_id="1", message="m")
+        FeedbackData.objects.filter(pk=fb.pk).update(is_resolved=True, status="open")
+        from django.apps import apps
+
+        migration.status_from_is_resolved(apps, None)
+        fb.refresh_from_db()
+        self.assertEqual(fb.status, "resolved")
+
+
+@package_test_settings()
+class ReviewTests(FeedbackTestCase):
+    """Review of #103."""
+
+    def test_the_sender_sees_which_feedback_and_record(self):
+        group = Group.objects.create(name="Kế toán")
+        fb = FeedbackData.objects.create(user=self.root, content_type=self.ct, object_id=str(group.pk),
+                                         message="the name is misspelt")
+        services.resolve(fb, note="renamed")
+        note = Notification.objects.get(user=self.root, title="Feedback resolved")
+        self.assertIn("Kế toán", note.content)
+        self.assertIn("the name is misspelt", note.content)
+        self.assertIn("renamed", note.content)
+        self.assertEqual(note.obj_link, reverse("admin:auth_group_change", args=[group.pk]))
+
+    def test_reject_from_the_detail_page_with_a_note(self):
+        fb = self._feedback(self.alice)
+        self.client.force_login(self.root)
+        url = reverse("admin:feedbacks_feedbackdata_detail_reject", args=[fb.pk])
+        self.assertEqual(self.client.get(url).status_code, 200)   # the dialog
+        fb.refresh_from_db()
+        self.assertEqual(fb.status, "open")
+        self.client.post(url, {"_form_submitted": "True", "note": "duplicate of #12"})
+        fb.refresh_from_db()
+        self.assertEqual((fb.status, fb.note), ("rejected", "duplicate of #12"))
+        self.assertIn("duplicate of #12", Notification.objects.get(user=self.alice, title="Feedback rejected").content)
+
+    def test_status_column_has_a_database_default(self):
+        field = FeedbackData._meta.get_field("status")
+        self.assertEqual(getattr(field.db_default, "value", field.db_default), "open")
+
+
+class SenderMessageLanguageTests(FeedbackTestCase):
+    def test_vietnamese_message_says_which_record(self):
+        from django.utils import translation
+
+        group = Group.objects.create(name="Nhóm A")
+        fb = FeedbackData.objects.create(user=self.alice, content_type=self.ct, object_id=str(group.pk), message="m")
+        with translation.override("vi"):
+            services.resolve(fb)
+        content = Notification.objects.get(user=self.alice).content
+        self.assertIn("Về bản ghi", content)
+        self.assertNotIn("Thông tin ứng dụng", content)
+
+
+@package_test_settings()
+class DetailActionsByStatusTests(FeedbackTestCase):
+    """Review of #103: only the decisions that mean something for the current status."""
+
+    def _actions(self, fb):
+        self.client.force_login(self.root)
+        response = self.client.get(reverse("admin:feedbacks_feedbackdata_change", args=[fb.pk]))
+        return {str(item["title"]) for item in response.context["actions_detail"]}
+
+    def test_open_feedback(self):
+        self.assertEqual(self._actions(self._feedback(self.alice)), {"Resolve", "In progress", "Reject"})
+
+    def test_in_progress_feedback(self):
+        fb = self._feedback(self.alice)
+        services.set_status(fb, FeedbackData.IN_PROGRESS)
+        self.assertEqual(self._actions(fb), {"Resolve", "Reject"})
+
+    def test_closed_feedback_can_only_be_reopened(self):
+        fb = self._feedback(self.alice)
+        services.resolve(fb)
+        self.assertEqual(self._actions(fb), {"Reopen"})
+        self.client.post(reverse("admin:feedbacks_feedbackdata_detail_reject", args=[fb.pk]),
+                         {"_form_submitted": "True"})
+        fb.refresh_from_db()
+        self.assertEqual(fb.status, "resolved")   # not offered, and refused if called
+
+    def test_history_button_is_back_on_the_feedback_page(self):
+        fb = self._feedback(self.alice)
+        self.client.force_login(self.root)
+        response = self.client.get(reverse("admin:feedbacks_feedbackdata_change", args=[fb.pk]))
+        self.assertTemplateUsed(response, "admin/wn_change_form.html")
+        self.assertNotContains(response, "make-resolved-link")
