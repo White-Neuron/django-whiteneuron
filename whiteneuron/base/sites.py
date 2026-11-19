@@ -78,12 +78,13 @@ class BaseAdminSite(UnfoldAdminSite):
         for member in (User.objects.filter(is_active=True).exclude(username=anonymous_user_name())
                        .prefetch_related("groups").order_by("username")):
             role = members.current_role(member, groups)
+            held = [r.key for r in members.member_roles(member)]
             rows.append({
                 "member": member,
                 "role": role,
                 "locked": member.is_superuser or member.is_bot,
-                # someone with a role the manager could not give: read-only for them
-                "above": bool(role) and not allowed.get(role, True),
+                # someone with a role the manager could not give (any of them): read-only
+                "above": any(not allowed.get(key, True) for key in held),
             })
         context = {
             **self.each_context(request),
