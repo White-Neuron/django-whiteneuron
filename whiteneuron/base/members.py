@@ -35,6 +35,12 @@ def role_groups():
     return {roles[g.name].key: g for g in Group.objects.filter(name__in=list(roles))}
 
 
+def member_roles(member):
+    """Every declared role whose group the member is in (normally one)."""
+    names = set(member.groups.values_list("name", flat=True))
+    return [role for role in configured_roles() if role.group in names]
+
+
 def current_role(member, groups=None):
     """The key of the member's role, or None."""
     groups = role_groups() if groups is None else groups
@@ -92,9 +98,11 @@ def check_change(actor, member, role_key):
         # since the last migrate must not hand out more than the manager has
         if role is not None and not role_permissions(role) <= have:
             raise RoleChangeRefused(_("You cannot give a role with permissions you do not have yourself."))
-        # nor take a role away from someone who has more than the manager
-        current = roles.get(current_role(member) or "")
-        if current is not None and current.key != (role.key if role else None) and not role_permissions(current) <= have:
+        # nor take a role away from someone who has more than the manager. Every role group the
+        # member is in counts: one added by hand on the user page must not hide behind another.
+        held = member_roles(member)
+        removed = [r for r in held if r.key != (role.key if role else None)]
+        if any(not role_permissions(r) <= have for r in removed):
             raise RoleChangeRefused(_("You cannot change the role of someone who has permissions you do not have."))
     if member.pk == actor.pk and not actor.is_superuser:
         keeps = role is not None and _role_grants(role)

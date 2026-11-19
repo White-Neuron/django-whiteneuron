@@ -167,3 +167,31 @@ class MembersReviewTests(TestCase):
         row = html.split('id="member-%d"' % self.director.pk)[1].split("</tr>")[0]
         self.assertNotIn("<select", row)
         self.assertIn("more than you have", row)
+
+
+# "aa_viewer" sorts before "zz_director": a check that looked at one role group only (the
+# first by name) saw the viewer role and let the director be changed
+TWO_ROLES = [
+    Role(key="aa_viewer", permissions=("auth.view_group",)),
+    Role(key="mm_manager", permissions=("base.manage_members", "auth.view_group")),
+    Role(key="zz_director", permissions=("auth.*",)),
+]
+
+
+@package_test_settings(WN_ROLES=TWO_ROLES)
+class MemberInTwoRolesTests(TestCase):
+    """Review of #106 (follow-up): a member in two role groups at once."""
+
+    def test_every_role_group_counts(self):
+        sync_roles(TWO_ROLES)
+        boss = User.objects.create_user("boss", "b@example.com", "pw", is_staff=True)
+        boss.groups.add(Group.objects.get(name="mm_manager"))
+        member = User.objects.create_user("both", "x@example.com", "pw", is_staff=True)
+        member.groups.add(Group.objects.get(name="aa_viewer"), Group.objects.get(name="zz_director"))
+        for target in ("aa_viewer", None, "mm_manager"):
+            with self.assertRaises(RoleChangeRefused):
+                assign_role(User.objects.get(pk=boss.pk), member, target)
+        self.assertTrue(member.groups.filter(name="zz_director").exists())
+        self.client.force_login(boss)
+        html = self.client.get(reverse("admin:members")).content.decode()
+        self.assertNotIn("<select", html.split('id="member-%d"' % member.pk)[1].split("</tr>")[0])
