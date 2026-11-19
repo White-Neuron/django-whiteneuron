@@ -1,8 +1,12 @@
+"""The package's default roles, as roles declared in code (#94): same five groups, same
+permissions as before, now through whiteneuron.base.roles.sync_roles (run it again at any time:
+each group is set back to exactly these permissions)."""
 from django.core.management.base import BaseCommand
-from django.contrib.auth.models import Group
-from django.contrib.auth.models import Permission
 
-GROUP= {
+from whiteneuron.base.roles import Role, sync_roles
+
+# Kept for projects that import them
+GROUP = {
     'admin': 'Quản trị viên',
     'manager': 'Quản lý',
     'staff': 'Nhân viên',
@@ -10,74 +14,27 @@ GROUP= {
     'guest': 'Khách thăm',
 }
 
-PERMISSIONS= {}
-PERMISSIONS['admin']= {
-    "exclude": [], # Các model không được phép truy cập
-    "view": ["*"],
-    "add": ["*"],
-    "change": ["*"],
-    "delete": ["*"],
-}
-PERMISSIONS['guest']= {
-    "exclude": ["user", "useractivity", 
-                "group", "permission", 
-                "contenttype", "logentry", 
-                "session", "token", "authtoken", "excelfile", "pdffile"
-                ],
-    "view": ["*"],
-    "add": [],
-    "change": [],
-    "delete": [],
-}
-PERMISSIONS['customer']= {
-    "exclude": ["user", "useractivity",
-                "group", "permission",
-                "contenttype", "logentry",
-                "session", "token", "authtoken",
-                ],
-    "view": ["*"],
-    "add": [],
-    "change": [],
-    "delete": [],
-}
-PERMISSIONS['staff']= {
-    "exclude": ["user", "useractivity",
-                "group", "permission",
-                "contenttype", "logentry",
-                "session", "token", "authtoken",
-                ],
-    "view": ["*"],
-    "add": [],
-    "change": [],
-    "delete": [],
-}
-PERMISSIONS['manager']= {
-    "exclude": [],
-    "view": ["*"],
-    "add": ["*"],
-    "change": ["*"],
-    "delete": [],
-}
+# codename__icontains, as the command always matched: custom permissions included
+_PRIVATE = ("user", "useractivity", "group", "permission", "contenttype", "logentry",
+            "session", "token", "authtoken")
 
-def init_group():
-    for group, name in GROUP.items():
-        g, created= Group.objects.get_or_create(name= name)
-        print(f"Group {name} {'created' if created else 'existed'}")
-        # Xóa tất cả các permission cũ
-        g.permissions.clear()
-        for perm, models in PERMISSIONS[group].items():
-            for model in models:
-                if model=='*':
-                    for p in Permission.objects.filter(codename__icontains= perm).exclude(content_type__model__in= PERMISSIONS[group]['exclude']):
-                        g.permissions.add(p)
-                        # print(f"Add permission {p} to group {name}: {p.codename}")
-                else:
-                    for p in Permission.objects.filter(content_type__model= model, codename__icontains= perm):
-                        g.permissions.add(p)
+DEFAULT_ROLES = [
+    Role(key="admin", group_name=GROUP["admin"], permissions=("*view*", "*add*", "*change*", "*delete*")),
+    Role(key="manager", group_name=GROUP["manager"], permissions=("*view*", "*add*", "*change*")),
+    Role(key="staff", group_name=GROUP["staff"], permissions=("*view*",), exclude=_PRIVATE),
+    Role(key="customer", group_name=GROUP["customer"], permissions=("*view*",), exclude=_PRIVATE),
+    Role(key="guest", group_name=GROUP["guest"], permissions=("*view*",),
+         exclude=_PRIVATE + ("excelfile", "pdffile")),
+]
+
+
+def init_group(stdout=None):
+    return sync_roles(DEFAULT_ROLES, stdout=stdout)
+
 
 class Command(BaseCommand):
-    help = 'Initialize group and permissions'
+    help = "Create the package's default role groups and set their permissions"
 
     def handle(self, *args, **kwargs):
-        init_group()
-        print('Done')
+        init_group(stdout=self.stdout)
+        self.stdout.write("Done")
