@@ -15,7 +15,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.html import format_html
-from django.utils.text import Truncator
+from django.utils.text import Truncator, capfirst
 from django.utils.http import url_has_allowed_host_and_scheme
 from unfold.contrib.filters.admin import AutocompleteSelectFilter
 from unfold.decorators import action, display
@@ -252,14 +252,15 @@ class NotificationAdmin(ModelAdmin):
             except ContentType.DoesNotExist:
                 mc = None
             if mc is None:
-                found[(app_label, raw_model)] = (raw_model.replace('_', ' ').title(), {})
+                found[(app_label, raw_model)] = (capfirst(raw_model.replace('_', ' ')), {})
                 continue
             manager = getattr(mc, 'objects_all', mc._default_manager)
             try:
                 objs = {o.pk: str(o) for o in manager.filter(pk__in=ids)}
             except Exception:
                 objs = {}
-            found[(app_label, raw_model)] = (mc._meta.verbose_name.title(), objs)
+            # capfirst, not title(): Vietnamese capitalises the first word only ("Người dùng")
+            found[(app_label, raw_model)] = (capfirst(mc._meta.verbose_name), objs)
         for n in notifications:
             parsed = cls._parse_obj_link(n.obj_link)
             if not parsed:
@@ -317,7 +318,7 @@ class NotificationAdmin(ModelAdmin):
         else:
             parts.append(format_html('<span>{}</span>', Truncator(instance.title or "").chars(120)))
 
-        if instance.action_by:
+        if instance.action_by and model_verbose:  # a stored title usually names who did it already
             ab = instance.action_by
             who = getattr(ab, 'full_name', None) or ab.username
             parts.append(format_html('<span class="text-xs opacity-60">· {} {}</span>', _("by"), who))

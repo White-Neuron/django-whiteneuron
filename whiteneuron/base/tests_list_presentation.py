@@ -74,3 +74,34 @@ class ListPresentationTests(TestCase):
     def test_home_title_has_no_trailing_full_stop(self):
         html = self.client.get(reverse("admin:index")).content.decode()
         self.assertNotIn("Site quản trị hệ thống.", html)
+
+
+class ListPresentationReviewTests(TestCase):
+    """Review of #99."""
+
+    def test_model_name_capitalises_the_first_word_only(self):
+        from django.utils import translation
+
+        link = "/admin/base/user/1/change/"
+        note = Notification(id=1, user_id=1, title="x", content="", flag="info", action="update", obj_link=link)
+        with translation.override("vi"):
+            NotificationAdmin.resolve_components([note])
+            self.assertEqual(str(note._wn_components[1]), "Người dùng")
+
+    def test_stored_title_is_not_followed_by_a_second_by(self):
+        root = User.objects.create_superuser("root2", "r2@example.com", "pw")
+        note = Notification.objects.create(user=root, title='Group "x" has been created by user "root2"',
+                                           content="", flag="info", action_by=root)
+        html = str(NotificationAdmin(Notification, base_admin_site).display_title(note))
+        self.assertNotIn("· ", html)
+
+    def test_search_text_keeps_acronyms(self):
+        from .modeladmin import ModelAdmin as WnModelAdmin
+
+        class IpAdmin(WnModelAdmin):
+            search_fields = ("ip_address",)
+
+        from .models import IPBlacklist
+
+        text = str(IpAdmin(IPBlacklist, base_admin_site).search_help_text)
+        self.assertNotIn("iP", text)
