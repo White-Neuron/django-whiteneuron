@@ -29,6 +29,13 @@ def _age(name, seconds):
 
 @override_settings(WN_HEARTBEATS=JOBS)
 class HeartbeatStateTests(TestCase):
+    def setUp(self):
+        # "never" turns "late" max_age after the process started: pin a fresh start
+        from whiteneuron.base import app_info
+
+        patcher = mock.patch.object(app_info, "process_started", return_value=timezone.now())
+        patcher.start()
+        self.addCleanup(patcher.stop)
     def test_states(self):
         self.assertEqual({j["name"]: j["state"] for j in statuses()},
                          {"backup": NEVER, "scheduler": NEVER, "night_sync": DISABLED})
@@ -76,8 +83,13 @@ class HeartbeatPagesTests(TestCase):
         cls.staff = User.objects.create_user("staff", "s@example.com", "pw", is_staff=True)
 
     def setUp(self):
+        from whiteneuron.base import app_info
+
         caches["default"].clear()
         self.addCleanup(caches["default"].clear)
+        patcher = mock.patch.object(app_info, "process_started", return_value=timezone.now())
+        patcher.start()
+        self.addCleanup(patcher.stop)
         _age("backup", 7200)  # critical and late
 
     def test_monitoring_page_lists_the_jobs(self):
@@ -101,3 +113,29 @@ class HeartbeatPagesTests(TestCase):
         self.client.logout()
         caches["default"].clear()
         self.assertNotIn("late_jobs", self.client.get(reverse("wn_system:ready")).json())
+
+
+@override_settings(WN_HEARTBEATS=JOBS)
+class HeartbeatReviewTests(TestCase):
+    """Review of #101."""
+
+    def test_durations_of_days_read_in_vietnamese(self):
+        from django.contrib.humanize.templatetags.humanize import naturaltime
+        from django.utils import translation
+        from django.utils.timesince import timesince
+
+        three_days_ago = timezone.now() - timedelta(days=3, minutes=5)
+        with translation.override("vi"):
+            self.assertEqual(timesince(three_days_ago).replace("\xa0", " "), "3 ngày")
+            self.assertEqual(naturaltime(three_days_ago).replace("\xa0", " "), "3 ngày trước")
+
+    def test_a_job_that_never_ran_is_late_once_max_age_has_passed_since_start(self):
+        from whiteneuron.base import app_info
+
+        with mock.patch.object(app_info, "process_started", return_value=timezone.now() - timedelta(seconds=30)):
+            self.assertEqual({j["name"]: j["state"] for j in statuses()}["scheduler"], NEVER)
+        with mock.patch.object(app_info, "process_started", return_value=timezone.now() - timedelta(hours=2)):
+            states = {j["name"]: j["state"] for j in statuses()}
+        self.assertEqual(states["scheduler"], LATE)
+        self.assertEqual(states["backup"], LATE)
+        self.assertEqual(states["night_sync"], DISABLED)

@@ -3603,6 +3603,93 @@ msgstr "nhịp tim việc chạy nền"
 msgid "name"
 msgstr "tên"
 
+#: django/utils/timesince.py, django/contrib/humanize (missing from Django's Vietnamese)
+#, python-format
+msgid "%(num)d year"
+msgid_plural "%(num)d years"
+msgstr[0] "%(num)d năm"
+
+#: django/utils/timesince.py, django/contrib/humanize (missing from Django's Vietnamese)
+#, python-format
+msgctxt "naturaltime-past"
+msgid "%(num)d year"
+msgid_plural "%(num)d years"
+msgstr[0] "%(num)d năm"
+
+#: django/utils/timesince.py, django/contrib/humanize (missing from Django's Vietnamese)
+#, python-format
+msgid "%(num)d month"
+msgid_plural "%(num)d months"
+msgstr[0] "%(num)d tháng"
+
+#: django/utils/timesince.py, django/contrib/humanize (missing from Django's Vietnamese)
+#, python-format
+msgctxt "naturaltime-past"
+msgid "%(num)d month"
+msgid_plural "%(num)d months"
+msgstr[0] "%(num)d tháng"
+
+#: django/utils/timesince.py, django/contrib/humanize (missing from Django's Vietnamese)
+#, python-format
+msgid "%(num)d week"
+msgid_plural "%(num)d weeks"
+msgstr[0] "%(num)d tuần"
+
+#: django/utils/timesince.py, django/contrib/humanize (missing from Django's Vietnamese)
+#, python-format
+msgctxt "naturaltime-past"
+msgid "%(num)d week"
+msgid_plural "%(num)d weeks"
+msgstr[0] "%(num)d tuần"
+
+#: django/utils/timesince.py, django/contrib/humanize (missing from Django's Vietnamese)
+#, python-format
+msgid "%(num)d day"
+msgid_plural "%(num)d days"
+msgstr[0] "%(num)d ngày"
+
+#: django/utils/timesince.py, django/contrib/humanize (missing from Django's Vietnamese)
+#, python-format
+msgctxt "naturaltime-past"
+msgid "%(num)d day"
+msgid_plural "%(num)d days"
+msgstr[0] "%(num)d ngày"
+
+#: django/utils/timesince.py, django/contrib/humanize (missing from Django's Vietnamese)
+#, python-format
+msgid "%(num)d hour"
+msgid_plural "%(num)d hours"
+msgstr[0] "%(num)d giờ"
+
+#: django/utils/timesince.py, django/contrib/humanize (missing from Django's Vietnamese)
+#, python-format
+msgctxt "naturaltime-past"
+msgid "%(num)d hour"
+msgid_plural "%(num)d hours"
+msgstr[0] "%(num)d giờ"
+
+#: django/utils/timesince.py, django/contrib/humanize (missing from Django's Vietnamese)
+#, python-format
+msgid "%(num)d minute"
+msgid_plural "%(num)d minutes"
+msgstr[0] "%(num)d phút"
+
+#: django/utils/timesince.py, django/contrib/humanize (missing from Django's Vietnamese)
+#, python-format
+msgctxt "naturaltime-past"
+msgid "%(num)d minute"
+msgid_plural "%(num)d minutes"
+msgstr[0] "%(num)d phút"
+
+#: django/contrib/humanize
+#, python-format
+msgid "%(delta)s ago"
+msgstr "%(delta)s trước"
+
+#: whiteneuron/templates/admin/index.html
+msgid "has not run since the server started."
+msgstr "chưa chạy lần nào kể từ khi máy chủ khởi động."
+
 #~ msgid "day"
 #~ msgstr "ngày"
 

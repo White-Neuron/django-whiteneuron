@@ -70,8 +70,9 @@ def statuses(now=None):
     """One dict per configured job, critical and late ones first:
     {name, label, consequence, critical, max_age, state, last_beat_at, host, info, age_seconds}.
 
-    ``never`` (no beat yet: a fresh install is not an alarm), ``late`` (older than max_age),
-    ``disabled`` (``enabled: False``, neutral), else ``ok``.
+    ``never`` (no beat yet: a fresh install is not an alarm), ``late`` (older than max_age, or
+    no beat at all max_age after the web process started: a cron that was never set up must
+    not stay silent), ``disabled`` (``enabled: False``, neutral), else ``ok``.
     """
     jobs = configured()
     if not jobs:
@@ -79,6 +80,12 @@ def statuses(now=None):
     from .models import Heartbeat
 
     now = now or timezone.now()
+    try:
+        from whiteneuron.base.app_info import process_started
+
+        started = process_started()
+    except Exception:
+        started = None
     try:
         rows = {h.name: h for h in Heartbeat.objects.filter(name__in=list(jobs))}
     except Exception:
@@ -91,7 +98,8 @@ def statuses(now=None):
         if not job["enabled"]:
             state = DISABLED
         elif row is None:
-            state = NEVER
+            waited = (now - started).total_seconds() if started else 0
+            state = LATE if waited > job["max_age"] else NEVER
         elif age > job["max_age"]:
             state = LATE
         else:

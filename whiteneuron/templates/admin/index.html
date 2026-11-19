@@ -25,7 +25,7 @@
                 <span class="material-symbols-outlined">heart_broken</span>
                 <div>
                     {% for job in late_jobs %}
-                        <div><strong>{{ job.label }}</strong>: {% blocktranslate with since=job.last_beat_at|timesince %}has not run for {{ since }}.{% endblocktranslate %} {{ job.consequence }}</div>
+                        <div><strong>{{ job.label }}</strong>: {% if job.last_beat_at %}{% blocktranslate with since=job.last_beat_at|timesince %}has not run for {{ since }}.{% endblocktranslate %}{% else %}{% translate "has not run since the server started." %}{% endif %} {{ job.consequence }}</div>
                     {% endfor %}
                     <a class="underline" href="{% url 'admin:monitoring_metricsample_changelist' %}#heartbeats">{% translate "Open server monitoring" %}</a>
                 </div>

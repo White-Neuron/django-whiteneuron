@@ -452,6 +452,34 @@ Every error under the API is JSON, `{"detail": "..."}`, with the matching status
 
 A path under `system/`, `notifications/` or `announcement/` that matches no endpoint, or lacks its trailing slash, is a JSON `404` too (no redirect), so call the URLs exactly as listed. Other paths under the mount prefix are left to the project's own URLs.
 
+## Background job heartbeats
+
+Jobs nobody watches (a scheduler, a Celery worker, a backup command, a bot) report in at the end of each round, and the operator sees which one has stopped and what that means:
+
+```python
+from whiteneuron.monitoring import beat
+
+beat("backup", info="42 files")   # one upsert; never raises, so it cannot break the job
+```
+
+```python
+# settings.py - only the jobs listed here are recorded and shown
+WN_HEARTBEATS = {
+    "backup": {"label": _("Daily backup"), "max_age": 26 * 3600,
+               "consequence": _("No new backup since then."), "critical": True},
+    "celery": {"label": _("Background tasks"), "max_age": 300,
+               "consequence": _("E-mails and exports are not sent.")},
+    "night_sync": {"label": _("Night sync"), "max_age": 86400, "enabled": False},
+}
+```
+
+- **Server monitoring** gets a *Background jobs* block: running, late, not run yet (a fresh install is not an alarm, until `max_age` has passed since the web process started), or turned off, with the last run and, when there is a problem, the project's own "consequence" sentence.
+- A late `critical` job shows a banner at the top of the admin home, to users who may view monitoring.
+- `api/…/system/ready/` lists `late_jobs` for privileged callers (superuser or `SYSTEM_API_TOKEN`); a late job does not fail the probe.
+- The core reports `"monitoring_collector"` (collector task and command) and, if you schedule `whiteneuron.monitoring.tasks.worker_heartbeat` with celery beat, `"celery"`.
+
+Without `WN_HEARTBEATS` nothing is written or shown.
+
 ## Middleware & Security
 
 ### Rate Limiting
