@@ -41,14 +41,17 @@ class BaseAdminSite(UnfoldAdminSite):
         from django.core.exceptions import PermissionDenied
 
         from . import members
-        from .roles import configured_roles, resolve_permissions
+        from .roles import configured_roles
 
         user = request.user
         if not (user.is_superuser or user.has_perm(members.MANAGE_PERMISSION)):
             raise PermissionDenied
         User = get_user_model()
         if request.method == "POST":
-            member = User.objects.filter(pk=request.POST.get("member"), is_active=True).first()
+            try:
+                member = User.objects.filter(pk=int(request.POST.get("member", "")), is_active=True).first()
+            except (TypeError, ValueError):  # not a number: as missing, not a server error
+                member = None
             role_key = request.POST.get("role") or None
             if member is None:
                 messages.error(request, _("This member cannot be found."))
@@ -60,24 +63,27 @@ class BaseAdminSite(UnfoldAdminSite):
                     messages.error(request, str(refused))
             return redirect(reverse("%s:members" % self.name))
 
+        from .utils import anonymous_user_name
+
         roles = configured_roles()
         groups = members.role_groups()
         have = user.get_all_permissions()
+        role_rows, allowed = [], {}
+        for role in roles:
+            perms = members.role_permissions(role)
+            # shown, but the server refuses it anyway: rule 3 of members.py
+            allowed[role.key] = user.is_superuser or perms <= have
+            role_rows.append({"role": role, "count": len(perms), "allowed": allowed[role.key]})
         rows = []
-        for member in User.objects.filter(is_active=True).prefetch_related("groups").order_by("username"):
+        for member in (User.objects.filter(is_active=True).exclude(username=anonymous_user_name())
+                       .prefetch_related("groups").order_by("username")):
+            role = members.current_role(member, groups)
             rows.append({
                 "member": member,
-                "role": members.current_role(member, groups),
-                "locked": member.is_superuser or member.is_bot,
-            })
-        role_rows = []
-        for role in roles:
-            perms = resolve_permissions(role)
-            role_rows.append({
                 "role": role,
-                "count": len(perms),
-                # shown, but the server refuses it anyway: rule 3 of members.py
-                "allowed": user.is_superuser or all(f"{p.content_type.app_label}.{p.codename}" in have for p in perms),
+                "locked": member.is_superuser or member.is_bot,
+                # someone with a role the manager could not give: read-only for them
+                "above": bool(role) and not allowed.get(role, True),
             })
         context = {
             **self.each_context(request),

@@ -32,8 +32,8 @@
                                 <div class="text-xs opacity-60">@{{ row.member.username }}</div>
                             </td>
                             <td>
-                                {% if row.locked %}
-                                    <span class="text-sm opacity-60">{% if row.member.is_superuser %}{% translate "Superuser" %}{% else %}{% translate "Service account" %}{% endif %}</span>
+                                {% if row.locked or row.above %}
+                                    <span class="text-sm opacity-60">{% if row.member.is_superuser %}{% translate "Full system access" %}{% elif row.locked %}{% translate "Service account" %}{% else %}{% for item in roles %}{% if item.role.key == row.role %}{{ item.role.name|default:item.role.key }}{% endif %}{% endfor %} · {% translate "more than you have" %}{% endif %}</span>
                                 {% else %}
                                     <form method="post" class="flex flex-wrap items-center gap-2">
                                         {% csrf_token %}

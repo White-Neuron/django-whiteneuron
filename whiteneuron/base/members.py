@@ -4,8 +4,10 @@ A manager is a user with ``base.manage_members``. The rules are checked here, on
 whatever the page shows:
 
 1. a role never makes anyone a superuser (roles are groups; ``is_superuser`` is never touched);
-2. superusers and service accounts (``is_bot``) cannot be changed here;
-3. a manager cannot give a role with a permission they do not have themselves;
+2. superusers, service accounts (``is_bot``) and django-guardian's AnonymousUser cannot be
+   changed here;
+3. a manager cannot give a role with a permission they do not have themselves (declared, or
+   ticked on the role's group since), nor change the role of someone whose role has one;
 4. the last manager cannot take away their own ``manage_members``.
 
 Each change replaces the member's role groups (groups made by hand are kept) and is written
@@ -43,9 +45,24 @@ def current_role(member, groups=None):
     return None
 
 
+def role_permissions(role):
+    """{"app.codename"} a role really gives: its declaration plus whatever its group has now
+    (permissions ticked by hand since the last migrate count too)."""
+    perms = {f"{p.content_type.app_label}.{p.codename}" for p in resolve_permissions(role)}
+    group = Group.objects.filter(name=role.group).first()
+    if group is not None:
+        perms |= {f"{a}.{c}" for a, c in group.permissions.values_list("content_type__app_label", "codename")}
+    return perms
+
+
 def _role_grants(role, codename=MANAGE_PERMISSION):
-    app, code = codename.split(".", 1)
-    return any(p.content_type.app_label == app and p.codename == code for p in resolve_permissions(role))
+    return codename in role_permissions(role)
+
+
+def _is_system_account(member):
+    from .utils import anonymous_user_name
+
+    return member.username == anonymous_user_name()
 
 
 def _other_managers_exist(member):
@@ -61,7 +78,7 @@ def check_change(actor, member, role_key):
     ``role_key`` (None = no role)."""
     if not (actor.is_superuser or actor.has_perm(MANAGE_PERMISSION)):
         raise RoleChangeRefused(_("You cannot manage members."))
-    if member.is_superuser or getattr(member, "is_bot", False):
+    if member.is_superuser or getattr(member, "is_bot", False) or _is_system_account(member):
         raise RoleChangeRefused(_("Superusers and service accounts cannot be changed here."))
     roles = {r.key: r for r in configured_roles()}
     role = None
@@ -69,12 +86,16 @@ def check_change(actor, member, role_key):
         role = roles.get(role_key)
         if role is None:
             raise RoleChangeRefused(_("Unknown role."))
-        if not actor.is_superuser:
-            have = actor.get_all_permissions()
-            missing = [f"{p.content_type.app_label}.{p.codename}" for p in resolve_permissions(role)
-                       if f"{p.content_type.app_label}.{p.codename}" not in have]
-            if missing:
-                raise RoleChangeRefused(_("You cannot give a role with permissions you do not have yourself."))
+    if not actor.is_superuser:
+        have = actor.get_all_permissions()
+        # rule 3, with the group's real permissions (#106 review): a group ticked by hand
+        # since the last migrate must not hand out more than the manager has
+        if role is not None and not role_permissions(role) <= have:
+            raise RoleChangeRefused(_("You cannot give a role with permissions you do not have yourself."))
+        # nor take a role away from someone who has more than the manager
+        current = roles.get(current_role(member) or "")
+        if current is not None and current.key != (role.key if role else None) and not role_permissions(current) <= have:
+            raise RoleChangeRefused(_("You cannot change the role of someone who has permissions you do not have."))
     if member.pk == actor.pk and not actor.is_superuser:
         keeps = role is not None and _role_grants(role)
         if not keeps and not _other_managers_exist(member):

@@ -2075,6 +2075,18 @@ msgid "Server monitoring"
 msgstr "Giám sát máy chủ"
 
 #: whiteneuron/base/members.py
+msgid "You cannot change the role of someone who has permissions you do not have."
+msgstr "Bạn không thể đổi vai trò của người có quyền mà chính bạn không có."
+
+#: whiteneuron/templates/admin/members.html
+msgid "Full system access"
+msgstr "Toàn quyền hệ thống"
+
+#: whiteneuron/templates/admin/members.html
+msgid "more than you have"
+msgstr "nhiều quyền hơn bạn"
+
+#: whiteneuron/base/members.py
 msgid "Members and roles"
 msgstr "Thành viên và vai trò"
 

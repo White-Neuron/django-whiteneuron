@@ -110,3 +110,60 @@ class MembersTests(TestCase):
         self.client.force_login(self.boss)
         self.client.get(reverse("admin:members"), {"member": self.alice.pk, "role": "viewer"})
         self.assertIsNone(current_role(self.alice))
+
+
+@package_test_settings(WN_ROLES=ROLES)
+class MembersReviewTests(TestCase):
+    """Review of #106."""
+
+    @classmethod
+    def setUpTestData(cls):
+        sync_roles(ROLES)
+        cls.root = User.objects.create_superuser("root", "r@example.com", "pw")
+        cls.boss = User.objects.create_user("boss", "b@example.com", "pw", is_staff=True)
+        cls.boss.groups.add(Group.objects.get(name="manager"))
+        cls.director = User.objects.create_user("director", "d@example.com", "pw", is_staff=True)
+        cls.director.groups.add(Group.objects.get(name="admin"))
+        cls.alice = User.objects.create_user("alice", "a@example.com", "pw", is_staff=True)
+
+    def setUp(self):
+        caches["default"].clear()
+        self.addCleanup(caches["default"].clear)
+
+    def _boss(self):
+        return User.objects.get(pk=self.boss.pk)
+
+    def test_cannot_demote_or_strip_someone_with_more_permissions(self):
+        for target in ("viewer", None):
+            with self.assertRaises(RoleChangeRefused):
+                assign_role(self._boss(), self.director, target)
+        self.assertEqual(current_role(self.director), "admin")
+
+    def test_hand_ticked_permissions_on_a_role_group_count(self):
+        viewer = Group.objects.get(name="viewer")
+        viewer.permissions.add(Permission.objects.get(content_type__app_label="base", codename="delete_user"))
+        with self.assertRaises(RoleChangeRefused):
+            assign_role(self._boss(), self.alice, "viewer")
+        self.assertIsNone(current_role(self.alice))
+
+    def test_guardian_anonymous_user_is_neither_listed_nor_changeable(self):
+        from .utils import anonymous_user_name
+
+        anonymous, _created = User.objects.get_or_create(username=anonymous_user_name())
+        with self.assertRaises(RoleChangeRefused):
+            assign_role(self.root, anonymous, "viewer")
+        self.client.force_login(self.boss)
+        self.assertNotContains(self.client.get(reverse("admin:members")), 'id="member-%d"' % anonymous.pk)
+
+    def test_a_member_id_that_is_not_a_number_is_not_a_server_error(self):
+        self.client.force_login(self.boss)
+        response = self.client.post(reverse("admin:members"), {"member": "abc", "role": "viewer"}, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "This member cannot be found")
+
+    def test_rows_above_the_manager_are_read_only(self):
+        self.client.force_login(self.boss)
+        html = self.client.get(reverse("admin:members")).content.decode()
+        row = html.split('id="member-%d"' % self.director.pk)[1].split("</tr>")[0]
+        self.assertNotIn("<select", row)
+        self.assertIn("more than you have", row)
