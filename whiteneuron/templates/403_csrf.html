@@ -1,0 +1,16 @@
+{% extends "wn_error.html" %}
+{% load i18n %}
+{% comment %}
+    Shown by Django's csrf_failure view (CSRF_FAILURE_VIEW) instead of its yellow English page:
+    most often a form left open overnight, or a sign-in in another tab (#46).
+{% endcomment %}
+{% block code_title %}{% translate "Session expired" %}{% endblock %}
+{% block accent %}234, 179, 8{% endblock %}
+{% block code %}403{% endblock %}
+{% block heading %}{% translate "Your session has expired" %}{% endblock %}
+{% block text %}{% translate "The page was open for too long, or you signed in again in another tab. Reload the page, then try again." %}{% endblock %}
+{% block actions %}
+    <button type="button" class="error-btn primary" onclick="location.replace(location.href)">{% translate "Reload the page" %}</button>
+    {{ block.super }}
+{% endblock %}
+{% block home_variant %}{% endblock %}

@@ -3450,6 +3450,82 @@ msgstr "Chưa đọc"
 msgid "(no data for the previous period)"
 msgstr "(kỳ trước chưa có dữ liệu)"
 
+#: whiteneuron/templates (error pages)
+msgid "Bad request"
+msgstr "Yêu cầu không hợp lệ"
+
+#: whiteneuron/templates (error pages)
+msgid "The request could not be understood. Go back and try again."
+msgstr "Không đọc được yêu cầu. Hãy quay lại rồi thử lại."
+
+#: whiteneuron/templates (error pages)
+msgid "Back to home"
+msgstr "Về trang chủ"
+
+#: whiteneuron/templates (error pages)
+msgid "Contact support"
+msgstr "Liên hệ hỗ trợ"
+
+#: whiteneuron/templates (error pages)
+msgid "Access denied"
+msgstr "Không có quyền truy cập"
+
+#: whiteneuron/templates (error pages)
+msgid "You do not have permission to open this page. If you think you should, contact your administrator."
+msgstr "Bạn không có quyền mở trang này. Nếu bạn cho rằng mình cần quyền này, hãy liên hệ quản trị viên."
+
+#: whiteneuron/templates (error pages)
+msgid "Session expired"
+msgstr "Phiên làm việc đã hết hạn"
+
+#: whiteneuron/templates (error pages)
+msgid "Your session has expired"
+msgstr "Phiên làm việc đã hết hạn"
+
+#: whiteneuron/templates (error pages)
+msgid "The page was open for too long, or you signed in again in another tab. Reload the page, then try again."
+msgstr "Trang đã mở quá lâu, hoặc bạn đã đăng nhập lại ở một tab khác. Hãy tải lại trang rồi thử lại."
+
+#: whiteneuron/templates (error pages)
+msgid "Reload the page"
+msgstr "Tải lại trang"
+
+#: whiteneuron/templates (error pages)
+msgid "Page not found"
+msgstr "Không tìm thấy trang"
+
+#: whiteneuron/templates (error pages)
+msgid "The link may have changed or the page has been moved."
+msgstr "Đường dẫn có thể đã thay đổi hoặc trang đã được chuyển đi."
+
+#: whiteneuron/templates (error pages)
+msgid "Too many requests"
+msgstr "Quá nhiều yêu cầu"
+
+#: whiteneuron/templates (error pages)
+msgid "Too many requests were sent in a short time. Wait a moment, then try again."
+msgstr "Có quá nhiều yêu cầu trong thời gian ngắn. Hãy chờ một lát rồi thử lại."
+
+#: whiteneuron/templates (error pages)
+#, python-format
+msgid "You can try again in <span id=\"wn-retry-seconds\">%(seconds)s</span> seconds."
+msgstr "Bạn có thể thử lại sau <span id=\"wn-retry-seconds\">%(seconds)s</span> giây."
+
+#: whiteneuron/templates (error pages)
+msgid "Try again"
+msgstr "Thử lại"
+
+#: whiteneuron/templates (error pages)
+msgid "Server error"
+msgstr "Lỗi máy chủ"
+
+#: whiteneuron/templates (error pages)
+msgid "Something went wrong"
+msgstr "Đã có lỗi xảy ra"
+
+#: whiteneuron/templates (error pages)
+msgid "The error has been recorded. Try again in a moment; if it keeps happening, contact your administrator."
+msgstr "Lỗi đã được ghi lại. Hãy thử lại sau ít phút; nếu vẫn gặp lỗi, hãy liên hệ quản trị viên."
 #: django/contrib/auth/forms.py (Django 6, not in its Vietnamese catalog)
 msgid "Reset password"
 msgstr "Đặt lại mật khẩu"
