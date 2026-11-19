@@ -717,6 +717,13 @@ UNFOLD = {
                         "badge": "whiteneuron.base.utils.group_badge_callback",
                         "permission": "whiteneuron.base.utils.permission_admin_callback",
                     },
+                    {
+                        # roles of WN_ROLES, for managers (base.manage_members) - #94
+                        "title": _("Members and roles"),
+                        "icon": "badge",
+                        "link": reverse_lazy("admin:members"),
+                        "permission": "whiteneuron.base.utils.permission_manage_members_callback",
+                    },
                 ],
             },
             *(

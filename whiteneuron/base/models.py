@@ -101,6 +101,10 @@ class User(AbstractUser):
         db_table = "users"
         verbose_name = _("user")
         verbose_name_plural = _("users")
+        permissions = [
+            # the "Members and roles" page (whiteneuron.base.members, #94)
+            ("manage_members", _("Can assign roles to members")),
+        ]
 
     def __str__(self):
         s= self.username

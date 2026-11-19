@@ -224,6 +224,15 @@ def permission_admin_callback(request):
         return True
     return 'Quản trị viên' in user_group_names(request.user)
 
+def permission_manage_members_callback(request):
+    """The "Members and roles" page: roles are declared (WN_ROLES) and the user may manage."""
+    from django.conf import settings
+
+    user = request.user
+    return bool(getattr(settings, "WN_ROLES", None)) and user.is_authenticated and (
+        user.is_superuser or user.has_perm("base.manage_members"))
+
+
 def permission_non_guest_callback(request):
     return not is_guest_user(request.user)
 

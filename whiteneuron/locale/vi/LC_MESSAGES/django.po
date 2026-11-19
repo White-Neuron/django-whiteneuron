@@ -2074,6 +2074,90 @@ msgstr "Quản lý tệp"
 msgid "Server monitoring"
 msgstr "Giám sát máy chủ"
 
+#: whiteneuron/base/members.py
+msgid "Members and roles"
+msgstr "Thành viên và vai trò"
+
+#: whiteneuron/base/members.py
+msgid "Can assign roles to members"
+msgstr "Có thể gán vai trò cho thành viên"
+
+#: whiteneuron/base/members.py
+msgid "You cannot manage members."
+msgstr "Bạn không có quyền quản lý thành viên."
+
+#: whiteneuron/base/members.py
+msgid "Superusers and service accounts cannot be changed here."
+msgstr "Không thể đổi superuser và tài khoản dịch vụ ở đây."
+
+#: whiteneuron/base/members.py
+msgid "Unknown role."
+msgstr "Vai trò không tồn tại."
+
+#: whiteneuron/base/members.py
+msgid "You cannot give a role with permissions you do not have yourself."
+msgstr "Bạn không thể gán vai trò có quyền mà chính bạn không có."
+
+#: whiteneuron/base/members.py
+msgid "You are the last manager: someone else must keep the right to manage members."
+msgstr "Bạn là người quản lý cuối cùng: cần có người khác giữ quyền quản lý thành viên."
+
+#: whiteneuron/base/members.py
+msgid "no role"
+msgstr "không có vai trò"
+
+#: whiteneuron/base/members.py
+msgid "No role"
+msgstr "Không có vai trò"
+
+#: whiteneuron/base/members.py
+msgid "This member cannot be found."
+msgstr "Không tìm thấy thành viên này."
+
+#: whiteneuron/base/members.py
+msgid "No roles are declared. List them in WN_ROLES (see the README, Roles declared in code)."
+msgstr "Chưa khai báo vai trò nào. Hãy liệt kê chúng trong WN_ROLES (xem README, mục Roles declared in code)."
+
+#: whiteneuron/base/members.py
+msgid "Roles"
+msgstr "Vai trò"
+
+#: whiteneuron/base/members.py
+msgid "Members"
+msgstr "Thành viên"
+
+#: whiteneuron/base/members.py
+msgid "Member"
+msgstr "Thành viên"
+
+#: whiteneuron/base/members.py
+msgid "Role"
+msgstr "Vai trò"
+
+#: whiteneuron/base/members.py
+msgid "more than you have: you cannot give it"
+msgstr "nhiều hơn quyền của bạn: bạn không gán được"
+
+#: whiteneuron/base/members.py
+msgid "Service account"
+msgstr "Tài khoản dịch vụ"
+
+#: whiteneuron/base/sites.py
+#, python-format
+msgid "The role of %(member)s has been changed."
+msgstr "Đã đổi vai trò của %(member)s."
+
+#: whiteneuron/base/members.py
+#, python-format
+msgid "Role of \"%(member)s\" changed from %(before)s to %(after)s by \"%(actor)s\""
+msgstr "Vai trò của \"%(member)s\" đổi từ %(before)s sang %(after)s bởi \"%(actor)s\""
+
+#: whiteneuron/templates/admin/members.html
+#, python-format
+msgid "%(counter)s permission"
+msgid_plural "%(counter)s permissions"
+msgstr[0] "%(counter)s quyền"
+
 #: base/settings.py:697
 msgid "Images"
 msgstr "Hình ảnh"
