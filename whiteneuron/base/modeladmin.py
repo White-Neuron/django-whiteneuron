@@ -584,6 +584,73 @@ class ModelAdmin(UnfoldAdmin):
             return True
         return self.has_change_permission(request, obj)
 
+    # ── File size checked in the browser (#93 d) ───────────────────────────────
+    # Over the limit, the page says so at the field and drops the file: no request goes out, so
+    # nothing typed is lost to a proxy's 413 page. None = WN_UPLOAD_MAX_MB; both None = off.
+    upload_max_mb = None
+
+    def get_upload_max_mb(self, request=None):
+        from django.conf import settings
+
+        value = self.upload_max_mb if self.upload_max_mb is not None else getattr(settings, "WN_UPLOAD_MAX_MB", None)
+        try:
+            return float(value) if value not in (None, "") else None
+        except (TypeError, ValueError):
+            return None
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        field = super().formfield_for_dbfield(db_field, request, **kwargs)
+        max_mb = self.get_upload_max_mb(request) if isinstance(db_field, models.FileField) else None
+        if field is not None and max_mb:
+            field.widget.attrs["data-wn-max-bytes"] = str(int(max_mb * 1024 * 1024))
+            field.widget.attrs["data-wn-max-message"] = str(
+                _("This file is larger than %(size)s MB. Choose a smaller file.") % {"size": f"{max_mb:g}"})
+        return field
+
+    # ── Detail actions: URL parameters (#93) ─────────────────────────────────
+    def get_action_url_params(self, request, obj, action_name):
+        """Query parameters added to the URL of detail action ``action_name`` for ``obj``.
+
+        The public hook for what the page knows and the action must check. By default it adds
+        the signed version token of ``@sealed`` actions (``whiteneuron.base.sealed``)."""
+        from .sealed import SEAL_PARAM, make_seal, seal_version
+
+        version = seal_version(getattr(self, action_name, None))
+        if version is None or obj is None:
+            return {}
+        return {SEAL_PARAM: make_seal(request, obj, action_name, version)}
+
+    def _add_action_url_params(self, request, obj, actions_detail):
+        """Append get_action_url_params() to the paths Unfold built for the detail actions."""
+        if not actions_detail or obj is None:
+            return
+        opts = self.model._meta
+        names = {}
+        for name in self._extract_action_names(self.actions_detail):
+            try:
+                names[reverse(f"{self.admin_site.name}:{opts.app_label}_{opts.model_name}_{name}",
+                              args=[obj.pk])] = name
+            except Exception:
+                continue
+
+        def patch(item):
+            name = names.get(item.get("path"))
+            params = self.get_action_url_params(request, obj, name) if name else None
+            if params:
+                sep = "&" if "?" in item["path"] else "?"
+                item["path"] = item["path"] + sep + urlencode(params)
+
+        for item in actions_detail:
+            if isinstance(item, dict):
+                if "path" in item:
+                    patch(item)
+                for child in item.get("items") or []:
+                    patch(child)
+
+    def render_change_form(self, request, context, add=False, change=False, form_url="", obj=None):
+        self._add_action_url_params(request, obj, context.get("actions_detail"))
+        return super().render_change_form(request, context, add=add, change=change, form_url=form_url, obj=obj)
+
     def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
         extra_context = extra_context or {}
         extra_context["sidebar_default"] = self.default_toggle_sidebar
