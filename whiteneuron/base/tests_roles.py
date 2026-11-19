@@ -46,7 +46,7 @@ class SyncTests(TestCase):
 
     @override_settings(WN_ROLES=[Role(key="auditor", permissions=("auth.view_*",))])
     def test_after_migrate_on_the_last_app_only(self):
-        configs = list(apps.get_app_configs())
+        configs = [c for c in apps.get_app_configs() if c.models_module is not None]  # those post_migrate reaches
         sync_roles_after_migrate(sender=configs[0], app_config=configs[0])
         self.assertFalse(Group.objects.filter(name="auditor").exists())
         sync_roles_after_migrate(sender=configs[-1], app_config=configs[-1])
@@ -54,7 +54,7 @@ class SyncTests(TestCase):
                          {"auth.view_group", "auth.view_permission"})
 
     def test_without_wn_roles_migrate_changes_nothing(self):
-        configs = list(apps.get_app_configs())
+        configs = [c for c in apps.get_app_configs() if c.models_module is not None]
         before = Group.objects.count()
         sync_roles_after_migrate(sender=configs[-1], app_config=configs[-1])
         self.assertEqual(Group.objects.count(), before)
@@ -82,3 +82,24 @@ class InitGroupuserTests(TestCase):
         guest.permissions.add(Permission.objects.get(codename="delete_group"))
         call_command("init_groupuser", stdout=StringIO())
         self.assertNotIn("auth.delete_group", codes(guest.permissions.all()))
+
+
+class ReviewTests(TestCase):
+    """Review of #105."""
+
+    @override_settings(WN_ROLES=[Role(key="reader", permissions=("auth.view_group",))])
+    def test_syncs_when_the_last_installed_app_has_no_models(self):
+        from types import SimpleNamespace
+        from unittest import mock
+
+        real = list(apps.get_app_configs())
+        last_with_models = [c for c in real if c.models_module is not None][-1]
+        no_models = SimpleNamespace(label="toolbar", models_module=None)
+        with mock.patch.object(apps, "get_app_configs", return_value=real + [no_models]):
+            sync_roles_after_migrate(sender=last_with_models, app_config=last_with_models)
+        self.assertTrue(Group.objects.filter(name="reader").exists())
+
+    def test_a_pattern_that_matches_nothing_is_reported(self):
+        with self.assertLogs("whiteneuron.base.roles", level="WARNING") as logs:
+            resolve_permissions(Role(key="editor", permissions=("auth.veiw_*",)))
+        self.assertIn("auth.veiw_*", logs.output[0])

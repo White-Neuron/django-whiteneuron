@@ -470,6 +470,8 @@ WN_ROLES = [
 - Patterns are `app_label.codename` with `*` / `?` on either side (`blog.view_*`, `*.view_*`, `*`); without a dot they match the codename in any app. `exclude` takes models (`user` or `base.user`).
 - The group is named by `group_name` (default: `key`), so it does not change with the language.
 - Only declared roles' groups are touched; groups made by hand are left alone. Without `WN_ROLES` nothing happens after `migrate`.
+- A role's group is set to **exactly** its declaration: permissions ticked by hand on it are removed at the next `migrate`, including the first time `WN_ROLES` names a group that already exists. A role taken out of `WN_ROLES` keeps its group and permissions; delete the group yourself if it is no longer used.
+- A pattern that matches no permission (a typo) is logged as a warning.
 - `manage.py init_groupuser` creates the package's five default groups through the same mechanism (same names and rules as before) and can be run again at any time to undo drift.
 
 ## Background job heartbeats

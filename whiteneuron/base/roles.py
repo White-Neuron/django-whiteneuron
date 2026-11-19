@@ -15,13 +15,19 @@ Patterns: ``"app_label.codename"``, each side may use ``*`` / ``?`` (``"blog.vie
 ``"*.view_*"``, ``"*"`` for everything); a pattern without a dot matches the codename in any
 app. ``exclude`` lists models (``"user"`` or ``"base.user"``) whose permissions are left out.
 
-Only the groups of declared roles are touched; groups created by hand are left alone.
+Only the groups of declared roles are touched; groups created by hand are left alone. A role's
+group is set to exactly its declaration: permissions ticked by hand on that group are removed
+at the next ``migrate`` (also the first time ``WN_ROLES`` names an existing group). A role taken
+out of ``WN_ROLES`` keeps its group and permissions as they were; delete the group yourself.
 The group is named by ``group_name`` (default: ``key``), so it does not change with the language.
 """
-from dataclasses import dataclass, field
+import logging
+from dataclasses import dataclass
 from fnmatch import fnmatchcase
 
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -65,10 +71,14 @@ def _excluded(exclude, app_label, model):
 
 
 def resolve_permissions(role):
-    """The Permission rows a role's patterns select."""
+    """The Permission rows a role's patterns select. A pattern that matches nothing (a typo
+    such as ``blog.veiw_*``) is logged as a warning."""
     from django.contrib.auth.models import Permission
 
-    perms = Permission.objects.select_related("content_type")
+    perms = list(Permission.objects.select_related("content_type"))
+    for pattern in role.permissions:
+        if not any(_matches(pattern, p.content_type.app_label, p.codename) for p in perms):
+            logger.warning("Role %r: permission pattern %r matches no permission", role.key, pattern)
     return [
         p for p in perms
         if any(_matches(pattern, p.content_type.app_label, p.codename) for pattern in role.permissions)
@@ -100,7 +110,9 @@ def sync_roles_after_migrate(sender, app_config=None, using="default", **kwargs)
 
     if not getattr(settings, "WN_ROLES", None):
         return
-    configs = list(apps.get_app_configs())
+    # Django sends post_migrate only for apps with a models module: the last of those is the
+    # last signal of the run (an app without models last, e.g. debug_toolbar, never gets one)
+    configs = [c for c in apps.get_app_configs() if c.models_module is not None]
     if not configs or app_config is not configs[-1]:
         return
     sync_roles(stdout=None)
