@@ -1,8 +1,24 @@
 {% extends "admin/change_form.html" %}
 {% load i18n static %}
 
-{# Ẩn nút Lịch sử mặc định của UNFOLD vì đã có history panel riêng #}
-{% block object-tools-items %}{% endblock %}
+{# Page actions at the top: the package's history panel replaces Unfold's History link. #}
+{# The trigger used to float bottom-right over the end of long forms and the save row (#95). #}
+{% block object-tools-items %}
+    {% if show_history and history_notifications %}
+        <li class="border border-base-200 select-none max-lg:-mt-px max-lg:first:rounded-t-default max-lg:last:rounded-b-default min-lg:-ms-px min-lg:first:rounded-s-default min-lg:last:rounded-e-default hover:text-primary-600 dark:hover:text-primary-500 dark:border-base-700 hover:bg-base-500/8">
+            <button type="button" id="wn-history-open" onclick="document.getElementById('wn-history-modal').showModal()"
+                    class="cursor-pointer flex grow items-center gap-2 px-3 py-2 text-start whitespace-nowrap">
+                <span class="material-symbols-outlined">history</span>
+                {% translate "History" %}
+                <span class="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full bg-base-500/15 text-xs font-bold">{{ history_notifications|length }}</span>
+            </button>
+        </li>
+    {% endif %}
+    {% if has_absolute_url and show_view_on_site %}
+        {% translate "View on site" as title %}
+        {% include "unfold/helpers/tab_action.html" with title=title link=absolute_url blank=1 icon="open_in_new" %}
+    {% endif %}
+{% endblock %}
 
 {% block after_related_objects %}
 {{ block.super }}
