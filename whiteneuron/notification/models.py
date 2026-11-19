@@ -1,6 +1,7 @@
 import logging
 
 from django.db import models, transaction
+from django.utils import timezone
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from whiteneuron.base.models import User, Group
@@ -86,7 +87,9 @@ class Notification(models.Model):
                                                                              ("create",  _("create")),
                                                                              ('restore', _('restore')),
                                                                              ("delete",  _("delete"))], verbose_name=_("Action Type"))
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
+    # default, not auto_now_add: notify_superusers stamps every copy of an event with one time
+    # before the insert (auto_now_add overwrote it on each copy)
+    created_at = models.DateTimeField(default=timezone.now, editable=False, verbose_name=_("Created At"))
     action_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, 
                                   verbose_name=_("Action By"),
                                   related_name='action_by_notifications') # user who performed the action that triggered the notification
@@ -145,19 +148,15 @@ class Notification(models.Model):
         if action_by is not None and not getattr(action_by, "pk", None):
             action_by = None  # AnonymousUser
         data = json.dumps(changed_data, default=str, ensure_ascii=False) if changed_data else None
+        # One event, one timestamp for every copy, set before the insert: the history panel groups
+        # the copies of an event by time, and copies of a big batch stamped one by one could
+        # straddle a second. No extra query, and it holds on every database backend.
+        stamp = timezone.now()
         objs = cls.objects.bulk_create([
             cls(user_id=user_id, title=str(title)[:255], content=str(content), action=action,
-                flag=flag, obj_link=obj_link, changed_data=data, action_by=action_by)
+                flag=flag, obj_link=obj_link, changed_data=data, action_by=action_by, created_at=stamp)
             for user_id in user_ids
         ])
-        # One event, one timestamp: auto_now_add stamped each copy on its own, so the copies of a
-        # big batch could straddle a second and the history panel (which groups copies by
-        # second) showed one event twice. One UPDATE for the whole batch.
-        if len(objs) > 1 and all(o.pk for o in objs):
-            stamp = objs[0].created_at
-            cls.objects.filter(pk__in=[o.pk for o in objs]).exclude(created_at=stamp).update(created_at=stamp)
-            for o in objs:
-                o.created_at = stamp
         _clear_unread_cache(*user_ids)  # bulk_create sends no post_save
         transaction.on_commit(lambda: objs[0].alert(user_ids=user_ids))
         return objs
