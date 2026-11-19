@@ -452,6 +452,26 @@ Every error under the API is JSON, `{"detail": "..."}`, with the matching status
 
 A path under `system/`, `notifications/` or `announcement/` that matches no endpoint, or lacks its trailing slash, is a JSON `404` too (no redirect), so call the URLs exactly as listed. Other paths under the mount prefix are left to the project's own URLs.
 
+## Roles declared in code
+
+A role is a group with a fixed set of permissions, declared once in code and put back exactly as declared after every `migrate`, in every environment:
+
+```python
+# settings.py
+from whiteneuron.base.roles import Role
+
+WN_ROLES = [
+    Role(key="editor", name=_("Editor"), summary=_("Writes and edits; cannot approve."),
+         permissions=("blog.add_post", "blog.change_post", "blog.view_*")),
+    Role(key="reader", name=_("Reader"), permissions=("*.view_*",), exclude=("auth.permission",)),
+]
+```
+
+- Patterns are `app_label.codename` with `*` / `?` on either side (`blog.view_*`, `*.view_*`, `*`); without a dot they match the codename in any app. `exclude` takes models (`user` or `base.user`).
+- The group is named by `group_name` (default: `key`), so it does not change with the language.
+- Only declared roles' groups are touched; groups made by hand are left alone. Without `WN_ROLES` nothing happens after `migrate`.
+- `manage.py init_groupuser` creates the package's five default groups through the same mechanism (same names and rules as before) and can be run again at any time to undo drift.
+
 ## Background job heartbeats
 
 Jobs nobody watches (a scheduler, a Celery worker, a backup command, a bot) report in at the end of each round, and the operator sees which one has stopped and what that means:

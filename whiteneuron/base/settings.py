@@ -103,6 +103,9 @@ WN_MONITORING = {
 #             "consequence": _("No new backup since then."), "critical": True}}
 # The core reports "monitoring_collector" and "celery" (monitoring.tasks.worker_heartbeat).
 WN_HEARTBEATS = {}
+# Roles declared in code (whiteneuron.base.roles.Role): after every migrate each role's group
+# is set back to exactly its declared permissions. Empty = groups are left as they are.
+WN_ROLES = []
 # Client IP behind reverse proxies (rate limiting, IP blacklist, activity logs):
 # number of proxies that append to X-Forwarded-For (0 = auto: right-most public IP)
 TRUSTED_PROXY_COUNT = int(environ.get("TRUSTED_PROXY_COUNT", "0"))
