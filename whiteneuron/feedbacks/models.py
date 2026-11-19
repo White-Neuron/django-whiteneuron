@@ -50,12 +50,8 @@ class FeedbackData(BaseModel):
         (REJECTED, _("Rejected")),
     ]
     status = models.CharField(
-        max_length=20, choices=STATUS_CHOICES, default=OPEN, db_index=True,
+        max_length=20, choices=STATUS_CHOICES, default=OPEN, db_default=OPEN, db_index=True,
         verbose_name=_("Status"),
-    )
-    assignee = models.ForeignKey(
-        "base.User", on_delete=models.SET_NULL, null=True, blank=True,
-        related_name="assigned_feedbacks", verbose_name=_("Assignee"),
     )
 
     is_resolved = models.BooleanField(

@@ -71,7 +71,11 @@ class AdminWorkflowTests(FeedbackTestCase):
         self.client.post(reverse("admin:feedbacks_feedbackdata_changelist"),
                          {"action": "mark_as_resolved", "_selected_action": [f.pk for f in feedbacks]})
         self.assertEqual(FeedbackData.objects.filter(status="resolved").count(), 3)
-        self.assertEqual(self._sender_notes(self.alice).count(), 2)
+        # one message per sender, listing their feedbacks (#103 review)
+        self.assertEqual(self._sender_notes(self.alice).count(), 0)
+        alice_notes = Notification.objects.filter(user=self.alice, flag="success")
+        self.assertEqual(alice_notes.count(), 1)
+        self.assertTrue(alice_notes.get().title.startswith("2 feedbacks"))
         self.assertEqual(self._sender_notes(self.bob).count(), 1)
         # one history ("update") entry per record, from BaseModel.save
         self.assertEqual(Notification.objects.filter(user=self.root, action="update").count() - history_before, 3)
@@ -125,7 +129,7 @@ class MigrationTests(TestCase):
     def test_existing_resolved_rows_become_resolved(self):
         from importlib import import_module
 
-        migration = import_module("whiteneuron.feedbacks.migrations.0008_status_assignee")
+        migration = import_module("whiteneuron.feedbacks.migrations.0008_status")
         root = User.objects.create_superuser("root", "r@example.com", "pw")
         ct = ContentType.objects.get_for_model(Group)
         fb = FeedbackData.objects.create(user=root, content_type=ct, object_id="1", message="m")
@@ -135,3 +139,48 @@ class MigrationTests(TestCase):
         migration.status_from_is_resolved(apps, None)
         fb.refresh_from_db()
         self.assertEqual(fb.status, "resolved")
+
+
+@package_test_settings()
+class ReviewTests(FeedbackTestCase):
+    """Review of #103."""
+
+    def test_the_sender_sees_which_feedback_and_record(self):
+        group = Group.objects.create(name="Kế toán")
+        fb = FeedbackData.objects.create(user=self.root, content_type=self.ct, object_id=str(group.pk),
+                                         message="the name is misspelt")
+        services.resolve(fb, note="renamed")
+        note = Notification.objects.get(user=self.root, title="Feedback resolved")
+        self.assertIn("Kế toán", note.content)
+        self.assertIn("the name is misspelt", note.content)
+        self.assertIn("renamed", note.content)
+        self.assertEqual(note.obj_link, reverse("admin:auth_group_change", args=[group.pk]))
+
+    def test_reject_from_the_detail_page_with_a_note(self):
+        fb = self._feedback(self.alice)
+        self.client.force_login(self.root)
+        url = reverse("admin:feedbacks_feedbackdata_detail_reject", args=[fb.pk])
+        self.assertEqual(self.client.get(url).status_code, 200)   # the dialog
+        fb.refresh_from_db()
+        self.assertEqual(fb.status, "open")
+        self.client.post(url, {"_form_submitted": "True", "note": "duplicate of #12"})
+        fb.refresh_from_db()
+        self.assertEqual((fb.status, fb.note), ("rejected", "duplicate of #12"))
+        self.assertIn("duplicate of #12", Notification.objects.get(user=self.alice, title="Feedback rejected").content)
+
+    def test_status_column_has_a_database_default(self):
+        field = FeedbackData._meta.get_field("status")
+        self.assertEqual(getattr(field.db_default, "value", field.db_default), "open")
+
+
+class SenderMessageLanguageTests(FeedbackTestCase):
+    def test_vietnamese_message_says_which_record(self):
+        from django.utils import translation
+
+        group = Group.objects.create(name="Nhóm A")
+        fb = FeedbackData.objects.create(user=self.alice, content_type=self.ct, object_id=str(group.pk), message="m")
+        with translation.override("vi"):
+            services.resolve(fb)
+        content = Notification.objects.get(user=self.alice).content
+        self.assertIn("Về bản ghi", content)
+        self.assertNotIn("Thông tin ứng dụng", content)

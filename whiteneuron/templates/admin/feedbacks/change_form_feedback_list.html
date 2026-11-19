@@ -15,7 +15,7 @@
         <div class="flex gap-3 p-4 rounded-xl
                     bg-base-100 dark:bg-base-800
                     border border-base-200 dark:border-base-700
-                    {% if fb.is_resolved %}border-l-4 border-l-success{% else %}border-l-4 border-l-warning{% endif %}">
+                    border-l-4 {% if fb.status == "resolved" %}border-l-success{% elif fb.status == "rejected" %}border-l-base-300{% elif fb.status == "in_progress" %}border-l-info{% else %}border-l-warning{% endif %}">
 
             {# Avatar #}
             <div class="shrink-0 mt-0.5">
@@ -31,9 +31,9 @@
                 <div class="flex items-center gap-2 flex-wrap mb-1.5">
                     {# Status badge #}
                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold
-                        {% if fb.is_resolved %}bg-success/15 text-success{% else %}bg-warning/15 text-warning{% endif %}">
+                        {% if fb.status == "resolved" %}bg-success/15 text-success{% elif fb.status == "rejected" %}bg-base-content/10 text-base-content/70{% elif fb.status == "in_progress" %}bg-info/15 text-info{% else %}bg-warning/15 text-warning{% endif %}">
                         <span class="material-symbols-outlined" style="font-size:0.85rem;line-height:1">
-                            {% if fb.is_resolved %}check_circle{% else %}schedule{% endif %}
+                            {% if fb.status == "resolved" %}check_circle{% elif fb.status == "rejected" %}block{% elif fb.status == "in_progress" %}pending{% else %}schedule{% endif %}
                         </span>
                         {{ fb.get_status_display }}
                     </span>

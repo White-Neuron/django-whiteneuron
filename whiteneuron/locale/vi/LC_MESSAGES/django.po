@@ -3779,6 +3779,50 @@ msgstr[0] "Đã chuyển %(count)d phản hồi sang %(status)s."
 msgid "These notifications are also the change history of the records. When the choices below reach nobody, the superusers still receive them. Recipients without permission to view this model get the changes but cannot open the record."
 msgstr "Thông báo cũng là lịch sử thay đổi của bản ghi. Nếu các lựa chọn bên dưới không tới được ai, superuser vẫn nhận. Người nhận không có quyền xem model này vẫn thấy nội dung thay đổi nhưng không mở được bản ghi."
 
+#: whiteneuron/feedbacks
+msgid "Reject"
+msgstr "Từ chối"
+
+#: whiteneuron/feedbacks
+msgid "Reopen"
+msgstr "Mở lại"
+
+#: whiteneuron/feedbacks
+msgid "Mark this feedback as in progress?"
+msgstr "Chuyển phản hồi này sang đang xử lý?"
+
+#: whiteneuron/feedbacks
+msgid "Reject this feedback?"
+msgstr "Từ chối phản hồi này?"
+
+#: whiteneuron/feedbacks
+msgid "Reopen this feedback?"
+msgstr "Mở lại phản hồi này?"
+
+#: whiteneuron/feedbacks
+msgid "Note for the sender"
+msgstr "Ghi chú gửi người phản hồi"
+
+#: whiteneuron/feedbacks
+msgid "You wrote"
+msgstr "Bạn đã viết"
+
+#: whiteneuron/feedbacks/admin.py
+#, python-format
+msgid "Feedback changed to %(status)s."
+msgstr "Đã chuyển phản hồi sang %(status)s."
+
+#: whiteneuron/feedbacks/services.py
+#, python-format
+msgid "%(count)d feedback: %(title)s"
+msgid_plural "%(count)d feedbacks: %(title)s"
+msgstr[0] "%(count)d phản hồi: %(title)s"
+
+#: whiteneuron/feedbacks/services.py
+msgctxt "feedback about a record"
+msgid "About"
+msgstr "Về bản ghi"
+
 #~ msgid "day"
 #~ msgstr "ngày"
 

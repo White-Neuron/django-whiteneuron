@@ -5,12 +5,22 @@ from django.utils.html import format_html
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _, ngettext
 
-from unfold.decorators import display
+from django import forms
+from django.shortcuts import redirect
+from unfold.decorators import action, display
+from unfold.forms import BaseDialogForm
+from unfold.widgets import UnfoldAdminTextareaWidget
 
 from whiteneuron.base.admin import base_admin_site, ModelAdmin
 from . import services
 from .models import FeedbackData
 from .views import FEEDBACK_COOLDOWN_SECONDS
+
+
+class FeedbackNoteForm(BaseDialogForm):
+    """The dialog of the detail decisions: an optional note, sent to the feedback's author."""
+    note = forms.CharField(label=_("Note for the sender"), required=False, max_length=500,
+                           widget=UnfoldAdminTextareaWidget(attrs={"rows": 3}))
 
 
 @admin.register(FeedbackData, site=base_admin_site)
@@ -28,7 +38,7 @@ class FeedbackDataAdmin(ModelAdmin):
         'created_at',
     )
     search_help_text = _("Search by message or sender")
-    list_filter = ('status', 'assignee', 'created_at', 'user', 'content_type')
+    list_filter = ('status', 'created_at', 'user', 'content_type')
     search_fields = ('message', 'user__username', 'content_type__model')
 
     fieldsets = (
@@ -37,7 +47,7 @@ class FeedbackDataAdmin(ModelAdmin):
             'fields': ('user', ('content_type', 'object_id'), 'get_related_object_link', 'message')
         }),
         (_('Status'), {
-            'fields': ('status', 'assignee', 'note')
+            'fields': ('status', 'note')
         })
     )
 
@@ -85,7 +95,9 @@ class FeedbackDataAdmin(ModelAdmin):
     actions = ['mark_as_resolved', 'mark_in_progress', 'mark_rejected', 'reopen']
 
     def _bulk_status(self, request, queryset, status):
-        changed = sum(1 for feedback in queryset if services.set_status(feedback, status))
+        changed_items = [fb for fb in queryset.select_related("user") if services.set_status(fb, status, notify=False)]
+        services.notify_senders(changed_items)  # one message per sender, not one per feedback
+        changed = len(changed_items)
         self.message_user(request, ngettext(
             "%(count)d feedback changed to %(status)s.", "%(count)d feedbacks changed to %(status)s.", changed,
         ) % {"count": changed, "status": dict(FeedbackData.STATUS_CHOICES)[status]}, messages.SUCCESS)
@@ -106,9 +118,35 @@ class FeedbackDataAdmin(ModelAdmin):
     def reopen(self, request, queryset):
         self._bulk_status(request, queryset, FeedbackData.OPEN)
 
-    def has_resolve_permission(self, request):
+    def has_resolve_permission(self, request, object_id=None):
         # the same rule as the single "resolve" on the change form
         return request.user.is_superuser
+
+    # The other decisions on the detail page too, each with a note for the sender (#47 review):
+    # rejecting from the list gave no place to say why
+    actions_detail = ["detail_in_progress", "detail_reject", "detail_reopen"]
+
+    def _detail_status(self, request, form, object_id, status):
+        feedback = self.get_object(request, object_id)
+        if feedback is not None and services.set_status(feedback, status, note=form.cleaned_data.get("note") or None):
+            self.message_user(request, _("Feedback changed to %(status)s.") % {
+                "status": dict(FeedbackData.STATUS_CHOICES)[status]}, messages.SUCCESS)
+        return redirect(reverse("admin:feedbacks_feedbackdata_change", args=[object_id]))
+
+    @action(description=_("In progress"), url_path="in-progress", icon="pending", permissions=["resolve"],
+            dialog={"title": _("Mark this feedback as in progress?"), "form_class": FeedbackNoteForm})
+    def detail_in_progress(self, request, form, object_id):
+        return self._detail_status(request, form, object_id, FeedbackData.IN_PROGRESS)
+
+    @action(description=_("Reject"), url_path="reject", icon="block", permissions=["resolve"],
+            dialog={"title": _("Reject this feedback?"), "form_class": FeedbackNoteForm})
+    def detail_reject(self, request, form, object_id):
+        return self._detail_status(request, form, object_id, FeedbackData.REJECTED)
+
+    @action(description=_("Reopen"), url_path="reopen", icon="undo", permissions=["resolve"],
+            dialog={"title": _("Reopen this feedback?"), "form_class": FeedbackNoteForm})
+    def detail_reopen(self, request, form, object_id):
+        return self._detail_status(request, form, object_id, FeedbackData.OPEN)
 
     # Vô hiệu thêm mới
     def has_add_permission(self, request):
