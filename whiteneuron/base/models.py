@@ -111,15 +111,26 @@ class User(AbstractUser):
     # Languages that write the family name first ("Nguyễn Văn An"); others: given name first
     FAMILY_NAME_FIRST_LANGUAGES = ("vi", "zh", "ja", "ko", "hu")
 
-    def get_full_name(self):
-        """The name in the active language's order: "Nguyễn Văn An" in Vietnamese, "Văn An
-        Nguyễn" in English. One part alone is returned as it is. Used by Unfold's header and
-        avatar, the user cards, notifications and e-mails (#82)."""
-        from django.utils.translation import get_language
+    @classmethod
+    def family_name_first(cls):
+        """Whether names are written family name first on this site: ``WN_NAME_ORDER``
+        ("family_first" / "given_first"), else the site's ``LANGUAGE_CODE``. A property of the
+        organisation, not of the viewer: the same person reads the same everywhere, and the
+        names stored in notifications and history all follow one order (#92 review)."""
+        from django.conf import settings
 
-        language = (get_language() or "").split("-")[0]
+        order = getattr(settings, "WN_NAME_ORDER", None)
+        if order in ("family_first", "given_first"):
+            return order == "family_first"
+        language = (getattr(settings, "LANGUAGE_CODE", "") or "").split("-")[0]
+        return language in cls.FAMILY_NAME_FIRST_LANGUAGES
+
+    def get_full_name(self):
+        """"Nguyễn Văn An" on a Vietnamese site, "Văn An Nguyễn" on an English one (see
+        ``family_name_first``). One part alone is returned as it is. Used by Unfold's header
+        and avatar, the user cards, notifications and e-mails (#82)."""
         first, last = (self.first_name or "").strip(), (self.last_name or "").strip()
-        parts = (last, first) if language in self.FAMILY_NAME_FIRST_LANGUAGES else (first, last)
+        parts = (last, first) if self.family_name_first() else (first, last)
         return " ".join(p for p in parts if p)
 
     @property
