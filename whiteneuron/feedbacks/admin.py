@@ -3,15 +3,15 @@ from django.http import JsonResponse
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.text import Truncator
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, ngettext
 
 from unfold.decorators import display
 
 from whiteneuron.base.admin import base_admin_site, ModelAdmin
+from . import services
 from .models import FeedbackData
-from .urls import FEEDBACK_COOLDOWN_SECONDS
+from .views import FEEDBACK_COOLDOWN_SECONDS
 
-from whiteneuron.notification.models import Notification
 
 @admin.register(FeedbackData, site=base_admin_site)
 class FeedbackDataAdmin(ModelAdmin):
@@ -28,7 +28,7 @@ class FeedbackDataAdmin(ModelAdmin):
         'created_at',
     )
     search_help_text = _("Search by message or sender")
-    list_filter = ('is_resolved', 'created_at', 'user', 'content_type')
+    list_filter = ('status', 'assignee', 'created_at', 'user', 'content_type')
     search_fields = ('message', 'user__username', 'content_type__model')
 
     fieldsets = (
@@ -37,7 +37,7 @@ class FeedbackDataAdmin(ModelAdmin):
             'fields': ('user', ('content_type', 'object_id'), 'get_related_object_link', 'message')
         }),
         (_('Status'), {
-            'fields': ('is_resolved', 'note')
+            'fields': ('status', 'assignee', 'note')
         })
     )
 
@@ -52,10 +52,10 @@ class FeedbackDataAdmin(ModelAdmin):
         return qs.filter(user=request.user) 
     
     # A label, not the boolean icon: a red ✗ on every pending feedback read as "error" (#81)
-    @display(description=_("Status"), ordering="is_resolved",
-             label={"pending": "warning", "resolved": "success"})
+    @display(description=_("Status"), ordering="status",
+             label={"open": "warning", "in_progress": "info", "resolved": "success", "rejected": "default"})
     def display_status(self, obj):
-        return ("resolved", _("Resolved")) if obj.is_resolved else ("pending", _("Pending"))
+        return obj.status, obj.get_status_display()
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         field = super().formfield_for_dbfield(db_field, request, **kwargs)
@@ -65,7 +65,8 @@ class FeedbackDataAdmin(ModelAdmin):
         return field
 
     def get_short_message(self, obj):
-        return Truncator(obj.message).words(200)
+        # about a line in the list; the whole message on hover (#47)
+        return format_html('<span title="{}">{}</span>', obj.message, Truncator(obj.message).words(30))
     get_short_message.short_description = _('Message')
 
     def get_related_object_link(self, obj):
@@ -79,17 +80,35 @@ class FeedbackDataAdmin(ModelAdmin):
         return "-"
     get_related_object_link.short_description = _("Related Object")  # Tiêu đề trong Admin
 
-    # Định nghĩa action để đánh dấu đã xử lý
-    actions = ['mark_as_resolved']
+    # Workflow actions (#47): each record goes through services.set_status, so a bulk change
+    # saves, records history and notifies every sender like a single one does
+    actions = ['mark_as_resolved', 'mark_in_progress', 'mark_rejected', 'reopen']
 
-    @admin.action(description=_("Mark selected feedbacks as resolved"))
+    def _bulk_status(self, request, queryset, status):
+        changed = sum(1 for feedback in queryset if services.set_status(feedback, status))
+        self.message_user(request, ngettext(
+            "%(count)d feedback changed to %(status)s.", "%(count)d feedbacks changed to %(status)s.", changed,
+        ) % {"count": changed, "status": dict(FeedbackData.STATUS_CHOICES)[status]}, messages.SUCCESS)
+
+    @admin.action(description=_("Mark selected feedbacks as resolved"), permissions=["resolve"])
     def mark_as_resolved(self, request, queryset):
-        updated = queryset.update(is_resolved=True)
-        self.message_user(
-            request,
-            _("%d feedback(s) marked as resolved.") % updated,
-            messages.SUCCESS
-        )
+        self._bulk_status(request, queryset, FeedbackData.RESOLVED)
+
+    @admin.action(description=_("Mark selected feedbacks as in progress"), permissions=["resolve"])
+    def mark_in_progress(self, request, queryset):
+        self._bulk_status(request, queryset, FeedbackData.IN_PROGRESS)
+
+    @admin.action(description=_("Reject selected feedbacks"), permissions=["resolve"])
+    def mark_rejected(self, request, queryset):
+        self._bulk_status(request, queryset, FeedbackData.REJECTED)
+
+    @admin.action(description=_("Reopen selected feedbacks"), permissions=["resolve"])
+    def reopen(self, request, queryset):
+        self._bulk_status(request, queryset, FeedbackData.OPEN)
+
+    def has_resolve_permission(self, request):
+        # the same rule as the single "resolve" on the change form
+        return request.user.is_superuser
 
     # Vô hiệu thêm mới
     def has_add_permission(self, request):
@@ -128,25 +147,7 @@ class FeedbackDataAdmin(ModelAdmin):
             obj = self.get_object(request, object_id)
             if obj is None:
                 return JsonResponse({"success": False, "message": str(_("Feedback not found."))}, status=404)
-            obj.is_resolved = True
-            obj.note = note
-            obj.save()
-
-            # Thông báo đến user gửi feedback rằng feedback đã được xử lý
-            noti= Notification(
-                user= obj.user,
-                title= _("Feedback resolved"),
-                content= format_html(
-                    '<p>{}</p><p>{}: {}</p><p>{}: {}</p>',
-                    _("Your feedback has been resolved."),
-                    _("Object"), self.get_related_object_link(obj),
-                    _("Note"), note,
-                ),
-                action='update',
-                flag= 'success',
-            )
-            noti.save()
-
+            services.resolve(obj, note=note)  # saves, records history, notifies the sender (+ toast)
             return JsonResponse({"success": True})
 
         return super().changeform_view(request, object_id, form_url, extra_context)
@@ -168,6 +169,9 @@ class FeedbackBaseAdmin(ModelAdmin):
                 content_type=ct,
                 object_id=str(original.pk),
             ).select_related('user')
+            # the rule of the Feedback list: others' feedbacks only for superusers (#47)
+            if not request.user.is_superuser:
+                feedbacks = feedbacks.filter(user=request.user)
             context['feedback_list'] = feedbacks
 
         return super().render_change_form(request, context, *args, **kwargs)

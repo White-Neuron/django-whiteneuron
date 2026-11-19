@@ -35,7 +35,7 @@
                         <span class="material-symbols-outlined" style="font-size:0.85rem;line-height:1">
                             {% if fb.is_resolved %}check_circle{% else %}schedule{% endif %}
                         </span>
-                        {% if fb.is_resolved %}{% trans "Resolved" %}{% else %}{% trans "Pending" %}{% endif %}
+                        {{ fb.get_status_display }}
                     </span>
 
                     {# Author #}

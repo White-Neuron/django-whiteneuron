@@ -41,6 +41,23 @@ class FeedbackData(BaseModel):
         help_text=_("The message of the feedback")
     )
 
+    # Workflow (#47). is_resolved stays for compatibility and follows status in save().
+    OPEN, IN_PROGRESS, RESOLVED, REJECTED = "open", "in_progress", "resolved", "rejected"
+    STATUS_CHOICES = [
+        (OPEN, _("Open")),
+        (IN_PROGRESS, _("In progress")),
+        (RESOLVED, _("Resolved")),
+        (REJECTED, _("Rejected")),
+    ]
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default=OPEN, db_index=True,
+        verbose_name=_("Status"),
+    )
+    assignee = models.ForeignKey(
+        "base.User", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="assigned_feedbacks", verbose_name=_("Assignee"),
+    )
+
     is_resolved = models.BooleanField(
         default=False,
         verbose_name=_("Is Resolved"),
@@ -64,6 +81,21 @@ class FeedbackData(BaseModel):
 
     def __str__(self):
         return f'{self.user} - {self.content_type}({self.object_id})'
+
+    def save(self, *args, **kwargs):
+        self.is_resolved = self.status == self.RESOLVED
+        super().save(*args, **kwargs)
+        # the sidebar badge counts open feedbacks (feedbacks.utils)
+        from django.core.cache import caches
+
+        try:
+            caches["default"].delete_many(["badge:feedback:open:all", f"badge:feedback:open:{self.user_id}"])
+        except Exception:
+            pass
+
+    @property
+    def is_closed(self):
+        return self.status in (self.RESOLVED, self.REJECTED)
     
 
 

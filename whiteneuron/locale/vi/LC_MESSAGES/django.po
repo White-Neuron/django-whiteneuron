@@ -3567,6 +3567,64 @@ msgstr "Bản ghi sẽ hiện ở đây sau khi được thêm."
 msgid "Records will be listed here once there are some."
 msgstr "Bản ghi sẽ hiện ở đây khi có dữ liệu."
 
+#: whiteneuron/feedbacks
+msgid "Open"
+msgstr "Đang mở"
+
+#: whiteneuron/feedbacks
+msgid "In progress"
+msgstr "Đang xử lý"
+
+#: whiteneuron/feedbacks
+msgid "Rejected"
+msgstr "Đã từ chối"
+
+#: whiteneuron/feedbacks
+msgid "Assignee"
+msgstr "Người phụ trách"
+
+#: whiteneuron/feedbacks
+msgid "Feedback rejected"
+msgstr "Phản hồi bị từ chối"
+
+#: whiteneuron/feedbacks
+msgid "Your feedback has been rejected."
+msgstr "Phản hồi của bạn đã bị từ chối."
+
+#: whiteneuron/feedbacks
+msgid "Feedback in progress"
+msgstr "Phản hồi đang được xử lý"
+
+#: whiteneuron/feedbacks
+msgid "Your feedback is being handled."
+msgstr "Phản hồi của bạn đang được xử lý."
+
+#: whiteneuron/feedbacks
+msgid "Feedback reopened"
+msgstr "Phản hồi được mở lại"
+
+#: whiteneuron/feedbacks
+msgid "Your feedback has been reopened."
+msgstr "Phản hồi của bạn đã được mở lại."
+
+#: whiteneuron/feedbacks
+msgid "Mark selected feedbacks as in progress"
+msgstr "Đánh dấu các phản hồi đã chọn là đang xử lý"
+
+#: whiteneuron/feedbacks
+msgid "Reject selected feedbacks"
+msgstr "Từ chối các phản hồi đã chọn"
+
+#: whiteneuron/feedbacks
+msgid "Reopen selected feedbacks"
+msgstr "Mở lại các phản hồi đã chọn"
+
+#: whiteneuron/feedbacks/admin.py
+#, python-format
+msgid "%(count)d feedback changed to %(status)s."
+msgid_plural "%(count)d feedbacks changed to %(status)s."
+msgstr[0] "Đã chuyển %(count)d phản hồi sang %(status)s."
+
 #~ msgid "day"
 #~ msgstr "ngày"
 
