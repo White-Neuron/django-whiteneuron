@@ -14,6 +14,13 @@ else, or in another tab), is refused with a message and a redirect back to the r
 
 ``ModelAdmin.get_action_url_params(request, obj, action_name)`` is the public hook that adds
 the token; override it to add parameters of your own.
+
+Notes:
+- The token is not a CSRF token: give actions that change data a ``dialog`` (a POST), as above.
+- ``updated_at`` does not move on ``queryset.update()``; when that matters, make ``version``
+  a hash of the fields the page shows.
+- A record the admin cannot load for this user (outside ``get_queryset``, a wrong id) is
+  refused like a bad token: the action never runs unchecked.
 """
 import functools
 
@@ -73,14 +80,18 @@ def sealed(version):
         def wrapper(model_admin, request, *args, **kwargs):
             object_id = kwargs.get("object_id")
             obj = model_admin.get_object(request, object_id) if object_id is not None else None
-            if obj is not None:
-                problem = check_seal(request, obj, func.__name__, version)
-                if problem:
-                    model_admin.message_user(request, problem, messages.ERROR)
-                    opts = model_admin.model._meta
-                    return HttpResponseRedirect(
-                        reverse(f"{model_admin.admin_site.name}:{opts.app_label}_{opts.model_name}_change",
-                                args=[obj.pk]))
+            opts = model_admin.model._meta
+            if obj is None:
+                # fail closed: without the record there is nothing to check the token against
+                model_admin.message_user(request, _("This record cannot be found."), messages.ERROR)
+                return HttpResponseRedirect(
+                    reverse(f"{model_admin.admin_site.name}:{opts.app_label}_{opts.model_name}_changelist"))
+            problem = check_seal(request, obj, func.__name__, version)
+            if problem:
+                model_admin.message_user(request, problem, messages.ERROR)
+                return HttpResponseRedirect(
+                    reverse(f"{model_admin.admin_site.name}:{opts.app_label}_{opts.model_name}_change",
+                            args=[obj.pk]))
             return func(model_admin, request, *args, **kwargs)
 
         wrapper._wn_seal_version = version

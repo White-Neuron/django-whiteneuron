@@ -127,3 +127,27 @@ class SealedActionTests(TestCase):
             self.assertNotIn("data-wn-max-bytes", field.widget.attrs)   # off by default
         finally:
             admin.upload_max_mb = 2
+
+
+@override_settings(ROOT_URLCONF=__name__)
+class SealedFailsClosedTests(TestCase):
+    """Review of #104: a record the admin cannot load must not run the action unchecked."""
+
+    def test_record_outside_the_admin_queryset_is_refused(self):
+        root = User.objects.create_superuser("root", "r@example.com", "pw")
+        fb = FeedbackData.objects.create(user=root, content_type=ContentType.objects.get_for_model(Group),
+                                         object_id="1", message="m")
+        self.client.force_login(root)
+        url = reverse("sealtest:feedbacks_feedbackdata_approve", args=[fb.pk])
+        admin = site._registry[FeedbackData]
+        with mock.patch.object(type(admin), "get_queryset", lambda self, request: FeedbackData.objects.none()):
+            response = self.client.get(url + "?" + SEAL_PARAM + "=anything")
+        fb.refresh_from_db()
+        self.assertNotEqual(fb.note, "approved")
+        self.assertEqual(response["Location"], reverse("sealtest:feedbacks_feedbackdata_changelist"))
+
+    def test_wrong_object_id_is_refused(self):
+        root = User.objects.create_superuser("root", "r@example.com", "pw")
+        self.client.force_login(root)
+        response = self.client.get(reverse("sealtest:feedbacks_feedbackdata_approve", args=[999999]))
+        self.assertEqual(response["Location"], reverse("sealtest:feedbacks_feedbackdata_changelist"))

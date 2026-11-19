@@ -3739,6 +3739,10 @@ msgstr "Nội dung đã thay đổi từ lúc bạn mở trang. Hãy xem lại r
 msgid "This file is larger than %(size)s MB. Choose a smaller file."
 msgstr "Tệp này lớn hơn %(size)s MB. Hãy chọn tệp nhỏ hơn."
 
+#: whiteneuron/base/sealed.py
+msgid "This record cannot be found."
+msgstr "Không tìm thấy bản ghi này."
+
 #~ msgid "day"
 #~ msgstr "ngày"
 
