@@ -28,9 +28,9 @@ from django.template.loader import render_to_string
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.module_loading import import_string
 from django.views.decorators.cache import never_cache
-from django.views.decorators.http import require_GET, require_POST
-
-from whiteneuron.base.api_utils import api_login_required, json_response, paginate
+from whiteneuron.base.api_utils import (
+    api_csrf_protect, api_login_required, json_response, paginate, require_GET, require_POST,
+)
 from whiteneuron.base.html_sanitize import sanitize_html
 
 from .models import AnnouncementReceipt, Notification
@@ -136,18 +136,21 @@ def _set_read(request, pk, value):
     return json_response({"id": pk, "is_read": value, "unread_count": _unread_count(request)})
 
 
+@api_csrf_protect
 @require_POST
 @api_login_required
 def notification_read(request, pk):
     return _set_read(request, pk, True)
 
 
+@api_csrf_protect
 @require_POST
 @api_login_required
 def notification_unread(request, pk):
     return _set_read(request, pk, False)
 
 
+@api_csrf_protect
 @require_POST
 @api_login_required
 def notification_read_all(request):
@@ -205,6 +208,7 @@ def announcement(request):
     }})
 
 
+@api_csrf_protect
 @require_POST
 @api_login_required
 def announcement_seen(request):

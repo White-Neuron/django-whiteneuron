@@ -432,6 +432,20 @@ if (announcement && !announcement.is_seen) {
 
 Notifications and announcement need a logged-in user (`401` otherwise); a user only reaches their own notifications (`404` for others); `POST` needs the CSRF token.
 
+### Errors
+
+Every error under the API is JSON, `{"detail": "..."}`, with the matching status:
+
+| Status | When |
+|---|---|
+| `401` | not logged in |
+| `403` | CSRF check failed on a `POST` (`"CSRF failed: <reason>"`) |
+| `404` | no such object, or a path that matches no endpoint (e.g. a non-numeric id) |
+| `405` | wrong method; `Allow` lists the right ones (`GET` endpoints also answer `HEAD`) |
+| `429` | rate limited; `Retry-After` says how many seconds to wait |
+
+A path without its trailing slash is a `404` too (no redirect), so call the URLs exactly as listed.
+
 ## Middleware & Security
 
 ### Rate Limiting

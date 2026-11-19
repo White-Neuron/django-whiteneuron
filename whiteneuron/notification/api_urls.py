@@ -1,4 +1,6 @@
-from django.urls import path
+from django.urls import path, re_path
+
+from whiteneuron.base.api_utils import not_found
 
 from . import api
 
@@ -11,4 +13,5 @@ urlpatterns = [
     path("<int:pk>/", api.notification_detail, name="detail"),
     path("<int:pk>/read/", api.notification_read, name="read"),
     path("<int:pk>/unread/", api.notification_unread, name="unread"),
+    re_path(r"", not_found),  # JSON 404 for the rest (e.g. a non-numeric id)
 ]
