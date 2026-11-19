@@ -3689,6 +3689,38 @@ msgstr "%(delta)s trước"
 #: whiteneuron/templates/admin/index.html
 msgid "has not run since the server started."
 msgstr "chưa chạy lần nào kể từ khi máy chủ khởi động."
+#: whiteneuron/notification/admin.py
+msgid "Search by title, content or who did it"
+msgstr "Tìm theo tiêu đề, nội dung hoặc người thực hiện"
+
+#: whiteneuron/feedbacks/admin.py
+msgid "Search by message or sender"
+msgstr "Tìm theo nội dung hoặc người gửi"
+
+#: django/contrib/admin (Django's Vietnamese ends with a full stop)
+msgid "Site administration"
+msgstr "Quản trị hệ thống"
+
+#: whiteneuron/templates/unfold/helpers/empty_results.html
+#, python-format
+msgid "No %(name)s yet"
+msgstr "Chưa có %(name)s nào"
+
+#: whiteneuron/templates/unfold/helpers/empty_results.html
+msgid "Nothing matches the search or the filters."
+msgstr "Không có bản ghi nào khớp với từ khoá hoặc bộ lọc."
+
+#: whiteneuron/templates/unfold/helpers/empty_results.html
+msgid "Records will be listed here once they are added."
+msgstr "Bản ghi sẽ hiện ở đây sau khi được thêm."
+
+#: whiteneuron/templates/unfold/helpers/empty_results.html
+msgid "Records will be listed here once there are some."
+msgstr "Bản ghi sẽ hiện ở đây khi có dữ liệu."
+
+#: whiteneuron/notification/admin.py
+msgid "These notifications are also the change history of the records. When the choices below reach nobody, the superusers still receive them. Recipients without permission to view this model get the changes but cannot open the record."
+msgstr "Thông báo cũng là lịch sử thay đổi của bản ghi. Nếu các lựa chọn bên dưới không tới được ai, superuser vẫn nhận. Người nhận không có quyền xem model này vẫn thấy nội dung thay đổi nhưng không mở được bản ghi."
 
 #~ msgid "day"
 #~ msgstr "ngày"

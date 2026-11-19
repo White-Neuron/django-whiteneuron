@@ -5,6 +5,8 @@ from django.utils.html import format_html
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
+from unfold.decorators import display
+
 from whiteneuron.base.admin import base_admin_site, ModelAdmin
 from .models import FeedbackData
 from .urls import FEEDBACK_COOLDOWN_SECONDS
@@ -22,9 +24,10 @@ class FeedbackDataAdmin(ModelAdmin):
         'content_type',
         'get_related_object_link',  # Hiển thị link đến object gốc
         'get_short_message',
-        'is_resolved',
+        'display_status',
         'created_at',
     )
+    search_help_text = _("Search by message or sender")
     list_filter = ('is_resolved', 'created_at', 'user', 'content_type')
     search_fields = ('message', 'user__username', 'content_type__model')
 
@@ -48,6 +51,19 @@ class FeedbackDataAdmin(ModelAdmin):
         # Người liên quan có thể xem feedback        
         return qs.filter(user=request.user) 
     
+    # A label, not the boolean icon: a red ✗ on every pending feedback read as "error" (#81)
+    @display(description=_("Status"), ordering="is_resolved",
+             label={"pending": "warning", "resolved": "success"})
+    def display_status(self, obj):
+        return ("resolved", _("Resolved")) if obj.is_resolved else ("pending", _("Pending"))
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        field = super().formfield_for_dbfield(db_field, request, **kwargs)
+        # their help texts only repeated the label ("The message of the feedback") (#81)
+        if field is not None and db_field.name in ("message", "is_resolved"):
+            field.help_text = ""
+        return field
+
     def get_short_message(self, obj):
         return Truncator(obj.message).words(200)
     get_short_message.short_description = _('Message')

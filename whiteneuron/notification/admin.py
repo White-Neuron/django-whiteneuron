@@ -15,6 +15,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.html import format_html
+from django.utils.text import Truncator, capfirst
 from django.utils.http import url_has_allowed_host_and_scheme
 from unfold.contrib.filters.admin import AutocompleteSelectFilter
 from unfold.decorators import action, display
@@ -42,6 +43,11 @@ class NotificationConfigAdmin(ModelAdmin):
         (_('Notification Recipients'), {
             'fields': ('send_to_admin', 'send_to_user', 'users', 'send_to_group_user', 'group_users'),
             'classes': ('collapse',),
+            'description': _(
+                "These notifications are also the change history of the records. When the "
+                "choices below reach nobody, the superusers still receive them. Recipients "
+                "without permission to view this model get the changes but cannot open the record."
+            ),
         }),
     )
 
@@ -58,6 +64,7 @@ class NotificationAdmin(ModelAdmin):
         "created_at",
     ]
     autocomplete_fields = [ "user", "action_by"]
+    search_help_text = _("Search by title, content or who did it")
     search_fields = [
         "user__username",
         "title",
@@ -250,14 +257,15 @@ class NotificationAdmin(ModelAdmin):
             except ContentType.DoesNotExist:
                 mc = None
             if mc is None:
-                found[(app_label, raw_model)] = (raw_model.replace('_', ' ').title(), {})
+                found[(app_label, raw_model)] = (capfirst(raw_model.replace('_', ' ')), {})
                 continue
             manager = getattr(mc, 'objects_all', mc._default_manager)
             try:
                 objs = {o.pk: str(o) for o in manager.filter(pk__in=ids)}
             except Exception:
                 objs = {}
-            found[(app_label, raw_model)] = (mc._meta.verbose_name.title(), objs)
+            # capfirst, not title(): Vietnamese capitalises the first word only ("Người dùng")
+            found[(app_label, raw_model)] = (capfirst(mc._meta.verbose_name), objs)
         for n in notifications:
             parsed = cls._parse_obj_link(n.obj_link)
             if not parsed:
@@ -287,7 +295,10 @@ class NotificationAdmin(ModelAdmin):
         return cls
 
     def display_title(self, instance: Notification):
-        # Parse obj_link → extract app_label, model_name, object_id
+        """One line that says what happened: "[Updated] User nhanvien1 · by root" (#81).
+
+        Without a linked object (bulk actions, system messages) the stored title stands in.
+        Unread rows are bold, as in a mail inbox."""
         app_label, model_verbose, object_id, obj_str = self.get_components(instance)
 
         _action_cls = {
@@ -296,45 +307,29 @@ class NotificationAdmin(ModelAdmin):
             'delete': 'ui-badge-error',
             'restore': 'ui-badge-warning',
         }
-        action_cls = _action_cls.get(instance.action or '', '')
-        action_label = _(instance.action) if instance.action else '—'
-
         parts = []
+        if instance.action:
+            parts.append(format_html('<span class="ui-badge ui-badge-xs {}">{}</span>',
+                                     _action_cls.get(instance.action, ''), instance.get_action_display()))
 
-        # [Model name]
         if model_verbose:
-            parts.append(format_html(
-                '<span class="ui-badge ui-badge-xs font-mono opacity-70"><strong>{}</strong></span>', model_verbose))
-
-        # [#ID] — clickable link (only same-site paths)
-        if object_id:
+            parts.append(format_html('<span class="opacity-70">{}</span>', model_verbose))
+            name = obj_str or f"#{object_id}"
             if instance.obj_link and instance.obj_link.startswith("/") and is_safe_href(instance.obj_link):
-                parts.append(format_html(
-                    '<a href="{}" class="ui-badge ui-badge-xs font-mono">#{}</a>', instance.obj_link, object_id))
+                parts.append(format_html('<a href="{}" class="underline-offset-2 hover:underline">{}</a>',
+                                         instance.obj_link, name))
             else:
-                parts.append(format_html('<span class="ui-badge ui-badge-xs font-mono">#{}</span>', object_id))
+                parts.append(format_html('<span>{}</span>', name))
+        else:
+            parts.append(format_html('<span>{}</span>', Truncator(instance.title or "").chars(120)))
 
-        # [Object name]
-        if obj_str:
-            parts.append(format_html('<span class="text-sm font-semibold">{}</span>', obj_str))
-
-        # [Action]
-        parts.append(format_html('<span class="ui-badge ui-badge-xs {}">{}</span>', action_cls, action_label))
-
-        # by [Alias] [@username]
-        if instance.action_by:
+        if instance.action_by and model_verbose:  # a stored title usually names who did it already
             ab = instance.action_by
-            alias = getattr(ab, 'full_name', None) or ''
-            username = ab.username
-            parts.append(format_html('<span class="text-xs opacity-50">{}</span>', _("by")))
-            if alias and alias != username:
-                parts.append(format_html(
-                    '<span class="ui-badge ui-badge-xs">{}</span><span class="ui-badge ui-badge-xs opacity-60">@{}</span>',
-                    alias, username))
-            else:
-                parts.append(format_html('<span class="ui-badge ui-badge-xs">@{}</span>', username))
+            who = getattr(ab, 'full_name', None) or ab.username
+            parts.append(format_html('<span class="text-xs opacity-60">· {} {}</span>', _("by"), who))
 
-        return format_html('<div class="flex flex-wrap items-center gap-1">{}</div>', mark_safe(''.join(parts)))
+        weight = "font-normal opacity-80" if instance.is_read else "font-semibold"
+        return format_html('<div class="flex flex-wrap items-center gap-1 {}">{}</div>', weight, mark_safe(''.join(parts)))
     display_title.short_description = _("Title")
     
     def display_changed_data(self, instance: Notification):

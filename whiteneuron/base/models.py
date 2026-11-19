@@ -580,7 +580,7 @@ class BaseModel(SoftDeleteModel):
         Notification.notify_superusers(
             title=title, content=content_html, action=action, flag='info',
             obj_link=obj_link or None, changed_data=changed_data,
-            action_by=self.updated_by if action == 'update' else self.created_by,
+            action_by=self.updated_by if action == 'update' else self.created_by, model=self,
         )
 
 # ── M2M tracking ────────────────────────────────────────────────────────────
@@ -678,7 +678,7 @@ def _base_model_m2m_changed(sender, instance, action, pk_set, model, **kwargs):
     try:
         Notification.notify_superusers(
             title=title, content=content_html, action='update', flag='info',
-            obj_link=instance.path() or None, changed_data=changed_data, action_by=user,
+            obj_link=instance.path() or None, changed_data=changed_data, action_by=user, model=instance,
         )
     except Exception:
         pass

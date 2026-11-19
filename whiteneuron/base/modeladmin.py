@@ -124,8 +124,16 @@ class ModelAdmin(UnfoldAdmin):
 
     @property
     def search_help_text(self):
-        fields = ', '.join([str(get_verbose_name_field(self.model, f)) for f in self.search_fields])
-        return format_lazy(_('Search by {fields}'), fields=fields)
+        # One word per field, as the user knows it: "user" for user__username, not
+        # "Notification for user / Username"; a ModelAdmin can set its own sentence (#81)
+        labels = []
+        for f in self.search_fields:
+            label = str(get_verbose_name_field(self.model, f.lstrip("^=@").split("__")[0]))
+            if not label[1:2].isupper():  # "user", but "ID" / "URL" stay as they are
+                label = label[:1].lower() + label[1:]
+            if label not in labels:
+                labels.append(label)
+        return format_lazy(_('Search by {fields}'), fields=", ".join(labels))
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
@@ -202,7 +210,7 @@ class ModelAdmin(UnfoldAdmin):
         text = message % {'name': objs[0]._meta.verbose_name, 'obj': names, 'user': request.user}
         Notification.notify_superusers(
             title=text, content=format_html('<p>{}</p>', text),
-            action=action, flag=flag, action_by=request.user,
+            action=action, flag=flag, action_by=request.user, model=objs[0],
         )
 
     @staticmethod
@@ -217,7 +225,7 @@ class ModelAdmin(UnfoldAdmin):
             Notification.notify_superusers(
                 title=title, content=format_html('<p>{}</p>', title),
                 action='delete' if deleted else 'restore', flag='danger' if deleted else 'info',
-                obj_link=obj.path() or None, action_by=request.user,
+                obj_link=obj.path() or None, action_by=request.user, model=obj,
                 changed_data=[{'field_name': 'is_deleted', 'old_value': not deleted, 'new_value': deleted}],
             )
             return True
@@ -594,29 +602,40 @@ class ModelAdmin(UnfoldAdmin):
                     'admin:%s_%s_change' % (self.model._meta.app_label, self.model._meta.model_name),
                     args=[object_id],
                 )
-                # Query notifications for one superuser — each event is recorded once per superuser,
-                # so filtering by one superuser gives exactly one entry per event.
-                # Prefer request.user if superuser to avoid extra DB query.
-                ref_user = request.user if request.user.is_superuser else User.objects.filter(is_superuser=True, is_active=True).order_by("pk").first()
+                # Each event is stored once per recipient, and since "Notifications config"
+                # (#36) the recipients need not include any superuser: read every copy of this
+                # object's notifications and keep one per event.
+                # Each event is stored once per recipient, and since "Notifications config"
+                # (#36) the recipients need not include any superuser. Group the copies in the
+                # database and read the first row of each event, so the 50 are 50 events
+                # whatever the number of recipients.
+                from django.db.models import Min
+                from django.db.models.functions import TruncSecond
+
+                firsts = (
+                    Notification.objects.filter(obj_link=obj_link)
+                    .values('title', 'action', 'action_by', 'changed_data', at=TruncSecond('created_at'))
+                    .annotate(first=Min('pk'))
+                    .order_by('-at', '-first')
+                    .values_list('first', flat=True)[:50]
+                )
                 notifications = []
-                if ref_user:
-                    qs = (
-                        Notification.objects
-                        .filter(obj_link=obj_link, user=ref_user)
-                        .select_related('action_by')
-                        .order_by('-created_at')[:50]
-                    )
-                    for notif in qs:
-                        try:
-                            notif.parsed_changed_data = json.loads(notif.changed_data) if notif.changed_data else []
-                        except ValueError:
-                            try:  # rows saved before changed_data was JSON
-                                notif.parsed_changed_data = ast.literal_eval(notif.changed_data)
-                            except Exception:
-                                notif.parsed_changed_data = []
+                qs = (
+                    Notification.objects.filter(pk__in=list(firsts))
+                    .select_related('action_by')
+                    .order_by('-created_at', '-pk')
+                )
+                for notif in qs:
+                    try:
+                        notif.parsed_changed_data = json.loads(notif.changed_data) if notif.changed_data else []
+                    except ValueError:
+                        try:  # rows saved before changed_data was JSON
+                            notif.parsed_changed_data = ast.literal_eval(notif.changed_data)
                         except Exception:
                             notif.parsed_changed_data = []
-                        notifications.append(notif)
+                    except Exception:
+                        notif.parsed_changed_data = []
+                    notifications.append(notif)
                 extra_context['history_notifications'] = notifications
             except Exception:
                 extra_context['history_notifications'] = []
