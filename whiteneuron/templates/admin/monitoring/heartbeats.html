@@ -1,0 +1,31 @@
+{% load i18n humanize %}
+{# "Background jobs" on the monitoring dashboard (#91): one line per job in WN_HEARTBEATS #}
+<div class="wn-row" data-row="heartbeats" id="heartbeats">
+    <button type="button" class="wn-row-head"><span class="material-symbols-outlined">expand_more</span>{% trans "Background jobs" %}</button>
+    <div class="wn-row-body">
+        <div class="overflow-x-auto">
+            <table class="ui-table ui-table-sm w-full">
+                <thead>
+                    <tr><th>{% trans "Job" %}</th><th>{% trans "Status" %}</th><th>{% trans "Last run" %}</th><th>{% trans "If it stops" %}</th></tr>
+                </thead>
+                <tbody>
+                {% for job in heartbeats %}
+                    <tr id="heartbeat-{{ job.name }}" data-state="{{ job.state }}">
+                        <td class="font-medium">{{ job.label }}{% if job.critical %} <span class="ui-badge ui-badge-xs ui-badge-outline">{% trans "critical" %}</span>{% endif %}</td>
+                        <td>
+                            {% if job.state == "ok" %}<span class="ui-badge ui-badge-sm ui-badge-success">{% trans "Running" %}</span>
+                            {% elif job.state == "late" %}<span class="ui-badge ui-badge-sm {% if job.critical %}ui-badge-error{% else %}ui-badge-warning{% endif %}">{% trans "Late" %}</span>
+                            {% elif job.state == "never" %}<span class="ui-badge ui-badge-sm ui-badge-ghost">{% trans "Not run yet" %}</span>
+                            {% else %}<span class="ui-badge ui-badge-sm ui-badge-ghost">{% trans "Turned off" %}</span>{% endif %}
+                        </td>
+                        <td class="whitespace-nowrap">
+                            {% if job.last_beat_at %}<span title="{{ job.last_beat_at }}{% if job.host %} · {{ job.host }}{% endif %}">{{ job.last_beat_at|naturaltime }}</span>{% else %}—{% endif %}
+                        </td>
+                        <td class="text-sm opacity-80">{% if job.state == "late" or job.state == "never" %}{{ job.consequence }}{% endif %}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

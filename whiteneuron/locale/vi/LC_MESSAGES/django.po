@@ -3538,6 +3538,71 @@ msgstr "Đặt mật khẩu"
 msgid "Raw passwords are not stored, so there is no way to see the user’s password."
 msgstr "Mật khẩu không được lưu ở dạng đọc được, nên không thể xem mật khẩu của người dùng."
 
+#: whiteneuron/monitoring (heartbeats)
+msgid "Background jobs"
+msgstr "Việc chạy nền"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "Job"
+msgstr "Việc"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "Last run"
+msgstr "Lần chạy gần nhất"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "If it stops"
+msgstr "Nếu việc này dừng"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "critical"
+msgstr "quan trọng"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "Running"
+msgstr "Đang chạy"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "Late"
+msgstr "Trễ"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "Not run yet"
+msgstr "Chưa chạy lần nào"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "Turned off"
+msgstr "Đã tắt"
+
+#: whiteneuron/monitoring (heartbeats)
+#, python-format
+msgid "has not run for %(since)s."
+msgstr "đã không chạy trong %(since)s."
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "Open server monitoring"
+msgstr "Mở trang giám sát máy chủ"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "last run"
+msgstr "lần chạy gần nhất"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "details"
+msgstr "chi tiết"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "background job heartbeat"
+msgstr "nhịp tim việc chạy nền"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "background job heartbeats"
+msgstr "nhịp tim việc chạy nền"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "name"
+msgstr "tên"
+
 #~ msgid "day"
 #~ msgstr "ngày"
 

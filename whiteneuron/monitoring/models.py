@@ -57,3 +57,23 @@ class MetricSample(models.Model):
 
     def __str__(self):
         return f"{self.host} @ {self.timestamp:%Y-%m-%d %H:%M:%S}"
+
+
+class Heartbeat(models.Model):
+    """The last time a background job reported in (``whiteneuron.monitoring.beat``).
+
+    One row per job name; only names listed in ``WN_HEARTBEATS`` are written.
+    """
+
+    name = models.CharField(_("name"), max_length=100, unique=True)
+    last_beat_at = models.DateTimeField(_("last run"))
+    host = models.CharField(_("host"), max_length=128, blank=True)
+    info = models.CharField(_("details"), max_length=255, blank=True)
+
+    class Meta:
+        db_table = "monitoring_heartbeats"
+        verbose_name = _("background job heartbeat")
+        verbose_name_plural = _("background job heartbeats")
+
+    def __str__(self):
+        return f"{self.name} @ {self.last_beat_at:%Y-%m-%d %H:%M:%S}"
