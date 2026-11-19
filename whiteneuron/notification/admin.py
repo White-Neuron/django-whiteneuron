@@ -43,6 +43,11 @@ class NotificationConfigAdmin(ModelAdmin):
         (_('Notification Recipients'), {
             'fields': ('send_to_admin', 'send_to_user', 'users', 'send_to_group_user', 'group_users'),
             'classes': ('collapse',),
+            'description': _(
+                "These notifications are also the change history of the records. When the "
+                "choices below reach nobody, the superusers still receive them. Recipients "
+                "without permission to view this model get the changes but cannot open the record."
+            ),
         }),
     )
 

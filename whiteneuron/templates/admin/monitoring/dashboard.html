@@ -61,6 +61,8 @@
 
     <div class="ui-alert ui-alert-soft ui-alert-warning text-sm" role="status" data-banner hidden></div>
 
+    {% if heartbeats %}{% include "admin/monitoring/heartbeats.html" %}{% endif %}
+
     {# ── Overview ────────────────────────────────────────────── #}
     <div class="wn-row" data-row="overview">
         <button type="button" class="wn-row-head"><span class="material-symbols-outlined">expand_more</span>{% trans "Overview" %}</button>

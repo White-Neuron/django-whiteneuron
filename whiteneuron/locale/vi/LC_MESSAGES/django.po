@@ -3538,6 +3538,157 @@ msgstr "Đặt mật khẩu"
 msgid "Raw passwords are not stored, so there is no way to see the user’s password."
 msgstr "Mật khẩu không được lưu ở dạng đọc được, nên không thể xem mật khẩu của người dùng."
 
+#: whiteneuron/monitoring (heartbeats)
+msgid "Background jobs"
+msgstr "Việc chạy nền"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "Job"
+msgstr "Việc"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "Last run"
+msgstr "Lần chạy gần nhất"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "If it stops"
+msgstr "Nếu việc này dừng"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "critical"
+msgstr "quan trọng"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "Running"
+msgstr "Đang chạy"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "Late"
+msgstr "Trễ"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "Not run yet"
+msgstr "Chưa chạy lần nào"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "Turned off"
+msgstr "Đã tắt"
+
+#: whiteneuron/monitoring (heartbeats)
+#, python-format
+msgid "has not run for %(since)s."
+msgstr "đã không chạy trong %(since)s."
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "Open server monitoring"
+msgstr "Mở trang giám sát máy chủ"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "last run"
+msgstr "lần chạy gần nhất"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "details"
+msgstr "chi tiết"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "background job heartbeat"
+msgstr "nhịp tim việc chạy nền"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "background job heartbeats"
+msgstr "nhịp tim việc chạy nền"
+
+#: whiteneuron/monitoring (heartbeats)
+msgid "name"
+msgstr "tên"
+
+#: django/utils/timesince.py, django/contrib/humanize (missing from Django's Vietnamese)
+#, python-format
+msgid "%(num)d year"
+msgid_plural "%(num)d years"
+msgstr[0] "%(num)d năm"
+
+#: django/utils/timesince.py, django/contrib/humanize (missing from Django's Vietnamese)
+#, python-format
+msgctxt "naturaltime-past"
+msgid "%(num)d year"
+msgid_plural "%(num)d years"
+msgstr[0] "%(num)d năm"
+
+#: django/utils/timesince.py, django/contrib/humanize (missing from Django's Vietnamese)
+#, python-format
+msgid "%(num)d month"
+msgid_plural "%(num)d months"
+msgstr[0] "%(num)d tháng"
+
+#: django/utils/timesince.py, django/contrib/humanize (missing from Django's Vietnamese)
+#, python-format
+msgctxt "naturaltime-past"
+msgid "%(num)d month"
+msgid_plural "%(num)d months"
+msgstr[0] "%(num)d tháng"
+
+#: django/utils/timesince.py, django/contrib/humanize (missing from Django's Vietnamese)
+#, python-format
+msgid "%(num)d week"
+msgid_plural "%(num)d weeks"
+msgstr[0] "%(num)d tuần"
+
+#: django/utils/timesince.py, django/contrib/humanize (missing from Django's Vietnamese)
+#, python-format
+msgctxt "naturaltime-past"
+msgid "%(num)d week"
+msgid_plural "%(num)d weeks"
+msgstr[0] "%(num)d tuần"
+
+#: django/utils/timesince.py, django/contrib/humanize (missing from Django's Vietnamese)
+#, python-format
+msgid "%(num)d day"
+msgid_plural "%(num)d days"
+msgstr[0] "%(num)d ngày"
+
+#: django/utils/timesince.py, django/contrib/humanize (missing from Django's Vietnamese)
+#, python-format
+msgctxt "naturaltime-past"
+msgid "%(num)d day"
+msgid_plural "%(num)d days"
+msgstr[0] "%(num)d ngày"
+
+#: django/utils/timesince.py, django/contrib/humanize (missing from Django's Vietnamese)
+#, python-format
+msgid "%(num)d hour"
+msgid_plural "%(num)d hours"
+msgstr[0] "%(num)d giờ"
+
+#: django/utils/timesince.py, django/contrib/humanize (missing from Django's Vietnamese)
+#, python-format
+msgctxt "naturaltime-past"
+msgid "%(num)d hour"
+msgid_plural "%(num)d hours"
+msgstr[0] "%(num)d giờ"
+
+#: django/utils/timesince.py, django/contrib/humanize (missing from Django's Vietnamese)
+#, python-format
+msgid "%(num)d minute"
+msgid_plural "%(num)d minutes"
+msgstr[0] "%(num)d phút"
+
+#: django/utils/timesince.py, django/contrib/humanize (missing from Django's Vietnamese)
+#, python-format
+msgctxt "naturaltime-past"
+msgid "%(num)d minute"
+msgid_plural "%(num)d minutes"
+msgstr[0] "%(num)d phút"
+
+#: django/contrib/humanize
+#, python-format
+msgid "%(delta)s ago"
+msgstr "%(delta)s trước"
+
+#: whiteneuron/templates/admin/index.html
+msgid "has not run since the server started."
+msgstr "chưa chạy lần nào kể từ khi máy chủ khởi động."
 #: whiteneuron/notification/admin.py
 msgid "Search by title, content or who did it"
 msgstr "Tìm theo tiêu đề, nội dung hoặc người thực hiện"
@@ -3624,6 +3775,9 @@ msgstr "Mở lại các phản hồi đã chọn"
 msgid "%(count)d feedback changed to %(status)s."
 msgid_plural "%(count)d feedbacks changed to %(status)s."
 msgstr[0] "Đã chuyển %(count)d phản hồi sang %(status)s."
+#: whiteneuron/notification/admin.py
+msgid "These notifications are also the change history of the records. When the choices below reach nobody, the superusers still receive them. Recipients without permission to view this model get the changes but cannot open the record."
+msgstr "Thông báo cũng là lịch sử thay đổi của bản ghi. Nếu các lựa chọn bên dưới không tới được ai, superuser vẫn nhận. Người nhận không có quyền xem model này vẫn thấy nội dung thay đổi nhưng không mở được bản ghi."
 
 #~ msgid "day"
 #~ msgstr "ngày"
