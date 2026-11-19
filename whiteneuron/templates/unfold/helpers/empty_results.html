@@ -1,0 +1,51 @@
+{% load admin_urls i18n %}
+{% comment %}
+    Unfold's empty list, telling apart "nothing here yet" from "nothing matches": a new list
+    said "No results found" with a "Reset filters" button while no filter was on (#81).
+{% endcomment %}
+
+{% url cl.opts|admin_urlname:"add" as add_url %}
+{% blocktranslate with name=cl.opts.verbose_name asvar title %}Add {{ name }}{% endblocktranslate %}
+{% if cl.has_active_filters or cl.query %}{% firstof "1" as narrowed %}{% endif %}
+
+<div class="bg-white border border-base-200 flex flex-col items-center px-8 shadow-xs dark:bg-base-900 dark:border-base-800 {% if cl.search_fields %}rounded-b-default{% else %}rounded-default{% endif %} {% if cl.is_dataset %}py-16{% else %}py-24{% endif %}">
+    {% if not cl.is_dataset %}
+        <div class="border border-base-300 border-dashed flex h-24 items-center justify-center mb-8 rounded-full w-24 dark:border-base-700">
+            <span class="material-symbols-outlined text-base-500 text-5xl! dark:text-base-400">{% if narrowed %}search_off{% else %}inbox{% endif %}</span>
+        </div>
+    {% endif %}
+
+    <h2 class="font-semibold mb-1 text-xl text-font-important-light tracking-tight dark:text-font-important-dark">
+        {% if narrowed %}
+            {% trans "No results found" %}
+        {% else %}
+            {% blocktranslate with name=cl.opts.verbose_name_plural %}No {{ name }} yet{% endblocktranslate %}
+        {% endif %}
+    </h2>
+
+    <p class="mb-6 text-center">
+        {% if narrowed %}
+            {% trans "Nothing matches the search or the filters." %}
+        {% elif has_add_permission %}
+            {% trans "Records will be listed here once they are added." %}
+        {% else %}
+            {% trans "Records will be listed here once there are some." %}
+        {% endif %}
+    </p>
+
+    {% if has_add_permission or narrowed %}
+        <div class="flex flex-col gap-4 justify-center w-full lg:flex-row">
+            {% if has_add_permission %}
+                <a href="{% add_preserved_filters add_url is_popup to_field %}" class="bg-primary-600 flex flex-row font-medium gap-2 items-center h-[38px] justify-center px-3 py-2 rounded-default text-white w-full lg:w-auto">
+                    <span class="material-symbols-outlined text-white -ml-0.5 rtl:ml-0 rtl:-mr-0.5">add</span> {{ title }}
+                </a>
+            {% endif %}
+
+            {% if narrowed %}
+                <a href="?" class="border border-base-200 flex flex-row font-medium gap-2 group/button h-[38px] items-center justify-center px-3 py-2 rounded-default w-full hover:text-primary-600 lg:w-auto dark:border-base-700 dark:hover:bg-base-900 dark:hover:text-primary-500">
+                    <span class="material-symbols-outlined -ml-0.5 rtl:ml-0 rtl:-mr-0.5">filter_list_off</span> {% trans "Reset filters" %}
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>

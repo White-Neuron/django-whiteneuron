@@ -124,8 +124,14 @@ class ModelAdmin(UnfoldAdmin):
 
     @property
     def search_help_text(self):
-        fields = ', '.join([str(get_verbose_name_field(self.model, f)) for f in self.search_fields])
-        return format_lazy(_('Search by {fields}'), fields=fields)
+        # One word per field, as the user knows it: "user" for user__username, not
+        # "Notification for user / Username"; a ModelAdmin can set its own sentence (#81)
+        labels = []
+        for f in self.search_fields:
+            label = str(get_verbose_name_field(self.model, f.lstrip("^=@").split("__")[0])).lower()
+            if label not in labels:
+                labels.append(label)
+        return format_lazy(_('Search by {fields}'), fields=", ".join(labels))
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
