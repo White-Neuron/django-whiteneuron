@@ -65,10 +65,20 @@ class RecipientsTests(TestCase):
         self.assertEqual(recipients_for(FeedbackData, "create"), {self.watcher.pk, self.kt1.pk, self.kt2.pk})
 
     def test_inactive_users_are_skipped(self):
-        self._config("update", users=[self.watcher])
+        self._config("update", users=[self.watcher, self.kt1])
         self.watcher.is_active = False
         self.watcher.save()
-        self.assertEqual(recipients_for(FeedbackData, "update"), set())
+        self.assertEqual(recipients_for(FeedbackData, "update"), {self.kt1.pk})
+
+    def test_a_config_that_reaches_nobody_keeps_the_superusers(self):
+        # notifications are also the change history: never write zero rows (#102 review)
+        self._config("update")                                   # every box off
+        self.assertEqual(recipients_for(FeedbackData, "update"), {self.root.pk, self.root2.pk})
+        caches["default"].clear()
+        NotificationConfig.objects.all().delete()
+        empty = Group.objects.create(name="Empty")
+        self._config("update", groups=[empty])                   # a group without members
+        self.assertEqual(recipients_for(FeedbackData, "update"), {self.root.pk, self.root2.pk})
 
     def test_changing_the_config_takes_effect_at_once(self):
         config = self._config("update", users=[self.watcher])
@@ -103,3 +113,24 @@ class HistoryWithoutSuperuserCopiesTests(TestCase):
         self.client.force_login(root)
         response = self.client.get(url)
         self.assertEqual(len(response.context["history_notifications"]), 1)
+
+
+@package_test_settings()
+class HistoryWithManyRecipientsTests(TestCase):
+    def test_fifty_means_fifty_events_whatever_the_number_of_recipients(self):
+        root = User.objects.create_superuser("root", "r@example.com", "pw")
+        group = Group.objects.create(name="Everyone")
+        users = User.objects.bulk_create([User(username=f"u{i}", email=f"u{i}@example.com") for i in range(120)])
+        group.user_set.add(*users)
+        config = NotificationConfig.objects.create(model=ContentType.objects.get_for_model(User),
+                                                   event_type="update", send_to_admin=True, send_to_group_user=True)
+        config.group_users.set([group])
+        caches["default"].clear()
+        url = reverse("admin:base_user_change", args=[root.pk])
+        with self.captureOnCommitCallbacks(execute=False):
+            for i in range(10):
+                Notification.notify_superusers(title=f"change {i}", action="update", obj_link=url, model=User)
+        self.assertEqual(Notification.objects.filter(obj_link=url).count(), 10 * 121)
+        self.client.force_login(root)
+        titles = [n.title for n in self.client.get(url).context["history_notifications"]]
+        self.assertEqual(sorted(titles), sorted(f"change {i}" for i in range(10)))

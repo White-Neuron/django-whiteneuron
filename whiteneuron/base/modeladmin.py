@@ -605,22 +605,27 @@ class ModelAdmin(UnfoldAdmin):
                 # Each event is stored once per recipient, and since "Notifications config"
                 # (#36) the recipients need not include any superuser: read every copy of this
                 # object's notifications and keep one per event.
+                # Each event is stored once per recipient, and since "Notifications config"
+                # (#36) the recipients need not include any superuser. Group the copies in the
+                # database and read the first row of each event, so the 50 are 50 events
+                # whatever the number of recipients.
+                from django.db.models import Min
+                from django.db.models.functions import TruncSecond
+
+                firsts = (
+                    Notification.objects.filter(obj_link=obj_link)
+                    .values('title', 'action', 'action_by', 'changed_data', at=TruncSecond('created_at'))
+                    .annotate(first=Min('pk'))
+                    .order_by('-at', '-first')
+                    .values_list('first', flat=True)[:50]
+                )
                 notifications = []
-                seen = set()
                 qs = (
-                    Notification.objects
-                    .filter(obj_link=obj_link)
+                    Notification.objects.filter(pk__in=list(firsts))
                     .select_related('action_by')
-                    .order_by('-created_at', 'pk')[:500]
+                    .order_by('-created_at', '-pk')
                 )
                 for notif in qs:
-                    event = (notif.title, notif.action, notif.action_by_id, notif.changed_data,
-                             notif.created_at.replace(microsecond=0))
-                    if event in seen:
-                        continue
-                    seen.add(event)
-                    if len(notifications) >= 50:
-                        break
                     try:
                         notif.parsed_changed_data = json.loads(notif.changed_data) if notif.changed_data else []
                     except ValueError:

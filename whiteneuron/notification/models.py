@@ -227,7 +227,9 @@ def recipients_for(model, action):
     ids = set(User.objects.filter(pk__in=cached["users"], is_active=True).values_list("id", flat=True))
     if cached["admin"]:
         ids |= _superuser_ids()
-    return ids
+    # Notifications are also the record's change history (until #35): a config that reaches
+    # nobody (all boxes off, an empty group) must not erase that trail. Superusers keep it.
+    return ids or _superuser_ids()
 
 
 def _config_changed(**kwargs):

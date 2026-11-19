@@ -3567,6 +3567,10 @@ msgstr "Bản ghi sẽ hiện ở đây sau khi được thêm."
 msgid "Records will be listed here once there are some."
 msgstr "Bản ghi sẽ hiện ở đây khi có dữ liệu."
 
+#: whiteneuron/notification/admin.py
+msgid "These notifications are also the change history of the records. When the choices below reach nobody, the superusers still receive them. Recipients without permission to view this model get the changes but cannot open the record."
+msgstr "Thông báo cũng là lịch sử thay đổi của bản ghi. Nếu các lựa chọn bên dưới không tới được ai, superuser vẫn nhận. Người nhận không có quyền xem model này vẫn thấy nội dung thay đổi nhưng không mở được bản ghi."
+
 #~ msgid "day"
 #~ msgstr "ngày"
 
