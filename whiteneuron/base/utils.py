@@ -36,8 +36,9 @@ def _cacheable_filter_kwargs(filter_kwargs):
     except TypeError:
         return str(filter_kwargs)
 
-def base_badge_callback(request, model, filter_kwargs=None):
-    cache_key = _make_cache_key("badge", model.__name__, _cacheable_filter_kwargs(filter_kwargs))
+def base_badge_callback(request, model, filter_kwargs=None, exclude_kwargs=None):
+    cache_key = _make_cache_key("badge", model.__name__, _cacheable_filter_kwargs(filter_kwargs),
+                                _cacheable_filter_kwargs(exclude_kwargs))
     cached = caches["default"].get(cache_key)
     if cached is not None:
         return cached
@@ -50,6 +51,8 @@ def base_badge_callback(request, model, filter_kwargs=None):
     elif hasattr(model, 'created_at'):
         c = c.filter(created_at__gte=today)
 
+    if exclude_kwargs:
+        c = c.exclude(**exclude_kwargs)
     if filter_kwargs:
         c = c.filter(**filter_kwargs).count()
     else:
@@ -59,8 +62,17 @@ def base_badge_callback(request, model, filter_kwargs=None):
     return c
 
 
+def anonymous_user_name():
+    """Username of django-guardian's AnonymousUser row (None when guardian is not installed)."""
+    try:
+        from guardian.conf import settings as guardian_settings
+    except ImportError:
+        return None
+    return guardian_settings.ANONYMOUS_USER_NAME
+
+
 def user_badge_callback(request):
-    return base_badge_callback(request, User)
+    return base_badge_callback(request, User, exclude_kwargs={"username": anonymous_user_name()})
 
 def useractivity_badge_callback(request):
     cache_key = _make_cache_key("badge", "UserActivity")

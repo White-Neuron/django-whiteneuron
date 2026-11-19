@@ -108,14 +108,25 @@ class User(AbstractUser):
             s+= ' (bot)'
         return s
 
+    # Languages that write the family name first ("Nguyễn Văn An"); others: given name first
+    FAMILY_NAME_FIRST_LANGUAGES = ("vi", "zh", "ja", "ko", "hu")
+
+    def get_full_name(self):
+        """The name in the active language's order: "Nguyễn Văn An" in Vietnamese, "Văn An
+        Nguyễn" in English. One part alone is returned as it is. Used by Unfold's header and
+        avatar, the user cards, notifications and e-mails (#82)."""
+        from django.utils.translation import get_language
+
+        language = (get_language() or "").split("-")[0]
+        first, last = (self.first_name or "").strip(), (self.last_name or "").strip()
+        parts = (last, first) if language in self.FAMILY_NAME_FIRST_LANGUAGES else (first, last)
+        return " ".join(p for p in parts if p)
+
     @property
     def full_name(self):
-        s= ''
-        if self.first_name and self.last_name:
-            s= f"{self.last_name} {self.first_name}"
-        if s:
-            if self.is_bot:
-                s+= ' (bot)'
+        s = self.get_full_name()
+        if s and self.is_bot:
+            s += ' (bot)'
         return s
     
     # ── Unfold avatar helper (unfold/helpers/avatar.html, unfold >= 0.105) ──
