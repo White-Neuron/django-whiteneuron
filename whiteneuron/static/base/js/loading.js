@@ -80,12 +80,22 @@ document.addEventListener('DOMContentLoaded', function () {
         return (Date.now().toString(36) + Math.random().toString(36).slice(2)).slice(0, 64);
     };
 
+    // Safety net: if the page is still here this long after a click or submit, nothing is
+    // loading any more (a cancelled navigation, a form sent by a script): hide the overlay
+    const GIVE_UP_MS = 30000;
+    let giveUpTimer = null;
+
     const beginLoadingHandshake = function () {
         const requestToken = newRequestToken();
         clearCookie(RESPONSE_DONE_COOKIE);
         setCookie(REQUEST_TOKEN_COOKIE, requestToken, 120);
         showOverlay();
         startDownloadPolling(requestToken);
+        window.clearTimeout(giveUpTimer);
+        giveUpTimer = window.setTimeout(function () {
+            stopDownloadPolling();
+            hideOverlay();
+        }, GIVE_UP_MS);
     };
 
     const isSamePageAnchor = function (anchorUrl) {
@@ -146,20 +156,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Show loading cho submit form; nếu response là file download thì middleware sẽ trả cookie để tự tắt.
     document.addEventListener('submit', function (event) {
-        if (event.defaultPrevented) {
-            return;
-        }
-
         const form = event.target;
         if (!(form instanceof HTMLFormElement)) {
             return;
         }
 
-        if (form.target && form.target !== '_self') {
+        // method="dialog" only closes a <dialog> (the modals' click-outside backdrop): nothing
+        // navigates, so no pageshow would ever hide the overlay (#95)
+        const submitter = event.submitter;
+        const method = ((submitter && submitter.getAttribute('formmethod')) || form.getAttribute('method') || '').toLowerCase();
+        if (method === 'dialog') {
             return;
         }
 
-        beginLoadingHandshake();
+        const target = (submitter && submitter.getAttribute('formtarget')) || form.target;
+        if (target && target !== '_self') {
+            return;
+        }
+
+        // Decide once every handler has run: a script that sends the form with fetch may call
+        // preventDefault() in a listener registered after this one
+        window.setTimeout(function () {
+            if (!event.defaultPrevented) {
+                beginLoadingHandshake();
+            }
+        }, 0);
     });
 
     // Đảm bảo overlay luôn tắt khi trang vẫn hiện hoặc được khôi phục từ cache.

@@ -1,18 +1,6 @@
 {% load i18n static %}
 
-{# Floating trigger button — fixed bottom-right #}
-<button
-  type="button"
-  onclick="document.getElementById('wn-history-modal').showModal()"
-  class="fixed bottom-20 right-6 z-40 inline-flex items-center gap-2 px-4 py-2.5 rounded-full shadow-lg
-         bg-primary text-primary-content text-sm font-medium
-         hover:bg-primary/90 active:scale-95 transition-all">
-  <span class="material-symbols-outlined" style="font-size:1rem;line-height:1">history</span>
-  {% trans "History" %}
-  <span class="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full bg-white/25 text-xs font-bold">
-    {{ history_notifications|length }}
-  </span>
-</button>
+{# The trigger is in the page actions (admin/wn_change_form.html) #}
 
 {# Modal #}
 <dialog id="wn-history-modal" class="ui-modal">
