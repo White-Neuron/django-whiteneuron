@@ -3823,6 +3823,14 @@ msgctxt "feedback about a record"
 msgid "About"
 msgstr "Về bản ghi"
 
+#: whiteneuron/feedbacks/admin.py
+msgid "Resolve"
+msgstr "Giải quyết"
+
+#: whiteneuron/feedbacks/admin.py
+msgid "Resolve this feedback?"
+msgstr "Giải quyết phản hồi này?"
+
 #~ msgid "day"
 #~ msgstr "ngày"
 

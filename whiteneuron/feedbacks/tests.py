@@ -92,8 +92,8 @@ class AdminWorkflowTests(FeedbackTestCase):
     def test_single_resolve_from_the_change_form(self):
         fb = self._feedback(self.alice)
         self.client.force_login(self.root)
-        url = reverse("admin:feedbacks_feedbackdata_change", args=[fb.pk]) + "?resolved=1"
-        self.assertEqual(self.client.post(url, {"note": "done"}).json(), {"success": True})
+        url = reverse("admin:feedbacks_feedbackdata_detail_resolve", args=[fb.pk])
+        self.client.post(url, {"_form_submitted": "True", "note": "done"})
         fb.refresh_from_db()
         self.assertEqual(fb.status, "resolved")
         self.assertEqual(self._sender_notes(self.alice).count(), 1)
@@ -184,3 +184,37 @@ class SenderMessageLanguageTests(FeedbackTestCase):
         content = Notification.objects.get(user=self.alice).content
         self.assertIn("Về bản ghi", content)
         self.assertNotIn("Thông tin ứng dụng", content)
+
+
+@package_test_settings()
+class DetailActionsByStatusTests(FeedbackTestCase):
+    """Review of #103: only the decisions that mean something for the current status."""
+
+    def _actions(self, fb):
+        self.client.force_login(self.root)
+        response = self.client.get(reverse("admin:feedbacks_feedbackdata_change", args=[fb.pk]))
+        return {str(item["title"]) for item in response.context["actions_detail"]}
+
+    def test_open_feedback(self):
+        self.assertEqual(self._actions(self._feedback(self.alice)), {"Resolve", "In progress", "Reject"})
+
+    def test_in_progress_feedback(self):
+        fb = self._feedback(self.alice)
+        services.set_status(fb, FeedbackData.IN_PROGRESS)
+        self.assertEqual(self._actions(fb), {"Resolve", "Reject"})
+
+    def test_closed_feedback_can_only_be_reopened(self):
+        fb = self._feedback(self.alice)
+        services.resolve(fb)
+        self.assertEqual(self._actions(fb), {"Reopen"})
+        self.client.post(reverse("admin:feedbacks_feedbackdata_detail_reject", args=[fb.pk]),
+                         {"_form_submitted": "True"})
+        fb.refresh_from_db()
+        self.assertEqual(fb.status, "resolved")   # not offered, and refused if called
+
+    def test_history_button_is_back_on_the_feedback_page(self):
+        fb = self._feedback(self.alice)
+        self.client.force_login(self.root)
+        response = self.client.get(reverse("admin:feedbacks_feedbackdata_change", args=[fb.pk]))
+        self.assertTemplateUsed(response, "admin/wn_change_form.html")
+        self.assertNotContains(response, "make-resolved-link")

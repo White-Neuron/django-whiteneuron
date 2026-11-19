@@ -38,7 +38,6 @@ class FeedbackData(BaseModel):
 
     message = models.TextField(
         verbose_name=_("Message"),
-        help_text=_("The message of the feedback")
     )
 
     # Workflow (#47). is_resolved stays for compatibility and follows status in save().
@@ -57,12 +56,10 @@ class FeedbackData(BaseModel):
     is_resolved = models.BooleanField(
         default=False,
         verbose_name=_("Is Resolved"),
-        help_text=_("Whether the feedback is resolved")
     )
 
     note= models.TextField(
         verbose_name=_("Note"),
-        help_text=_("Admin note for the feedback"),
         blank=True,
         null=True
     )

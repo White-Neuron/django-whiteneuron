@@ -1,5 +1,4 @@
 from django.contrib import admin, messages
-from django.http import JsonResponse
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.text import Truncator
@@ -27,7 +26,6 @@ class FeedbackNoteForm(BaseDialogForm):
 class FeedbackDataAdmin(ModelAdmin):
     using_grid_view = False
     date_hierarchy = 'created_at'
-    change_form_template = 'admin/feedbacks/feedback_change_form.html'
     list_display = (
         'id',
         'user',
@@ -66,13 +64,6 @@ class FeedbackDataAdmin(ModelAdmin):
              label={"open": "warning", "in_progress": "info", "resolved": "success", "rejected": "default"})
     def display_status(self, obj):
         return obj.status, obj.get_status_display()
-
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
-        field = super().formfield_for_dbfield(db_field, request, **kwargs)
-        # their help texts only repeated the label ("The message of the feedback") (#81)
-        if field is not None and db_field.name in ("message", "is_resolved"):
-            field.help_text = ""
-        return field
 
     def get_short_message(self, obj):
         # about a line in the list; the whole message on hover (#47)
@@ -119,12 +110,27 @@ class FeedbackDataAdmin(ModelAdmin):
         self._bulk_status(request, queryset, FeedbackData.OPEN)
 
     def has_resolve_permission(self, request, object_id=None):
-        # the same rule as the single "resolve" on the change form
         return request.user.is_superuser
+
+    # Detail actions show only where they mean something (#103 review): a rejected feedback
+    # had "Reject", an open one "Reopen", and the dialog then did nothing
+    def _status_is(self, request, object_id, *statuses):
+        if not request.user.is_superuser or object_id is None:
+            return False
+        return FeedbackData.objects.filter(pk=object_id, status__in=statuses).exists()
+
+    def has_handle_open_permission(self, request, object_id=None):
+        return self._status_is(request, object_id, FeedbackData.OPEN, FeedbackData.IN_PROGRESS)
+
+    def has_start_permission(self, request, object_id=None):
+        return self._status_is(request, object_id, FeedbackData.OPEN)
+
+    def has_reopen_closed_permission(self, request, object_id=None):
+        return self._status_is(request, object_id, FeedbackData.RESOLVED, FeedbackData.REJECTED)
 
     # The other decisions on the detail page too, each with a note for the sender (#47 review):
     # rejecting from the list gave no place to say why
-    actions_detail = ["detail_in_progress", "detail_reject", "detail_reopen"]
+    actions_detail = ["detail_resolve", "detail_in_progress", "detail_reject", "detail_reopen"]
 
     def _detail_status(self, request, form, object_id, status):
         feedback = self.get_object(request, object_id)
@@ -133,18 +139,29 @@ class FeedbackDataAdmin(ModelAdmin):
                 "status": dict(FeedbackData.STATUS_CHOICES)[status]}, messages.SUCCESS)
         return redirect(reverse("admin:feedbacks_feedbackdata_change", args=[object_id]))
 
-    @action(description=_("In progress"), url_path="in-progress", icon="pending", permissions=["resolve"],
-            dialog={"title": _("Mark this feedback as in progress?"), "form_class": FeedbackNoteForm})
+    # "Resolve" is one of them too: the hand-drawn button did not shrink with the others and
+    # became unreadable at 1440px once History and three more actions shared the row
+    @action(description=_("Resolve"), url_path="resolve", icon="check_circle", permissions=["handle_open"],
+            dialog={"title": _("Resolve this feedback?"), "form_class": FeedbackNoteForm,
+                    "form_submit_text": _("Resolve")})
+    def detail_resolve(self, request, form, object_id):
+        return self._detail_status(request, form, object_id, FeedbackData.RESOLVED)
+
+    @action(description=_("In progress"), url_path="in-progress", icon="pending", permissions=["start"],
+            dialog={"title": _("Mark this feedback as in progress?"), "form_class": FeedbackNoteForm,
+                    "form_submit_text": _("In progress")})
     def detail_in_progress(self, request, form, object_id):
         return self._detail_status(request, form, object_id, FeedbackData.IN_PROGRESS)
 
-    @action(description=_("Reject"), url_path="reject", icon="block", permissions=["resolve"],
-            dialog={"title": _("Reject this feedback?"), "form_class": FeedbackNoteForm})
+    @action(description=_("Reject"), url_path="reject", icon="block", permissions=["handle_open"],
+            dialog={"title": _("Reject this feedback?"), "form_class": FeedbackNoteForm,
+                    "form_submit_text": _("Reject")})
     def detail_reject(self, request, form, object_id):
         return self._detail_status(request, form, object_id, FeedbackData.REJECTED)
 
-    @action(description=_("Reopen"), url_path="reopen", icon="undo", permissions=["resolve"],
-            dialog={"title": _("Reopen this feedback?"), "form_class": FeedbackNoteForm})
+    @action(description=_("Reopen"), url_path="reopen", icon="undo", permissions=["reopen_closed"],
+            dialog={"title": _("Reopen this feedback?"), "form_class": FeedbackNoteForm,
+                    "form_submit_text": _("Reopen")})
     def detail_reopen(self, request, form, object_id):
         return self._detail_status(request, form, object_id, FeedbackData.OPEN)
 
@@ -165,31 +182,6 @@ class FeedbackDataAdmin(ModelAdmin):
         fields += ('get_related_object_link',)
         return fields
     
-    def changeform_view(self, request, object_id = None, form_url = "", extra_context = None):
-
-        #?resolved=1 
-
-        if request.GET.get('resolved') == '1' and object_id:
-            # state change: POST only (CSRF-protected)
-            if request.method != 'POST':
-                return JsonResponse({"success": False, "message": "Method not allowed"}, status=405)
-            # chỉ cho phép superuser thực hiện
-            if not request.user.is_superuser:
-                return JsonResponse({"success": False, "message": str(_("Only superuser can mark feedback as resolved"))}, status=403)
-            
-            # note
-            note= request.POST.get('note', '')
-            if len(note) > 500:
-                return JsonResponse({"success": False, "message": str(_("Note must not exceed 500 characters."))}, status=400)
-
-            obj = self.get_object(request, object_id)
-            if obj is None:
-                return JsonResponse({"success": False, "message": str(_("Feedback not found."))}, status=404)
-            services.resolve(obj, note=note)  # saves, records history, notifies the sender (+ toast)
-            return JsonResponse({"success": True})
-
-        return super().changeform_view(request, object_id, form_url, extra_context)
-
 # FeedBack base admin
 # Cho phép các model khác kế thừa để gọi
 class FeedbackBaseAdmin(ModelAdmin):
